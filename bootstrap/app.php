@@ -20,6 +20,8 @@ return Application::configure(basePath: dirname(__DIR__))
         },
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        $middleware->trustProxies(at: '*');
+
         $middleware->alias([
             'user.domain' => \App\Http\Middleware\EnsureUserDomain::class,
             'admin.domain' => \App\Http\Middleware\EnsureAdminDomain::class,
