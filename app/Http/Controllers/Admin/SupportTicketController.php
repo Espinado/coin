@@ -26,7 +26,6 @@ class SupportTicketController extends Controller
             'tickets' => $tickets,
             'status' => $status,
             'statuses' => SupportTicket::statuses(),
-            'openCount' => SupportTicket::query()->where('status', SupportTicket::STATUS_OPEN)->count(),
         ]);
     }
 

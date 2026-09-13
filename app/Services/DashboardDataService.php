@@ -9,6 +9,10 @@ use Illuminate\Support\Collection;
 
 class DashboardDataService
 {
+    public function __construct(
+        private PlatformSettingsService $settings,
+    ) {}
+
     public function forUser(User $user): array
     {
         $user->load([
@@ -23,7 +27,7 @@ class DashboardDataService
 
         $wallet = $user->wallet;
         $primaryContract = $user->contracts->firstWhere('status', 'active');
-        $plans = Plan::query()->orderBy('sort_order')->get();
+        $plans = Plan::query()->where('is_active', true)->orderBy('sort_order')->get();
 
         return [
             'wallet' => $wallet,
@@ -44,6 +48,7 @@ class DashboardDataService
     public function calculatorTiers(): Collection
     {
         return Plan::query()
+            ->where('is_active', true)
             ->orderBy('sort_order')
             ->get()
             ->map(fn (Plan $plan) => [
@@ -79,6 +84,6 @@ class DashboardDataService
 
     public function rewardRate(): float
     {
-        return 0.0042;
+        return $this->settings->rewardRate();
     }
 }

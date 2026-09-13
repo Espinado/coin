@@ -20,6 +20,7 @@ class Plan extends Model
         'max_tflops',
         'sort_order',
         'is_featured',
+        'is_active',
         'capacity_percent',
     ];
 
@@ -29,6 +30,7 @@ class Plan extends Model
             'reward_multiplier' => 'decimal:2',
             'daily_estimate' => 'decimal:2',
             'is_featured' => 'boolean',
+            'is_active' => 'boolean',
         ];
     }
 

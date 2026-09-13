@@ -13,6 +13,7 @@ use App\Models\SupportTicketMessage;
 use App\Models\User;
 use App\Models\Wallet;
 use App\Models\WalletTransaction;
+use App\Models\Withdrawal;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
@@ -37,6 +38,7 @@ class CoinDemoSeeder extends Seeder
                 'availability_label' => '99.98%',
                 'load_label' => '90.2%',
                 'next_expiry_label' => 'Dec 4',
+                'kyc_status' => User::KYC_APPROVED,
             ]
         );
 
@@ -204,6 +206,17 @@ class CoinDemoSeeder extends Seeder
                 'body' => 'Thanks for reaching out. Your payout is queued for the next settlement window. No action is required on your side.',
             ]);
         }
+
+        Withdrawal::query()->updateOrCreate(
+            ['reference' => 'WD-DEMO120'],
+            [
+                'user_id' => $user->id,
+                'amount' => 120.00,
+                'payout_address' => '0x7c4b…9a4f',
+                'network_label' => 'Network-placeholder',
+                'status' => Withdrawal::STATUS_PENDING,
+            ]
+        );
     }
 
     /** @return array<string, Plan> */
@@ -223,6 +236,7 @@ class CoinDemoSeeder extends Seeder
                 'max_tflops' => 600,
                 'sort_order' => 1,
                 'is_featured' => false,
+                'is_active' => true,
                 'capacity_percent' => 12,
             ],
             'core' => [
@@ -238,6 +252,7 @@ class CoinDemoSeeder extends Seeder
                 'max_tflops' => 2500,
                 'sort_order' => 2,
                 'is_featured' => true,
+                'is_active' => true,
                 'capacity_percent' => 34,
             ],
             'cluster' => [
@@ -253,6 +268,7 @@ class CoinDemoSeeder extends Seeder
                 'max_tflops' => 6000,
                 'sort_order' => 3,
                 'is_featured' => false,
+                'is_active' => true,
                 'capacity_percent' => 62,
             ],
             'enterprise' => [
@@ -268,6 +284,7 @@ class CoinDemoSeeder extends Seeder
                 'max_tflops' => null,
                 'sort_order' => 4,
                 'is_featured' => false,
+                'is_active' => true,
                 'capacity_percent' => 100,
             ],
         ];

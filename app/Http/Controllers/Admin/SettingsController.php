@@ -1,0 +1,52 @@
+<?php
+
+namespace App\Http\Controllers\Admin;
+
+use App\Http\Controllers\Controller;
+use App\Services\PlatformSettingsService;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\View\View;
+
+class SettingsController extends Controller
+{
+    public function edit(PlatformSettingsService $settings): View
+    {
+        return view('admin.settings.edit', [
+            'definitions' => $settings->definitions(),
+            'values' => $settings->all(),
+        ]);
+    }
+
+    public function update(Request $request, PlatformSettingsService $settings): RedirectResponse
+    {
+        $definitions = $settings->definitions();
+        $rules = [];
+
+        foreach ($definitions as $key => $definition) {
+            if ($definition['type'] === 'boolean') {
+                $rules[$key] = ['sometimes', 'boolean'];
+            } elseif ($key === 'token_symbol') {
+                $rules[$key] = ['required', 'string', 'max:12'];
+            } elseif ($key === 'epochs_per_day') {
+                $rules[$key] = ['required', 'integer', 'min:1', 'max:24'];
+            } else {
+                $rules[$key] = ['required', 'numeric', 'min:0'];
+            }
+        }
+
+        $validated = $request->validate($rules);
+
+        foreach ($definitions as $key => $definition) {
+            if ($definition['type'] === 'boolean') {
+                $validated[$key] = $request->boolean($key);
+            }
+        }
+
+        $settings->setMany($validated);
+
+        return redirect()
+            ->route('admin.settings.edit')
+            ->with('status', 'Platform settings saved.');
+    }
+}

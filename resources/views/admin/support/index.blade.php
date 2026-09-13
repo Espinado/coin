@@ -3,7 +3,7 @@
 @section('title', 'Coin Admin — Support')
 
 @section('content')
-    @include('admin.partials.nav', ['openCount' => $openCount])
+    @include('admin.partials.nav')
 
     <div class="admin-card">
         <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;">

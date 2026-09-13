@@ -14,6 +14,14 @@ class User extends Authenticatable
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
 
+    public const KYC_NONE = 'none';
+
+    public const KYC_PENDING = 'pending';
+
+    public const KYC_APPROVED = 'approved';
+
+    public const KYC_REJECTED = 'rejected';
+
     protected $fillable = [
         'name',
         'email',
@@ -23,6 +31,8 @@ class User extends Authenticatable
         'active_tflops',
         'nodes_label',
         'expected_daily_reward',
+        'is_blocked',
+        'kyc_status',
         'avg_epoch_label',
         'availability_label',
         'load_label',
@@ -41,7 +51,24 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'expected_daily_reward' => 'decimal:2',
+            'is_blocked' => 'boolean',
         ];
+    }
+
+    /** @return array<string, string> */
+    public static function kycStatuses(): array
+    {
+        return [
+            self::KYC_NONE => 'None',
+            self::KYC_PENDING => 'Pending',
+            self::KYC_APPROVED => 'Approved',
+            self::KYC_REJECTED => 'Rejected',
+        ];
+    }
+
+    public function kycLabel(): string
+    {
+        return self::kycStatuses()[$this->kyc_status] ?? ucfirst($this->kyc_status);
     }
 
     public function wallet(): HasOne
@@ -77,6 +104,11 @@ class User extends Authenticatable
     public function supportTickets(): HasMany
     {
         return $this->hasMany(SupportTicket::class);
+    }
+
+    public function withdrawals(): HasMany
+    {
+        return $this->hasMany(Withdrawal::class);
     }
 
     public function accountLabel(): string
