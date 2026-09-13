@@ -61,6 +61,8 @@ Route::middleware(['admin.domain', 'reject.web.on.admin'])->group(function () {
 
         Route::get('support', [SupportTicketController::class, 'index'])
             ->name('admin.support.index');
+        Route::get('support/unread-count', [SupportTicketController::class, 'unreadCount'])
+            ->name('admin.support.unread-count');
         Route::get('support/{ticket}', [SupportTicketController::class, 'show'])
             ->name('admin.support.show');
         Route::post('support/{ticket}/reply', [SupportTicketController::class, 'reply'])

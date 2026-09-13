@@ -105,7 +105,18 @@ class Dashboard extends Component
 
         if ($section === 7) {
             $this->prepareSupportChat();
+        } else {
+            $this->refreshSupportUnreadState();
         }
+    }
+
+    public function pollSupportUnread(): void
+    {
+        if ($this->section === 7) {
+            return;
+        }
+
+        $this->refreshSupportUnreadState();
     }
 
     public function openSupport(): void
@@ -432,6 +443,12 @@ class Dashboard extends Component
         ) ?? $this->tickets->first();
 
         $this->selectedTicketId = $preferred?->id;
+    }
+
+    private function refreshSupportUnreadState(): void
+    {
+        $this->reloadTickets();
+        $this->syncSupportUnreadBadge();
     }
 
     private function syncSupportUnreadBadge(): void

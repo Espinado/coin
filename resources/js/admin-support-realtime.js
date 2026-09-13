@@ -131,6 +131,38 @@ function handleIncomingMessage(payload, ticketId) {
     handleAdminPayload(payload);
 }
 
+async function pollAdminUnreadBadge() {
+    const url = window.coinAdminSupport?.unreadUrl;
+
+    if (! url) {
+        return;
+    }
+
+    try {
+        const response = await fetch(url, {
+            headers: {
+                Accept: 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+            },
+            credentials: 'same-origin',
+        });
+
+        if (! response.ok) {
+            return;
+        }
+
+        const payload = await response.json();
+        updateNavBadge(Number(payload.total ?? 0));
+    } catch (_) {
+        // Ignore polling errors; Echo remains the primary path.
+    }
+}
+
+function bootAdminSupportPolling() {
+    pollAdminUnreadBadge();
+    window.setInterval(pollAdminUnreadBadge, 10000);
+}
+
 function bootAdminSupportRealtime() {
     if (! hasEchoKey()) {
         reverbLog('warn', 'admin Echo skipped: no Reverb key in runtime config or Vite build');
@@ -181,7 +213,11 @@ function bootAdminSupportRealtime() {
 }
 
 if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', bootAdminSupportRealtime);
+    document.addEventListener('DOMContentLoaded', () => {
+        bootAdminSupportPolling();
+        bootAdminSupportRealtime();
+    });
 } else {
+    bootAdminSupportPolling();
     bootAdminSupportRealtime();
 }

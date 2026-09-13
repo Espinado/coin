@@ -6,7 +6,9 @@ cd "$(dirname "$0")"
 pkill -f "artisan reverb:start" 2>/dev/null || true
 sleep 1
 
-nohup php artisan reverb:start --host=127.0.0.1 --port=8080 >> storage/logs/reverb.log 2>&1 &
+PHP_BIN="${PHP_BIN:-$(command -v php)}"
+
+nohup "${PHP_BIN}" artisan reverb:start --host=127.0.0.1 --port=8080 >> storage/logs/reverb.log 2>&1 &
 echo "Started PID $!"
 
 sleep 2

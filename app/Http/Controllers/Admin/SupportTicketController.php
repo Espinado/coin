@@ -12,6 +12,13 @@ use Illuminate\View\View;
 
 class SupportTicketController extends Controller
 {
+    public function unreadCount(): JsonResponse
+    {
+        return response()->json([
+            'total' => SupportTicket::totalUnreadForAdmin(),
+        ]);
+    }
+
     public function index(Request $request): View
     {
         $status = $request->string('status')->toString();

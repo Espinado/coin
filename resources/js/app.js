@@ -60,7 +60,11 @@ function syncUserSupportNavBadgeFromDom() {
         return;
     }
 
-    updateUserSupportNavBadge(Number(nav.dataset.unreadSupport ?? 0));
+    if (! nav.dataset.unreadSupport) {
+        return;
+    }
+
+    updateUserSupportNavBadge(Number(nav.dataset.unreadSupport));
 }
 
 window.updateUserSupportNavBadge = updateUserSupportNavBadge;

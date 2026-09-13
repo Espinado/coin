@@ -32,6 +32,11 @@
     @stack('head')
     @auth('admin')
         @include('partials.coin-reverb-config')
+        <script>
+            window.coinAdminSupport = {
+                unreadUrl: @json(route('admin.support.unread-count')),
+            };
+        </script>
     @endauth
 </head>
 <body class="admin-shell">
