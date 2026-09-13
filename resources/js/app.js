@@ -49,7 +49,20 @@ function updateUserSupportNavBadge(total) {
     }
 
     badge.textContent = String(total);
+    nav.dataset.unreadSupport = String(total);
 }
+
+function syncUserSupportNavBadgeFromDom() {
+    const nav = document.querySelector('.coin-nav-support');
+
+    if (! nav) {
+        return;
+    }
+
+    updateUserSupportNavBadge(Number(nav.dataset.unreadSupport ?? 0));
+}
+
+window.updateUserSupportNavBadge = updateUserSupportNavBadge;
 
 function bootUserSupportRealtime() {
     const echo = initEcho();
@@ -90,6 +103,14 @@ if (hasEchoKey()) {
 } else {
     reverbLog('warn', 'user Echo skipped: no Reverb key in runtime config or Vite build');
 }
+
+syncUserSupportNavBadgeFromDom();
+
+document.addEventListener('livewire:init', () => {
+    Livewire.hook('morph.updated', () => {
+        syncUserSupportNavBadgeFromDom();
+    });
+});
 
 // Livewire pages ship with wire:id and start Alpine themselves.
 if (! document.querySelector('[wire\\:id]')) {

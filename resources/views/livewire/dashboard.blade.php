@@ -54,7 +54,7 @@
       <span style="position: relative; width: 7px; height: 7px; border-radius: 2px; background: rgba(150,235,250,0.3);"></span>
       <span style="position: relative;">Settings</span>
     </button>
-    <button type="button" wire:click="openSupport" wire:key="support-nav-{{ $this->unreadSupportCount }}" class="coin-nav-support {{ $this->unreadSupportCount > 0 ? 'coin-nav-support--unread' : '' }}" style="position: relative; display: flex; align-items: center; gap: 11px; padding: 11px 12px; border: 0; border-radius: 10px; background: none; font-family: inherit; font-size: 13.5px; color: {{ $this->unreadSupportCount > 0 ? '#f0fbff' : ($section === 7 ? '#e6f4fa' : 'rgba(230,244,250,0.72)') }}; text-align: left; cursor: pointer; width: 100%; z-index: 2;">
+    <button type="button" wire:click="openSupport" wire:key="support-nav-{{ $this->unreadSupportCount }}" data-unread-support="{{ $this->unreadSupportCount }}" class="coin-nav-support {{ $this->unreadSupportCount > 0 ? 'coin-nav-support--unread' : '' }}" style="position: relative; display: flex; align-items: center; gap: 11px; padding: 11px 12px; border: 0; border-radius: 10px; background: none; font-family: inherit; font-size: 13.5px; color: {{ $this->unreadSupportCount > 0 ? '#f0fbff' : ($section === 7 ? '#e6f4fa' : 'rgba(230,244,250,0.72)') }}; text-align: left; cursor: pointer; width: 100%; z-index: 2;">
       @if($section === 7)<span style="position: absolute; inset: 0; border-radius: 10px; background: oklch(0.6 0.13 200 / 0.22); border: 1px solid oklch(0.86 0.11 195 / 0.3); pointer-events: none;"></span>@elseif($this->unreadSupportCount > 0)<span data-user-support-nav-bg style="position: absolute; inset: 0; border-radius: 10px; background: oklch(0.72 0.16 35 / 0.12); border: 1px solid oklch(0.82 0.18 35 / 0.35); pointer-events: none;"></span>@endif
       <span class="coin-nav-support-dot" style="position: relative; width: 7px; height: 7px; border-radius: 2px; background: {{ $this->unreadSupportCount > 0 ? 'oklch(0.85 0.18 35)' : ($section === 7 ? 'oklch(0.86 0.12 192)' : 'rgba(150,235,250,0.3)') }}; {{ $this->unreadSupportCount > 0 ? 'box-shadow: 0 0 10px oklch(0.85 0.18 35 / 0.8);' : '' }}"></span>
       <span class="coin-nav-support-label" style="position: relative; flex: 1; font-weight: {{ $this->unreadSupportCount > 0 ? '600' : '400' }};">Live support</span>
@@ -749,6 +749,10 @@
 
   $wire.on('support-message-received', (payload) => {
     window.showSupportToast?.(payload?.message ?? 'New message', 'incoming');
+  });
+
+  $wire.on('support-unread-updated', (payload) => {
+    window.updateUserSupportNavBadge?.(Number(payload?.count ?? 0));
   });
 
   $wire.watch('selectedTicketId', () => {

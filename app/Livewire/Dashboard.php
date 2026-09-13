@@ -270,6 +270,7 @@ class Dashboard extends Component
         $this->showCreateTicket = false;
         $this->replyBody = '';
         $this->markTicketRead($ticketId);
+        $this->syncSupportUnreadBadge();
     }
 
     public function createTicket(SupportTicketService $support): void
@@ -302,6 +303,7 @@ class Dashboard extends Component
         $this->newBody = '';
         $this->createFormKey++;
         $this->markTicketRead($ticket->id);
+        $this->syncSupportUnreadBadge();
         $this->dispatch('support-thread-scroll');
         $this->dispatch('support-message-sent', message: 'Message sent');
     }
@@ -340,6 +342,8 @@ class Dashboard extends Component
                 $this->dispatch('support-message-received', message: 'New message from support');
             }
         }
+
+        $this->syncSupportUnreadBadge();
     }
 
     public function sendTicketReply(SupportTicketService $support): void
@@ -365,6 +369,7 @@ class Dashboard extends Component
         $this->dispatch('support-append-message', message: $this->formatMessageForBroadcast($message));
         $this->dispatch('support-thread-scroll');
         $this->dispatch('support-message-sent', message: 'Message sent');
+        $this->syncSupportUnreadBadge();
     }
 
     public function render(): View
@@ -429,7 +434,11 @@ class Dashboard extends Component
         ) ?? $this->tickets->first();
 
         $this->selectedTicketId = $preferred?->id;
-        $this->markTicketRead($this->selectedTicketId);
+    }
+
+    private function syncSupportUnreadBadge(): void
+    {
+        $this->dispatch('support-unread-updated', count: $this->unreadSupportCount);
     }
 
     private function markTicketRead(?int $ticketId): void
