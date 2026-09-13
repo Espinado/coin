@@ -1,16 +1,38 @@
+const recentIncomingToastIds = new Set();
+
+export function showIncomingMessageToast(message, title = 'New message') {
+    if (message?.id) {
+        if (recentIncomingToastIds.has(message.id)) {
+            return;
+        }
+
+        if (document.querySelector(`[data-message-id="${message.id}"]`)) {
+            return;
+        }
+
+        recentIncomingToastIds.add(message.id);
+        window.setTimeout(() => recentIncomingToastIds.delete(message.id), 15000);
+    }
+
+    const body = String(message?.body ?? '').trim();
+    const preview = body.length > 100 ? `${body.slice(0, 100)}…` : body;
+
+    showSupportToast(preview ? `${title}: ${preview}` : title, 'incoming');
+}
+
 export function showSupportToast(message, variant = 'success') {
     let root = document.getElementById('coin-support-toast-root');
 
     if (! root) {
         root = document.createElement('div');
         root.id = 'coin-support-toast-root';
-        root.setAttribute('aria-live', 'polite');
-        root.style.cssText = 'position:fixed;top:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:10px;pointer-events:none;max-width:min(380px,calc(100vw - 32px));';
+        root.setAttribute('aria-live', 'assertive');
+        root.style.cssText = 'position:fixed;top:20px;right:20px;z-index:2147483000;display:flex;flex-direction:column;gap:10px;pointer-events:none;max-width:min(420px,calc(100vw - 32px));';
         document.body.appendChild(root);
     }
 
     const toast = document.createElement('div');
-    toast.setAttribute('role', 'status');
+    toast.setAttribute('role', 'alert');
     toast.textContent = message;
 
     const isAdmin = document.body.classList.contains('admin-shell')
@@ -32,11 +54,12 @@ export function showSupportToast(message, variant = 'success') {
         styles = errorStyles;
     } else if (variant === 'incoming') {
         styles = incomingStyles;
-        toast.style.fontWeight = '700';
-        toast.style.fontSize = '14px';
     }
 
-    toast.style.cssText = `pointer-events:auto;padding:14px 18px;border-radius:12px;font-family:'Sora',sans-serif;font-size:13px;font-weight:600;letter-spacing:0.01em;${styles}`;
+    const fontWeight = variant === 'incoming' ? '700' : '600';
+    const fontSize = variant === 'incoming' ? '14px' : '13px';
+
+    toast.style.cssText = `pointer-events:auto;padding:16px 20px;border-radius:12px;font-family:'Sora',sans-serif;font-size:${fontSize};font-weight:${fontWeight};letter-spacing:0.01em;line-height:1.45;${styles}`;
 
     root.appendChild(toast);
 

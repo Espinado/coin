@@ -1,7 +1,7 @@
 import './bootstrap';
 import { hasEchoKey, initEcho } from './echo';
 import { reverbLog } from './reverb-debug';
-import { showSupportToast } from './support-toast';
+import { showIncomingMessageToast } from './support-toast';
 import { appendSupportMessage } from './support-chat';
 
 const badgeStyle = 'margin-left:6px;padding:3px 8px;border-radius:999px;background:linear-gradient(140deg,#ffb454,#e8872e);color:#1a1208;font-family:\'JetBrains Mono\',monospace;font-size:10px;font-weight:700;box-shadow:0 0 14px rgba(255,180,84,0.45);';
@@ -103,6 +103,24 @@ function handleAdminPayload(payload) {
     updateTicketRow(payload);
 }
 
+function notifyAdminAboutUserMessage(payload, activeTicketId) {
+    const message = payload?.message;
+
+    if (! message || message.is_from_admin) {
+        return;
+    }
+
+    const messageTicketId = Number(message.ticket_id ?? payload.ticket?.id ?? 0);
+    const viewingSameTicket = activeTicketId && messageTicketId === Number(activeTicketId);
+    const thread = document.getElementById('support-thread');
+
+    if (viewingSameTicket && thread) {
+        return;
+    }
+
+    showIncomingMessageToast(message, 'New user message');
+}
+
 function handleIncomingMessage(payload, ticketId) {
     const message = payload.message;
 
@@ -119,10 +137,6 @@ function handleIncomingMessage(payload, ticketId) {
     appendSupportMessage(message);
     updateTicketMeta(payload.ticket);
     handleAdminPayload(payload);
-
-    if (! message.is_from_admin) {
-        showSupportToast('New user message', 'incoming');
-    }
 }
 
 function bootAdminSupportRealtime() {
@@ -146,6 +160,7 @@ function bootAdminSupportRealtime() {
                 ticketId: payload?.ticket?.id ?? payload?.message?.ticket_id ?? null,
             });
             handleAdminPayload(payload);
+            notifyAdminAboutUserMessage(payload, ticketId);
             handleIncomingMessage(payload, ticketId);
         })
         .listen('.SupportTicketUpdated', (payload) => {

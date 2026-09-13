@@ -1,7 +1,7 @@
 import './bootstrap';
 import { hasEchoKey, initEcho } from './echo';
 import { reverbLog } from './reverb-debug';
-import { showSupportToast } from './support-toast';
+import { showIncomingMessageToast, showSupportToast } from './support-toast';
 import { appendSupportMessage, scrollSupportThreadToBottom } from './support-chat';
 
 window.showSupportToast = showSupportToast;
@@ -69,6 +69,10 @@ function bootUserSupportRealtime() {
                 ticketId: payload?.ticket?.id ?? payload?.message?.ticket_id ?? null,
             });
             handlePayload(payload);
+
+            if (payload?.message?.is_from_admin) {
+                showIncomingMessageToast(payload.message, 'New message from support');
+            }
         })
         .listen('.SupportTicketUpdated', (payload) => {
             reverbLog('info', 'user channel: SupportTicketUpdated', {
