@@ -1,0 +1,966 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Coin — личный кабинет</title>
+    <script src="{{ asset('coin/support.js') }}"></script>
+</head>
+<body>
+@verbatim
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  body { margin: 0; background: #04101c; -webkit-font-smoothing: antialiased; }
+  a { color: oklch(0.86 0.11 195); text-decoration: none; }
+  a:hover { color: oklch(0.92 0.09 195); }
+  @keyframes dbPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
+  input[type="range"] { accent-color: oklch(0.8 0.13 192); }
+</style>
+<link rel="stylesheet" href="/coin/responsive.css" />
+<script src="/coin/mobile.js" defer></script>
+</helmet>
+
+<div class="coin-dashboard" style="display: flex; min-height: 100vh; width: 1440px; margin: 0 auto; background: #061423; color: #e6f4fa; font-family: 'Sora', 'Helvetica Neue', Helvetica, sans-serif;">
+
+  <div class="coin-nav-overlay" onClick="{{ closeMenu }}"></div>
+  <aside class="coin-sidebar" style="width: 248px; flex: none; border-right: 1px solid rgba(150,235,250,0.1); background: rgba(4,16,28,0.6); padding: 22px 16px; display: flex; flex-direction: column; gap: 3px;">
+    <a href="/" style="display: flex; align-items: center; gap: 11px; padding: 4px 10px 24px; color: inherit;">
+      <div style="width: 28px; height: 28px; border-radius: 9px; background: linear-gradient(145deg, oklch(0.86 0.12 192), oklch(0.6 0.13 210)); display: grid; place-items: center; box-shadow: 0 8px 22px -8px oklch(0.78 0.13 192 / 0.8);">
+        <div style="width: 10px; height: 10px; border-radius: 3px; background: #061423;"></div>
+      </div>
+      <div>
+        <div style="font-size: 15px; font-weight: 600; letter-spacing: -0.015em;">Coin</div>
+        <div style="font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: 0.14em; color: rgba(214,238,248,0.6);">КОНСОЛЬ ВЫЧИСЛЕНИЙ</div>
+      </div>
+    </a>
+
+    <div style="font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: 0.16em; color: rgba(214,238,248,0.55); padding: 0 12px 10px;">ОСНОВНОЕ</div>
+
+    <button onClick="{{ nav0 }}" style="position: relative; display: flex; align-items: center; gap: 11px; padding: 11px 12px; border: 0; border-radius: 10px; background: none; font-family: inherit; font-size: 13.5px; color: #e6f4fa; text-align: left; cursor: pointer;">
+      <sc-if value="{{ at0 }}" hint-placeholder-val="{{ true }}"><span style="position: absolute; inset: 0; border-radius: 10px; background: oklch(0.6 0.13 200 / 0.22); border: 1px solid oklch(0.86 0.11 195 / 0.3); pointer-events: none;"></span></sc-if>
+      <span style="position: relative; width: 7px; height: 7px; border-radius: 2px; background: oklch(0.86 0.12 192);"></span>
+      <span style="position: relative;">Панель</span>
+    </button>
+    <button onClick="{{ nav1 }}" style="position: relative; display: flex; align-items: center; gap: 11px; padding: 11px 12px; border: 0; border-radius: 10px; background: none; font-family: inherit; font-size: 13.5px; color: rgba(230,244,250,0.72); text-align: left; cursor: pointer;">
+      <sc-if value="{{ at1 }}" hint-placeholder-val="{{ false }}"><span style="position: absolute; inset: 0; border-radius: 10px; background: oklch(0.6 0.13 200 / 0.22); border: 1px solid oklch(0.86 0.11 195 / 0.3); pointer-events: none;"></span></sc-if>
+      <span style="position: relative; width: 7px; height: 7px; border-radius: 2px; background: rgba(150,235,250,0.3);"></span>
+      <span style="position: relative;">Тарифы</span>
+    </button>
+    <button onClick="{{ nav2 }}" style="position: relative; display: flex; align-items: center; gap: 11px; padding: 11px 12px; border: 0; border-radius: 10px; background: none; font-family: inherit; font-size: 13.5px; color: rgba(230,244,250,0.72); text-align: left; cursor: pointer;">
+      <sc-if value="{{ at2 }}" hint-placeholder-val="{{ false }}"><span style="position: absolute; inset: 0; border-radius: 10px; background: oklch(0.6 0.13 200 / 0.22); border: 1px solid oklch(0.86 0.11 195 / 0.3); pointer-events: none;"></span></sc-if>
+      <span style="position: relative; width: 7px; height: 7px; border-radius: 2px; background: rgba(150,235,250,0.3);"></span>
+      <span style="position: relative; flex: 1;">Контракты</span>
+      <span style="position: relative; font-family: 'JetBrains Mono', monospace; font-size: 10px; padding: 2px 7px; border-radius: 6px; background: rgba(150,235,250,0.1); color: rgba(214,238,248,0.8);">2</span>
+    </button>
+    <button onClick="{{ nav3 }}" style="position: relative; display: flex; align-items: center; gap: 11px; padding: 11px 12px; border: 0; border-radius: 10px; background: none; font-family: inherit; font-size: 13.5px; color: rgba(230,244,250,0.72); text-align: left; cursor: pointer;">
+      <sc-if value="{{ at3 }}" hint-placeholder-val="{{ false }}"><span style="position: absolute; inset: 0; border-radius: 10px; background: oklch(0.6 0.13 200 / 0.22); border: 1px solid oklch(0.86 0.11 195 / 0.3); pointer-events: none;"></span></sc-if>
+      <span style="position: relative; width: 7px; height: 7px; border-radius: 2px; background: rgba(150,235,250,0.3);"></span>
+      <span style="position: relative;">Статистика</span>
+    </button>
+    <button onClick="{{ nav4 }}" style="position: relative; display: flex; align-items: center; gap: 11px; padding: 11px 12px; border: 0; border-radius: 10px; background: none; font-family: inherit; font-size: 13.5px; color: rgba(230,244,250,0.72); text-align: left; cursor: pointer;">
+      <sc-if value="{{ at4 }}" hint-placeholder-val="{{ false }}"><span style="position: absolute; inset: 0; border-radius: 10px; background: oklch(0.6 0.13 200 / 0.22); border: 1px solid oklch(0.86 0.11 195 / 0.3); pointer-events: none;"></span></sc-if>
+      <span style="position: relative; width: 7px; height: 7px; border-radius: 2px; background: rgba(150,235,250,0.3);"></span>
+      <span style="position: relative;">Кошелёк</span>
+    </button>
+    <button onClick="{{ nav5 }}" style="position: relative; display: flex; align-items: center; gap: 11px; padding: 11px 12px; border: 0; border-radius: 10px; background: none; font-family: inherit; font-size: 13.5px; color: rgba(230,244,250,0.72); text-align: left; cursor: pointer;">
+      <sc-if value="{{ at5 }}" hint-placeholder-val="{{ false }}"><span style="position: absolute; inset: 0; border-radius: 10px; background: oklch(0.6 0.13 200 / 0.22); border: 1px solid oklch(0.86 0.11 195 / 0.3); pointer-events: none;"></span></sc-if>
+      <span style="position: relative; width: 7px; height: 7px; border-radius: 2px; background: rgba(150,235,250,0.3);"></span>
+      <span style="position: relative;">Рефералы</span>
+    </button>
+
+    <div style="font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: 0.16em; color: rgba(214,238,248,0.55); padding: 22px 12px 10px;">АККАУНТ</div>
+    <button onClick="{{ nav6 }}" style="position: relative; display: flex; align-items: center; gap: 11px; padding: 11px 12px; border: 0; border-radius: 10px; background: none; font-family: inherit; font-size: 13.5px; color: rgba(230,244,250,0.72); text-align: left; cursor: pointer;">
+      <sc-if value="{{ at6 }}" hint-placeholder-val="{{ false }}"><span style="position: absolute; inset: 0; border-radius: 10px; background: oklch(0.6 0.13 200 / 0.22); border: 1px solid oklch(0.86 0.11 195 / 0.3); pointer-events: none;"></span></sc-if>
+      <span style="position: relative; width: 7px; height: 7px; border-radius: 2px; background: rgba(150,235,250,0.3);"></span>
+      <span style="position: relative;">Настройки</span>
+    </button>
+    <a href="#" style="display: flex; align-items: center; gap: 11px; padding: 11px 12px; border-radius: 10px; font-size: 13.5px; color: rgba(230,244,250,0.72);">
+      <span style="width: 7px; height: 7px; border-radius: 2px; background: rgba(150,235,250,0.3);"></span>Поддержка
+    </a>
+
+    <div style="margin-top: auto; padding: 18px; border-radius: 14px; border: 1px solid oklch(0.86 0.11 195 / 0.26); background: linear-gradient(170deg, oklch(0.6 0.13 200 / 0.22), rgba(6,20,35,0.6));">
+      <div style="font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: 0.14em; color: rgba(214,238,248,0.7);">АКТИВНЫЙ ТАРИФ</div>
+      <div style="margin-top: 9px; font-size: 15px; font-weight: 600;">Ядро</div>
+      <div style="margin-top: 4px; font-family: 'JetBrains Mono', monospace; font-size: 11.5px; color: rgba(214,238,248,0.78);">1 200 TFLOPS · 180 дн.</div>
+      <div style="margin-top: 14px; height: 4px; border-radius: 3px; background: rgba(150,235,250,0.14);"><div style="width: 46%; height: 100%; border-radius: 3px; background: linear-gradient(90deg, oklch(0.72 0.11 215), oklch(0.88 0.12 192));"></div></div>
+      <div style="margin-top: 8px; font-size: 11.5px; color: rgba(214,238,248,0.7);">Прошло 83 из 180 дней</div>
+      <button onClick="{{ nav1 }}" style="width: 100%; margin-top: 16px; padding: 10px; border-radius: 10px; border: 1px solid oklch(0.86 0.11 195 / 0.5); background: linear-gradient(140deg, oklch(0.86 0.12 192), oklch(0.66 0.13 205)); color: #04121f; font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer;">Улучшить тариф</button>
+    </div>
+  </aside>
+
+  <main style="flex: 1; min-width: 0; display: flex; flex-direction: column;">
+    <header class="coin-dash-header" style="display: flex; align-items: center; gap: 20px; padding: 20px 32px; border-bottom: 1px solid rgba(150,235,250,0.1); background: rgba(4,16,28,0.4);">
+      <button type="button" class="coin-burger" onClick="{{ toggleMenu }}" aria-label="Открыть меню"><span></span><span></span><span></span></button>
+      <div style="min-width: 0; flex: 1;">
+        <div style="font-size: 20px; font-weight: 600; letter-spacing: -0.02em;">{{ title }}</div>
+        <div style="margin-top: 4px; font-size: 12.5px; color: rgba(214,238,248,0.7);">{{ subtitle }}</div>
+      </div>
+      <div class="coin-dash-meta">
+        <div class="coin-hide-mobile" style="display: flex; align-items: center; gap: 9px; padding: 9px 14px; border-radius: 10px; border: 1px solid rgba(150,235,250,0.14); background: rgba(150,235,250,0.04); font-family: 'JetBrains Mono', monospace; font-size: 11px; color: rgba(214,238,248,0.8);">
+          <span style="width: 6px; height: 6px; border-radius: 50%; background: oklch(0.85 0.15 160); box-shadow: 0 0 9px oklch(0.85 0.15 160); animation: dbPulse 2.4s infinite;"></span>
+          СЕТЬ ОНЛАЙН
+        </div>
+        <div class="coin-hide-mobile" style="padding: 9px 14px; border-radius: 10px; border: 1px solid rgba(150,235,250,0.14); background: rgba(150,235,250,0.04); font-family: 'JetBrains Mono', monospace; font-size: 11px; color: rgba(214,238,248,0.8);">ЭПОХА 20 914 · 02:14:38</div>
+        <div style="display: flex; align-items: center; gap: 10px; padding: 6px 12px 6px 6px; border-radius: 999px; border: 1px solid rgba(150,235,250,0.14); background: rgba(150,235,250,0.04);">
+          <span style="width: 28px; height: 28px; border-radius: 50%; background: linear-gradient(145deg, oklch(0.7 0.13 198), oklch(0.5 0.15 285)); display: grid; place-items: center; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #04121f;">A</span>
+          <span class="coin-hide-mobile" style="font-size: 13px;">Аккаунт 8f21</span>
+        </div>
+      </div>
+    </header>
+
+    <sc-if value="{{ at0 }}" hint-placeholder-val="{{ true }}">
+      <section data-screen-label="Обзор" style="padding: 28px 32px 40px; display: flex; flex-direction: column; gap: 16px;">
+        <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px;">
+          <div style="padding: 22px; border-radius: 16px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.04);">
+            <div style="font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.14em; color: rgba(214,238,248,0.7);">ОБЩИЙ БАЛАНС</div>
+            <div style="margin-top: 14px; font-family: 'JetBrains Mono', monospace; font-size: 26px; color: #f0fbff;">1 482,60</div>
+            <div style="margin-top: 7px; font-size: 12.5px; color: rgba(214,238,248,0.7);">{{ symbol }} · ≈ $2 964 (заглушка)</div>
+          </div>
+          <div style="padding: 22px; border-radius: 16px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.04);">
+            <div style="font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.14em; color: rgba(214,238,248,0.7);">АКТИВНАЯ МОЩНОСТЬ</div>
+            <div style="margin-top: 14px; font-family: 'JetBrains Mono', monospace; font-size: 26px; color: #f0fbff;">1 200 <span style="font-size: 13px; color: rgba(214,238,248,0.7);">TFLOPS</span></div>
+            <div style="margin-top: 7px; font-size: 12.5px; color: rgba(214,238,248,0.7);">12 узлов · FRA-02, IAD-01</div>
+          </div>
+          <div style="padding: 22px; border-radius: 16px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.04);">
+            <div style="font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.14em; color: rgba(214,238,248,0.7);">АКТИВНЫЙ ТАРИФ</div>
+            <div style="margin-top: 14px; font-size: 24px; font-weight: 600; letter-spacing: -0.02em; color: #f0fbff;">Ядро</div>
+            <div style="margin-top: 7px; font-size: 12.5px; color: rgba(214,238,248,0.7);">Контракт 180 дней · приоритетный пул</div>
+          </div>
+          <div style="padding: 22px; border-radius: 16px; border: 1px solid oklch(0.86 0.11 195 / 0.26); background: linear-gradient(170deg, oklch(0.6 0.13 200 / 0.2), rgba(150,235,250,0.03));">
+            <div style="font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.14em; color: rgba(214,238,248,0.75);">ОЖИДАЕМАЯ НАГРАДА ЗА ДЕНЬ</div>
+            <div style="margin-top: 14px; font-family: 'JetBrains Mono', monospace; font-size: 26px; color: oklch(0.9 0.12 192);">+5.04</div>
+            <div style="margin-top: 7px; font-size: 12.5px; color: rgba(214,238,248,0.75);">{{ symbol }} · 3 эпохи в сутки</div>
+          </div>
+        </div>
+
+        <div style="display: flex; flex-wrap: wrap; gap: 10px; padding: 16px 18px; border-radius: 16px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.03); align-items: center;">
+          <span style="font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.14em; color: rgba(214,238,248,0.7); margin-right: 6px;">БЫСТРЫЕ ДЕЙСТВИЯ</span>
+          <button onClick="{{ nav1 }}" style="padding: 10px 18px; border-radius: 10px; border: 1px solid oklch(0.86 0.11 195 / 0.5); background: linear-gradient(140deg, oklch(0.86 0.12 192), oklch(0.66 0.13 205)); color: #04121f; font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer;">Активировать тариф</button>
+          <button onClick="{{ nav4 }}" style="padding: 10px 18px; border-radius: 10px; border: 1px solid rgba(150,235,250,0.2); background: rgba(150,235,250,0.06); color: #e6f4fa; font-family: inherit; font-size: 13px; font-weight: 500; cursor: pointer;">Пополнить</button>
+          <button onClick="{{ nav4 }}" style="padding: 10px 18px; border-radius: 10px; border: 1px solid rgba(150,235,250,0.2); background: rgba(150,235,250,0.06); color: #e6f4fa; font-family: inherit; font-size: 13px; font-weight: 500; cursor: pointer;">Вывести</button>
+          <button onClick="{{ nav2 }}" style="padding: 10px 18px; border-radius: 10px; border: 1px solid rgba(150,235,250,0.2); background: rgba(150,235,250,0.06); color: #e6f4fa; font-family: inherit; font-size: 13px; font-weight: 500; cursor: pointer;">Увеличить мощность</button>
+          <button onClick="{{ nav5 }}" style="padding: 10px 18px; border-radius: 10px; border: 1px solid rgba(180,180,255,0.26); background: rgba(150,140,255,0.1); color: #e6f4fa; font-family: inherit; font-size: 13px; font-weight: 500; cursor: pointer;">Пригласить</button>
+        </div>
+
+        <div style="display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); gap: 16px;">
+          <div style="padding: 22px; border-radius: 16px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.035);">
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+              <div>
+                <div style="font-size: 15px; font-weight: 600;">Начисления</div>
+                <div style="margin-top: 4px; font-size: 12.5px; color: rgba(214,238,248,0.7);">Начисленные награды за день · данные-заглушка</div>
+              </div>
+              <div style="display: flex; gap: 7px;">
+                <span style="padding: 7px 12px; border-radius: 9px; border: 1px solid rgba(150,235,250,0.16); font-family: 'JetBrains Mono', monospace; font-size: 10.5px; color: rgba(214,238,248,0.7);">30Д</span>
+                <span style="padding: 7px 12px; border-radius: 9px; border: 1px solid oklch(0.86 0.11 195 / 0.4); background: oklch(0.6 0.13 200 / 0.22); font-family: 'JetBrains Mono', monospace; font-size: 10.5px; color: #f0fbff;">14Д</span>
+                <span style="padding: 7px 12px; border-radius: 9px; border: 1px solid rgba(150,235,250,0.16); font-family: 'JetBrains Mono', monospace; font-size: 10.5px; color: rgba(214,238,248,0.7);">24Ч</span>
+              </div>
+            </div>
+            <div style="display: flex; align-items: flex-end; gap: 8px; height: 176px; margin-top: 24px;">
+              <div style="flex: 1; height: 34%; border-radius: 4px 4px 2px 2px; background: linear-gradient(180deg, oklch(0.72 0.11 210 / 0.8), oklch(0.72 0.11 210 / 0.12));"></div>
+              <div style="flex: 1; height: 46%; border-radius: 4px 4px 2px 2px; background: linear-gradient(180deg, oklch(0.72 0.11 210 / 0.8), oklch(0.72 0.11 210 / 0.12));"></div>
+              <div style="flex: 1; height: 39%; border-radius: 4px 4px 2px 2px; background: linear-gradient(180deg, oklch(0.72 0.11 210 / 0.8), oklch(0.72 0.11 210 / 0.12));"></div>
+              <div style="flex: 1; height: 58%; border-radius: 4px 4px 2px 2px; background: linear-gradient(180deg, oklch(0.72 0.11 210 / 0.8), oklch(0.72 0.11 210 / 0.12));"></div>
+              <div style="flex: 1; height: 52%; border-radius: 4px 4px 2px 2px; background: linear-gradient(180deg, oklch(0.76 0.12 202 / 0.85), oklch(0.76 0.12 202 / 0.12));"></div>
+              <div style="flex: 1; height: 67%; border-radius: 4px 4px 2px 2px; background: linear-gradient(180deg, oklch(0.76 0.12 202 / 0.85), oklch(0.76 0.12 202 / 0.12));"></div>
+              <div style="flex: 1; height: 61%; border-radius: 4px 4px 2px 2px; background: linear-gradient(180deg, oklch(0.76 0.12 202 / 0.85), oklch(0.76 0.12 202 / 0.12));"></div>
+              <div style="flex: 1; height: 74%; border-radius: 4px 4px 2px 2px; background: linear-gradient(180deg, oklch(0.8 0.12 198), oklch(0.8 0.12 198 / 0.14));"></div>
+              <div style="flex: 1; height: 69%; border-radius: 4px 4px 2px 2px; background: linear-gradient(180deg, oklch(0.8 0.12 198), oklch(0.8 0.12 198 / 0.14));"></div>
+              <div style="flex: 1; height: 83%; border-radius: 4px 4px 2px 2px; background: linear-gradient(180deg, oklch(0.84 0.12 195), oklch(0.84 0.12 195 / 0.16));"></div>
+              <div style="flex: 1; height: 78%; border-radius: 4px 4px 2px 2px; background: linear-gradient(180deg, oklch(0.84 0.12 195), oklch(0.84 0.12 195 / 0.16));"></div>
+              <div style="flex: 1; height: 91%; border-radius: 4px 4px 2px 2px; background: linear-gradient(180deg, oklch(0.88 0.12 192), oklch(0.88 0.12 192 / 0.18));"></div>
+              <div style="flex: 1; height: 86%; border-radius: 4px 4px 2px 2px; background: linear-gradient(180deg, oklch(0.88 0.12 192), oklch(0.88 0.12 192 / 0.18));"></div>
+              <div style="flex: 1; height: 100%; border-radius: 4px 4px 2px 2px; background: linear-gradient(180deg, #eafcff, oklch(0.88 0.12 192 / 0.22)); box-shadow: 0 0 26px oklch(0.88 0.12 192 / 0.45);"></div>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-top: 14px; font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.1em; color: rgba(214,238,248,0.62);"><span>26 АВГ</span><span>1 СЕН</span><span>8 СЕН</span></div>
+          </div>
+
+          <div style="padding: 22px; border-radius: 16px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.035);">
+            <div style="font-size: 15px; font-weight: 600;">Распределение мощности</div>
+            <div style="margin-top: 4px; font-size: 12.5px; color: rgba(214,238,248,0.7);">Где работала ваша мощность в этой эпохе</div>
+            <div style="display: flex; align-items: center; gap: 22px; margin-top: 24px;">
+              <div style="position: relative; width: 122px; height: 122px; flex: none; border-radius: 50%; background: conic-gradient(oklch(0.86 0.12 192) 0 42%, oklch(0.72 0.11 215) 42% 73%, oklch(0.7 0.15 292) 73% 90%, rgba(214,238,248,0.16) 90% 100%);">
+                <div style="position: absolute; inset: 16px; border-radius: 50%; background: #081b2c; display: grid; place-items: center;">
+                  <div style="text-align: center;">
+                    <div style="font-family: 'JetBrains Mono', monospace; font-size: 17px; color: #f0fbff;">90%</div>
+                    <div style="font-family: 'JetBrains Mono', monospace; font-size: 8px; letter-spacing: 0.1em; color: rgba(214,238,248,0.66);">ЗАГРУЖЕНО</div>
+                  </div>
+                </div>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 11px; font-size: 12.5px; min-width: 0;">
+                <div style="display: flex; align-items: center; gap: 8px;"><span style="width: 8px; height: 8px; border-radius: 2px; background: oklch(0.86 0.12 192);"></span><span style="color: rgba(214,238,248,0.78);">Обучение</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">42%</span></div>
+                <div style="display: flex; align-items: center; gap: 8px;"><span style="width: 8px; height: 8px; border-radius: 2px; background: oklch(0.72 0.11 215);"></span><span style="color: rgba(214,238,248,0.78);">Инференс</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">31%</span></div>
+                <div style="display: flex; align-items: center; gap: 8px;"><span style="width: 8px; height: 8px; border-radius: 2px; background: oklch(0.7 0.15 292);"></span><span style="color: rgba(214,238,248,0.78);">Генерация</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">17%</span></div>
+                <div style="display: flex; align-items: center; gap: 8px;"><span style="width: 8px; height: 8px; border-radius: 2px; background: rgba(214,238,248,0.2);"></span><span style="color: rgba(214,238,248,0.78);">Исследования</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">10%</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px;">
+          <div style="padding: 22px; border-radius: 16px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.035);">
+            <div style="display: flex; align-items: baseline; justify-content: space-between;">
+              <span style="font-size: 15px; font-weight: 600;">Активные контракты</span>
+              <button onClick="{{ nav2 }}" style="background: none; border: 0; padding: 0; font-family: 'JetBrains Mono', monospace; font-size: 10.5px; letter-spacing: 0.1em; color: oklch(0.88 0.11 195); cursor: pointer;">ВСЕ КОНТРАКТЫ</button>
+            </div>
+            <div style="margin-top: 18px; display: flex; flex-direction: column; gap: 14px;">
+              <div>
+                <div style="display: flex; align-items: baseline; justify-content: space-between; font-size: 13px;"><span>Ядро · 1 200 TFLOPS</span><span style="font-family: 'JetBrains Mono', monospace; color: rgba(214,238,248,0.78);">46%</span></div>
+                <div style="margin-top: 9px; height: 4px; border-radius: 3px; background: rgba(150,235,250,0.12);"><div style="width: 46%; height: 100%; border-radius: 3px; background: linear-gradient(90deg, oklch(0.72 0.11 215), oklch(0.88 0.12 192));"></div></div>
+              </div>
+              <div>
+                <div style="display: flex; align-items: baseline; justify-content: space-between; font-size: 13px;"><span>Узел · 250 TFLOPS</span><span style="font-family: 'JetBrains Mono', monospace; color: rgba(214,238,248,0.78);">72%</span></div>
+                <div style="margin-top: 9px; height: 4px; border-radius: 3px; background: rgba(150,235,250,0.12);"><div style="width: 72%; height: 100%; border-radius: 3px; background: linear-gradient(90deg, oklch(0.72 0.11 215), oklch(0.88 0.12 192));"></div></div>
+              </div>
+              <div style="display: flex; justify-content: space-between; font-size: 12.5px; color: rgba(214,238,248,0.7); padding-top: 4px;"><span>Следующий расчёт</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">02:14:38</span></div>
+            </div>
+          </div>
+
+          <div style="padding: 22px; border-radius: 16px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.035);">
+            <div style="display: flex; align-items: baseline; justify-content: space-between;">
+              <span style="font-size: 15px; font-weight: 600;">Кошелёк</span>
+              <button onClick="{{ nav4 }}" style="background: none; border: 0; padding: 0; font-family: 'JetBrains Mono', monospace; font-size: 10.5px; letter-spacing: 0.1em; color: oklch(0.88 0.11 195); cursor: pointer;">ОТКРЫТЬ</button>
+            </div>
+            <div style="margin-top: 18px; display: flex; flex-direction: column; gap: 13px; font-size: 13px;">
+              <div style="display: flex; justify-content: space-between; gap: 14px;"><span style="color: rgba(214,238,248,0.72); min-width: 0;">Доступно</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">1 362,60 {{ symbol }}</span></div>
+              <div style="display: flex; justify-content: space-between; gap: 14px;"><span style="color: rgba(214,238,248,0.72); min-width: 0;">Ожидает расчёта</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">120,00 {{ symbol }}</span></div>
+              <div style="display: flex; justify-content: space-between; gap: 14px;"><span style="color: rgba(214,238,248,0.72); min-width: 0;">Адрес выплаты</span><span style="font-family: 'JetBrains Mono', monospace; color: rgba(214,238,248,0.8);">0x7c…9a4f</span></div>
+            </div>
+            <div style="display: flex; gap: 8px; margin-top: 20px;">
+              <button onClick="{{ nav4 }}" style="flex: 1; padding: 10px; border-radius: 10px; border: 1px solid oklch(0.86 0.11 195 / 0.45); background: oklch(0.6 0.13 200 / 0.22); color: #eafcff; font-family: inherit; font-size: 13px; font-weight: 500; cursor: pointer;">Пополнить</button>
+              <button onClick="{{ nav4 }}" style="flex: 1; padding: 10px; border-radius: 10px; border: 1px solid rgba(150,235,250,0.2); background: rgba(150,235,250,0.06); color: #e6f4fa; font-family: inherit; font-size: 13px; font-weight: 500; cursor: pointer;">Вывести</button>
+            </div>
+          </div>
+
+          <div style="padding: 22px; border-radius: 16px; border: 1px solid rgba(180,180,255,0.16); background: linear-gradient(170deg, rgba(120,110,220,0.13), rgba(150,235,250,0.02));">
+            <div style="display: flex; align-items: baseline; justify-content: space-between;">
+              <span style="font-size: 15px; font-weight: 600;">Рефералы</span>
+              <button onClick="{{ nav5 }}" style="background: none; border: 0; padding: 0; font-family: 'JetBrains Mono', monospace; font-size: 10.5px; letter-spacing: 0.1em; color: oklch(0.88 0.11 195); cursor: pointer;">ОТКРЫТЬ</button>
+            </div>
+            <div style="margin-top: 18px; display: flex; align-items: baseline; gap: 10px;">
+              <span style="font-family: 'JetBrains Mono', monospace; font-size: 28px; color: #f0fbff;">28</span>
+              <span style="font-size: 12.5px; color: rgba(214,238,248,0.72);">приглашённых</span>
+            </div>
+            <div style="margin-top: 16px; display: flex; flex-direction: column; gap: 12px; font-size: 13px;">
+              <div style="display: flex; justify-content: space-between; gap: 14px;"><span style="color: rgba(214,238,248,0.72); min-width: 0;">Реферальные награды</span><span style="font-family: 'JetBrains Mono', monospace; color: oklch(0.88 0.12 192);">+112.40</span></div>
+              <div style="display: flex; justify-content: space-between; gap: 14px;"><span style="color: rgba(214,238,248,0.72); min-width: 0;">Доля комиссии</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">5% / 2%</span></div>
+            </div>
+            <button onClick="{{ nav5 }}" style="width: 100%; margin-top: 20px; padding: 10px; border-radius: 10px; border: 1px solid rgba(180,180,255,0.3); background: rgba(150,140,255,0.12); color: #eafcff; font-family: inherit; font-size: 13px; font-weight: 500; cursor: pointer;">Пригласить друзей</button>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); gap: 16px;">
+          <div style="padding: 22px; border-radius: 16px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.035);">
+            <div style="display: flex; align-items: baseline; justify-content: space-between;">
+              <span style="font-size: 15px; font-weight: 600;">Последние операции</span>
+              <span style="font-family: 'JetBrains Mono', monospace; font-size: 10.5px; color: rgba(214,238,248,0.66);">ПОСЛЕДНИЕ 5 ЗАПИСЕЙ</span>
+            </div>
+            <div style="display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr) minmax(0, 1fr) minmax(0, 0.8fr); padding: 16px 0 12px; border-bottom: 1px solid rgba(150,235,250,0.1); font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.12em; color: rgba(214,238,248,0.66);"><span>ВРЕМЯ</span><span>ТИП</span><span>ИСТОЧНИК</span><span style="text-align: right;">СУММА</span></div>
+            <div style="display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr) minmax(0, 1fr) minmax(0, 0.8fr); padding: 13px 0; border-bottom: 1px solid rgba(150,235,250,0.07); font-size: 13px; align-items: center;"><span style="color: rgba(214,238,248,0.78);">09:12</span><span style="color: rgba(214,238,248,0.78);">Начисление награды</span><span style="color: rgba(214,238,248,0.78);">Инференс · FRA-02</span><span style="font-family: 'JetBrains Mono', monospace; text-align: right; color: oklch(0.88 0.12 192);">+1,71</span></div>
+            <div style="display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr) minmax(0, 1fr) minmax(0, 0.8fr); padding: 13px 0; border-bottom: 1px solid rgba(150,235,250,0.07); font-size: 13px; align-items: center;"><span style="color: rgba(214,238,248,0.78);">01:12</span><span style="color: rgba(214,238,248,0.78);">Начисление награды</span><span style="color: rgba(214,238,248,0.78);">Обучение · IAD-01</span><span style="font-family: 'JetBrains Mono', monospace; text-align: right; color: oklch(0.88 0.12 192);">+1,68</span></div>
+            <div style="display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr) minmax(0, 1fr) minmax(0, 0.8fr); padding: 13px 0; border-bottom: 1px solid rgba(150,235,250,0.07); font-size: 13px; align-items: center;"><span style="color: rgba(214,238,248,0.78);">7 сен</span><span style="color: rgba(214,238,248,0.78);">Реферальное начисление</span><span style="color: rgba(214,238,248,0.78);">Уровень 1 · 2 контракта</span><span style="font-family: 'JetBrains Mono', monospace; text-align: right; color: oklch(0.88 0.12 192);">+4,20</span></div>
+            <div style="display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr) minmax(0, 1fr) minmax(0, 0.8fr); padding: 13px 0; border-bottom: 1px solid rgba(150,235,250,0.07); font-size: 13px; align-items: center;"><span style="color: rgba(214,238,248,0.78);">6 сен</span><span style="color: rgba(214,238,248,0.78);">Вывод</span><span style="color: rgba(214,238,248,0.78);">0x7c…9a4f</span><span style="font-family: 'JetBrains Mono', monospace; text-align: right; color: rgba(214,238,248,0.8);">−120,00</span></div>
+            <div style="display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr) minmax(0, 1fr) minmax(0, 0.8fr); padding: 13px 0; font-size: 13px; align-items: center;"><span style="color: rgba(214,238,248,0.78);">5 сен</span><span style="color: rgba(214,238,248,0.78);">Контракт активирован</span><span style="color: rgba(214,238,248,0.78);">Узел · 250 TFLOPS</span><span style="font-family: 'JetBrains Mono', monospace; text-align: right; color: rgba(214,238,248,0.8);">—</span></div>
+          </div>
+
+          <div style="padding: 22px; border-radius: 16px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.035);">
+            <div style="font-size: 15px; font-weight: 600;">Статус дата-центров</div>
+            <div style="margin-top: 4px; font-size: 12.5px; color: rgba(214,238,248,0.7);">Где размещена ваша мощность</div>
+            <div style="margin-top: 20px; display: flex; flex-direction: column; gap: 12px;">
+              <div style="padding: 14px 16px; border-radius: 12px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.04);">
+                <div style="display: flex; align-items: center; justify-content: space-between; font-size: 13px;"><span>Франкфурт · FRA-02</span><span style="display: flex; align-items: center; gap: 7px; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: oklch(0.86 0.14 160);"><span style="width: 6px; height: 6px; border-radius: 50%; background: oklch(0.85 0.15 160);"></span>РАБОТАЕТ</span></div>
+                <div style="margin-top: 11px; height: 4px; border-radius: 3px; background: rgba(150,235,250,0.12);"><div style="width: 64%; height: 100%; border-radius: 3px; background: oklch(0.86 0.12 192);"></div></div>
+                <div style="margin-top: 8px; font-family: 'JetBrains Mono', monospace; font-size: 10.5px; color: rgba(214,238,248,0.68);">ВЫДЕЛЕНО 768 TFLOPS</div>
+              </div>
+              <div style="padding: 14px 16px; border-radius: 12px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.04);">
+                <div style="display: flex; align-items: center; justify-content: space-between; font-size: 13px;"><span>Ашберн · IAD-01</span><span style="display: flex; align-items: center; gap: 7px; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: oklch(0.86 0.14 160);"><span style="width: 6px; height: 6px; border-radius: 50%; background: oklch(0.85 0.15 160);"></span>РАБОТАЕТ</span></div>
+                <div style="margin-top: 11px; height: 4px; border-radius: 3px; background: rgba(150,235,250,0.12);"><div style="width: 36%; height: 100%; border-radius: 3px; background: oklch(0.72 0.11 215);"></div></div>
+                <div style="margin-top: 8px; font-family: 'JetBrains Mono', monospace; font-size: 10.5px; color: rgba(214,238,248,0.68);">ВЫДЕЛЕНО 432 TFLOPS</div>
+              </div>
+              <div style="padding: 14px 16px; border-radius: 12px; border: 1px solid rgba(180,180,255,0.16); background: rgba(150,140,255,0.07);">
+                <div style="display: flex; align-items: center; justify-content: space-between; font-size: 13px;"><span>Сан-Паулу · GRU-01</span><span style="display: flex; align-items: center; gap: 7px; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: oklch(0.88 0.15 90);"><span style="width: 6px; height: 6px; border-radius: 50%; background: oklch(0.88 0.15 90);"></span>РАСШИРЕНИЕ</span></div>
+                <div style="margin-top: 11px; font-family: 'JetBrains Mono', monospace; font-size: 10.5px; color: rgba(214,238,248,0.68);">МОЩНОСТЬ ПОЯВИТСЯ СКОРО</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </sc-if>
+
+    <sc-if value="{{ at1 }}" hint-placeholder-val="{{ false }}">
+      <section data-screen-label="Тарифы" style="padding: 28px 32px 40px; display: flex; flex-direction: column; gap: 16px;">
+        <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px;">
+          <div style="padding: 24px; border-radius: 18px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.04); display: flex; flex-direction: column;">
+            <div style="display: flex; align-items: center; justify-content: space-between;">
+              <div style="width: 44px; height: 44px; border-radius: 13px; background: linear-gradient(150deg, #1a4055, #0b2030); border: 1px solid rgba(150,235,250,0.22); display: grid; place-items: center;"><span style="width: 15px; height: 15px; border-radius: 4px; background: oklch(0.7 0.1 200);"></span></div>
+              <span style="font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.12em; color: rgba(214,238,248,0.66);">СТАРТ</span>
+            </div>
+            <div style="margin-top: 20px; font-size: 19px; font-weight: 600; letter-spacing: -0.02em;">Узел</div>
+            <div style="margin-top: 14px; display: flex; align-items: baseline; gap: 7px;">
+              <span style="font-size: 30px; font-weight: 600; letter-spacing: -0.03em;">$250</span>
+              <span style="font-size: 12.5px; color: rgba(214,238,248,0.7);">заглушка</span>
+            </div>
+            <div style="height: 1px; background: rgba(150,235,250,0.12); margin: 20px 0;"></div>
+            <div style="display: flex; flex-direction: column; gap: 13px; font-size: 13px;">
+              <div style="display: flex; justify-content: space-between; gap: 14px;"><span style="color: rgba(214,238,248,0.72); min-width: 0;">Мощность</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">250 TFLOPS</span></div>
+              <div style="display: flex; justify-content: space-between; gap: 14px;"><span style="color: rgba(214,238,248,0.72); min-width: 0;">Срок</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">12 месяцев</span></div>
+              <div style="display: flex; justify-content: space-between; gap: 14px;"><span style="color: rgba(214,238,248,0.72); min-width: 0;">Оценка награды</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">~0,9 / день</span></div>
+              <div style="display: flex; justify-content: space-between; gap: 14px;"><span style="color: rgba(214,238,248,0.72); min-width: 0;">Инфраструктура</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">Общий пул</span></div>
+            </div>
+            <div style="margin-top: 20px; height: 5px; border-radius: 3px; background: rgba(150,235,250,0.12);"><div style="width: 12%; height: 100%; border-radius: 3px; background: oklch(0.7 0.11 205);"></div></div>
+            <button style="margin-top: 22px; padding: 11px; border-radius: 10px; border: 1px solid rgba(150,235,250,0.2); background: rgba(150,235,250,0.06); color: #e6f4fa; font-family: inherit; font-size: 13.5px; font-weight: 500; cursor: pointer;">Активировать</button>
+          </div>
+
+          <div style="position: relative; padding: 24px; border-radius: 18px; border: 1px solid oklch(0.86 0.11 195 / 0.36); background: linear-gradient(170deg, oklch(0.6 0.13 200 / 0.24), rgba(150,235,250,0.03)); display: flex; flex-direction: column; box-shadow: 0 24px 60px -40px oklch(0.7 0.14 195 / 0.9);">
+            <div style="position: absolute; top: -10px; left: 24px; padding: 4px 10px; border-radius: 7px; background: linear-gradient(140deg, oklch(0.88 0.12 192), oklch(0.66 0.13 205)); font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: 0.12em; color: #04121f;">ТЕКУЩИЙ ТАРИФ</div>
+            <div style="display: flex; align-items: center; justify-content: space-between;">
+              <div style="width: 44px; height: 44px; border-radius: 13px; background: linear-gradient(150deg, oklch(0.72 0.13 198), oklch(0.44 0.12 215)); border: 1px solid rgba(190,250,255,0.4); display: grid; place-items: center; box-shadow: inset 0 1px 0 rgba(255,255,255,0.3);"><span style="width: 15px; height: 15px; border-radius: 4px; background: #eafcff;"></span></div>
+              <span style="font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.12em; color: rgba(214,238,248,0.72);">ПОПУЛЯРНЫЙ</span>
+            </div>
+            <div style="margin-top: 20px; font-size: 19px; font-weight: 600; letter-spacing: -0.02em;">Ядро</div>
+            <div style="margin-top: 14px; display: flex; align-items: baseline; gap: 7px;">
+              <span style="font-size: 30px; font-weight: 600; letter-spacing: -0.03em;">$1 100</span>
+              <span style="font-size: 12.5px; color: rgba(214,238,248,0.72);">заглушка</span>
+            </div>
+            <div style="height: 1px; background: rgba(150,235,250,0.16); margin: 20px 0;"></div>
+            <div style="display: flex; flex-direction: column; gap: 13px; font-size: 13px;">
+              <div style="display: flex; justify-content: space-between; gap: 14px;"><span style="color: rgba(214,238,248,0.74); min-width: 0;">Мощность</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">1 200 TFLOPS</span></div>
+              <div style="display: flex; justify-content: space-between; gap: 14px;"><span style="color: rgba(214,238,248,0.74); min-width: 0;">Срок</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">12 месяцев</span></div>
+              <div style="display: flex; justify-content: space-between; gap: 14px;"><span style="color: rgba(214,238,248,0.74); min-width: 0;">Оценка награды</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">~5,0 / день</span></div>
+              <div style="display: flex; justify-content: space-between; gap: 14px;"><span style="color: rgba(214,238,248,0.74); min-width: 0;">Инфраструктура</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">Приоритетный пул</span></div>
+            </div>
+            <div style="margin-top: 20px; height: 5px; border-radius: 3px; background: rgba(150,235,250,0.14);"><div style="width: 34%; height: 100%; border-radius: 3px; background: oklch(0.86 0.12 192);"></div></div>
+            <button style="margin-top: 22px; padding: 11px; border-radius: 10px; border: 1px solid oklch(0.86 0.11 195 / 0.5); background: linear-gradient(140deg, oklch(0.86 0.12 192), oklch(0.66 0.13 205)); color: #04121f; font-family: inherit; font-size: 13.5px; font-weight: 600; cursor: pointer;">Управлять тарифом</button>
+          </div>
+
+          <div style="padding: 24px; border-radius: 18px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.04); display: flex; flex-direction: column;">
+            <div style="display: flex; align-items: center; justify-content: space-between;">
+              <div style="position: relative; width: 58px; height: 44px;">
+                <div style="position: absolute; left: 0; top: 6px; width: 22px; height: 32px; border-radius: 8px; background: linear-gradient(150deg, #1e4a60, #0b2030); border: 1px solid rgba(150,235,250,0.22);"></div>
+                <div style="position: absolute; left: 18px; top: 0; width: 23px; height: 36px; border-radius: 9px; background: linear-gradient(150deg, #276076, #0d2637); border: 1px solid rgba(150,235,250,0.3); box-shadow: inset 0 1px 0 rgba(255,255,255,0.16);"></div>
+                <div style="position: absolute; left: 37px; top: 7px; width: 21px; height: 30px; border-radius: 8px; background: linear-gradient(150deg, #1e4a60, #0b2030); border: 1px solid rgba(150,235,250,0.22);"></div>
+              </div>
+              <span style="font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.12em; color: rgba(214,238,248,0.66);">МУЛЬТИ-ПОД</span>
+            </div>
+            <div style="margin-top: 20px; font-size: 19px; font-weight: 600; letter-spacing: -0.02em;">Кластер</div>
+            <div style="margin-top: 14px; display: flex; align-items: baseline; gap: 7px;">
+              <span style="font-size: 30px; font-weight: 600; letter-spacing: -0.03em;">$3 400</span>
+              <span style="font-size: 12.5px; color: rgba(214,238,248,0.7);">заглушка</span>
+            </div>
+            <div style="height: 1px; background: rgba(150,235,250,0.12); margin: 20px 0;"></div>
+            <div style="display: flex; flex-direction: column; gap: 13px; font-size: 13px;">
+              <div style="display: flex; justify-content: space-between; gap: 14px;"><span style="color: rgba(214,238,248,0.72); min-width: 0;">Мощность</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">4 000 TFLOPS</span></div>
+              <div style="display: flex; justify-content: space-between; gap: 14px;"><span style="color: rgba(214,238,248,0.72); min-width: 0;">Срок</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">12 месяцев</span></div>
+              <div style="display: flex; justify-content: space-between; gap: 14px;"><span style="color: rgba(214,238,248,0.72); min-width: 0;">Оценка награды</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">~18,8 / день</span></div>
+              <div style="display: flex; justify-content: space-between; gap: 14px;"><span style="color: rgba(214,238,248,0.72); min-width: 0;">Инфраструктура</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">Выделенные поды</span></div>
+            </div>
+            <div style="margin-top: 20px; height: 5px; border-radius: 3px; background: rgba(150,235,250,0.12);"><div style="width: 62%; height: 100%; border-radius: 3px; background: oklch(0.8 0.12 198);"></div></div>
+            <button style="margin-top: 22px; padding: 11px; border-radius: 10px; border: 1px solid rgba(150,235,250,0.2); background: rgba(150,235,250,0.06); color: #e6f4fa; font-family: inherit; font-size: 13.5px; font-weight: 500; cursor: pointer;">Улучшить</button>
+          </div>
+
+          <div style="padding: 24px; border-radius: 18px; border: 1px solid rgba(180,180,255,0.16); background: linear-gradient(170deg, rgba(120,110,220,0.13), rgba(150,235,250,0.02)); display: flex; flex-direction: column;">
+            <div style="display: flex; align-items: center; justify-content: space-between;">
+              <div style="width: 56px; height: 44px; border-radius: 11px; background: linear-gradient(160deg, #2a2a58, #0d1230); border: 1px solid rgba(180,180,255,0.3); padding: 7px; display: flex; flex-direction: column; gap: 5px;">
+                <div style="display: flex; align-items: center; gap: 5px;"><span style="width: 4px; height: 4px; border-radius: 50%; background: oklch(0.85 0.15 160);"></span><span style="flex: 1; height: 3px; border-radius: 2px; background: rgba(190,190,255,0.5);"></span></div>
+                <div style="display: flex; align-items: center; gap: 5px;"><span style="width: 4px; height: 4px; border-radius: 50%; background: oklch(0.78 0.15 292);"></span><span style="flex: 1; height: 3px; border-radius: 2px; background: rgba(190,190,255,0.4);"></span></div>
+                <div style="display: flex; align-items: center; gap: 5px;"><span style="width: 4px; height: 4px; border-radius: 50%; background: rgba(190,190,255,0.4);"></span><span style="flex: 1; height: 3px; border-radius: 2px; background: rgba(190,190,255,0.28);"></span></div>
+              </div>
+              <span style="font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.12em; color: rgba(214,238,248,0.66);">ИНДИВИДУАЛЬНО</span>
+            </div>
+            <div style="margin-top: 20px; font-size: 19px; font-weight: 600; letter-spacing: -0.02em;">Корпоративный</div>
+            <div style="margin-top: 14px; display: flex; align-items: baseline; gap: 7px;">
+              <span style="font-size: 30px; font-weight: 600; letter-spacing: -0.03em;">Индивидуально</span>
+            </div>
+            <div style="height: 1px; background: rgba(150,235,250,0.12); margin: 20px 0;"></div>
+            <div style="display: flex; flex-direction: column; gap: 13px; font-size: 13px;">
+              <div style="display: flex; justify-content: space-between; gap: 14px;"><span style="color: rgba(214,238,248,0.72); min-width: 0;">Мощность</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">10 000+ TFLOPS</span></div>
+              <div style="display: flex; justify-content: space-between; gap: 14px;"><span style="color: rgba(214,238,248,0.72); min-width: 0;">Срок</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">По договору</span></div>
+              <div style="display: flex; justify-content: space-between; gap: 14px;"><span style="color: rgba(214,238,248,0.72); min-width: 0;">Оценка награды</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">Расчётная</span></div>
+              <div style="display: flex; justify-content: space-between; gap: 14px;"><span style="color: rgba(214,238,248,0.72); min-width: 0;">Инфраструктура</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">Зарезервированные стойки</span></div>
+            </div>
+            <div style="margin-top: 20px; height: 5px; border-radius: 3px; background: rgba(150,235,250,0.12);"><div style="width: 100%; height: 100%; border-radius: 3px; background: linear-gradient(90deg, oklch(0.78 0.15 292), oklch(0.88 0.12 192));"></div></div>
+            <button style="margin-top: 22px; padding: 11px; border-radius: 10px; border: 1px solid rgba(180,180,255,0.28); background: rgba(150,140,255,0.1); color: #e6f4fa; font-family: inherit; font-size: 13.5px; font-weight: 500; cursor: pointer;">Связаться с продажами</button>
+          </div>
+        </div>
+
+        <div style="padding: 26px 28px; border-radius: 18px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.035); display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 340px); gap: 40px; align-items: center;">
+          <div>
+            <div style="display: flex; align-items: baseline; gap: 12px;">
+              <span style="font-size: 17px; font-weight: 600;">Калькулятор награды</span>
+              <span style="font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.12em; color: rgba(214,238,248,0.66);">КОНТРАКТ 12 МЕСЯЦЕВ</span>
+            </div>
+            <div style="margin-top: 22px; display: flex; align-items: baseline; justify-content: space-between;">
+              <span style="font-size: 13.5px; color: rgba(214,238,248,0.74);">Выберите мощность</span>
+              <span style="font-family: 'JetBrains Mono', monospace; font-size: 19px; color: #f0fbff;">{{ powerLabel }} <span style="font-size: 12px; color: rgba(214,238,248,0.7);">TFLOPS</span></span>
+            </div>
+            <input type="range" min="100" max="10000" step="100" value="{{ power }}" onChange="{{ onPower }}" style="width: 100%; margin-top: 16px; height: 4px; cursor: pointer;" />
+            <div style="display: flex; justify-content: space-between; margin-top: 8px; font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.1em; color: rgba(214,238,248,0.62);"><span>100</span><span>2 500</span><span>5 000</span><span>10 000</span></div>
+            <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-top: 26px;">
+              <div style="padding: 16px; border-radius: 13px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.04);">
+                <div style="font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.12em; color: rgba(214,238,248,0.68);">ЗА ДЕНЬ</div>
+                <div style="margin-top: 10px; font-family: 'JetBrains Mono', monospace; font-size: 18px; color: #f0fbff;">{{ daily }}</div>
+              </div>
+              <div style="padding: 16px; border-radius: 13px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.04);">
+                <div style="font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.12em; color: rgba(214,238,248,0.68);">ЗА МЕСЯЦ</div>
+                <div style="margin-top: 10px; font-family: 'JetBrains Mono', monospace; font-size: 18px; color: #f0fbff;">{{ monthly }}</div>
+              </div>
+              <div style="padding: 16px; border-radius: 13px; border: 1px solid oklch(0.86 0.11 195 / 0.3); background: oklch(0.6 0.13 200 / 0.18);">
+                <div style="font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.12em; color: rgba(214,238,248,0.75);">ЗА ГОД</div>
+                <div style="margin-top: 10px; font-family: 'JetBrains Mono', monospace; font-size: 18px; color: oklch(0.9 0.12 192);">{{ yearly }}</div>
+              </div>
+            </div>
+          </div>
+          <div style="padding: 24px; border-radius: 16px; border: 1px solid rgba(150,235,250,0.14); background: linear-gradient(170deg, rgba(20,55,80,0.7), rgba(6,20,35,0.85));">
+            <div style="font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.14em; color: rgba(214,238,248,0.7);">ПОДХОДЯЩИЙ ТАРИФ</div>
+            <div style="margin-top: 12px; font-size: 22px; font-weight: 600; letter-spacing: -0.02em;">{{ planName }}</div>
+            <div style="height: 1px; background: rgba(150,235,250,0.14); margin: 20px 0;"></div>
+            <div style="display: flex; flex-direction: column; gap: 12px; font-size: 13px;">
+              <div style="display: flex; justify-content: space-between; gap: 14px;"><span style="color: rgba(214,238,248,0.72); min-width: 0;">Инфраструктура</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">{{ planInfra }}</span></div>
+              <div style="display: flex; justify-content: space-between; gap: 14px;"><span style="color: rgba(214,238,248,0.72); min-width: 0;">Ориентировочная цена</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">{{ planPrice }}</span></div>
+              <div style="display: flex; justify-content: space-between; gap: 14px;"><span style="color: rgba(214,238,248,0.72); min-width: 0;">Токен награды</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">{{ symbol }}</span></div>
+            </div>
+            <button style="width: 100%; margin-top: 22px; padding: 12px; border-radius: 10px; border: 1px solid oklch(0.86 0.11 195 / 0.5); background: linear-gradient(140deg, oklch(0.86 0.12 192), oklch(0.66 0.13 205)); color: #04121f; font-family: inherit; font-size: 13.5px; font-weight: 600; cursor: pointer;">Активировать мощность</button>
+            <p style="margin: 16px 0 0; font-size: 11.5px; line-height: 1.5; color: rgba(214,238,248,0.66);">Оценка построена на текущей загрузке сети. Награды меняются вместе со спросом — доходность не гарантирована.</p>
+          </div>
+        </div>
+      </section>
+    </sc-if>
+
+    <sc-if value="{{ at2 }}" hint-placeholder-val="{{ false }}">
+      <section data-screen-label="Контракты" style="padding: 28px 32px 40px; display: flex; flex-direction: column; gap: 16px;">
+        <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px;">
+          <div style="padding: 20px; border-radius: 16px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.04);">
+            <div style="font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.14em; color: rgba(214,238,248,0.7);">АКТИВНЫЕ КОНТРАКТЫ</div>
+            <div style="margin-top: 12px; font-family: 'JetBrains Mono', monospace; font-size: 24px; color: #f0fbff;">2</div>
+          </div>
+          <div style="padding: 20px; border-radius: 16px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.04);">
+            <div style="font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.14em; color: rgba(214,238,248,0.7);">ВСЕГО ВЫДЕЛЕНО</div>
+            <div style="margin-top: 12px; font-family: 'JetBrains Mono', monospace; font-size: 24px; color: #f0fbff;">1 450 TF</div>
+          </div>
+          <div style="padding: 20px; border-radius: 16px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.04);">
+            <div style="font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.14em; color: rgba(214,238,248,0.7);">НАГРАД ЗА ВСЁ ВРЕМЯ</div>
+            <div style="margin-top: 12px; font-family: 'JetBrains Mono', monospace; font-size: 24px; color: oklch(0.9 0.12 192);">1 370,20</div>
+          </div>
+          <div style="padding: 20px; border-radius: 16px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.04);">
+            <div style="font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.14em; color: rgba(214,238,248,0.7);">БЛИЖАЙШЕЕ ОКОНЧАНИЕ</div>
+            <div style="margin-top: 12px; font-family: 'JetBrains Mono', monospace; font-size: 24px; color: #f0fbff;">4 дек</div>
+          </div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 14px;">
+          <div style="padding: 24px; border-radius: 16px; border: 1px solid oklch(0.86 0.11 195 / 0.26); background: linear-gradient(170deg, oklch(0.6 0.13 200 / 0.16), rgba(150,235,250,0.03));">
+            <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 24px; flex-wrap: wrap;">
+              <div style="display: flex; align-items: center; gap: 16px; min-width: 0;">
+                <div style="width: 46px; height: 46px; flex: none; border-radius: 13px; background: linear-gradient(150deg, oklch(0.72 0.13 198), oklch(0.44 0.12 215)); border: 1px solid rgba(190,250,255,0.35); display: grid; place-items: center;"><span style="width: 15px; height: 15px; border-radius: 4px; background: #eafcff;"></span></div>
+                <div>
+                  <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 16.5px; font-weight: 600;">Контракт Ядро</span>
+                    <span style="padding: 3px 9px; border-radius: 6px; background: oklch(0.6 0.14 160 / 0.2); border: 1px solid oklch(0.7 0.14 160 / 0.4); font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.1em; color: oklch(0.88 0.14 160);">АКТИВЕН</span>
+                  </div>
+                  <div style="margin-top: 5px; font-family: 'JetBrains Mono', monospace; font-size: 11.5px; color: rgba(214,238,248,0.7);">CTR-20914-A · FRA-02, IAD-01</div>
+                </div>
+              </div>
+              <div style="display: flex; gap: 8px;">
+                <button style="padding: 10px 16px; border-radius: 10px; border: 1px solid rgba(150,235,250,0.2); background: rgba(150,235,250,0.06); color: #e6f4fa; font-family: inherit; font-size: 13px; font-weight: 500; cursor: pointer;">Подробнее</button>
+                <button onClick="{{ nav1 }}" style="padding: 10px 16px; border-radius: 10px; border: 1px solid oklch(0.86 0.11 195 / 0.5); background: linear-gradient(140deg, oklch(0.86 0.12 192), oklch(0.66 0.13 205)); color: #04121f; font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer;">Улучшить</button>
+              </div>
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 20px; margin-top: 24px;">
+              <div><div style="font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.12em; color: rgba(214,238,248,0.68);">ДАТА СТАРТА</div><div style="margin-top: 9px; font-size: 14px;">8 июн 2026</div></div>
+              <div><div style="font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.12em; color: rgba(214,238,248,0.68);">СРОК</div><div style="margin-top: 9px; font-size: 14px;">180 дней</div></div>
+              <div><div style="font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.12em; color: rgba(214,238,248,0.68);">МОЩНОСТЬ</div><div style="margin-top: 9px; font-size: 14px;">1 200 TFLOPS</div></div>
+              <div><div style="font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.12em; color: rgba(214,238,248,0.68);">НАЧИСЛЕНО</div><div style="margin-top: 9px; font-size: 14px; color: oklch(0.9 0.12 192);">1 214,80</div></div>
+              <div><div style="font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.12em; color: rgba(214,238,248,0.68);">ОКОНЧАНИЕ</div><div style="margin-top: 9px; font-size: 14px;">4 дек 2026</div></div>
+            </div>
+            <div style="margin-top: 24px;">
+              <div style="display: flex; justify-content: space-between; font-size: 12.5px; color: rgba(214,238,248,0.74);"><span>Прогресс контракта</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">83 / 180 дней</span></div>
+              <div style="margin-top: 10px; height: 6px; border-radius: 4px; background: rgba(150,235,250,0.12);"><div style="width: 46%; height: 100%; border-radius: 4px; background: linear-gradient(90deg, oklch(0.72 0.11 215), oklch(0.88 0.12 192));"></div></div>
+            </div>
+          </div>
+
+          <div style="padding: 24px; border-radius: 16px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.035);">
+            <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 24px; flex-wrap: wrap;">
+              <div style="display: flex; align-items: center; gap: 16px; min-width: 0;">
+                <div style="width: 46px; height: 46px; flex: none; border-radius: 13px; background: linear-gradient(150deg, #1a4055, #0b2030); border: 1px solid rgba(150,235,250,0.22); display: grid; place-items: center;"><span style="width: 15px; height: 15px; border-radius: 4px; background: oklch(0.7 0.1 200);"></span></div>
+                <div>
+                  <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 16.5px; font-weight: 600;">Контракт Узел</span>
+                    <span style="padding: 3px 9px; border-radius: 6px; background: oklch(0.6 0.14 160 / 0.2); border: 1px solid oklch(0.7 0.14 160 / 0.4); font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.1em; color: oklch(0.88 0.14 160);">АКТИВЕН</span>
+                  </div>
+                  <div style="margin-top: 5px; font-family: 'JetBrains Mono', monospace; font-size: 11.5px; color: rgba(214,238,248,0.7);">CTR-20802-B · SIN-03</div>
+                </div>
+              </div>
+              <div style="display: flex; gap: 8px;">
+                <button style="padding: 10px 16px; border-radius: 10px; border: 1px solid rgba(150,235,250,0.2); background: rgba(150,235,250,0.06); color: #e6f4fa; font-family: inherit; font-size: 13px; font-weight: 500; cursor: pointer;">Подробнее</button>
+                <button onClick="{{ nav1 }}" style="padding: 10px 16px; border-radius: 10px; border: 1px solid rgba(150,235,250,0.2); background: rgba(150,235,250,0.06); color: #e6f4fa; font-family: inherit; font-size: 13px; font-weight: 500; cursor: pointer;">Улучшить</button>
+              </div>
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 20px; margin-top: 24px;">
+              <div><div style="font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.12em; color: rgba(214,238,248,0.68);">ДАТА СТАРТА</div><div style="margin-top: 9px; font-size: 14px;">2 апр 2026</div></div>
+              <div><div style="font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.12em; color: rgba(214,238,248,0.68);">СРОК</div><div style="margin-top: 9px; font-size: 14px;">90 дней</div></div>
+              <div><div style="font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.12em; color: rgba(214,238,248,0.68);">МОЩНОСТЬ</div><div style="margin-top: 9px; font-size: 14px;">250 TFLOPS</div></div>
+              <div><div style="font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.12em; color: rgba(214,238,248,0.68);">НАЧИСЛЕНО</div><div style="margin-top: 9px; font-size: 14px; color: oklch(0.9 0.12 192);">155,40</div></div>
+              <div><div style="font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.12em; color: rgba(214,238,248,0.68);">ОКОНЧАНИЕ</div><div style="margin-top: 9px; font-size: 14px;">30 сен 2026</div></div>
+            </div>
+            <div style="margin-top: 24px;">
+              <div style="display: flex; justify-content: space-between; font-size: 12.5px; color: rgba(214,238,248,0.74);"><span>Прогресс контракта</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">65 / 90 дней</span></div>
+              <div style="margin-top: 10px; height: 6px; border-radius: 4px; background: rgba(150,235,250,0.12);"><div style="width: 72%; height: 100%; border-radius: 4px; background: linear-gradient(90deg, oklch(0.72 0.11 215), oklch(0.88 0.12 192));"></div></div>
+            </div>
+          </div>
+
+          <div style="padding: 24px; border-radius: 16px; border: 1px dashed rgba(150,235,250,0.2); background: rgba(150,235,250,0.02); display: flex; align-items: center; justify-content: space-between; gap: 24px; flex-wrap: wrap;">
+            <div>
+              <div style="font-size: 15px; font-weight: 600;">Завершённый контракт · Узел</div>
+              <div style="margin-top: 5px; font-family: 'JetBrains Mono', monospace; font-size: 11.5px; color: rgba(214,238,248,0.7);">CTR-19640-C · 250 TFLOPS · завершён 12 мар 2026 · начислено 148,60</div>
+            </div>
+            <button style="padding: 10px 16px; border-radius: 10px; border: 1px solid rgba(150,235,250,0.2); background: rgba(150,235,250,0.06); color: #e6f4fa; font-family: inherit; font-size: 13px; font-weight: 500; cursor: pointer;">Продлить</button>
+          </div>
+        </div>
+      </section>
+    </sc-if>
+
+    <sc-if value="{{ at3 }}" hint-placeholder-val="{{ false }}">
+      <section data-screen-label="Статистика" style="padding: 28px 32px 40px; display: flex; flex-direction: column; gap: 16px;">
+        <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+          <button onClick="{{ period0 }}" style="position: relative; padding: 10px 20px; border-radius: 10px; border: 1px solid rgba(150,235,250,0.16); background: rgba(150,235,250,0.04); color: #e6f4fa; font-family: inherit; font-size: 13px; cursor: pointer;">
+            <sc-if value="{{ p0 }}" hint-placeholder-val="{{ false }}"><span style="position: absolute; inset: -1px; border-radius: 10px; border: 1px solid oklch(0.86 0.11 195 / 0.6); background: oklch(0.6 0.13 200 / 0.22); pointer-events: none;"></span></sc-if>
+            <span style="position: relative;">За день</span>
+          </button>
+          <button onClick="{{ period1 }}" style="position: relative; padding: 10px 20px; border-radius: 10px; border: 1px solid rgba(150,235,250,0.16); background: rgba(150,235,250,0.04); color: #e6f4fa; font-family: inherit; font-size: 13px; cursor: pointer;">
+            <sc-if value="{{ p1 }}" hint-placeholder-val="{{ true }}"><span style="position: absolute; inset: -1px; border-radius: 10px; border: 1px solid oklch(0.86 0.11 195 / 0.6); background: oklch(0.6 0.13 200 / 0.22); pointer-events: none;"></span></sc-if>
+            <span style="position: relative;">За неделю</span>
+          </button>
+          <button onClick="{{ period2 }}" style="position: relative; padding: 10px 20px; border-radius: 10px; border: 1px solid rgba(150,235,250,0.16); background: rgba(150,235,250,0.04); color: #e6f4fa; font-family: inherit; font-size: 13px; cursor: pointer;">
+            <sc-if value="{{ p2 }}" hint-placeholder-val="{{ false }}"><span style="position: absolute; inset: -1px; border-radius: 10px; border: 1px solid oklch(0.86 0.11 195 / 0.6); background: oklch(0.6 0.13 200 / 0.22); pointer-events: none;"></span></sc-if>
+            <span style="position: relative;">За месяц</span>
+          </button>
+          <div style="flex: 1;"></div>
+          <button style="padding: 10px 18px; border-radius: 10px; border: 1px solid rgba(150,235,250,0.2); background: rgba(150,235,250,0.06); color: #e6f4fa; font-family: inherit; font-size: 13px; cursor: pointer;">Экспорт CSV</button>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px;">
+          <div style="padding: 20px; border-radius: 16px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.04);">
+            <div style="font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.14em; color: rgba(214,238,248,0.7);">НАГРАДЫ {{ periodLabel }}</div>
+            <div style="margin-top: 12px; font-family: 'JetBrains Mono', monospace; font-size: 24px; color: #f0fbff;">{{ periodTotal }}</div>
+            <div style="margin-top: 7px; font-size: 12px; color: rgba(214,238,248,0.7);">{{ symbol }} · начислено</div>
+          </div>
+          <div style="padding: 20px; border-radius: 16px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.04);">
+            <div style="font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.14em; color: rgba(214,238,248,0.7);">СРЕДНЕЕ ЗА ЭПОХУ</div>
+            <div style="margin-top: 12px; font-family: 'JetBrains Mono', monospace; font-size: 24px; color: #f0fbff;">1,68</div>
+            <div style="margin-top: 7px; font-size: 12px; color: rgba(214,238,248,0.7);">3 эпохи в сутки</div>
+          </div>
+          <div style="padding: 20px; border-radius: 16px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.04);">
+            <div style="font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.14em; color: rgba(214,238,248,0.7);">ДОСТУПНОСТЬ</div>
+            <div style="margin-top: 12px; font-family: 'JetBrains Mono', monospace; font-size: 24px; color: #f0fbff;">99.98%</div>
+            <div style="margin-top: 7px; font-size: 12px; color: rgba(214,238,248,0.7);">Ваши выделенные узлы</div>
+          </div>
+          <div style="padding: 20px; border-radius: 16px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.04);">
+            <div style="font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.14em; color: rgba(214,238,248,0.7);">ЗАГРУЗКА</div>
+            <div style="margin-top: 12px; font-family: 'JetBrains Mono', monospace; font-size: 24px; color: #f0fbff;">90.2%</div>
+            <div style="margin-top: 7px; font-size: 12px; color: rgba(214,238,248,0.7);">Мощность на активных задачах</div>
+          </div>
+        </div>
+
+        <div style="padding: 24px; border-radius: 16px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.035);">
+          <div style="display: flex; align-items: baseline; justify-content: space-between;">
+            <span style="font-size: 15px; font-weight: 600;">Динамика наград</span>
+            <span style="font-family: 'JetBrains Mono', monospace; font-size: 10.5px; color: rgba(214,238,248,0.66);">{{ symbol }} · {{ periodLabel }}</span>
+          </div>
+          <div style="display: flex; align-items: flex-end; gap: 6px; height: 210px; margin-top: 26px;">
+            <div style="flex: 1; height: 28%; border-radius: 4px 4px 2px 2px; background: linear-gradient(180deg, oklch(0.72 0.11 210 / 0.75), oklch(0.72 0.11 210 / 0.1));"></div>
+            <div style="flex: 1; height: 36%; border-radius: 4px 4px 2px 2px; background: linear-gradient(180deg, oklch(0.72 0.11 210 / 0.75), oklch(0.72 0.11 210 / 0.1));"></div>
+            <div style="flex: 1; height: 31%; border-radius: 4px 4px 2px 2px; background: linear-gradient(180deg, oklch(0.72 0.11 210 / 0.75), oklch(0.72 0.11 210 / 0.1));"></div>
+            <div style="flex: 1; height: 44%; border-radius: 4px 4px 2px 2px; background: linear-gradient(180deg, oklch(0.72 0.11 210 / 0.75), oklch(0.72 0.11 210 / 0.1));"></div>
+            <div style="flex: 1; height: 39%; border-radius: 4px 4px 2px 2px; background: linear-gradient(180deg, oklch(0.74 0.11 206 / 0.8), oklch(0.74 0.11 206 / 0.1));"></div>
+            <div style="flex: 1; height: 52%; border-radius: 4px 4px 2px 2px; background: linear-gradient(180deg, oklch(0.74 0.11 206 / 0.8), oklch(0.74 0.11 206 / 0.1));"></div>
+            <div style="flex: 1; height: 47%; border-radius: 4px 4px 2px 2px; background: linear-gradient(180deg, oklch(0.74 0.11 206 / 0.8), oklch(0.74 0.11 206 / 0.1));"></div>
+            <div style="flex: 1; height: 61%; border-radius: 4px 4px 2px 2px; background: linear-gradient(180deg, oklch(0.78 0.12 200 / 0.85), oklch(0.78 0.12 200 / 0.12));"></div>
+            <div style="flex: 1; height: 56%; border-radius: 4px 4px 2px 2px; background: linear-gradient(180deg, oklch(0.78 0.12 200 / 0.85), oklch(0.78 0.12 200 / 0.12));"></div>
+            <div style="flex: 1; height: 68%; border-radius: 4px 4px 2px 2px; background: linear-gradient(180deg, oklch(0.8 0.12 198 / 0.9), oklch(0.8 0.12 198 / 0.12));"></div>
+            <div style="flex: 1; height: 63%; border-radius: 4px 4px 2px 2px; background: linear-gradient(180deg, oklch(0.8 0.12 198 / 0.9), oklch(0.8 0.12 198 / 0.12));"></div>
+            <div style="flex: 1; height: 74%; border-radius: 4px 4px 2px 2px; background: linear-gradient(180deg, oklch(0.84 0.12 195), oklch(0.84 0.12 195 / 0.14));"></div>
+            <div style="flex: 1; height: 71%; border-radius: 4px 4px 2px 2px; background: linear-gradient(180deg, oklch(0.84 0.12 195), oklch(0.84 0.12 195 / 0.14));"></div>
+            <div style="flex: 1; height: 82%; border-radius: 4px 4px 2px 2px; background: linear-gradient(180deg, oklch(0.86 0.12 193), oklch(0.86 0.12 193 / 0.16));"></div>
+            <div style="flex: 1; height: 78%; border-radius: 4px 4px 2px 2px; background: linear-gradient(180deg, oklch(0.86 0.12 193), oklch(0.86 0.12 193 / 0.16));"></div>
+            <div style="flex: 1; height: 88%; border-radius: 4px 4px 2px 2px; background: linear-gradient(180deg, oklch(0.88 0.12 192), oklch(0.88 0.12 192 / 0.18));"></div>
+            <div style="flex: 1; height: 84%; border-radius: 4px 4px 2px 2px; background: linear-gradient(180deg, oklch(0.88 0.12 192), oklch(0.88 0.12 192 / 0.18));"></div>
+            <div style="flex: 1; height: 94%; border-radius: 4px 4px 2px 2px; background: linear-gradient(180deg, oklch(0.9 0.12 192), oklch(0.9 0.12 192 / 0.2));"></div>
+            <div style="flex: 1; height: 89%; border-radius: 4px 4px 2px 2px; background: linear-gradient(180deg, oklch(0.9 0.12 192), oklch(0.9 0.12 192 / 0.2));"></div>
+            <div style="flex: 1; height: 100%; border-radius: 4px 4px 2px 2px; background: linear-gradient(180deg, #eafcff, oklch(0.88 0.12 192 / 0.22)); box-shadow: 0 0 26px oklch(0.88 0.12 192 / 0.45);"></div>
+          </div>
+          <div style="display: flex; justify-content: space-between; margin-top: 14px; font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.1em; color: rgba(214,238,248,0.62);"><span>W1</span><span>W5</span><span>W10</span><span>W15</span><span>W20</span></div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px;">
+          <div style="padding: 22px; border-radius: 16px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.035);">
+            <span style="font-size: 15px; font-weight: 600;">По типу задач</span>
+            <div style="display: flex; height: 10px; border-radius: 6px; overflow: hidden; margin-top: 20px;">
+              <div style="width: 42%; background: oklch(0.86 0.12 192);"></div>
+              <div style="width: 31%; background: oklch(0.72 0.11 215);"></div>
+              <div style="width: 17%; background: oklch(0.7 0.15 292);"></div>
+              <div style="width: 10%; background: rgba(214,238,248,0.2);"></div>
+            </div>
+            <div style="margin-top: 20px; display: flex; flex-direction: column; gap: 12px; font-size: 13px;">
+              <div style="display: flex; justify-content: space-between;"><span style="display: flex; align-items: center; gap: 8px; color: rgba(214,238,248,0.78);"><span style="width: 8px; height: 8px; border-radius: 2px; background: oklch(0.86 0.12 192);"></span>Обучение</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">42%</span></div>
+              <div style="display: flex; justify-content: space-between;"><span style="display: flex; align-items: center; gap: 8px; color: rgba(214,238,248,0.78);"><span style="width: 8px; height: 8px; border-radius: 2px; background: oklch(0.72 0.11 215);"></span>Инференс</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">31%</span></div>
+              <div style="display: flex; justify-content: space-between;"><span style="display: flex; align-items: center; gap: 8px; color: rgba(214,238,248,0.78);"><span style="width: 8px; height: 8px; border-radius: 2px; background: oklch(0.7 0.15 292);"></span>Генерация</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">17%</span></div>
+              <div style="display: flex; justify-content: space-between;"><span style="display: flex; align-items: center; gap: 8px; color: rgba(214,238,248,0.78);"><span style="width: 8px; height: 8px; border-radius: 2px; background: rgba(214,238,248,0.2);"></span>Исследования</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">10%</span></div>
+            </div>
+          </div>
+
+          <div style="padding: 22px; border-radius: 16px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.035);">
+            <span style="font-size: 15px; font-weight: 600;">По дата-центрам</span>
+            <div style="margin-top: 20px; display: flex; flex-direction: column; gap: 16px;">
+              <div>
+                <div style="display: flex; justify-content: space-between; font-size: 13px;"><span style="color: rgba(214,238,248,0.78);">Франкфурт · FRA-02</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">53%</span></div>
+                <div style="margin-top: 9px; height: 4px; border-radius: 3px; background: rgba(150,235,250,0.12);"><div style="width: 53%; height: 100%; border-radius: 3px; background: oklch(0.86 0.12 192);"></div></div>
+              </div>
+              <div>
+                <div style="display: flex; justify-content: space-between; font-size: 13px;"><span style="color: rgba(214,238,248,0.78);">Ашберн · IAD-01</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">30%</span></div>
+                <div style="margin-top: 9px; height: 4px; border-radius: 3px; background: rgba(150,235,250,0.12);"><div style="width: 30%; height: 100%; border-radius: 3px; background: oklch(0.72 0.11 215);"></div></div>
+              </div>
+              <div>
+                <div style="display: flex; justify-content: space-between; font-size: 13px;"><span style="color: rgba(214,238,248,0.78);">Сингапур · SIN-03</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">17%</span></div>
+                <div style="margin-top: 9px; height: 4px; border-radius: 3px; background: rgba(150,235,250,0.12);"><div style="width: 17%; height: 100%; border-radius: 3px; background: oklch(0.7 0.15 292);"></div></div>
+              </div>
+            </div>
+          </div>
+
+          <div style="padding: 22px; border-radius: 16px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.035);">
+            <span style="font-size: 15px; font-weight: 600;">История наград</span>
+            <div style="margin-top: 18px; display: flex; flex-direction: column;">
+              <div style="display: flex; justify-content: space-between; padding: 11px 0; border-bottom: 1px solid rgba(150,235,250,0.07); font-size: 13px;"><span style="color: rgba(214,238,248,0.78);">8 сен · эпоха 20 914</span><span style="font-family: 'JetBrains Mono', monospace; color: oklch(0.88 0.12 192);">+1,71</span></div>
+              <div style="display: flex; justify-content: space-between; padding: 11px 0; border-bottom: 1px solid rgba(150,235,250,0.07); font-size: 13px;"><span style="color: rgba(214,238,248,0.78);">8 сен · эпоха 20 913</span><span style="font-family: 'JetBrains Mono', monospace; color: oklch(0.88 0.12 192);">+1,68</span></div>
+              <div style="display: flex; justify-content: space-between; padding: 11px 0; border-bottom: 1px solid rgba(150,235,250,0.07); font-size: 13px;"><span style="color: rgba(214,238,248,0.78);">7 сен · эпоха 20 912</span><span style="font-family: 'JetBrains Mono', monospace; color: oklch(0.88 0.12 192);">+1,65</span></div>
+              <div style="display: flex; justify-content: space-between; padding: 11px 0; border-bottom: 1px solid rgba(150,235,250,0.07); font-size: 13px;"><span style="color: rgba(214,238,248,0.78);">7 сен · эпоха 20 911</span><span style="font-family: 'JetBrains Mono', monospace; color: oklch(0.88 0.12 192);">+1,70</span></div>
+              <div style="display: flex; justify-content: space-between; padding: 11px 0; font-size: 13px;"><span style="color: rgba(214,238,248,0.78);">6 сен · эпоха 20 910</span><span style="font-family: 'JetBrains Mono', monospace; color: oklch(0.88 0.12 192);">+1,66</span></div>
+            </div>
+            <button style="width: 100%; margin-top: 18px; padding: 10px; border-radius: 10px; border: 1px solid rgba(150,235,250,0.2); background: rgba(150,235,250,0.06); color: #e6f4fa; font-family: inherit; font-size: 13px; cursor: pointer;">Вся история</button>
+          </div>
+        </div>
+      </section>
+    </sc-if>
+
+    <sc-if value="{{ at4 }}" hint-placeholder-val="{{ false }}">
+      <section data-screen-label="Кошелёк" style="padding: 28px 32px 40px; display: flex; flex-direction: column; gap: 16px;">
+        <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px;">
+          <div style="padding: 24px; border-radius: 16px; border: 1px solid oklch(0.86 0.11 195 / 0.26); background: linear-gradient(170deg, oklch(0.6 0.13 200 / 0.2), rgba(150,235,250,0.03));">
+            <div style="font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.14em; color: rgba(214,238,248,0.75);">ОБЩИЙ БАЛАНС</div>
+            <div style="margin-top: 14px; font-family: 'JetBrains Mono', monospace; font-size: 30px; color: #f0fbff;">1 482,60</div>
+            <div style="margin-top: 7px; font-size: 12.5px; color: rgba(214,238,248,0.75);">{{ symbol }} · ≈ $2 964 (заглушка)</div>
+          </div>
+          <div style="padding: 24px; border-radius: 16px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.04);">
+            <div style="font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.14em; color: rgba(214,238,248,0.7);">ДОСТУПНО К ВЫВОДУ</div>
+            <div style="margin-top: 14px; font-family: 'JetBrains Mono', monospace; font-size: 30px; color: #f0fbff;">1 362,60</div>
+            <div style="margin-top: 7px; font-size: 12.5px; color: rgba(214,238,248,0.7);">Начислено и разблокировано</div>
+          </div>
+          <div style="padding: 24px; border-radius: 16px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.04);">
+            <div style="font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.14em; color: rgba(214,238,248,0.7);">ОЖИДАЕТ РАСЧЁТА</div>
+            <div style="margin-top: 14px; font-family: 'JetBrains Mono', monospace; font-size: 30px; color: #f0fbff;">120,00</div>
+            <div style="margin-top: 7px; font-size: 12.5px; color: rgba(214,238,248,0.7);">Зачислится в след. эпоху · 02:14:38</div>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.1fr); gap: 16px;">
+          <div style="padding: 24px; border-radius: 16px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.035);">
+            <div style="font-size: 15px; font-weight: 600;">Пополнить</div>
+            <div style="margin-top: 5px; font-size: 12.5px; color: rgba(214,238,248,0.7);">Пополните, чтобы активировать больше мощности</div>
+            <div style="margin-top: 20px; font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.12em; color: rgba(214,238,248,0.68);">СУММА</div>
+            <div style="margin-top: 9px; padding: 13px 15px; border-radius: 11px; border: 1px solid rgba(150,235,250,0.16); background: rgba(4,16,28,0.6); display: flex; justify-content: space-between; font-family: 'JetBrains Mono', monospace; font-size: 15px;">
+              <span style="color: rgba(214,238,248,0.6);">0,00</span><span style="color: rgba(214,238,248,0.78);">{{ symbol }}</span>
+            </div>
+            <div style="display: flex; gap: 7px; margin-top: 12px;">
+              <span style="padding: 6px 12px; border-radius: 8px; border: 1px solid rgba(150,235,250,0.16); font-family: 'JetBrains Mono', monospace; font-size: 11px; color: rgba(214,238,248,0.78);">100</span>
+              <span style="padding: 6px 12px; border-radius: 8px; border: 1px solid rgba(150,235,250,0.16); font-family: 'JetBrains Mono', monospace; font-size: 11px; color: rgba(214,238,248,0.78);">500</span>
+              <span style="padding: 6px 12px; border-radius: 8px; border: 1px solid rgba(150,235,250,0.16); font-family: 'JetBrains Mono', monospace; font-size: 11px; color: rgba(214,238,248,0.78);">1 000</span>
+            </div>
+            <button style="width: 100%; margin-top: 20px; padding: 12px; border-radius: 10px; border: 1px solid oklch(0.86 0.11 195 / 0.5); background: linear-gradient(140deg, oklch(0.86 0.12 192), oklch(0.66 0.13 205)); color: #04121f; font-family: inherit; font-size: 13.5px; font-weight: 600; cursor: pointer;">Перейти к пополнению</button>
+          </div>
+
+          <div style="padding: 24px; border-radius: 16px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.035);">
+            <div style="font-size: 15px; font-weight: 600;">Вывести</div>
+            <div style="margin-top: 5px; font-size: 12.5px; color: rgba(214,238,248,0.7);">Отправьте начисленные награды на свой адрес</div>
+            <div style="margin-top: 20px; font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.12em; color: rgba(214,238,248,0.68);">СУММА</div>
+            <div style="margin-top: 9px; padding: 13px 15px; border-radius: 11px; border: 1px solid rgba(150,235,250,0.16); background: rgba(4,16,28,0.6); display: flex; justify-content: space-between; font-family: 'JetBrains Mono', monospace; font-size: 15px;">
+              <span style="color: rgba(214,238,248,0.6);">0,00</span><span style="color: oklch(0.88 0.11 195);">МАКС</span>
+            </div>
+            <div style="margin-top: 16px; display: flex; flex-direction: column; gap: 11px; font-size: 12.5px;">
+              <div style="display: flex; justify-content: space-between; gap: 14px;"><span style="color: rgba(214,238,248,0.72); min-width: 0;">Комиссия сети</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">0,40 {{ symbol }}</span></div>
+              <div style="display: flex; justify-content: space-between; gap: 14px;"><span style="color: rgba(214,238,248,0.72); min-width: 0;">Срок обработки</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">~2 ч</span></div>
+            </div>
+            <button style="width: 100%; margin-top: 20px; padding: 12px; border-radius: 10px; border: 1px solid rgba(150,235,250,0.2); background: rgba(150,235,250,0.06); color: #e6f4fa; font-family: inherit; font-size: 13.5px; font-weight: 500; cursor: pointer;">Запросить вывод</button>
+          </div>
+
+          <div style="padding: 24px; border-radius: 16px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.035);">
+            <div style="font-size: 15px; font-weight: 600;">Реквизиты выплат</div>
+            <div style="margin-top: 5px; font-size: 12.5px; color: rgba(214,238,248,0.7);">Только адреса из белого списка</div>
+            <div style="margin-top: 20px; padding: 14px 16px; border-radius: 12px; border: 1px dashed rgba(150,235,250,0.22); background: rgba(150,235,250,0.03);">
+              <div style="font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.12em; color: rgba(214,238,248,0.68);">ОСНОВНОЙ КОШЕЛЁК</div>
+              <div style="margin-top: 9px; font-family: 'JetBrains Mono', monospace; font-size: 13px; color: #eafcff; word-break: break-all;">0x7c4b…9a4f</div>
+              <div style="margin-top: 9px; display: flex; align-items: center; gap: 7px; font-family: 'JetBrains Mono', monospace; font-size: 10.5px; color: oklch(0.88 0.14 160);"><span style="width: 6px; height: 6px; border-radius: 50%; background: oklch(0.85 0.15 160);"></span>ПОДТВЕРЖДЁН</div>
+            </div>
+            <div style="margin-top: 14px; display: flex; flex-direction: column; gap: 11px; font-size: 12.5px;">
+              <div style="display: flex; justify-content: space-between; gap: 14px;"><span style="color: rgba(214,238,248,0.72); min-width: 0;">Сеть</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">Сеть-заглушка</span></div>
+              <div style="display: flex; justify-content: space-between; gap: 14px;"><span style="color: rgba(214,238,248,0.72); min-width: 0;">Мин. вывод</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">10,00 {{ symbol }}</span></div>
+            </div>
+            <button onClick="{{ nav6 }}" style="width: 100%; margin-top: 20px; padding: 11px; border-radius: 10px; border: 1px solid rgba(150,235,250,0.2); background: rgba(150,235,250,0.06); color: #e6f4fa; font-family: inherit; font-size: 13px; cursor: pointer;">Управлять адресами</button>
+          </div>
+        </div>
+
+        <div style="padding: 24px; border-radius: 16px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.035);">
+          <div style="display: flex; align-items: baseline; justify-content: space-between;">
+            <span style="font-size: 15px; font-weight: 600;">Транзакции</span>
+            <span style="font-family: 'JetBrains Mono', monospace; font-size: 10.5px; color: rgba(214,238,248,0.66);">ВСЕ ТИПЫ</span>
+          </div>
+          <div style="display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr) minmax(0, 1.4fr) minmax(0, 0.8fr) minmax(0, 0.8fr); padding: 16px 0 12px; border-bottom: 1px solid rgba(150,235,250,0.1); font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.12em; color: rgba(214,238,248,0.66);"><span>ДАТА</span><span>ТИП</span><span>НАЗНАЧЕНИЕ</span><span>СТАТУС</span><span style="text-align: right;">СУММА</span></div>
+          <div style="display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr) minmax(0, 1.4fr) minmax(0, 0.8fr) minmax(0, 0.8fr); padding: 13px 0; border-bottom: 1px solid rgba(150,235,250,0.07); font-size: 13px; align-items: center;"><span style="color: rgba(214,238,248,0.78);">8 сен</span><span style="color: rgba(214,238,248,0.78);">Начисление награды</span><span style="font-family: 'JetBrains Mono', monospace; color: rgba(214,238,248,0.72);">эпоха 20 914</span><span style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: oklch(0.88 0.14 160);">НАЧИСЛЕНО</span><span style="font-family: 'JetBrains Mono', monospace; text-align: right; color: oklch(0.88 0.12 192);">+1,71</span></div>
+          <div style="display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr) minmax(0, 1.4fr) minmax(0, 0.8fr) minmax(0, 0.8fr); padding: 13px 0; border-bottom: 1px solid rgba(150,235,250,0.07); font-size: 13px; align-items: center;"><span style="color: rgba(214,238,248,0.78);">7 сен</span><span style="color: rgba(214,238,248,0.78);">Реферальное начисление</span><span style="font-family: 'JetBrains Mono', monospace; color: rgba(214,238,248,0.72);">уровень 1 · 2 контракта</span><span style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: oklch(0.88 0.14 160);">НАЧИСЛЕНО</span><span style="font-family: 'JetBrains Mono', monospace; text-align: right; color: oklch(0.88 0.12 192);">+4,20</span></div>
+          <div style="display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr) minmax(0, 1.4fr) minmax(0, 0.8fr) minmax(0, 0.8fr); padding: 13px 0; border-bottom: 1px solid rgba(150,235,250,0.07); font-size: 13px; align-items: center;"><span style="color: rgba(214,238,248,0.78);">6 сен</span><span style="color: rgba(214,238,248,0.78);">Вывод</span><span style="font-family: 'JetBrains Mono', monospace; color: rgba(214,238,248,0.72);">0x7c4b…9a4f</span><span style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: oklch(0.88 0.14 160);">ВЫПОЛНЕНО</span><span style="font-family: 'JetBrains Mono', monospace; text-align: right; color: rgba(214,238,248,0.8);">−120,00</span></div>
+          <div style="display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr) minmax(0, 1.4fr) minmax(0, 0.8fr) minmax(0, 0.8fr); padding: 13px 0; border-bottom: 1px solid rgba(150,235,250,0.07); font-size: 13px; align-items: center;"><span style="color: rgba(214,238,248,0.78);">5 сен</span><span style="color: rgba(214,238,248,0.78);">Покупка тарифа</span><span style="font-family: 'JetBrains Mono', monospace; color: rgba(214,238,248,0.72);">Узел · 250 TFLOPS</span><span style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: oklch(0.88 0.14 160);">ВЫПОЛНЕНО</span><span style="font-family: 'JetBrains Mono', monospace; text-align: right; color: rgba(214,238,248,0.8);">−250,00</span></div>
+          <div style="display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr) minmax(0, 1.4fr) minmax(0, 0.8fr) minmax(0, 0.8fr); padding: 13px 0; font-size: 13px; align-items: center;"><span style="color: rgba(214,238,248,0.78);">4 сен</span><span style="color: rgba(214,238,248,0.78);">Пополнение</span><span style="font-family: 'JetBrains Mono', monospace; color: rgba(214,238,248,0.72);">0x7c4b…9a4f</span><span style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: oklch(0.88 0.15 90);">В ОБРАБОТКЕ</span><span style="font-family: 'JetBrains Mono', monospace; text-align: right; color: rgba(214,238,248,0.8);">+500,00</span></div>
+        </div>
+      </section>
+    </sc-if>
+
+    <sc-if value="{{ at5 }}" hint-placeholder-val="{{ false }}">
+      <section data-screen-label="Рефералы" style="padding: 28px 32px 40px; display: flex; flex-direction: column; gap: 16px;">
+        <div style="padding: 28px; border-radius: 18px; border: 1px solid rgba(180,180,255,0.18); background: linear-gradient(120deg, oklch(0.6 0.13 200 / 0.16), rgba(120,110,220,0.12));">
+          <div style="font-size: 20px; font-weight: 600; letter-spacing: -0.02em;">Приглашайте. Растите. Зарабатывайте.</div>
+          <p style="margin: 10px 0 0; max-width: 620px; font-size: 14px; line-height: 1.6; color: rgba(214,238,248,0.75);">Поделитесь ссылкой: когда кто-то активирует AI-мощность, часть комиссии сети по его контракту начисляется на ваш баланс наград, пока контракт активен.</p>
+          <div style="display: flex; align-items: center; gap: 12px; margin-top: 22px; flex-wrap: wrap;">
+            <div style="padding: 13px 18px; border-radius: 11px; border: 1px dashed rgba(150,235,250,0.3); background: rgba(4,16,28,0.5); font-family: 'JetBrains Mono', monospace; font-size: 13.5px; color: #eafcff;">coin.local/r/<span style="color: oklch(0.88 0.11 195);">COIN-4X9K2</span></div>
+            <button style="padding: 13px 22px; border-radius: 11px; border: 1px solid oklch(0.86 0.11 195 / 0.5); background: linear-gradient(140deg, oklch(0.86 0.12 192), oklch(0.66 0.13 205)); color: #04121f; font-family: inherit; font-size: 13.5px; font-weight: 600; cursor: pointer;">Скопировать ссылку</button>
+            <button style="padding: 13px 20px; border-radius: 11px; border: 1px solid rgba(150,235,250,0.2); background: rgba(150,235,250,0.06); color: #e6f4fa; font-family: inherit; font-size: 13.5px; font-weight: 500; cursor: pointer;">Пригласить по e-mail</button>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px;">
+          <div style="padding: 20px; border-radius: 16px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.04);">
+            <div style="font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.14em; color: rgba(214,238,248,0.7);">ПРИГЛАШЕНО</div>
+            <div style="margin-top: 12px; font-family: 'JetBrains Mono', monospace; font-size: 24px; color: #f0fbff;">28</div>
+          </div>
+          <div style="padding: 20px; border-radius: 16px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.04);">
+            <div style="font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.14em; color: rgba(214,238,248,0.7);">АКТИВНЫЕ КОНТРАКТЫ</div>
+            <div style="margin-top: 12px; font-family: 'JetBrains Mono', monospace; font-size: 24px; color: #f0fbff;">19</div>
+          </div>
+          <div style="padding: 20px; border-radius: 16px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.04);">
+            <div style="font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.14em; color: rgba(214,238,248,0.7);">РЕФЕРАЛЬНЫЕ НАГРАДЫ</div>
+            <div style="margin-top: 12px; font-family: 'JetBrains Mono', monospace; font-size: 24px; color: oklch(0.9 0.12 192);">112,40</div>
+          </div>
+          <div style="padding: 20px; border-radius: 16px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.04);">
+            <div style="font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.14em; color: rgba(214,238,248,0.7);">ДОЛЯ КОМИССИИ</div>
+            <div style="margin-top: 12px; font-family: 'JetBrains Mono', monospace; font-size: 24px; color: #f0fbff;">5% / 2%</div>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 16px;">
+          <div style="padding: 24px; border-radius: 16px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.035);">
+            <div style="display: flex; align-items: baseline; justify-content: space-between;">
+              <span style="font-size: 15px; font-weight: 600;">История начислений</span>
+              <span style="font-family: 'JetBrains Mono', monospace; font-size: 10.5px; color: rgba(214,238,248,0.66);">ПОСЛЕДНИЕ 5</span>
+            </div>
+            <div style="display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr) minmax(0, 0.8fr); padding: 16px 0 12px; border-bottom: 1px solid rgba(150,235,250,0.1); font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.12em; color: rgba(214,238,248,0.66);"><span>ПОЛЬЗОВАТЕЛЬ</span><span>УРОВЕНЬ</span><span>ТАРИФ</span><span style="text-align: right;">НАЧИСЛЕНО</span></div>
+            <div style="display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr) minmax(0, 0.8fr); padding: 13px 0; border-bottom: 1px solid rgba(150,235,250,0.07); font-size: 13px;"><span style="font-family: 'JetBrains Mono', monospace; color: rgba(214,238,248,0.78);">польз.·4a71</span><span style="color: rgba(214,238,248,0.78);">Уровень 1</span><span style="color: rgba(214,238,248,0.78);">Ядро</span><span style="font-family: 'JetBrains Mono', monospace; text-align: right; color: oklch(0.88 0.12 192);">+2,40</span></div>
+            <div style="display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr) minmax(0, 0.8fr); padding: 13px 0; border-bottom: 1px solid rgba(150,235,250,0.07); font-size: 13px;"><span style="font-family: 'JetBrains Mono', monospace; color: rgba(214,238,248,0.78);">польз.·9c02</span><span style="color: rgba(214,238,248,0.78);">Уровень 1</span><span style="color: rgba(214,238,248,0.78);">Кластер</span><span style="font-family: 'JetBrains Mono', monospace; text-align: right; color: oklch(0.88 0.12 192);">+8,10</span></div>
+            <div style="display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr) minmax(0, 0.8fr); padding: 13px 0; border-bottom: 1px solid rgba(150,235,250,0.07); font-size: 13px;"><span style="font-family: 'JetBrains Mono', monospace; color: rgba(214,238,248,0.78);">польз.·1f88</span><span style="color: rgba(214,238,248,0.78);">Уровень 2</span><span style="color: rgba(214,238,248,0.78);">Узел</span><span style="font-family: 'JetBrains Mono', monospace; text-align: right; color: oklch(0.88 0.12 192);">+0,50</span></div>
+            <div style="display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr) minmax(0, 0.8fr); padding: 13px 0; border-bottom: 1px solid rgba(150,235,250,0.07); font-size: 13px;"><span style="font-family: 'JetBrains Mono', monospace; color: rgba(214,238,248,0.78);">польз.·6b30</span><span style="color: rgba(214,238,248,0.78);">Уровень 1</span><span style="color: rgba(214,238,248,0.78);">Ядро</span><span style="font-family: 'JetBrains Mono', monospace; text-align: right; color: oklch(0.88 0.12 192);">+2,40</span></div>
+            <div style="display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr) minmax(0, 0.8fr); padding: 13px 0; font-size: 13px;"><span style="font-family: 'JetBrains Mono', monospace; color: rgba(214,238,248,0.78);">польз.·2e54</span><span style="color: rgba(214,238,248,0.78);">Уровень 2</span><span style="color: rgba(214,238,248,0.78);">Узел</span><span style="font-family: 'JetBrains Mono', monospace; text-align: right; color: oklch(0.88 0.12 192);">+0,50</span></div>
+          </div>
+
+          <div style="padding: 24px; border-radius: 16px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.035);">
+            <span style="font-size: 15px; font-weight: 600;">Структура сети</span>
+            <div style="margin-top: 22px; display: flex; flex-direction: column; gap: 18px;">
+              <div>
+                <div style="display: flex; justify-content: space-between; font-size: 13px;"><span style="color: rgba(214,238,248,0.78);">Уровень 1 · прямые</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">18 польз.</span></div>
+                <div style="margin-top: 9px; height: 5px; border-radius: 3px; background: rgba(150,235,250,0.12);"><div style="width: 64%; height: 100%; border-radius: 3px; background: oklch(0.86 0.12 192);"></div></div>
+                <div style="margin-top: 7px; font-family: 'JetBrains Mono', monospace; font-size: 10.5px; color: rgba(214,238,248,0.68);">ДОЛЯ 5%</div>
+              </div>
+              <div>
+                <div style="display: flex; justify-content: space-between; font-size: 13px;"><span style="color: rgba(214,238,248,0.78);">Уровень 2 · косвенные</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">10 польз.</span></div>
+                <div style="margin-top: 9px; height: 5px; border-radius: 3px; background: rgba(150,235,250,0.12);"><div style="width: 36%; height: 100%; border-radius: 3px; background: oklch(0.7 0.15 292);"></div></div>
+                <div style="margin-top: 7px; font-family: 'JetBrains Mono', monospace; font-size: 10.5px; color: rgba(214,238,248,0.68);">ДОЛЯ 2%</div>
+              </div>
+            </div>
+            <p style="margin: 22px 0 0; font-size: 11.5px; line-height: 1.5; color: rgba(214,238,248,0.66);">Значения-заглушки. Реферальное начисление формируется из комиссий сети, а не из новых пополнений.</p>
+          </div>
+        </div>
+      </section>
+    </sc-if>
+
+    <sc-if value="{{ at6 }}" hint-placeholder-val="{{ false }}">
+      <section data-screen-label="Настройки" style="padding: 28px 32px 40px; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; align-items: start;">
+        <div style="padding: 24px; border-radius: 16px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.035);">
+          <div style="font-size: 15px; font-weight: 600;">Профиль</div>
+          <div style="display: flex; align-items: center; gap: 16px; margin-top: 20px;">
+            <div style="width: 52px; height: 52px; border-radius: 50%; background: linear-gradient(145deg, oklch(0.7 0.13 198), oklch(0.5 0.15 285)); display: grid; place-items: center; font-family: 'JetBrains Mono', monospace; font-size: 17px; color: #04121f;">A</div>
+            <div>
+              <div style="font-size: 15px; font-weight: 500;">Аккаунт 8f21·4c90</div>
+              <div style="margin-top: 4px; font-size: 12.5px; color: rgba(214,238,248,0.72);">placeholder@coin.local</div>
+            </div>
+          </div>
+          <div style="margin-top: 22px; display: flex; flex-direction: column; gap: 14px;">
+            <div>
+              <div style="font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.12em; color: rgba(214,238,248,0.68);">ОТОБРАЖАЕМОЕ ИМЯ</div>
+              <div style="margin-top: 8px; padding: 12px 14px; border-radius: 10px; border: 1px solid rgba(150,235,250,0.14); background: rgba(4,16,28,0.5); font-size: 13.5px; color: rgba(214,238,248,0.85);">Редактируемая заглушка</div>
+            </div>
+            <div>
+              <div style="font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.12em; color: rgba(214,238,248,0.68);">ЧАСОВОЙ ПОЯС</div>
+              <div style="margin-top: 8px; padding: 12px 14px; border-radius: 10px; border: 1px solid rgba(150,235,250,0.14); background: rgba(4,16,28,0.5); font-size: 13.5px; color: rgba(214,238,248,0.85);">UTC+02:00</div>
+            </div>
+          </div>
+          <button style="margin-top: 22px; padding: 11px 20px; border-radius: 10px; border: 1px solid oklch(0.86 0.11 195 / 0.5); background: linear-gradient(140deg, oklch(0.86 0.12 192), oklch(0.66 0.13 205)); color: #04121f; font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer;">Сохранить</button>
+        </div>
+
+        <div style="padding: 24px; border-radius: 16px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.035);">
+          <div style="font-size: 15px; font-weight: 600;">Безопасность</div>
+          <div style="margin-top: 20px; display: flex; flex-direction: column; gap: 12px;">
+            <div style="padding: 14px 16px; border-radius: 12px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.03); display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+              <div>
+                <div style="font-size: 13.5px;">Двухфакторная аутентификация</div>
+                <div style="margin-top: 4px; font-size: 12px; color: rgba(214,238,248,0.7);">Приложение-аутентификатор</div>
+              </div>
+              <span style="padding: 5px 11px; border-radius: 7px; background: oklch(0.6 0.14 160 / 0.2); border: 1px solid oklch(0.7 0.14 160 / 0.4); font-family: 'JetBrains Mono', monospace; font-size: 10px; color: oklch(0.88 0.14 160);">ВКЛЮЧЕНО</span>
+            </div>
+            <div style="padding: 14px 16px; border-radius: 12px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.03); display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+              <div>
+                <div style="font-size: 13.5px;">Белый список для вывода</div>
+                <div style="margin-top: 4px; font-size: 12px; color: rgba(214,238,248,0.7);">1 подтверждённый адрес</div>
+              </div>
+              <span style="padding: 5px 11px; border-radius: 7px; background: oklch(0.6 0.14 160 / 0.2); border: 1px solid oklch(0.7 0.14 160 / 0.4); font-family: 'JetBrains Mono', monospace; font-size: 10px; color: oklch(0.88 0.14 160);">ВКЛ</span>
+            </div>
+            <div style="padding: 14px 16px; border-radius: 12px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.03); display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+              <div>
+                <div style="font-size: 13.5px;">Активные сессии</div>
+                <div style="margin-top: 4px; font-size: 12px; color: rgba(214,238,248,0.7);">2 устройства · вход 8 сен</div>
+              </div>
+              <button style="padding: 8px 14px; border-radius: 9px; border: 1px solid rgba(150,235,250,0.2); background: rgba(150,235,250,0.06); color: #e6f4fa; font-family: inherit; font-size: 12.5px; cursor: pointer;">Проверить</button>
+            </div>
+          </div>
+        </div>
+
+        <div style="padding: 24px; border-radius: 16px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.035);">
+          <div style="font-size: 15px; font-weight: 600;">Подключённый кошелёк</div>
+          <div style="margin-top: 20px; padding: 16px; border-radius: 12px; border: 1px dashed rgba(150,235,250,0.22); background: rgba(150,235,250,0.03);">
+            <div style="font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.12em; color: rgba(214,238,248,0.68);">ОСНОВНОЙ · ВЫПЛАТЫ</div>
+            <div style="margin-top: 9px; font-family: 'JetBrains Mono', monospace; font-size: 13px; word-break: break-all;">0x7c4b…9a4f</div>
+            <div style="margin-top: 10px; display: flex; align-items: center; gap: 7px; font-family: 'JetBrains Mono', monospace; font-size: 10.5px; color: oklch(0.88 0.14 160);"><span style="width: 6px; height: 6px; border-radius: 50%; background: oklch(0.85 0.15 160);"></span>ПОДТВЕРЖДЁН</div>
+          </div>
+          <div style="display: flex; gap: 8px; margin-top: 16px;">
+            <button style="flex: 1; padding: 11px; border-radius: 10px; border: 1px solid rgba(150,235,250,0.2); background: rgba(150,235,250,0.06); color: #e6f4fa; font-family: inherit; font-size: 13px; cursor: pointer;">Добавить адрес</button>
+            <button style="flex: 1; padding: 11px; border-radius: 10px; border: 1px solid rgba(150,235,250,0.2); background: rgba(150,235,250,0.06); color: #e6f4fa; font-family: inherit; font-size: 13px; cursor: pointer;">Отключить</button>
+          </div>
+          <div style="margin-top: 24px; padding: 16px; border-radius: 12px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.03);">
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+              <div>
+                <div style="font-size: 13.5px;">Верификация личности (KYC)</div>
+                <div style="margin-top: 4px; font-size: 12px; color: rgba(214,238,248,0.7);">Заглушка — сценарий уточняется</div>
+              </div>
+              <span style="padding: 5px 11px; border-radius: 7px; background: oklch(0.7 0.15 90 / 0.16); border: 1px solid oklch(0.8 0.14 90 / 0.4); font-family: 'JetBrains Mono', monospace; font-size: 10px; color: oklch(0.9 0.14 90);">В ОБРАБОТКЕ</span>
+            </div>
+          </div>
+        </div>
+
+        <div style="padding: 24px; border-radius: 16px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.035);">
+          <div style="font-size: 15px; font-weight: 600;">Уведомления</div>
+          <div style="margin-top: 20px; display: flex; flex-direction: column; gap: 12px;">
+            <div style="padding: 14px 16px; border-radius: 12px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.03); display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+              <span style="font-size: 13.5px;">Начисление награды</span>
+              <span style="width: 38px; height: 22px; border-radius: 999px; background: oklch(0.6 0.13 200 / 0.5); border: 1px solid oklch(0.86 0.11 195 / 0.5); position: relative;"><span style="position: absolute; top: 2px; right: 2px; width: 16px; height: 16px; border-radius: 50%; background: #eafcff;"></span></span>
+            </div>
+            <div style="padding: 14px 16px; border-radius: 12px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.03); display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+              <span style="font-size: 13.5px;">Напоминания об окончании контракта</span>
+              <span style="width: 38px; height: 22px; border-radius: 999px; background: oklch(0.6 0.13 200 / 0.5); border: 1px solid oklch(0.86 0.11 195 / 0.5); position: relative;"><span style="position: absolute; top: 2px; right: 2px; width: 16px; height: 16px; border-radius: 50%; background: #eafcff;"></span></span>
+            </div>
+            <div style="padding: 14px 16px; border-radius: 12px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.03); display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+              <span style="font-size: 13.5px;">Оповещения о статусе дата-центров</span>
+              <span style="width: 38px; height: 22px; border-radius: 999px; background: rgba(150,235,250,0.14); border: 1px solid rgba(150,235,250,0.2); position: relative;"><span style="position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 50%; background: rgba(214,238,248,0.6);"></span></span>
+            </div>
+            <div style="padding: 14px 16px; border-radius: 12px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.03); display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+              <span style="font-size: 13.5px;">Реферальная активность</span>
+              <span style="width: 38px; height: 22px; border-radius: 999px; background: rgba(150,235,250,0.14); border: 1px solid rgba(150,235,250,0.2); position: relative;"><span style="position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 50%; background: rgba(214,238,248,0.6);"></span></span>
+            </div>
+          </div>
+        </div>
+      </section>
+    </sc-if>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1440,&quot;height&quot;:1200},&quot;rewardRate&quot;:{&quot;editor&quot;:&quot;float&quot;,&quot;default&quot;:0.0042,&quot;tsType&quot;:&quot;number&quot;,&quot;min&quot;:0.001,&quot;max&quot;:0.01,&quot;step&quot;:0.0001,&quot;section&quot;:&quot;Rewards model&quot;},&quot;tokenSymbol&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;COIN&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Rewards model&quot;}}">
+class Component extends DCLogic {
+  state = { section: 0, power: 1200, period: 1, menuOpen: false };
+
+  fmt(n, d) {
+    return n.toLocaleString('ru-RU', { minimumFractionDigits: d, maximumFractionDigits: d });
+  }
+
+  setMenuOpen(open) {
+    this.setState({ menuOpen: open });
+    document.documentElement.classList.toggle('coin-nav-open', open);
+  }
+
+  renderVals() {
+    const meta = [
+      ['Панель', 'Обзор аккаунта · эпоха 20 914'],
+      ['Тарифы', 'Тарифы AI-мощности и калькулятор награды'],
+      ['Контракты', 'Активные и завершённые контракты'],
+      ['Статистика', 'Награды, распределение и производительность'],
+      ['Кошелёк', 'Баланс, пополнения и выводы'],
+      ['Рефералы', 'Ваша сеть приглашённых и доля комиссии'],
+      ['Настройки', 'Профиль, безопасность и реквизиты выплат']
+    ];
+    const tiers = [
+      { max: 600, name: 'Узел', infra: 'Общий пул', price: '$250', mult: 0.86 },
+      { max: 2500, name: 'Ядро', infra: 'Приоритетный пул', price: '$1 100', mult: 1 },
+      { max: 6000, name: 'Кластер', infra: 'Выделенные поды', price: '$3 400', mult: 1.12 },
+      { max: Infinity, name: 'Корпоративный', infra: 'Зарезервированные стойки', price: 'Индивидуально', mult: 1.2 }
+    ];
+    const periods = [
+      { label: 'ЗА ДЕНЬ', total: '5,04' },
+      { label: 'ЗА НЕДЕЛЮ', total: '35,28' },
+      { label: 'ЗА МЕСЯЦ', total: '151,20' }
+    ];
+    const rate = this.props.rewardRate ?? 0.0042;
+    const tier = tiers.find((t) => this.state.power <= t.max);
+    const daily = this.state.power * rate * tier.mult;
+    const p = periods[this.state.period];
+
+    const vals = {
+      symbol: this.props.tokenSymbol ?? 'COIN',
+      title: meta[this.state.section][0],
+      subtitle: meta[this.state.section][1],
+      power: this.state.power,
+      powerLabel: this.fmt(this.state.power, 0),
+      daily: this.fmt(daily, 2),
+      monthly: this.fmt(daily * 30, 1),
+      yearly: this.fmt(daily * 365, 0),
+      planName: tier.name,
+      planInfra: tier.infra,
+      planPrice: tier.price,
+      periodLabel: p.label,
+      periodTotal: p.total,
+      toggleMenu: () => this.setMenuOpen(!this.state.menuOpen),
+      closeMenu: () => this.setMenuOpen(false),
+      onPower: (e) => this.setState({ power: Number(e.target.value) })
+    };
+    for (let i = 0; i < 7; i++) {
+      vals['at' + i] = this.state.section === i;
+      vals['nav' + i] = () => {
+        this.setState({ section: i, menuOpen: false });
+        document.documentElement.classList.remove('coin-nav-open');
+      };
+    }
+    for (let i = 0; i < 3; i++) {
+      vals['p' + i] = this.state.period === i;
+      vals['period' + i] = () => this.setState({ period: i });
+    }
+    return vals;
+  }
+}
+</script>
+@endverbatim
+</body>
+</html>
