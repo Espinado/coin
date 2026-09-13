@@ -30,6 +30,16 @@
         }
     </style>
     @stack('head')
+    @auth('admin')
+        <script>
+            window.coinReverb = @json([
+                'key' => config('broadcasting.connections.reverb.key'),
+                'host' => env('VITE_REVERB_HOST', env('REVERB_HOST', 'localhost')),
+                'port' => (int) env('VITE_REVERB_PORT', env('REVERB_PORT', 8080)),
+                'scheme' => env('VITE_REVERB_SCHEME', env('REVERB_SCHEME', 'http')),
+            ]);
+        </script>
+    @endauth
 </head>
 <body class="admin-shell">
     <div class="admin-shell">

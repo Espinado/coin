@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Models\SupportTicket;
+use App\Models\SupportTicketMessage;
 use App\Services\DashboardDataService;
 use App\Services\PlatformSettingsService;
 use App\Services\SupportTicketService;
@@ -67,6 +68,10 @@ class Dashboard extends Component
     public string $newBody = '';
 
     public string $replyBody = '';
+
+    public int $replyFormKey = 0;
+
+    public int $createFormKey = 0;
 
     public function mount(DashboardDataService $data, PlatformSettingsService $settings): void
     {
@@ -303,7 +308,9 @@ class Dashboard extends Component
         $this->newSubject = '';
         $this->newCategory = SupportTicket::CATEGORY_OTHER;
         $this->newBody = '';
+        $this->createFormKey++;
         $this->markTicketRead($ticket->id);
+        $this->dispatch('support-thread-scroll');
         $this->dispatch('support-message-sent', message: 'Message sent');
     }
 
@@ -323,8 +330,12 @@ class Dashboard extends Component
             }
         }
 
-        if (is_array($payload) && ($payload['message']['is_from_admin'] ?? false)) {
-            $this->dispatch('support-message-received', message: 'New message from support');
+        if (is_array($payload) && isset($payload['message'])) {
+            $this->dispatch('support-append-message', message: $payload['message']);
+
+            if ($payload['message']['is_from_admin'] ?? false) {
+                $this->dispatch('support-message-received', message: 'New message from support');
+            }
         }
 
         $this->dispatch('support-thread-scroll');
@@ -344,11 +355,14 @@ class Dashboard extends Component
             'replyBody' => 'message',
         ]);
 
-        $support->addUserMessage($ticket, $this->user, $validated['replyBody']);
+        $message = $support->addUserMessage($ticket, $this->user, $validated['replyBody']);
 
         $this->replyBody = '';
+        $this->replyFormKey++;
         $this->reloadTickets();
         $this->selectedTicketId = $ticket->id;
+        $this->dispatch('support-append-message', message: $this->formatMessageForBroadcast($message));
+        $this->dispatch('support-thread-scroll');
         $this->dispatch('support-message-sent', message: 'Message sent');
     }
 
@@ -382,6 +396,20 @@ class Dashboard extends Component
             ->with('messages')
             ->orderByDesc('updated_at')
             ->get();
+    }
+
+    /** @return array<string, mixed> */
+    private function formatMessageForBroadcast(SupportTicketMessage $message): array
+    {
+        return [
+            'id' => $message->id,
+            'ticket_id' => $message->support_ticket_id,
+            'author_type' => $message->author_type,
+            'author_label' => $message->authorLabelForBroadcast(),
+            'body' => $message->body,
+            'created_at' => $message->created_at?->format('M j, Y H:i'),
+            'is_from_admin' => $message->isFromAdmin(),
+        ];
     }
 
     private function prepareSupportChat(): void

@@ -44,7 +44,7 @@
                 </div>
             </div>
 
-            <div id="support-thread" class="admin-card" style="margin-top:16px;display:flex;flex-direction:column;gap:14px;">
+            <div id="support-thread" class="admin-card" style="margin-top:16px;display:flex;flex-direction:column;gap:14px;max-height:420px;overflow-y:auto;padding-right:4px;">
                 @foreach($ticket->messages as $message)
                     <div data-message-id="{{ $message->id }}" style="padding:16px;border-radius:12px;border:1px solid rgba(255,255,255,0.08);background:{{ $message->isFromAdmin() ? 'rgba(255,180,84,0.06)' : 'rgba(255,255,255,0.03)' }};">
                         <div style="display:flex;justify-content:space-between;gap:12px;font-size:12px;color:rgba(232,237,245,0.62);">

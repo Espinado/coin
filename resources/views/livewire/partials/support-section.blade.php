@@ -43,7 +43,7 @@
       <div style="padding:24px;border-radius:16px;border:1px solid rgba(150,235,250,0.12);background:rgba(150,235,250,0.035);flex:1;">
         <div style="font-size:17px;font-weight:600;">Start a new chat</div>
         <p style="margin:8px 0 0;font-size:13px;line-height:1.55;color:rgba(214,238,248,0.72);">Describe your issue. An operator will join this conversation in real time.</p>
-        <form wire:submit.prevent="createTicket" wire:key="support-create-form" style="margin-top:20px;display:flex;flex-direction:column;gap:14px;">
+        <form wire:submit.prevent="createTicket" wire:key="support-create-form-{{ $createFormKey }}" style="margin-top:20px;display:flex;flex-direction:column;gap:14px;">
           <div>
             <div style="font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.12em;color:rgba(214,238,248,0.68);">SUBJECT</div>
             <input type="text" wire:model.live.debounce.250ms="newSubject" maxlength="120" style="width:100%;box-sizing:border-box;margin-top:8px;padding:12px 14px;border-radius:10px;border:1px solid rgba(150,235,250,0.16);background:rgba(4,16,28,0.6);color:#eafcff;font-size:14px;">
@@ -82,30 +82,32 @@
         </div>
       </div>
 
-      <div id="support-thread" style="display:flex;flex-direction:column;gap:12px;flex:1;max-height:420px;overflow-y:auto;padding-right:4px;">
-        @foreach($ticket->messages as $message)
-          <div wire:key="support-message-{{ $message->id }}" data-message-id="{{ $message->id }}" style="padding:16px 18px;border-radius:14px;border:1px solid rgba(150,235,250,0.12);background:{{ $message->isFromAdmin() ? 'oklch(0.6 0.13 200 / 0.12)' : 'rgba(150,235,250,0.03)' }};">
-            <div style="display:flex;justify-content:space-between;gap:12px;font-size:12px;color:rgba(214,238,248,0.66);">
-              <span>{{ $message->authorLabel() }}</span>
-              <span>{{ $message->created_at?->format('M j, Y H:i') }}</span>
+      <div wire:key="support-chat-{{ $ticket->id }}">
+        <div id="support-thread" wire:ignore.self style="display:flex;flex-direction:column;gap:12px;flex:1;max-height:420px;overflow-y:auto;padding-right:4px;">
+          @foreach($ticket->messages as $message)
+            <div wire:key="support-message-{{ $message->id }}" data-message-id="{{ $message->id }}" style="padding:16px 18px;border-radius:14px;border:1px solid rgba(150,235,250,0.12);background:{{ $message->isFromAdmin() ? 'oklch(0.6 0.13 200 / 0.12)' : 'rgba(150,235,250,0.03)' }};">
+              <div style="display:flex;justify-content:space-between;gap:12px;font-size:12px;color:rgba(214,238,248,0.66);">
+                <span>{{ $message->authorLabel() }}</span>
+                <span>{{ $message->created_at?->format('M j, Y H:i') }}</span>
+              </div>
+              <div style="margin-top:10px;font-size:14px;line-height:1.6;white-space:pre-wrap;">{{ $message->body }}</div>
             </div>
-            <div style="margin-top:10px;font-size:14px;line-height:1.6;white-space:pre-wrap;">{{ $message->body }}</div>
-          </div>
-        @endforeach
-      </div>
-
-      @if($ticket->status !== \App\Models\SupportTicket::STATUS_CLOSED)
-        <div style="padding:20px 24px;border-radius:16px;border:1px solid rgba(150,235,250,0.12);background:rgba(150,235,250,0.035);">
-          <form wire:submit.prevent="sendTicketReply" wire:key="support-reply-form-{{ $ticket->id }}" style="display:flex;flex-direction:column;gap:12px;">
-            <textarea wire:model.live.debounce.250ms="replyBody" rows="3" maxlength="5000" placeholder="Type a message to the operator..."
-              style="width:100%;box-sizing:border-box;padding:12px 14px;border-radius:10px;border:1px solid rgba(150,235,250,0.16);background:rgba(4,16,28,0.6);color:#eafcff;font-size:14px;resize:vertical;"></textarea>
-            @error('replyBody')<div style="font-size:12.5px;color:oklch(0.78 0.16 25);">{{ $message }}</div>@enderror
-            <button type="submit" style="align-self:flex-start;padding:11px 18px;border-radius:10px;border:1px solid oklch(0.86 0.11 195 / 0.5);background:linear-gradient(140deg, oklch(0.86 0.12 192), oklch(0.66 0.13 205));color:#04121f;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;">Send message</button>
-          </form>
+          @endforeach
         </div>
-      @else
-        <div style="padding:18px;border-radius:14px;border:1px dashed rgba(150,235,250,0.18);font-size:13px;color:rgba(214,238,248,0.72);">This chat is closed. Start a new conversation if you need further help.</div>
-      @endif
+
+        @if($ticket->status !== \App\Models\SupportTicket::STATUS_CLOSED)
+          <div style="padding:20px 24px;border-radius:16px;border:1px solid rgba(150,235,250,0.12);background:rgba(150,235,250,0.035);">
+            <form wire:submit.prevent="sendTicketReply" wire:key="support-reply-form-{{ $ticket->id }}-{{ $replyFormKey }}" style="display:flex;flex-direction:column;gap:12px;">
+              <textarea wire:model="replyBody" rows="3" maxlength="5000" placeholder="Type a message to the operator..."
+                style="width:100%;box-sizing:border-box;padding:12px 14px;border-radius:10px;border:1px solid rgba(150,235,250,0.16);background:rgba(4,16,28,0.6);color:#eafcff;font-size:14px;resize:vertical;"></textarea>
+              @error('replyBody')<div style="font-size:12.5px;color:oklch(0.78 0.16 25);">{{ $message }}</div>@enderror
+              <button type="submit" style="align-self:flex-start;padding:11px 18px;border-radius:10px;border:1px solid oklch(0.86 0.11 195 / 0.5);background:linear-gradient(140deg, oklch(0.86 0.12 192), oklch(0.66 0.13 205));color:#04121f;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;">Send message</button>
+            </form>
+          </div>
+        @else
+          <div style="padding:18px;border-radius:14px;border:1px dashed rgba(150,235,250,0.18);font-size:13px;color:rgba(214,238,248,0.72);">This chat is closed. Start a new conversation if you need further help.</div>
+        @endif
+      </div>
     @else
       <div style="padding:32px;border-radius:16px;border:1px dashed rgba(150,235,250,0.18);background:rgba(150,235,250,0.02);font-size:14px;line-height:1.6;color:rgba(214,238,248,0.72);flex:1;display:flex;flex-direction:column;justify-content:center;align-items:flex-start;gap:16px;">
         <div>Select a conversation on the left or start a new live chat with an operator.</div>

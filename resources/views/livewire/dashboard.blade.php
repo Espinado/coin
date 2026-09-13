@@ -736,11 +736,13 @@
 <script>
   $wire.on('support-thread-scroll', () => {
     requestAnimationFrame(() => {
-      const thread = document.getElementById('support-thread');
-      if (thread) {
-        thread.lastElementChild?.scrollIntoView({ behavior: 'smooth', block: 'end' });
-      }
+      window.scrollSupportThreadToBottom?.('smooth');
     });
+  });
+
+  $wire.on('support-append-message', (payload) => {
+    const message = payload?.message ?? payload;
+    window.appendSupportMessage?.(message);
   });
 
   $wire.on('support-message-sent', (payload) => {
@@ -749,6 +751,12 @@
 
   $wire.on('support-message-received', (payload) => {
     window.showSupportToast?.(payload?.message ?? 'New message', 'incoming');
+  });
+
+  $wire.watch('selectedTicketId', () => {
+    if ($wire.section === 7) {
+      requestAnimationFrame(() => window.scrollSupportThreadToBottom?.('auto'));
+    }
   });
 </script>
 @endscript

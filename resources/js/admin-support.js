@@ -1,5 +1,6 @@
 import './bootstrap';
 import { showSupportToast } from './support-toast';
+import { appendSupportMessage, scrollSupportThreadToBottom } from './support-chat';
 
 const config = window.supportChatConfig;
 
@@ -8,7 +9,6 @@ if (config?.ticketId) {
     const replyBody = document.getElementById('support-reply-body');
     const replyStatus = document.getElementById('support-reply-status');
     const replyError = document.getElementById('support-reply-error');
-    const thread = document.getElementById('support-thread');
     const statusLabel = document.getElementById('ticket-status-label');
 
     if (replyForm && replyBody) {
@@ -43,7 +43,7 @@ if (config?.ticketId) {
                     },
                 });
 
-                appendMessage(response.data.message);
+                appendSupportMessage(response.data.message);
                 updateTicketMeta(response.data.ticket);
                 replyBody.value = '';
                 showSupportToast('Message sent');
@@ -60,30 +60,10 @@ if (config?.ticketId) {
                 if (submitButton) {
                     submitButton.disabled = false;
                 }
+
+                replyBody.focus();
             }
         });
-    }
-
-    function appendMessage(message) {
-        if (! thread || document.querySelector(`[data-message-id="${message.id}"]`)) {
-            return;
-        }
-
-        const wrapper = document.createElement('div');
-        wrapper.dataset.messageId = String(message.id);
-        wrapper.style.cssText = `padding:16px;border-radius:12px;border:1px solid rgba(255,255,255,0.08);background:${message.is_from_admin ? 'rgba(255,180,84,0.06)' : 'rgba(255,255,255,0.03)'};`;
-
-        wrapper.innerHTML = `
-            <div style="display:flex;justify-content:space-between;gap:12px;font-size:12px;color:rgba(232,237,245,0.62);">
-                <span>${escapeHtml(message.author_label)}</span>
-                <span>${escapeHtml(message.created_at ?? '')}</span>
-            </div>
-            <div style="margin-top:10px;font-size:14px;line-height:1.6;white-space:pre-wrap;"></div>
-        `;
-
-        wrapper.querySelector('div:last-child').textContent = message.body;
-        thread.appendChild(wrapper);
-        wrapper.scrollIntoView({ behavior: 'smooth', block: 'end' });
     }
 
     function updateTicketMeta(ticket) {
@@ -100,12 +80,5 @@ if (config?.ticketId) {
         }
     }
 
-    function escapeHtml(value) {
-        return String(value)
-            .replaceAll('&', '&amp;')
-            .replaceAll('<', '&lt;')
-            .replaceAll('>', '&gt;')
-            .replaceAll('"', '&quot;')
-            .replaceAll("'", '&#39;');
-    }
+    scrollSupportThreadToBottom('auto');
 }

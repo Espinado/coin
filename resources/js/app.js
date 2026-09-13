@@ -1,8 +1,11 @@
 import './bootstrap';
 import { initEcho } from './echo';
 import { showSupportToast } from './support-toast';
+import { appendSupportMessage, scrollSupportThreadToBottom } from './support-chat';
 
 window.showSupportToast = showSupportToast;
+window.appendSupportMessage = appendSupportMessage;
+window.scrollSupportThreadToBottom = scrollSupportThreadToBottom;
 
 import Alpine from 'alpinejs';
 
