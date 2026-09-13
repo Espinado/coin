@@ -2,7 +2,9 @@
 
 namespace App\Livewire;
 
+use App\Models\SupportTicket;
 use App\Services\DashboardDataService;
+use App\Services\SupportTicketService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Collection;
 use Livewire\Component;
@@ -47,6 +49,21 @@ class Dashboard extends Component
     /** @var Collection<string, mixed> */
     public Collection $periodTotals;
 
+    /** @var Collection<int, mixed> */
+    public Collection $tickets;
+
+    public ?int $selectedTicketId = null;
+
+    public bool $showCreateTicket = false;
+
+    public string $newSubject = '';
+
+    public string $newCategory = SupportTicket::CATEGORY_OTHER;
+
+    public string $newBody = '';
+
+    public string $replyBody = '';
+
     public function mount(DashboardDataService $data): void
     {
         $payload = $data->forUser(auth()->user());
@@ -63,6 +80,10 @@ class Dashboard extends Component
         $this->primaryContract = $payload['primaryContract'];
         $this->primaryPlan = $payload['primaryPlan'];
         $this->power = (int) ($this->user->active_tflops ?: 1200);
+        $this->tickets = $this->user->supportTickets()
+            ->with('messages')
+            ->orderByDesc('updated_at')
+            ->get();
     }
 
     public function setSection(int $section): void
@@ -180,6 +201,102 @@ class Dashboard extends Component
         return $this->periodTotals[$keys[$this->period]]->total_label ?? '35.28';
     }
 
+    public function getSelectedTicketProperty(): ?SupportTicket
+    {
+        if (! $this->selectedTicketId) {
+            return null;
+        }
+
+        return $this->tickets->firstWhere('id', $this->selectedTicketId);
+    }
+
+    public function getOpenTicketCountProperty(): int
+    {
+        return $this->tickets->whereIn('status', [
+            SupportTicket::STATUS_OPEN,
+            SupportTicket::STATUS_PENDING,
+        ])->count();
+    }
+
+    public function getTicketCategoriesProperty(): array
+    {
+        return SupportTicket::categories();
+    }
+
+    public function openCreateTicket(): void
+    {
+        $this->showCreateTicket = true;
+        $this->selectedTicketId = null;
+        $this->resetValidation();
+    }
+
+    public function cancelCreateTicket(): void
+    {
+        $this->showCreateTicket = false;
+        $this->newSubject = '';
+        $this->newCategory = SupportTicket::CATEGORY_OTHER;
+        $this->newBody = '';
+        $this->resetValidation();
+    }
+
+    public function selectTicket(int $ticketId): void
+    {
+        abort_unless(
+            $this->tickets->contains('id', $ticketId),
+            403
+        );
+
+        $this->selectedTicketId = $ticketId;
+        $this->showCreateTicket = false;
+        $this->replyBody = '';
+    }
+
+    public function createTicket(SupportTicketService $support): void
+    {
+        $validated = $this->validate([
+            'newSubject' => ['required', 'string', 'min:3', 'max:120'],
+            'newCategory' => ['required', 'in:'.implode(',', array_keys(SupportTicket::categories()))],
+            'newBody' => ['required', 'string', 'min:10', 'max:5000'],
+        ], [], [
+            'newSubject' => 'subject',
+            'newCategory' => 'category',
+            'newBody' => 'message',
+        ]);
+
+        $ticket = $support->createForUser(
+            $this->user,
+            $validated['newSubject'],
+            $validated['newCategory'],
+            $validated['newBody'],
+        );
+
+        $this->reloadTickets();
+        $this->selectedTicketId = $ticket->id;
+        $this->showCreateTicket = false;
+        $this->newSubject = '';
+        $this->newCategory = SupportTicket::CATEGORY_OTHER;
+        $this->newBody = '';
+    }
+
+    public function sendTicketReply(SupportTicketService $support): void
+    {
+        $ticket = $this->selectedTicket;
+
+        abort_unless($ticket !== null, 403);
+
+        $validated = $this->validate([
+            'replyBody' => ['required', 'string', 'min:2', 'max:5000'],
+        ], [], [
+            'replyBody' => 'message',
+        ]);
+
+        $support->addUserMessage($ticket, $this->user, $validated['replyBody']);
+
+        $this->replyBody = '';
+        $this->reloadTickets();
+        $this->selectedTicketId = $ticket->id;
+    }
+
     public function render(): View
     {
         return view('livewire.dashboard')
@@ -202,5 +319,13 @@ class Dashboard extends Component
     private function formatAmount(float $value, int $decimals): string
     {
         return number_format($value, $decimals, '.', ',');
+    }
+
+    private function reloadTickets(): void
+    {
+        $this->tickets = $this->user->supportTickets()
+            ->with('messages')
+            ->orderByDesc('updated_at')
+            ->get();
     }
 }

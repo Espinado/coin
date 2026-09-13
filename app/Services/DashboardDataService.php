@@ -18,6 +18,7 @@ class DashboardDataService
             'rewardPeriodTotals',
             'referralProfile',
             'referralAccruals',
+            'supportTickets',
         ]);
 
         $wallet = $user->wallet;
@@ -64,6 +65,7 @@ class DashboardDataService
             ['Wallet', 'Balance, deposits, and withdrawals'],
             ['Referrals', 'Your referral network and commission share'],
             ['Settings', 'Profile, security, and payout details'],
+            ['Support', 'Contact the Coin support team'],
         ];
     }
 

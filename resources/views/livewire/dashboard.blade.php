@@ -53,9 +53,14 @@
       <span style="position: relative; width: 7px; height: 7px; border-radius: 2px; background: rgba(150,235,250,0.3);"></span>
       <span style="position: relative;">Settings</span>
     </button>
-    <a href="#" style="display: flex; align-items: center; gap: 11px; padding: 11px 12px; border-radius: 10px; font-size: 13.5px; color: rgba(230,244,250,0.72);">
-      <span style="width: 7px; height: 7px; border-radius: 2px; background: rgba(150,235,250,0.3);"></span>Support
-    </a>
+    <button wire:click="setSection(7)" style="position: relative; display: flex; align-items: center; gap: 11px; padding: 11px 12px; border: 0; border-radius: 10px; background: none; font-family: inherit; font-size: 13.5px; color: rgba(230,244,250,0.72); text-align: left; cursor: pointer; width: 100%;">
+      @if($section === 7)<span style="position: absolute; inset: 0; border-radius: 10px; background: oklch(0.6 0.13 200 / 0.22); border: 1px solid oklch(0.86 0.11 195 / 0.3); pointer-events: none;"></span>@endif
+      <span style="position: relative; width: 7px; height: 7px; border-radius: 2px; background: rgba(150,235,250,0.3);"></span>
+      <span style="position: relative; flex: 1;">Support</span>
+      @if($this->openTicketCount > 0)
+        <span style="position: relative; font-family: 'JetBrains Mono', monospace; font-size: 10px; padding: 2px 7px; border-radius: 6px; background: rgba(150,235,250,0.1); color: rgba(214,238,248,0.8);">{{ $this->openTicketCount }}</span>
+      @endif
+    </button>
     <form method="POST" action="{{ route('logout') }}" style="margin-top: 8px;">
       @csrf
       <button type="submit" style="width: 100%; padding: 10px 12px; border-radius: 10px; border: 1px solid rgba(150,235,250,0.16); background: rgba(150,235,250,0.04); color: rgba(230,244,250,0.78); font-family: inherit; font-size: 13px; cursor: pointer;">Log out</button>
@@ -713,6 +718,10 @@
           </div>
         </div>
       </section>
+    @endif
+
+    @if($section === 7)
+      @include('livewire.partials.support-section')
     @endif
   </main>
 </div>

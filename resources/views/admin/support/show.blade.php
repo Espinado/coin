@@ -1,0 +1,91 @@
+@extends('layouts.admin')
+
+@section('title', 'Coin Admin — '.$ticket->reference)
+
+@section('content')
+    @include('admin.partials.nav', ['openCount' => \App\Models\SupportTicket::query()->where('status', \App\Models\SupportTicket::STATUS_OPEN)->count()])
+
+    @if (session('status'))
+        <div class="admin-card" style="margin-bottom:16px;border-color:rgba(255,180,84,0.35);">{{ session('status') }}</div>
+    @endif
+
+    <div style="display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:16px;align-items:start;">
+        <div>
+            <div class="admin-card">
+                <div style="display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;">
+                    <div>
+                        <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.12em;color:rgba(232,237,245,0.62);">{{ $ticket->reference }}</div>
+                        <h1 style="margin:10px 0 0;font-size:22px;font-weight:600;">{{ $ticket->subject }}</h1>
+                        <p style="margin:8px 0 0;font-size:13px;color:rgba(232,237,245,0.72);">{{ $ticket->categoryLabel() }} · {{ $ticket->statusLabel() }}</p>
+                    </div>
+                    <form method="POST" action="{{ route('admin.support.status', $ticket) }}" style="display:flex;gap:8px;align-items:center;">
+                        @csrf
+                        @method('PATCH')
+                        <select name="status" style="padding:10px 12px;border-radius:10px;border:1px solid rgba(255,255,255,0.12);background:#070a10;color:#e8edf5;">
+                            @foreach($statuses as $value => $label)
+                                <option value="{{ $value }}" @selected($ticket->status === $value)>{{ $label }}</option>
+                            @endforeach
+                        </select>
+                        <button type="submit" class="admin-btn">Update</button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="admin-card" style="margin-top:16px;display:flex;flex-direction:column;gap:14px;">
+                @foreach($ticket->messages as $message)
+                    <div style="padding:16px;border-radius:12px;border:1px solid rgba(255,255,255,0.08);background:{{ $message->isFromAdmin() ? 'rgba(255,180,84,0.06)' : 'rgba(255,255,255,0.03)' }};">
+                        <div style="display:flex;justify-content:space-between;gap:12px;font-size:12px;color:rgba(232,237,245,0.62);">
+                            <span>{{ $message->isFromAdmin() ? 'Support team' : $ticket->user->accountLabel() }}</span>
+                            <span>{{ $message->created_at?->format('M j, Y H:i') }}</span>
+                        </div>
+                        <div style="margin-top:10px;font-size:14px;line-height:1.6;white-space:pre-wrap;">{{ $message->body }}</div>
+                    </div>
+                @endforeach
+            </div>
+
+            @if($ticket->status !== \App\Models\SupportTicket::STATUS_CLOSED)
+                <div class="admin-card" style="margin-top:16px;">
+                    <h2 style="margin:0 0 14px;font-size:16px;font-weight:600;">Reply</h2>
+                    <form method="POST" action="{{ route('admin.support.reply', $ticket) }}" style="display:flex;flex-direction:column;gap:12px;">
+                        @csrf
+                        <textarea name="body" rows="5" required maxlength="5000" placeholder="Write a reply to the user..."
+                            style="width:100%;box-sizing:border-box;padding:12px 14px;border-radius:10px;border:1px solid rgba(255,255,255,0.12);background:#070a10;color:#e8edf5;resize:vertical;">{{ old('body') }}</textarea>
+                        @error('body')<div style="font-size:12px;color:#ff8f8f;">{{ $message }}</div>@enderror
+                        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+                            <select name="status" style="padding:10px 12px;border-radius:10px;border:1px solid rgba(255,255,255,0.12);background:#070a10;color:#e8edf5;">
+                                <option value="{{ \App\Models\SupportTicket::STATUS_PENDING }}">Set pending after reply</option>
+                                <option value="{{ \App\Models\SupportTicket::STATUS_OPEN }}">Keep open</option>
+                                <option value="{{ \App\Models\SupportTicket::STATUS_CLOSED }}">Close ticket</option>
+                            </select>
+                            <button type="submit" class="admin-btn admin-btn-primary">Send reply</button>
+                        </div>
+                    </form>
+                </div>
+            @endif
+        </div>
+
+        <div class="admin-card">
+            <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.12em;color:rgba(232,237,245,0.62);">USER CONTEXT</div>
+            <div style="margin-top:12px;font-size:15px;font-weight:600;">{{ $ticket->user->accountLabel() }}</div>
+            <div style="margin-top:6px;font-size:13px;color:rgba(232,237,245,0.72);">{{ $ticket->user->email }}</div>
+            <div style="margin-top:18px;display:flex;flex-direction:column;gap:10px;font-size:13px;">
+                <div style="display:flex;justify-content:space-between;gap:12px;"><span style="color:rgba(232,237,245,0.62);">Balance</span><span style="font-family:'JetBrains Mono',monospace;">{{ $ticket->user->wallet?->formattedBalance() ?? '—' }}</span></div>
+                <div style="display:flex;justify-content:space-between;gap:12px;"><span style="color:rgba(232,237,245,0.62);">Available</span><span style="font-family:'JetBrains Mono',monospace;">{{ $ticket->user->wallet?->formattedAvailable() ?? '—' }}</span></div>
+                <div style="display:flex;justify-content:space-between;gap:12px;"><span style="color:rgba(232,237,245,0.62);">Active TFLOPS</span><span style="font-family:'JetBrains Mono',monospace;">{{ number_format($ticket->user->active_tflops) }}</span></div>
+                <div style="display:flex;justify-content:space-between;gap:12px;"><span style="color:rgba(232,237,245,0.62);">Contracts</span><span style="font-family:'JetBrains Mono',monospace;">{{ $ticket->user->contracts->count() }}</span></div>
+            </div>
+            @if($ticket->user->contracts->isNotEmpty())
+                <div style="margin-top:18px;display:flex;flex-direction:column;gap:8px;font-size:12.5px;">
+                    @foreach($ticket->user->contracts as $contract)
+                        <div style="padding:10px 12px;border-radius:10px;background:rgba(255,255,255,0.03);">
+                            {{ $contract->plan?->name }} · {{ $contract->formattedTflops() }} TF · {{ $contract->status }}
+                        </div>
+                    @endforeach
+                </div>
+            @endif
+            @if($ticket->assignedAdmin)
+                <div style="margin-top:18px;font-size:12.5px;color:rgba(232,237,245,0.72);">Assigned: {{ $ticket->assignedAdmin->name }}</div>
+            @endif
+        </div>
+    </div>
+@endsection

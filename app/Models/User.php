@@ -74,6 +74,11 @@ class User extends Authenticatable
         return $this->hasMany(ReferralAccrual::class);
     }
 
+    public function supportTickets(): HasMany
+    {
+        return $this->hasMany(SupportTicket::class);
+    }
+
     public function accountLabel(): string
     {
         return 'Account '.($this->account_slug ?? substr(md5((string) $this->id), 0, 4));

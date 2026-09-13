@@ -4,9 +4,12 @@ namespace Database\Seeders;
 
 use App\Models\Contract;
 use App\Models\Plan;
+use App\Models\Admin;
 use App\Models\ReferralAccrual;
 use App\Models\ReferralProfile;
 use App\Models\RewardPeriodTotal;
+use App\Models\SupportTicket;
+use App\Models\SupportTicketMessage;
 use App\Models\User;
 use App\Models\Wallet;
 use App\Models\WalletTransaction;
@@ -166,6 +169,39 @@ class CoinDemoSeeder extends Seeder
                 'amount_tone' => $tone,
                 'status_label' => $status,
                 'sort_order' => $order,
+            ]);
+        }
+
+        SupportTicketMessage::query()
+            ->whereIn('support_ticket_id', SupportTicket::query()->where('user_id', $user->id)->pluck('id'))
+            ->delete();
+        SupportTicket::query()->where('user_id', $user->id)->delete();
+
+        $admin = Admin::query()->first();
+
+        $ticket = SupportTicket::query()->create([
+            'user_id' => $user->id,
+            'assigned_admin_id' => $admin?->id,
+            'reference' => 'TKT-DEMO01',
+            'subject' => 'Withdrawal pending longer than expected',
+            'category' => SupportTicket::CATEGORY_WITHDRAWAL,
+            'status' => SupportTicket::STATUS_PENDING,
+            'last_reply_at' => now(),
+        ]);
+
+        SupportTicketMessage::query()->create([
+            'support_ticket_id' => $ticket->id,
+            'author_type' => SupportTicketMessage::AUTHOR_USER,
+            'author_id' => $user->id,
+            'body' => 'I requested a withdrawal 2 days ago and it is still pending settlement. Can you check ticket status?',
+        ]);
+
+        if ($admin) {
+            SupportTicketMessage::query()->create([
+                'support_ticket_id' => $ticket->id,
+                'author_type' => SupportTicketMessage::AUTHOR_ADMIN,
+                'author_id' => $admin->id,
+                'body' => 'Thanks for reaching out. Your payout is queued for the next settlement window. No action is required on your side.',
             ]);
         }
     }

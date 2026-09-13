@@ -3,6 +3,8 @@
 @section('title', 'Coin Admin — Dashboard')
 
 @section('content')
+    @include('admin.partials.nav', ['openCount' => \App\Models\SupportTicket::query()->where('status', \App\Models\SupportTicket::STATUS_OPEN)->count()])
+
     <div class="admin-card">
         <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.14em;color:rgba(232,237,245,0.62);">OVERVIEW</div>
         <h1 style="margin:12px 0 0;font-size:24px;font-weight:600;">Admin console</h1>
