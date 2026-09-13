@@ -15,7 +15,25 @@ window.Alpine = Alpine;
 
 const userSupportBadgeStyle = 'position:relative;font-family:\'JetBrains Mono\',monospace;font-size:10px;font-weight:700;min-width:20px;text-align:center;padding:3px 7px;border-radius:999px;background:linear-gradient(140deg, oklch(0.88 0.2 35), oklch(0.72 0.22 25));color:#1a0a04;box-shadow:0 0 16px oklch(0.82 0.2 35 / 0.55);';
 
-function updateUserSupportNavBadge(total) {
+function readInitialUserNavUnread() {
+    const nav = document.querySelector('.coin-nav-support');
+
+    if (! nav?.dataset.unreadSupport) {
+        return 0;
+    }
+
+    return Number(nav.dataset.unreadSupport);
+}
+
+function isUserSupportSectionOpen() {
+    const wire = window.Livewire?.first?.();
+
+    return wire ? Number(wire.get?.('section') ?? 0) === 7 : false;
+}
+
+let userNavUnreadCount = readInitialUserNavUnread();
+
+function renderUserSupportNavBadge(total) {
     const nav = document.querySelector('.coin-nav-support');
 
     if (! nav) {
@@ -30,6 +48,7 @@ function updateUserSupportNavBadge(total) {
     if (! unread) {
         badge?.remove();
         nav.querySelector('[data-user-support-nav-bg]')?.remove();
+        nav.dataset.unreadSupport = '0';
 
         return;
     }
@@ -53,18 +72,32 @@ function updateUserSupportNavBadge(total) {
     nav.dataset.unreadSupport = String(total);
 }
 
+function updateUserSupportNavBadge(total, options = {}) {
+    const count = Number(total);
+
+    if (! Number.isFinite(count)) {
+        return;
+    }
+
+    if (options.force === true || isUserSupportSectionOpen()) {
+        userNavUnreadCount = count;
+        renderUserSupportNavBadge(userNavUnreadCount);
+
+        return;
+    }
+
+    // Outside Support: only grow via realtime; clearing happens when user opens Support.
+    if (count <= userNavUnreadCount) {
+        return;
+    }
+
+    userNavUnreadCount = count;
+    renderUserSupportNavBadge(userNavUnreadCount);
+}
+
 function syncUserSupportNavBadgeFromDom() {
-    const nav = document.querySelector('.coin-nav-support');
-
-    if (! nav) {
-        return;
-    }
-
-    if (! nav.dataset.unreadSupport) {
-        return;
-    }
-
-    updateUserSupportNavBadge(Number(nav.dataset.unreadSupport));
+    userNavUnreadCount = readInitialUserNavUnread();
+    renderUserSupportNavBadge(userNavUnreadCount);
 }
 
 window.updateUserSupportNavBadge = updateUserSupportNavBadge;
@@ -90,7 +123,11 @@ function bootUserSupportRealtime() {
     }
 
     const handlePayload = (payload) => {
-        updateUserSupportNavBadge(Number(payload.total_unread_for_user ?? 0));
+        if (payload.total_unread_for_user === undefined || payload.total_unread_for_user === null) {
+            return;
+        }
+
+        updateUserSupportNavBadge(Number(payload.total_unread_for_user));
     };
 
     echo.private(`support.user.${userId}`)
@@ -131,7 +168,7 @@ document.addEventListener('livewire:init', () => {
             return;
         }
 
-        updateUserSupportNavBadge(Number(count));
+        updateUserSupportNavBadge(Number(count), { force: true });
     });
 });
 

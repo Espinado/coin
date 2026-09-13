@@ -24,7 +24,23 @@ function updateTicketMeta(ticket) {
     }
 }
 
-function updateNavBadge(total) {
+function readInitialAdminNavUnread() {
+    const badge = document.querySelector('[data-admin-support-nav-badge]');
+
+    return badge ? Number(badge.textContent) : 0;
+}
+
+function isAdminSupportTicketPage() {
+    return /\/support\/\d+/.test(window.location.pathname);
+}
+
+function isAdminSupportSection() {
+    return window.location.pathname.includes('/support');
+}
+
+let adminNavUnreadCount = readInitialAdminNavUnread();
+
+function renderAdminNavBadge(total) {
     const link = document.querySelector('[data-admin-support-nav]');
 
     if (! link) {
@@ -48,6 +64,33 @@ function updateNavBadge(total) {
     }
 
     badge.textContent = String(total);
+}
+
+function updateNavBadge(total) {
+    const count = Number(total);
+
+    if (! Number.isFinite(count)) {
+        return;
+    }
+
+    // On overview and other non-support pages, only grow the badge via realtime.
+    // Clearing happens on full page load after admin opens Support (markReadByAdmin).
+    if (! isAdminSupportSection()) {
+        if (count <= adminNavUnreadCount) {
+            return;
+        }
+
+        adminNavUnreadCount = count;
+        renderAdminNavBadge(adminNavUnreadCount);
+
+        return;
+    }
+
+    // On support list/ticket pages, sync the server count.
+    if (isAdminSupportTicketPage() || count >= adminNavUnreadCount) {
+        adminNavUnreadCount = count;
+        renderAdminNavBadge(adminNavUnreadCount);
+    }
 }
 
 function updateTicketRow(payload) {
@@ -99,7 +142,10 @@ function updateTicketRow(payload) {
 }
 
 function handleAdminPayload(payload) {
-    updateNavBadge(Number(payload.total_unread_for_admin ?? 0));
+    if (payload.total_unread_for_admin !== undefined && payload.total_unread_for_admin !== null) {
+        updateNavBadge(Number(payload.total_unread_for_admin));
+    }
+
     updateTicketRow(payload);
 }
 
@@ -180,8 +226,17 @@ function bootAdminSupportRealtime() {
     }
 }
 
+function bootAdminSupportNavBadge() {
+    adminNavUnreadCount = readInitialAdminNavUnread();
+    renderAdminNavBadge(adminNavUnreadCount);
+}
+
 if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', bootAdminSupportRealtime);
+    document.addEventListener('DOMContentLoaded', () => {
+        bootAdminSupportNavBadge();
+        bootAdminSupportRealtime();
+    });
 } else {
+    bootAdminSupportNavBadge();
     bootAdminSupportRealtime();
 }

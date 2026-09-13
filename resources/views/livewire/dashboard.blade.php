@@ -765,7 +765,7 @@
       return;
     }
 
-    window.updateUserSupportNavBadge?.(Number(count));
+    window.updateUserSupportNavBadge?.(Number(count), { force: true });
   });
 
   $wire.watch('selectedTicketId', () => {
