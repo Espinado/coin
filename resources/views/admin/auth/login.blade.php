@@ -17,6 +17,7 @@
             <h1 style="margin:0;font-size:22px;font-weight:600;">Admin sign in</h1>
             <p style="margin:10px 0 0;font-size:13.5px;line-height:1.55;color:rgba(232,237,245,0.72);">
                 Separate staff access for {{ config('coin.admin_domain') }}. Regular user accounts cannot sign in here.
+                Staff accounts are created by an administrator — self-registration and password reset are not available.
             </p>
 
             @if (session('status'))

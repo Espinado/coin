@@ -734,70 +734,6 @@
 
 @script
 <script>
-  let activeTicketChannel = null;
-  let supportRefreshTimer = null;
-
-  const scheduleSupportRefresh = (ticketId = null) => {
-    clearTimeout(supportRefreshTimer);
-    supportRefreshTimer = setTimeout(() => {
-      $wire.onSupportTicketRealtime(ticketId);
-    }, 80);
-  };
-
-  const leaveTicketChannel = () => {
-    if (activeTicketChannel !== null && window.Echo) {
-      window.Echo.leave(`support.ticket.${activeTicketChannel}`);
-      activeTicketChannel = null;
-    }
-  };
-
-  const subscribeTicketChannel = (ticketId) => {
-    if (! window.Echo) {
-      return;
-    }
-
-    const id = Number(ticketId);
-
-    if (! id) {
-      leaveTicketChannel();
-
-      return;
-    }
-
-    if (activeTicketChannel === id) {
-      return;
-    }
-
-    leaveTicketChannel();
-    activeTicketChannel = id;
-
-    window.Echo.private(`support.ticket.${id}`)
-      .listen('.SupportTicketMessageSent', (payload) => {
-        scheduleSupportRefresh(payload.message?.ticket_id ?? id);
-      })
-      .listen('.SupportTicketUpdated', (payload) => {
-        scheduleSupportRefresh(payload.ticket?.id ?? id);
-      });
-  };
-
-  $wire.watch('selectedTicketId', (ticketId) => {
-    if ($wire.section === 7) {
-      subscribeTicketChannel(ticketId);
-    }
-  });
-
-  $wire.watch('section', (section) => {
-    if (section === 7) {
-      subscribeTicketChannel($wire.selectedTicketId);
-    } else {
-      leaveTicketChannel();
-    }
-  });
-
-  if ($wire.section === 7 && $wire.selectedTicketId) {
-    subscribeTicketChannel($wire.selectedTicketId);
-  }
-
   $wire.on('support-thread-scroll', () => {
     requestAnimationFrame(() => {
       const thread = document.getElementById('support-thread');
@@ -805,6 +741,14 @@
         thread.lastElementChild?.scrollIntoView({ behavior: 'smooth', block: 'end' });
       }
     });
+  });
+
+  $wire.on('support-message-sent', (payload) => {
+    window.showSupportToast?.(payload?.message ?? 'Message sent');
+  });
+
+  $wire.on('support-message-received', (payload) => {
+    window.showSupportToast?.(payload?.message ?? 'New message', 'incoming');
   });
 </script>
 @endscript

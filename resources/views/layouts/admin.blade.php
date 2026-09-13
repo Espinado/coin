@@ -31,7 +31,7 @@
     </style>
     @stack('head')
 </head>
-<body>
+<body class="admin-shell">
     <div class="admin-shell">
         @hasSection('topbar')
             @yield('topbar')

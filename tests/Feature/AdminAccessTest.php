@@ -33,6 +33,23 @@ class AdminAccessTest extends TestCase
 
         $this->get('http://admin.coin.test/register')
             ->assertNotFound();
+
+        $this->post('http://admin.coin.test/register', [
+            'name' => 'Hacker',
+            'email' => 'hacker@coin.test',
+            'password' => 'password1234',
+            'password_confirmation' => 'password1234',
+        ])->assertNotFound();
+
+        $this->get('http://admin.coin.test/forgot-password')
+            ->assertNotFound();
+
+        $this->post('http://admin.coin.test/forgot-password', [
+            'email' => 'staff@coin.test',
+        ])->assertNotFound();
+
+        $this->get('http://admin.coin.test/reset-password/fake-token')
+            ->assertNotFound();
     }
 
     public function test_admin_routes_are_not_available_on_user_domain(): void

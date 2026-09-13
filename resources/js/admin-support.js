@@ -1,4 +1,5 @@
 import './bootstrap';
+import { showSupportToast } from './support-toast';
 
 const config = window.supportChatConfig;
 
@@ -45,11 +46,16 @@ if (config?.ticketId) {
                 appendMessage(response.data.message);
                 updateTicketMeta(response.data.ticket);
                 replyBody.value = '';
+                showSupportToast('Message sent');
             } catch (error) {
+                const errorMessage = error.response?.data?.message
+                    ?? 'Could not send reply. Please try again.';
+
                 if (replyError) {
-                    replyError.textContent = error.response?.data?.message
-                        ?? 'Could not send reply. Please try again.';
+                    replyError.textContent = errorMessage;
                 }
+
+                showSupportToast(errorMessage, 'error');
             } finally {
                 if (submitButton) {
                     submitButton.disabled = false;

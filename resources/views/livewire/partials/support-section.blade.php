@@ -43,10 +43,10 @@
       <div style="padding:24px;border-radius:16px;border:1px solid rgba(150,235,250,0.12);background:rgba(150,235,250,0.035);flex:1;">
         <div style="font-size:17px;font-weight:600;">Start a new chat</div>
         <p style="margin:8px 0 0;font-size:13px;line-height:1.55;color:rgba(214,238,248,0.72);">Describe your issue. An operator will join this conversation in real time.</p>
-        <form wire:submit="createTicket" style="margin-top:20px;display:flex;flex-direction:column;gap:14px;">
+        <form wire:submit.prevent="createTicket" wire:key="support-create-form" style="margin-top:20px;display:flex;flex-direction:column;gap:14px;">
           <div>
             <div style="font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.12em;color:rgba(214,238,248,0.68);">SUBJECT</div>
-            <input type="text" wire:model="newSubject" maxlength="120" style="width:100%;box-sizing:border-box;margin-top:8px;padding:12px 14px;border-radius:10px;border:1px solid rgba(150,235,250,0.16);background:rgba(4,16,28,0.6);color:#eafcff;font-size:14px;">
+            <input type="text" wire:model.live.debounce.250ms="newSubject" maxlength="120" style="width:100%;box-sizing:border-box;margin-top:8px;padding:12px 14px;border-radius:10px;border:1px solid rgba(150,235,250,0.16);background:rgba(4,16,28,0.6);color:#eafcff;font-size:14px;">
             @error('newSubject')<div style="margin-top:8px;font-size:12.5px;color:oklch(0.78 0.16 25);">{{ $message }}</div>@enderror
           </div>
           <div>
@@ -60,7 +60,7 @@
           </div>
           <div>
             <div style="font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.12em;color:rgba(214,238,248,0.68);">MESSAGE</div>
-            <textarea wire:model="newBody" rows="6" maxlength="5000" placeholder="Write your first message to the support team..."
+            <textarea wire:model.live.debounce.250ms="newBody" rows="6" maxlength="5000" placeholder="Write your first message to the support team..."
               style="width:100%;box-sizing:border-box;margin-top:8px;padding:12px 14px;border-radius:10px;border:1px solid rgba(150,235,250,0.16);background:rgba(4,16,28,0.6);color:#eafcff;font-size:14px;resize:vertical;"></textarea>
             @error('newBody')<div style="margin-top:8px;font-size:12.5px;color:oklch(0.78 0.16 25);">{{ $message }}</div>@enderror
           </div>
@@ -96,8 +96,8 @@
 
       @if($ticket->status !== \App\Models\SupportTicket::STATUS_CLOSED)
         <div style="padding:20px 24px;border-radius:16px;border:1px solid rgba(150,235,250,0.12);background:rgba(150,235,250,0.035);">
-          <form wire:submit="sendTicketReply" style="display:flex;flex-direction:column;gap:12px;">
-            <textarea wire:model="replyBody" rows="3" maxlength="5000" placeholder="Type a message to the operator..."
+          <form wire:submit.prevent="sendTicketReply" wire:key="support-reply-form-{{ $ticket->id }}" style="display:flex;flex-direction:column;gap:12px;">
+            <textarea wire:model.live.debounce.250ms="replyBody" rows="3" maxlength="5000" placeholder="Type a message to the operator..."
               style="width:100%;box-sizing:border-box;padding:12px 14px;border-radius:10px;border:1px solid rgba(150,235,250,0.16);background:rgba(4,16,28,0.6);color:#eafcff;font-size:14px;resize:vertical;"></textarea>
             @error('replyBody')<div style="font-size:12.5px;color:oklch(0.78 0.16 25);">{{ $message }}</div>@enderror
             <button type="submit" style="align-self:flex-start;padding:11px 18px;border-radius:10px;border:1px solid oklch(0.86 0.11 195 / 0.5);background:linear-gradient(140deg, oklch(0.86 0.12 192), oklch(0.66 0.13 205));color:#04121f;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;">Send message</button>

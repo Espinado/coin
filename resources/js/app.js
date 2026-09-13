@@ -1,5 +1,8 @@
 import './bootstrap';
 import { initEcho } from './echo';
+import { showSupportToast } from './support-toast';
+
+window.showSupportToast = showSupportToast;
 
 import Alpine from 'alpinejs';
 

@@ -14,6 +14,12 @@ use Illuminate\Support\Facades\Route;
 Route::middleware(['admin.domain', 'reject.web.on.admin'])->group(function () {
     Route::redirect('/', '/login');
 
+    foreach (['register', 'forgot-password'] as $path) {
+        Route::any($path, fn () => abort(404));
+    }
+
+    Route::any('reset-password/{token?}', fn () => abort(404));
+
     Route::middleware('guest:admin')->group(function () {
         Route::get('login', [AuthenticatedSessionController::class, 'create'])
             ->name('admin.login');

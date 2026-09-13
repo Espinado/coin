@@ -1,5 +1,6 @@
 import './bootstrap';
 import { initEcho } from './echo';
+import { showSupportToast } from './support-toast';
 
 const badgeStyle = 'margin-left:6px;padding:3px 8px;border-radius:999px;background:linear-gradient(140deg,#ffb454,#e8872e);color:#1a1208;font-family:\'JetBrains Mono\',monospace;font-size:10px;font-weight:700;box-shadow:0 0 14px rgba(255,180,84,0.45);';
 const rowBadgeStyle = 'flex-shrink:0;font-family:\'JetBrains Mono\',monospace;font-size:11px;font-weight:700;min-width:22px;text-align:center;padding:4px 9px;border-radius:999px;background:linear-gradient(140deg,#ffb454,#e8872e);color:#1a1208;box-shadow:0 0 14px rgba(255,180,84,0.45);';
@@ -155,6 +156,10 @@ if (import.meta.env.VITE_REVERB_APP_KEY) {
     echo.private('support.admin')
         .listen('.SupportTicketMessageSent', (payload) => {
             handleAdminPayload(payload);
+
+            if (payload.message && ! payload.message.is_from_admin) {
+                showSupportToast('New user message', 'incoming');
+            }
 
             if (ticketId && Number(payload.message?.ticket_id) === Number(ticketId)) {
                 appendChatMessage(payload.message);

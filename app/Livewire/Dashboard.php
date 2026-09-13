@@ -277,6 +277,9 @@ class Dashboard extends Component
 
     public function createTicket(SupportTicketService $support): void
     {
+        $this->newSubject = trim($this->newSubject);
+        $this->newBody = trim($this->newBody);
+
         $validated = $this->validate([
             'newSubject' => ['required', 'string', 'min:3', 'max:120'],
             'newCategory' => ['required', 'in:'.implode(',', array_keys(SupportTicket::categories()))],
@@ -301,6 +304,7 @@ class Dashboard extends Component
         $this->newCategory = SupportTicket::CATEGORY_OTHER;
         $this->newBody = '';
         $this->markTicketRead($ticket->id);
+        $this->dispatch('support-message-sent', message: 'Message sent');
     }
 
     #[On('echo-private:support.user.{user.id},.SupportTicketMessageSent')]
@@ -319,6 +323,10 @@ class Dashboard extends Component
             }
         }
 
+        if (is_array($payload) && ($payload['message']['is_from_admin'] ?? false)) {
+            $this->dispatch('support-message-received', message: 'New message from support');
+        }
+
         $this->dispatch('support-thread-scroll');
     }
 
@@ -327,6 +335,8 @@ class Dashboard extends Component
         $ticket = $this->selectedTicket;
 
         abort_unless($ticket !== null, 403);
+
+        $this->replyBody = trim($this->replyBody);
 
         $validated = $this->validate([
             'replyBody' => ['required', 'string', 'min:2', 'max:5000'],
@@ -339,6 +349,7 @@ class Dashboard extends Component
         $this->replyBody = '';
         $this->reloadTickets();
         $this->selectedTicketId = $ticket->id;
+        $this->dispatch('support-message-sent', message: 'Message sent');
     }
 
     public function render(): View
