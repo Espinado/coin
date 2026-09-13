@@ -75,8 +75,8 @@
     <header class="coin-dash-header" style="display: flex; align-items: center; gap: 20px; padding: 20px 32px; border-bottom: 1px solid rgba(150,235,250,0.1); background: rgba(4,16,28,0.4);">
       <button type="button" class="coin-burger" wire:click="toggleMenu" aria-label="Open menu"><span></span><span></span><span></span></button>
       <div style="min-width: 0; flex: 1;">
-        <div style="font-size: 20px; font-weight: 600; letter-spacing: -0.02em;">{{ $title }}</div>
-        <div style="margin-top: 4px; font-size: 12.5px; color: rgba(214,238,248,0.7);">{{ $subtitle }}</div>
+        <div style="font-size: 20px; font-weight: 600; letter-spacing: -0.02em;">{{ $this->title }}</div>
+        <div style="margin-top: 4px; font-size: 12.5px; color: rgba(214,238,248,0.7);">{{ $this->subtitle }}</div>
       </div>
       <div class="coin-dash-meta">
         <div class="coin-hide-mobile" style="display: flex; align-items: center; gap: 9px; padding: 9px 14px; border-radius: 10px; border: 1px solid rgba(150,235,250,0.14); background: rgba(150,235,250,0.04); font-family: 'JetBrains Mono', monospace; font-size: 11px; color: rgba(214,238,248,0.8);">
@@ -280,32 +280,32 @@
             </div>
             <div style="margin-top: 22px; display: flex; align-items: baseline; justify-content: space-between;">
               <span style="font-size: 13.5px; color: rgba(214,238,248,0.74);">Select compute</span>
-              <span style="font-family: 'JetBrains Mono', monospace; font-size: 19px; color: #f0fbff;">{{ $powerLabel }} <span style="font-size: 12px; color: rgba(214,238,248,0.7);">TFLOPS</span></span>
+              <span style="font-family: 'JetBrains Mono', monospace; font-size: 19px; color: #f0fbff;">{{ $this->powerLabel }} <span style="font-size: 12px; color: rgba(214,238,248,0.7);">TFLOPS</span></span>
             </div>
             <input type="range" min="100" max="10000" step="100" wire:model.live="power" style="width: 100%; margin-top: 16px; height: 4px; cursor: pointer;" />
             <div style="display: flex; justify-content: space-between; margin-top: 8px; font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.1em; color: rgba(214,238,248,0.62);"><span>100</span><span>2 500</span><span>5 000</span><span>10 000</span></div>
             <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-top: 26px;">
               <div style="padding: 16px; border-radius: 13px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.04);">
                 <div style="font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.12em; color: rgba(214,238,248,0.68);">PER DAY</div>
-                <div style="margin-top: 10px; font-family: 'JetBrains Mono', monospace; font-size: 18px; color: #f0fbff;">{{ $daily }}</div>
+                <div style="margin-top: 10px; font-family: 'JetBrains Mono', monospace; font-size: 18px; color: #f0fbff;">{{ $this->daily }}</div>
               </div>
               <div style="padding: 16px; border-radius: 13px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.04);">
                 <div style="font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.12em; color: rgba(214,238,248,0.68);">PER MONTH</div>
-                <div style="margin-top: 10px; font-family: 'JetBrains Mono', monospace; font-size: 18px; color: #f0fbff;">{{ $monthly }}</div>
+                <div style="margin-top: 10px; font-family: 'JetBrains Mono', monospace; font-size: 18px; color: #f0fbff;">{{ $this->monthly }}</div>
               </div>
               <div style="padding: 16px; border-radius: 13px; border: 1px solid oklch(0.86 0.11 195 / 0.3); background: oklch(0.6 0.13 200 / 0.18);">
                 <div style="font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.12em; color: rgba(214,238,248,0.75);">PER YEAR</div>
-                <div style="margin-top: 10px; font-family: 'JetBrains Mono', monospace; font-size: 18px; color: oklch(0.9 0.12 192);">{{ $yearly }}</div>
+                <div style="margin-top: 10px; font-family: 'JetBrains Mono', monospace; font-size: 18px; color: oklch(0.9 0.12 192);">{{ $this->yearly }}</div>
               </div>
             </div>
           </div>
           <div style="padding: 24px; border-radius: 16px; border: 1px solid rgba(150,235,250,0.14); background: linear-gradient(170deg, rgba(20,55,80,0.7), rgba(6,20,35,0.85));">
             <div style="font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.14em; color: rgba(214,238,248,0.7);">MATCHING PLAN</div>
-            <div style="margin-top: 12px; font-size: 22px; font-weight: 600; letter-spacing: -0.02em;">{{ $planName }}</div>
+            <div style="margin-top: 12px; font-size: 22px; font-weight: 600; letter-spacing: -0.02em;">{{ $this->planName }}</div>
             <div style="height: 1px; background: rgba(150,235,250,0.14); margin: 20px 0;"></div>
             <div style="display: flex; flex-direction: column; gap: 12px; font-size: 13px;">
-              <div style="display: flex; justify-content: space-between; gap: 14px;"><span style="color: rgba(214,238,248,0.72); min-width: 0;">Infrastructure</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">{{ $planInfra }}</span></div>
-              <div style="display: flex; justify-content: space-between; gap: 14px;"><span style="color: rgba(214,238,248,0.72); min-width: 0;">Estimated price</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">{{ $planPrice }}</span></div>
+              <div style="display: flex; justify-content: space-between; gap: 14px;"><span style="color: rgba(214,238,248,0.72); min-width: 0;">Infrastructure</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">{{ $this->planInfra }}</span></div>
+              <div style="display: flex; justify-content: space-between; gap: 14px;"><span style="color: rgba(214,238,248,0.72); min-width: 0;">Estimated price</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">{{ $this->planPrice }}</span></div>
               <div style="display: flex; justify-content: space-between; gap: 14px;"><span style="color: rgba(214,238,248,0.72); min-width: 0;">Reward token</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">{{ $symbol }}</span></div>
             </div>
             <button style="width: 100%; margin-top: 22px; padding: 12px; border-radius: 10px; border: 1px solid oklch(0.86 0.11 195 / 0.5); background: linear-gradient(140deg, oklch(0.86 0.12 192), oklch(0.66 0.13 205)); color: #04121f; font-family: inherit; font-size: 13.5px; font-weight: 600; cursor: pointer;">Activate compute</button>
@@ -375,8 +375,8 @@
 
         <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px;">
           <div style="padding: 20px; border-radius: 16px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.04);">
-            <div style="font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.14em; color: rgba(214,238,248,0.7);">REWARDS {{ $periodLabel }}</div>
-            <div style="margin-top: 12px; font-family: 'JetBrains Mono', monospace; font-size: 24px; color: #f0fbff;">{{ $periodTotal }}</div>
+            <div style="font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.14em; color: rgba(214,238,248,0.7);">REWARDS {{ $this->periodLabel }}</div>
+            <div style="margin-top: 12px; font-family: 'JetBrains Mono', monospace; font-size: 24px; color: #f0fbff;">{{ $this->periodTotal }}</div>
             <div style="margin-top: 7px; font-size: 12px; color: rgba(214,238,248,0.7);">{{ $symbol }} · accrued</div>
           </div>
           <div style="padding: 20px; border-radius: 16px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.04);">
@@ -399,7 +399,7 @@
         <div style="padding: 24px; border-radius: 16px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.035);">
           <div style="display: flex; align-items: baseline; justify-content: space-between;">
             <span style="font-size: 15px; font-weight: 600;">Reward trend</span>
-            <span style="font-family: 'JetBrains Mono', monospace; font-size: 10.5px; color: rgba(214,238,248,0.66);">{{ $symbol }} · {{ $periodLabel }}</span>
+            <span style="font-family: 'JetBrains Mono', monospace; font-size: 10.5px; color: rgba(214,238,248,0.66);">{{ $symbol }} · {{ $this->periodLabel }}</span>
           </div>
           <div style="display: flex; align-items: flex-end; gap: 6px; height: 210px; margin-top: 26px;">
             <div style="flex: 1; height: 28%; border-radius: 4px 4px 2px 2px; background: linear-gradient(180deg, oklch(0.72 0.11 210 / 0.75), oklch(0.72 0.11 210 / 0.1));"></div>
