@@ -10,6 +10,7 @@ use App\Services\SupportTicketService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Collection;
 use Livewire\Attributes\On;
+use Livewire\Attributes\Renderless;
 use Livewire\Component;
 
 class Dashboard extends Component
@@ -110,13 +111,15 @@ class Dashboard extends Component
         }
     }
 
+    #[Renderless]
     public function pollSupportUnread(): void
     {
         if ($this->section === 7) {
             return;
         }
 
-        $this->refreshSupportUnreadState();
+        $this->reloadTickets();
+        $this->dispatchUnreadSupportBadge();
     }
 
     public function openSupport(): void
@@ -124,6 +127,12 @@ class Dashboard extends Component
         $this->section = 7;
         $this->menuOpen = false;
         $this->prepareSupportChat();
+
+        if ($this->selectedTicketId) {
+            $this->markTicketRead($this->selectedTicketId);
+        }
+
+        $this->syncSupportUnreadBadge();
     }
 
     public function setPeriod(int $period): void
@@ -246,7 +255,7 @@ class Dashboard extends Component
 
     public function getUnreadSupportCountProperty(): int
     {
-        return (int) $this->tickets->sum(fn (SupportTicket $ticket) => $ticket->unreadMessagesForUser());
+        return $this->unreadSupportTotalForUser();
     }
 
     public function getTicketCategoriesProperty(): array
@@ -451,9 +460,19 @@ class Dashboard extends Component
         $this->syncSupportUnreadBadge();
     }
 
+    private function unreadSupportTotalForUser(): int
+    {
+        return (int) SupportTicket::totalUnreadForUser($this->user->id);
+    }
+
+    private function dispatchUnreadSupportBadge(): void
+    {
+        $this->dispatch('support-unread-updated', count: $this->unreadSupportTotalForUser());
+    }
+
     private function syncSupportUnreadBadge(): void
     {
-        $this->dispatch('support-unread-updated', count: $this->unreadSupportCount);
+        $this->dispatchUnreadSupportBadge();
     }
 
     private function markTicketRead(?int $ticketId): void

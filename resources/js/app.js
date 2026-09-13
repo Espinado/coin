@@ -112,8 +112,8 @@ if (hasEchoKey()) {
 syncUserSupportNavBadgeFromDom();
 
 document.addEventListener('livewire:init', () => {
-    Livewire.hook('morph.updated', () => {
-        syncUserSupportNavBadgeFromDom();
+    Livewire.on('support-unread-updated', (payload) => {
+        updateUserSupportNavBadge(Number(payload?.count ?? 0));
     });
 });
 
