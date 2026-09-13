@@ -10,7 +10,6 @@ use App\Services\SupportTicketService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Collection;
 use Livewire\Attributes\On;
-use Livewire\Attributes\Renderless;
 use Livewire\Component;
 
 class Dashboard extends Component
@@ -109,17 +108,6 @@ class Dashboard extends Component
         } else {
             $this->refreshSupportUnreadState();
         }
-    }
-
-    #[Renderless]
-    public function pollSupportUnread(): void
-    {
-        if ($this->section === 7) {
-            return;
-        }
-
-        $this->reloadTickets();
-        $this->dispatchUnreadSupportBadge();
     }
 
     public function openSupport(): void

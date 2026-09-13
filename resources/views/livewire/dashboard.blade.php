@@ -1,4 +1,4 @@
-<div x-data x-effect="document.documentElement.classList.toggle('coin-nav-open', @js($menuOpen))" @unless($section === 7) wire:poll.10s="pollSupportUnread" @endunless>
+<div x-data x-effect="document.documentElement.classList.toggle('coin-nav-open', @js($menuOpen))">
 <div class="coin-dashboard" style="display: flex; min-height: 100vh; width: 1440px; margin: 0 auto; background: #061423; color: #e6f4fa; font-family: 'Sora', 'Helvetica Neue', Helvetica, sans-serif;">
 
   <div class="coin-nav-overlay" wire:click="closeMenu"></div>
