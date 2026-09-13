@@ -5,6 +5,7 @@ import { showIncomingMessageToast, showSupportToast } from './support-toast';
 import { appendSupportMessage, scrollSupportThreadToBottom } from './support-chat';
 
 window.showSupportToast = showSupportToast;
+window.showIncomingMessageToast = showIncomingMessageToast;
 window.appendSupportMessage = appendSupportMessage;
 window.scrollSupportThreadToBottom = scrollSupportThreadToBottom;
 

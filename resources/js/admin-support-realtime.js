@@ -103,18 +103,10 @@ function handleAdminPayload(payload) {
     updateTicketRow(payload);
 }
 
-function notifyAdminAboutUserMessage(payload, activeTicketId) {
+function notifyAdminAboutUserMessage(payload) {
     const message = payload?.message;
 
     if (! message || message.is_from_admin) {
-        return;
-    }
-
-    const messageTicketId = Number(message.ticket_id ?? payload.ticket?.id ?? 0);
-    const viewingSameTicket = activeTicketId && messageTicketId === Number(activeTicketId);
-    const thread = document.getElementById('support-thread');
-
-    if (viewingSameTicket && thread) {
         return;
     }
 
@@ -160,7 +152,7 @@ function bootAdminSupportRealtime() {
                 ticketId: payload?.ticket?.id ?? payload?.message?.ticket_id ?? null,
             });
             handleAdminPayload(payload);
-            notifyAdminAboutUserMessage(payload, ticketId);
+            notifyAdminAboutUserMessage(payload);
             handleIncomingMessage(payload, ticketId);
         })
         .listen('.SupportTicketUpdated', (payload) => {

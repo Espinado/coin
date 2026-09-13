@@ -336,10 +336,8 @@ class Dashboard extends Component
                 $this->dispatch('support-thread-scroll');
             }
 
-            if ($isFromAdmin && ! $viewingTicket) {
-                $this->dispatch('support-message-received', message: 'New message from support');
-            } elseif ($isFromAdmin && $viewingTicket && $messageTicketId !== null && $messageTicketId !== $this->selectedTicketId) {
-                $this->dispatch('support-message-received', message: 'New message from support');
+            if ($isFromAdmin) {
+                $this->dispatch('support-message-received', incomingMessage: $message);
             }
         }
 

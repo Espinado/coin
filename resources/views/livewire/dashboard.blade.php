@@ -748,7 +748,13 @@
   });
 
   $wire.on('support-message-received', (payload) => {
-    window.showSupportToast?.(payload?.message ?? 'New message', 'incoming');
+    const incoming = payload?.incomingMessage ?? payload;
+
+    if (incoming?.id || incoming?.body) {
+      window.showIncomingMessageToast?.(incoming, 'New message from support');
+    } else {
+      window.showSupportToast?.('New message from support', 'incoming');
+    }
   });
 
   $wire.on('support-unread-updated', (payload) => {

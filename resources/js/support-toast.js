@@ -6,10 +6,6 @@ export function showIncomingMessageToast(message, title = 'New message') {
             return;
         }
 
-        if (document.querySelector(`[data-message-id="${message.id}"]`)) {
-            return;
-        }
-
         recentIncomingToastIds.add(message.id);
         window.setTimeout(() => recentIncomingToastIds.delete(message.id), 15000);
     }
