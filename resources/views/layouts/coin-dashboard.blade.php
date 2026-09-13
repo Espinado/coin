@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ $title ?? 'Coin' }}</title>
+    @livewireStyles
+    @vite(['resources/js/app.js'])
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="{{ asset('coin/responsive.css') }}" />
+    <style>
+      body { margin: 0; background: #04101c; -webkit-font-smoothing: antialiased; }
+      a { color: oklch(0.86 0.11 195); text-decoration: none; }
+      a:hover { color: oklch(0.92 0.09 195); }
+      @keyframes dbPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
+      input[type="range"] { accent-color: oklch(0.8 0.13 192); }
+    </style>
+</head>
+<body>
+    {{ $slot }}
+    @livewireScripts
+    <script src="{{ asset('coin/mobile.js') }}" defer></script>
+</body>
+</html>
