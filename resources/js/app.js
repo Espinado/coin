@@ -69,6 +69,18 @@ function syncUserSupportNavBadgeFromDom() {
 
 window.updateUserSupportNavBadge = updateUserSupportNavBadge;
 
+function readLivewireEventPayload(payload, key = null) {
+    const item = Array.isArray(payload) ? payload[0] : payload;
+
+    if (key === null) {
+        return item;
+    }
+
+    return item?.[key];
+}
+
+window.readLivewireEventPayload = readLivewireEventPayload;
+
 function bootUserSupportRealtime() {
     const echo = initEcho();
     const userId = window.coinReverb?.supportUserId;
@@ -113,7 +125,13 @@ syncUserSupportNavBadgeFromDom();
 
 document.addEventListener('livewire:init', () => {
     Livewire.on('support-unread-updated', (payload) => {
-        updateUserSupportNavBadge(Number(payload?.count ?? 0));
+        const count = readLivewireEventPayload(payload, 'count');
+
+        if (count === undefined || count === null) {
+            return;
+        }
+
+        updateUserSupportNavBadge(Number(count));
     });
 });
 

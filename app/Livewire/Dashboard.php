@@ -344,12 +344,14 @@ class Dashboard extends Component
                 $this->dispatch('support-thread-scroll');
             }
 
-            if ($isFromAdmin) {
+            if ($isFromAdmin && $this->section !== 7) {
                 $this->dispatch('support-message-received', incomingMessage: $message);
             }
         }
 
-        $this->syncSupportUnreadBadge();
+        if ($this->section !== 7) {
+            $this->syncSupportUnreadBadge();
+        }
     }
 
     public function sendTicketReply(SupportTicketService $support): void

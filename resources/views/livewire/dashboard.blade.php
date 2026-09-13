@@ -748,7 +748,8 @@
   });
 
   $wire.on('support-message-received', (payload) => {
-    const incoming = payload?.incomingMessage ?? payload;
+    const incoming = window.readLivewireEventPayload?.(payload, 'incomingMessage')
+      ?? window.readLivewireEventPayload?.(payload);
 
     if (incoming?.id || incoming?.body) {
       window.showIncomingMessageToast?.(incoming, 'New message from support');
@@ -758,7 +759,13 @@
   });
 
   $wire.on('support-unread-updated', (payload) => {
-    window.updateUserSupportNavBadge?.(Number(payload?.count ?? 0));
+    const count = window.readLivewireEventPayload?.(payload, 'count');
+
+    if (count === undefined || count === null) {
+      return;
+    }
+
+    window.updateUserSupportNavBadge?.(Number(count));
   });
 
   $wire.watch('selectedTicketId', () => {
