@@ -233,14 +233,6 @@ class Dashboard extends Component
         return $this->tickets->firstWhere('id', $this->selectedTicketId);
     }
 
-    public function getOpenTicketCountProperty(): int
-    {
-        return $this->tickets->whereIn('status', [
-            SupportTicket::STATUS_OPEN,
-            SupportTicket::STATUS_PENDING,
-        ])->count();
-    }
-
     public function getUnreadSupportCountProperty(): int
     {
         return (int) $this->tickets->sum(fn (SupportTicket $ticket) => $ticket->unreadMessagesForUser());

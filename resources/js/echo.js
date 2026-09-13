@@ -1,5 +1,6 @@
 import Echo from 'laravel-echo';
 import Pusher from 'pusher-js';
+import { attachEchoDebug, logEchoConfig, reverbLog } from './reverb-debug';
 
 window.Pusher = Pusher;
 
@@ -15,19 +16,30 @@ function reverbConfig() {
         wsPort: port,
         wssPort: port,
         forceTLS: scheme === 'https',
+        debug: Boolean(runtime.debug),
     };
+}
+
+export function hasEchoKey() {
+    const config = reverbConfig();
+
+    return Boolean(config.key);
 }
 
 export function initEcho() {
     const config = reverbConfig();
 
     if (! config.key) {
+        reverbLog('error', 'Echo not initialized: missing Reverb app key');
+
         return null;
     }
 
     if (window.Echo) {
         return window.Echo;
     }
+
+    logEchoConfig('init');
 
     const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ?? '';
 
@@ -48,6 +60,10 @@ export function initEcho() {
         },
         disableStats: true,
     });
+
+    if (config.debug) {
+        attachEchoDebug(window.Echo, 'init');
+    }
 
     return window.Echo;
 }

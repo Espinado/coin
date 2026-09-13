@@ -1,5 +1,6 @@
 import './bootstrap';
-import { initEcho } from './echo';
+import { hasEchoKey, initEcho } from './echo';
+import { reverbLog } from './reverb-debug';
 import { showSupportToast } from './support-toast';
 import { appendSupportMessage } from './support-chat';
 
@@ -125,6 +126,12 @@ function handleIncomingMessage(payload, ticketId) {
 }
 
 function bootAdminSupportRealtime() {
+    if (! hasEchoKey()) {
+        reverbLog('warn', 'admin Echo skipped: no Reverb key in runtime config or Vite build');
+
+        return;
+    }
+
     const echo = initEcho();
 
     if (! echo) {
@@ -135,18 +142,34 @@ function bootAdminSupportRealtime() {
 
     echo.private('support.admin')
         .listen('.SupportTicketMessageSent', (payload) => {
+            reverbLog('info', 'admin channel: SupportTicketMessageSent', {
+                ticketId: payload?.ticket?.id ?? payload?.message?.ticket_id ?? null,
+            });
             handleAdminPayload(payload);
             handleIncomingMessage(payload, ticketId);
         })
-        .listen('.SupportTicketUpdated', handleAdminPayload);
+        .listen('.SupportTicketUpdated', (payload) => {
+            reverbLog('info', 'admin channel: SupportTicketUpdated', {
+                ticketId: payload?.ticket?.id ?? null,
+            });
+            handleAdminPayload(payload);
+        });
+
+    reverbLog('info', 'admin support.admin subscribed');
 
     if (ticketId) {
         echo.private(`support.ticket.${ticketId}`)
-            .listen('.SupportTicketMessageSent', (payload) => handleIncomingMessage(payload, ticketId))
+            .listen('.SupportTicketMessageSent', (payload) => {
+                reverbLog('info', 'admin ticket channel: SupportTicketMessageSent', { ticketId });
+                handleIncomingMessage(payload, ticketId);
+            })
             .listen('.SupportTicketUpdated', (payload) => {
+                reverbLog('info', 'admin ticket channel: SupportTicketUpdated', { ticketId });
                 updateTicketMeta(payload.ticket);
                 handleAdminPayload(payload);
             });
+
+        reverbLog('info', 'admin support.ticket subscribed', { ticketId });
     }
 }
 

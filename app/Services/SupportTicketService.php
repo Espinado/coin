@@ -9,9 +9,11 @@ use App\Models\SupportTicket;
 use App\Models\SupportTicketMessage;
 use App\Models\User;
 use Illuminate\Broadcasting\BroadcastException;
+use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
+use Throwable;
 
 class SupportTicketService
 {
@@ -85,11 +87,33 @@ class SupportTicketService
 
     private function broadcastSupportEvent(object $event): void
     {
+        $channels = $event instanceof ShouldBroadcastNow
+            ? collect($event->broadcastOn())->map(fn ($channel) => $channel->name)->values()->all()
+            : [];
+
         try {
             event($event);
+
+            if (config('broadcasting.connections.reverb.debug')) {
+                Log::channel('reverb')->info('Support broadcast dispatched.', [
+                    'event' => $event::class,
+                    'channels' => $channels,
+                    'driver' => config('broadcasting.default'),
+                ]);
+            }
         } catch (BroadcastException $exception) {
-            Log::warning('Support realtime broadcast skipped.', [
+            Log::channel('reverb')->error('Support realtime broadcast failed.', [
                 'event' => $event::class,
+                'channels' => $channels,
+                'driver' => config('broadcasting.default'),
+                'reverb_host' => config('broadcasting.connections.reverb.options.host'),
+                'reverb_port' => config('broadcasting.connections.reverb.options.port'),
+                'message' => $exception->getMessage(),
+            ]);
+        } catch (Throwable $exception) {
+            Log::channel('reverb')->error('Support realtime broadcast error.', [
+                'event' => $event::class,
+                'channels' => $channels,
                 'message' => $exception->getMessage(),
             ]);
         }

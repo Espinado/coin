@@ -57,6 +57,19 @@ class SupportTicket extends Model
             ->count();
     }
 
+    public static function totalUnreadForUser(int $userId): int
+    {
+        return (int) SupportTicketMessage::query()
+            ->join('support_tickets', 'support_tickets.id', '=', 'support_ticket_messages.support_ticket_id')
+            ->where('support_tickets.user_id', $userId)
+            ->where('support_ticket_messages.author_type', SupportTicketMessage::AUTHOR_ADMIN)
+            ->where(function ($query) {
+                $query->whereNull('support_tickets.user_last_read_at')
+                    ->orWhereColumn('support_ticket_messages.created_at', '>', 'support_tickets.user_last_read_at');
+            })
+            ->count();
+    }
+
     public function unreadMessagesForAdmin(): int
     {
         return $this->messages

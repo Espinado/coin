@@ -1,9 +1,12 @@
 @php
+    $reverbClient = config('broadcasting.connections.reverb.client', []);
     $coinReverbConfig = [
         'key' => config('broadcasting.connections.reverb.key'),
-        'host' => env('VITE_REVERB_HOST', env('REVERB_HOST', 'localhost')),
-        'port' => (int) env('VITE_REVERB_PORT', env('REVERB_PORT', 8080)),
-        'scheme' => env('VITE_REVERB_SCHEME', env('REVERB_SCHEME', 'http')),
+        'host' => $reverbClient['host'] ?? 'localhost',
+        'port' => (int) ($reverbClient['port'] ?? 8080),
+        'scheme' => $reverbClient['scheme'] ?? 'http',
+        'supportUserId' => auth()->id(),
+        'debug' => (bool) config('broadcasting.connections.reverb.debug', false),
     ];
 @endphp
 <script>

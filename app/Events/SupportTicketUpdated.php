@@ -48,6 +48,7 @@ class SupportTicketUpdated implements ShouldBroadcastNow
             'unread_for_admin' => $this->ticket->unreadMessagesForAdmin(),
             'unread_for_user' => $this->ticket->unreadMessagesForUser(),
             'total_unread_for_admin' => SupportTicket::totalUnreadForAdmin(),
+            'total_unread_for_user' => SupportTicket::totalUnreadForUser($this->ticket->user_id),
         ];
     }
 }

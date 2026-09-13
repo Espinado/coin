@@ -36,4 +36,7 @@ else
   bash ./start-reverb.sh
 fi
 
+echo "==> reverb diagnose"
+php artisan coin:reverb-diagnose || true
+
 echo "DEPLOY_OK"

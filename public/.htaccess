@@ -5,6 +5,12 @@
 
     RewriteEngine On
 
+    # Reverb WebSocket proxy (browser :443 -> local Reverb :8080)
+    RewriteCond %{HTTP:Upgrade} =websocket [NC]
+    RewriteRule ^app/(.*)$ ws://127.0.0.1:8080/app/$1 [P,L]
+    RewriteCond %{HTTP:Upgrade} !=websocket [NC]
+    RewriteRule ^app/(.*)$ http://127.0.0.1:8080/app/$1 [P,L]
+
     # Force HTTPS in production (prevents 419 CSRF errors from mixed HTTP/HTTPS sessions).
     RewriteCond %{HTTPS} !=on
     RewriteCond %{HTTP_HOST} !\.test$ [NC]

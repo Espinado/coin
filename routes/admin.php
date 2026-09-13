@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\Auth\AuthenticatedSessionController;
+use App\Http\Controllers\ReverbDebugLogController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\EpochController;
 use App\Http\Controllers\Admin\PlanController;
@@ -30,6 +31,8 @@ Route::middleware(['admin.domain', 'reject.web.on.admin'])->group(function () {
 
     Route::middleware('auth:admin')->group(function () {
         Broadcast::routes(['middleware' => ['web', 'broadcast.auth:admin']]);
+
+        Route::post('reverb-debug', [ReverbDebugLogController::class, 'store'])->name('admin.reverb-debug.store');
 
         Route::get('dashboard', DashboardController::class)
             ->name('admin.dashboard');
