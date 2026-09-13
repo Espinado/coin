@@ -1,6 +1,6 @@
 import Echo from 'laravel-echo';
 import Pusher from 'pusher-js';
-import { attachEchoDebug, logEchoConfig, reverbLog } from './reverb-debug';
+import { attachEchoConnectionMonitor, attachEchoDebug, logEchoConfig, reverbLog } from './reverb-debug';
 
 window.Pusher = Pusher;
 
@@ -60,6 +60,10 @@ export function initEcho() {
         },
         disableStats: true,
     });
+
+    if (window.coinReverb?.monitor !== false) {
+        attachEchoConnectionMonitor(window.Echo, 'init');
+    }
 
     if (config.debug) {
         attachEchoDebug(window.Echo, 'init');

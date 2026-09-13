@@ -135,6 +135,14 @@ return [
             'replace_placeholders' => true,
         ],
 
+        'reverb_connection' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/reverb-connection.log'),
+            'level' => env('LOG_LEVEL', 'debug'),
+            'days' => 14,
+            'replace_placeholders' => true,
+        ],
+
     ],
 
 ];

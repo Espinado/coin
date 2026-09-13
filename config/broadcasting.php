@@ -47,6 +47,7 @@ return [
                 'scheme' => env('VITE_REVERB_SCHEME', env('REVERB_SCHEME', 'http')),
             ],
             'debug' => (bool) env('REVERB_DEBUG', false),
+            'connection_monitor' => (bool) env('REVERB_CONNECTION_MONITOR', true),
             'client_options' => [
                 // Guzzle client options: https://docs.guzzlephp.org/en/stable/request-options.html
             ],

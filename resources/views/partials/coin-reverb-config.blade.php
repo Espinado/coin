@@ -7,6 +7,7 @@
         'scheme' => $reverbClient['scheme'] ?? 'http',
         'supportUserId' => auth()->id(),
         'debug' => (bool) config('broadcasting.connections.reverb.debug', false),
+        'monitor' => (bool) config('broadcasting.connections.reverb.connection_monitor', true),
     ];
 @endphp
 <script>

@@ -45,6 +45,7 @@ class ReverbDiagnoseCommand extends Command
 
         $this->line('Reverb app key set: '.(filled($reverb['key'] ?? null) ? 'yes' : 'no'));
         $this->line('Reverb debug logging: '.((bool) ($reverb['debug'] ?? false) ? 'enabled' : 'disabled'));
+        $this->line('WebSocket connection monitor: '.((bool) ($reverb['connection_monitor'] ?? true) ? 'enabled' : 'disabled'));
 
         $host = $reverb['options']['host'] ?? '127.0.0.1';
         $port = (int) ($reverb['options']['port'] ?? 8080);
@@ -71,6 +72,9 @@ class ReverbDiagnoseCommand extends Command
 
         $this->showLogTail(storage_path('logs/reverb.log'), 'Reverb daemon log');
         $this->showLogTail(storage_path('logs/reverb-debug.log'), 'Reverb debug log');
+        $this->showLogTail($this->latestDailyLog('reverb-connection'), 'WebSocket connection log');
+        $this->showLogTail(storage_path('logs/reverb-watchdog.log'), 'Reverb watchdog log');
+        $this->line('Run `php artisan coin:reverb-connection-stats` for disconnect counts.');
         $this->showBroadcastErrors();
 
         return self::SUCCESS;
@@ -120,6 +124,17 @@ class ReverbDiagnoseCommand extends Command
                 'message' => $exception->getMessage(),
             ]);
         }
+    }
+
+    private function latestDailyLog(string $basename): string
+    {
+        $dated = storage_path('logs/'.$basename.'-'.now()->format('Y-m-d').'.log');
+
+        if (File::exists($dated)) {
+            return $dated;
+        }
+
+        return storage_path('logs/'.$basename.'.log');
     }
 
     private function showLogTail(string $path, string $label): void

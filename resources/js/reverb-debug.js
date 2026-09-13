@@ -1,18 +1,14 @@
 const csrfToken = () => document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ?? '';
 
-export function reverbLog(level, message, context = {}) {
-    const prefix = `[reverb:${level}]`;
-
-    if (level === 'error') {
-        console.error(prefix, message, context);
-    } else {
-        console.info(prefix, message, context);
+function shouldSendToServer(message, context = {}) {
+    if (context.monitor || message.startsWith('[ws_state]')) {
+        return window.coinReverb?.monitor !== false;
     }
 
-    if (! window.coinReverb?.debug) {
-        return;
-    }
+    return Boolean(window.coinReverb?.debug);
+}
 
+function sendReverbLog(level, message, context = {}) {
     fetch(`${window.location.origin}/reverb-debug`, {
         method: 'POST',
         headers: {
@@ -34,6 +30,69 @@ export function reverbLog(level, message, context = {}) {
     }).catch((error) => {
         console.warn('[reverb:debug] failed to send log', error);
     });
+}
+
+export function reverbLog(level, message, context = {}) {
+    const prefix = `[reverb:${level}]`;
+
+    if (level === 'error') {
+        console.error(prefix, message, context);
+    } else {
+        console.info(prefix, message, context);
+    }
+
+    if (! shouldSendToServer(message, context)) {
+        return;
+    }
+
+    sendReverbLog(level, message, context);
+}
+
+export function reverbConnectionLog(event, context = {}) {
+    reverbLog('info', `[ws_state] ${event}`, { ...context, monitor: true });
+}
+
+export function attachEchoConnectionMonitor(echo, label = 'echo') {
+    if (! echo?.connector?.pusher) {
+        return;
+    }
+
+    if (echo.__coinConnectionMonitorAttached) {
+        return;
+    }
+
+    echo.__coinConnectionMonitorAttached = true;
+
+    const connection = echo.connector.pusher.connection;
+    let connectedAt = null;
+
+    const logTransition = (event, extra = {}) => {
+        reverbConnectionLog(event, {
+            label,
+            state: connection.state,
+            socketId: connection.socket_id ?? null,
+            ...extra,
+        });
+    };
+
+    logTransition(`initial:${connection.state}`);
+
+    connection.bind('connecting', () => logTransition('connecting'));
+    connection.bind('connected', () => {
+        connectedAt = Date.now();
+        logTransition('connected');
+    });
+    connection.bind('disconnected', () => {
+        logTransition('disconnected', {
+            uptimeMs: connectedAt ? Date.now() - connectedAt : null,
+        });
+        connectedAt = null;
+    });
+    connection.bind('unavailable', () => logTransition('unavailable'));
+    connection.bind('failed', () => logTransition('failed'));
+    connection.bind('error', (error) => logTransition('error', {
+        error: error?.error?.data ?? error?.error ?? error,
+    }));
 }
 
 export function attachEchoDebug(echo, label = 'echo') {
@@ -82,6 +141,7 @@ export function logEchoConfig(label = 'echo') {
         scheme: runtime.scheme,
         hasKey: Boolean(runtime.key),
         debug: Boolean(runtime.debug),
+        monitor: runtime.monitor !== false,
         authEndpoint: `${window.location.origin}/broadcasting/auth`,
     });
 }
