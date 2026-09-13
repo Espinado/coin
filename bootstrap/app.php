@@ -12,6 +12,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
         web: __DIR__.'/../routes/web.php',
         commands: __DIR__.'/../routes/console.php',
+        channels: __DIR__.'/../routes/channels.php',
         health: '/up',
         then: function () {
             Route::middleware('web')
@@ -26,6 +27,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'user.domain' => \App\Http\Middleware\EnsureUserDomain::class,
             'admin.domain' => \App\Http\Middleware\EnsureAdminDomain::class,
             'reject.web.on.admin' => \App\Http\Middleware\RejectWebGuardOnAdmin::class,
+            'broadcast.auth' => \App\Http\Middleware\AuthenticateBroadcasting::class,
         ]);
 
         Authenticate::redirectUsing(function (Request $request) {

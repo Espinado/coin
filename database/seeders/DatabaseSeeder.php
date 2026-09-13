@@ -10,6 +10,7 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             AdminSeeder::class,
+            PlatformSettingsSeeder::class,
             CoinDemoSeeder::class,
         ]);
     }

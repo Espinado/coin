@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use App\Events\SupportTicketMessageSent;
+use App\Events\SupportTicketUpdated;
 use App\Models\Admin;
 use App\Models\SupportTicket;
 use App\Models\SupportTicketMessage;
@@ -57,7 +59,11 @@ class SupportTicketService
             'assigned_admin_id' => $ticket->assigned_admin_id ?? $admin->id,
         ]);
 
-        return $ticket->fresh(['user.wallet', 'user.contracts.plan', 'messages', 'assignedAdmin']);
+        $ticket = $ticket->fresh(['user.wallet', 'user.contracts.plan', 'messages', 'assignedAdmin']);
+
+        SupportTicketUpdated::dispatch($ticket);
+
+        return $ticket;
     }
 
     private function addMessage(SupportTicket $ticket, string $authorType, int $authorId, string $body): SupportTicketMessage
@@ -69,6 +75,8 @@ class SupportTicketService
         ]);
 
         $ticket->update(['last_reply_at' => $message->created_at]);
+
+        SupportTicketMessageSent::dispatch($message->fresh());
 
         return $message;
     }

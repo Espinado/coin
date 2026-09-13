@@ -2,11 +2,14 @@
 
 namespace Tests\Feature;
 
+use App\Events\SupportTicketMessageSent;
+use App\Events\SupportTicketUpdated;
 use App\Models\Admin;
 use App\Models\SupportTicket;
 use App\Models\User;
 use App\Services\SupportTicketService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Hash;
 use Tests\TestCase;
 
@@ -98,6 +101,47 @@ class SupportTicketTest extends TestCase
             'status' => SupportTicket::STATUS_PENDING,
             'assigned_admin_id' => $admin->id,
         ]);
+    }
+
+    public function test_support_messages_dispatch_realtime_events(): void
+    {
+        Event::fake([
+            SupportTicketMessageSent::class,
+            SupportTicketUpdated::class,
+        ]);
+
+        $user = User::factory()->create();
+        $admin = Admin::query()->create([
+            'name' => 'Support Admin',
+            'email' => 'realtime-admin@coin.test',
+            'password' => Hash::make('password'),
+        ]);
+
+        $ticket = app(SupportTicketService::class)->createForUser(
+            $user,
+            'Realtime check',
+            SupportTicket::CATEGORY_OTHER,
+            'First message',
+        );
+
+        Event::assertDispatched(SupportTicketMessageSent::class);
+
+        app(SupportTicketService::class)->addAdminMessage(
+            $ticket,
+            $admin,
+            'Admin reply',
+            SupportTicket::STATUS_PENDING,
+        );
+
+        Event::assertDispatchedTimes(SupportTicketMessageSent::class, 2);
+
+        app(SupportTicketService::class)->updateStatus(
+            $ticket,
+            SupportTicket::STATUS_CLOSED,
+            $admin,
+        );
+
+        Event::assertDispatched(SupportTicketUpdated::class);
     }
 
     public function test_regular_user_cannot_open_admin_support_pages(): void

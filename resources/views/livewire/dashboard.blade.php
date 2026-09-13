@@ -387,7 +387,7 @@
           <div style="padding: 20px; border-radius: 16px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.04);">
             <div style="font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.14em; color: rgba(214,238,248,0.7);">AVG PER EPOCH</div>
             <div style="margin-top: 12px; font-family: 'JetBrains Mono', monospace; font-size: 24px; color: #f0fbff;">{{ $user->avg_epoch_label }}</div>
-            <div style="margin-top: 7px; font-size: 12px; color: rgba(214,238,248,0.7);">3 epochs per day</div>
+            <div style="margin-top: 7px; font-size: 12px; color: rgba(214,238,248,0.7);">{{ $epochsPerDay }} epochs per day</div>
           </div>
           <div style="padding: 20px; border-radius: 16px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.04);">
             <div style="font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.14em; color: rgba(214,238,248,0.7);">AVAILABILITY</div>
@@ -631,13 +631,13 @@
             <div style="width: 52px; height: 52px; border-radius: 50%; background: linear-gradient(145deg, oklch(0.7 0.13 198), oklch(0.5 0.15 285)); display: grid; place-items: center; font-family: 'JetBrains Mono', monospace; font-size: 17px; color: #04121f;">A</div>
             <div>
               <div style="font-size: 15px; font-weight: 500;">{{ $user->accountLabel() }}</div>
-              <div style="margin-top: 4px; font-size: 12.5px; color: rgba(214,238,248,0.72);">placeholder@coin.local</div>
+              <div style="margin-top: 4px; font-size: 12.5px; color: rgba(214,238,248,0.72);">{{ $user->email }}</div>
             </div>
           </div>
           <div style="margin-top: 22px; display: flex; flex-direction: column; gap: 14px;">
             <div>
               <div style="font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.12em; color: rgba(214,238,248,0.68);">DISPLAY NAME</div>
-              <div style="margin-top: 8px; padding: 12px 14px; border-radius: 10px; border: 1px solid rgba(150,235,250,0.14); background: rgba(4,16,28,0.5); font-size: 13.5px; color: rgba(214,238,248,0.85);">Editable placeholder</div>
+              <div style="margin-top: 8px; padding: 12px 14px; border-radius: 10px; border: 1px solid rgba(150,235,250,0.14); background: rgba(4,16,28,0.5); font-size: 13.5px; color: rgba(214,238,248,0.85);">{{ $user->name }}</div>
             </div>
             <div>
               <div style="font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.12em; color: rgba(214,238,248,0.68);">TIME ZONE</div>
@@ -689,9 +689,9 @@
             <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
               <div>
                 <div style="font-size: 13.5px;">Identity verification (KYC)</div>
-                <div style="margin-top: 4px; font-size: 12px; color: rgba(214,238,248,0.7);">Placeholder — flow TBD</div>
+                <div style="margin-top: 4px; font-size: 12px; color: rgba(214,238,248,0.7);">Required before withdrawals when enabled platform-wide</div>
               </div>
-              <span style="padding: 5px 11px; border-radius: 7px; background: oklch(0.7 0.15 90 / 0.16); border: 1px solid oklch(0.8 0.14 90 / 0.4); font-family: 'JetBrains Mono', monospace; font-size: 10px; color: oklch(0.9 0.14 90);">PENDING</span>
+              <span style="padding: 5px 11px; border-radius: 7px; font-family: 'JetBrains Mono', monospace; font-size: 10px; {{ $user->kycBadgeStyle() }}">{{ strtoupper($user->kycLabel()) }}</span>
             </div>
           </div>
         </div>

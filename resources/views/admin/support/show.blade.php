@@ -2,6 +2,16 @@
 
 @section('title', 'Coin Admin — '.$ticket->reference)
 
+@push('head')
+    @vite(['resources/js/admin-support.js'])
+    <script>
+        window.supportChatConfig = {
+            ticketId: {{ $ticket->id }},
+            replyUrl: @json(route('admin.support.reply', $ticket)),
+        };
+    </script>
+@endpush
+
 @section('content')
     @include('admin.partials.nav')
 
@@ -16,7 +26,7 @@
                     <div>
                         <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.12em;color:rgba(232,237,245,0.62);">{{ $ticket->reference }}</div>
                         <h1 style="margin:10px 0 0;font-size:22px;font-weight:600;">{{ $ticket->subject }}</h1>
-                        <p style="margin:8px 0 0;font-size:13px;color:rgba(232,237,245,0.72);">{{ $ticket->categoryLabel() }} · {{ $ticket->statusLabel() }}</p>
+                        <p style="margin:8px 0 0;font-size:13px;color:rgba(232,237,245,0.72);">{{ $ticket->categoryLabel() }} · <span id="ticket-status-label">{{ $ticket->statusLabel() }}</span></p>
                     </div>
                     <form method="POST" action="{{ route('admin.support.status', $ticket) }}" style="display:flex;gap:8px;align-items:center;">
                         @csrf
@@ -31,9 +41,9 @@
                 </div>
             </div>
 
-            <div class="admin-card" style="margin-top:16px;display:flex;flex-direction:column;gap:14px;">
+            <div id="support-thread" class="admin-card" style="margin-top:16px;display:flex;flex-direction:column;gap:14px;">
                 @foreach($ticket->messages as $message)
-                    <div style="padding:16px;border-radius:12px;border:1px solid rgba(255,255,255,0.08);background:{{ $message->isFromAdmin() ? 'rgba(255,180,84,0.06)' : 'rgba(255,255,255,0.03)' }};">
+                    <div data-message-id="{{ $message->id }}" style="padding:16px;border-radius:12px;border:1px solid rgba(255,255,255,0.08);background:{{ $message->isFromAdmin() ? 'rgba(255,180,84,0.06)' : 'rgba(255,255,255,0.03)' }};">
                         <div style="display:flex;justify-content:space-between;gap:12px;font-size:12px;color:rgba(232,237,245,0.62);">
                             <span>{{ $message->isFromAdmin() ? 'Support team' : $ticket->user->accountLabel() }}</span>
                             <span>{{ $message->created_at?->format('M j, Y H:i') }}</span>
@@ -46,13 +56,14 @@
             @if($ticket->status !== \App\Models\SupportTicket::STATUS_CLOSED)
                 <div class="admin-card" style="margin-top:16px;">
                     <h2 style="margin:0 0 14px;font-size:16px;font-weight:600;">Reply</h2>
-                    <form method="POST" action="{{ route('admin.support.reply', $ticket) }}" style="display:flex;flex-direction:column;gap:12px;">
+                    <form id="support-reply-form" method="POST" action="{{ route('admin.support.reply', $ticket) }}" style="display:flex;flex-direction:column;gap:12px;">
                         @csrf
-                        <textarea name="body" rows="5" required maxlength="5000" placeholder="Write a reply to the user..."
+                        <textarea id="support-reply-body" name="body" rows="5" required maxlength="5000" placeholder="Write a reply to the user..."
                             style="width:100%;box-sizing:border-box;padding:12px 14px;border-radius:10px;border:1px solid rgba(255,255,255,0.12);background:#070a10;color:#e8edf5;resize:vertical;">{{ old('body') }}</textarea>
+                        <div id="support-reply-error" style="font-size:12px;color:#ff8f8f;"></div>
                         @error('body')<div style="font-size:12px;color:#ff8f8f;">{{ $message }}</div>@enderror
                         <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
-                            <select name="status" style="padding:10px 12px;border-radius:10px;border:1px solid rgba(255,255,255,0.12);background:#070a10;color:#e8edf5;">
+                            <select id="support-reply-status" name="status" style="padding:10px 12px;border-radius:10px;border:1px solid rgba(255,255,255,0.12);background:#070a10;color:#e8edf5;">
                                 <option value="{{ \App\Models\SupportTicket::STATUS_PENDING }}">Set pending after reply</option>
                                 <option value="{{ \App\Models\SupportTicket::STATUS_OPEN }}">Keep open</option>
                                 <option value="{{ \App\Models\SupportTicket::STATUS_CLOSED }}">Close ticket</option>

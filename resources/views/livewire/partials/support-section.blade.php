@@ -63,9 +63,9 @@
         </div>
       </div>
 
-      <div style="display:flex;flex-direction:column;gap:12px;">
+      <div id="support-thread" style="display:flex;flex-direction:column;gap:12px;">
         @foreach($ticket->messages as $message)
-          <div style="padding:16px 18px;border-radius:14px;border:1px solid rgba(150,235,250,0.12);background:{{ $message->isFromAdmin() ? 'oklch(0.6 0.13 200 / 0.12)' : 'rgba(150,235,250,0.03)' }};">
+          <div wire:key="support-message-{{ $message->id }}" data-message-id="{{ $message->id }}" style="padding:16px 18px;border-radius:14px;border:1px solid rgba(150,235,250,0.12);background:{{ $message->isFromAdmin() ? 'oklch(0.6 0.13 200 / 0.12)' : 'rgba(150,235,250,0.03)' }};">
             <div style="display:flex;justify-content:space-between;gap:12px;font-size:12px;color:rgba(214,238,248,0.66);">
               <span>{{ $message->authorLabel() }}</span>
               <span>{{ $message->created_at?->format('M j, Y H:i') }}</span>
@@ -95,3 +95,16 @@
     @endif
   </div>
 </section>
+
+@script
+<script>
+  $wire.on('support-thread-scroll', () => {
+    requestAnimationFrame(() => {
+      const thread = document.getElementById('support-thread');
+      if (thread) {
+        thread.lastElementChild?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+      }
+    });
+  });
+</script>
+@endscript

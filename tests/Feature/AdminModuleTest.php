@@ -10,6 +10,7 @@ use App\Services\EpochService;
 use App\Services\PlatformSettingsService;
 use Database\Seeders\AdminSeeder;
 use Database\Seeders\CoinDemoSeeder;
+use Database\Seeders\PlatformSettingsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Tests\TestCase;
@@ -30,6 +31,7 @@ class AdminModuleTest extends TestCase
         ]);
 
         $this->seed(AdminSeeder::class);
+        $this->seed(PlatformSettingsSeeder::class);
         $this->seed(CoinDemoSeeder::class);
 
         $this->admin = Admin::query()->firstOrFail();
@@ -124,15 +126,16 @@ class AdminModuleTest extends TestCase
             'epochs_per_day' => '3',
         ]);
 
+        $nextNumber = app(EpochService::class)->nextEpochNumber();
         $epoch = app(EpochService::class)->runSettlement($this->admin);
 
-        $this->assertSame(1, $epoch->number);
+        $this->assertSame($nextNumber, $epoch->number);
         $this->assertGreaterThan(0, (float) $epoch->total_rewards);
 
         $this->actingAs($this->admin, 'admin')
             ->get('http://admin.coin.test/epochs')
             ->assertOk()
-            ->assertSee('#1');
+            ->assertSee('#'.$epoch->number);
 
         $this->actingAs($this->admin, 'admin')
             ->patch('http://admin.coin.test/settings', [
@@ -154,10 +157,13 @@ class AdminModuleTest extends TestCase
 
     public function test_admin_overview_dashboard(): void
     {
+        $this->assertGreaterThanOrEqual(5, User::query()->count());
+
         $this->actingAs($this->admin, 'admin')
             ->get('http://admin.coin.test/dashboard')
             ->assertOk()
             ->assertSee('PLATFORM OVERVIEW')
-            ->assertSee('PENDING WITHDRAWALS');
+            ->assertSee('PENDING WITHDRAWALS')
+            ->assertSee('20914');
     }
 }

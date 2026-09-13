@@ -4,9 +4,11 @@ namespace App\Livewire;
 
 use App\Models\SupportTicket;
 use App\Services\DashboardDataService;
+use App\Services\PlatformSettingsService;
 use App\Services\SupportTicketService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Collection;
+use Livewire\Attributes\On;
 use Livewire\Component;
 
 class Dashboard extends Component
@@ -20,6 +22,8 @@ class Dashboard extends Component
     public bool $menuOpen = false;
 
     public string $symbol = 'COIN';
+
+    public int $epochsPerDay = 3;
 
     public $wallet;
 
@@ -64,8 +68,11 @@ class Dashboard extends Component
 
     public string $replyBody = '';
 
-    public function mount(DashboardDataService $data): void
+    public function mount(DashboardDataService $data, PlatformSettingsService $settings): void
     {
+        $this->symbol = $settings->tokenSymbol();
+        $this->epochsPerDay = $settings->epochsPerDay();
+
         $payload = $data->forUser(auth()->user());
 
         $this->user = auth()->user();
@@ -276,6 +283,14 @@ class Dashboard extends Component
         $this->newSubject = '';
         $this->newCategory = SupportTicket::CATEGORY_OTHER;
         $this->newBody = '';
+    }
+
+    #[On('echo-private:support.user.{user.id},.SupportTicketMessageSent')]
+    #[On('echo-private:support.user.{user.id},.SupportTicketUpdated')]
+    public function onSupportTicketRealtime(): void
+    {
+        $this->reloadTickets();
+        $this->dispatch('support-thread-scroll');
     }
 
     public function sendTicketReply(SupportTicketService $support): void

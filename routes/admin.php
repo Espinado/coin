@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\SettingsController;
 use App\Http\Controllers\Admin\SupportTicketController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\WithdrawalController;
+use Illuminate\Support\Facades\Broadcast;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['admin.domain', 'reject.web.on.admin'])->group(function () {
@@ -22,6 +23,8 @@ Route::middleware(['admin.domain', 'reject.web.on.admin'])->group(function () {
     });
 
     Route::middleware('auth:admin')->group(function () {
+        Broadcast::routes(['middleware' => ['web', 'broadcast.auth:admin']]);
+
         Route::get('dashboard', DashboardController::class)
             ->name('admin.dashboard');
 

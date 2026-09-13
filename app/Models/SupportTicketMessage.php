@@ -36,4 +36,15 @@ class SupportTicketMessage extends Model
 
         return 'You';
     }
+
+    public function authorLabelForBroadcast(): string
+    {
+        if ($this->isFromAdmin()) {
+            return 'Support team';
+        }
+
+        $this->loadMissing('ticket.user');
+
+        return $this->ticket?->user?->accountLabel() ?? 'User';
+    }
 }

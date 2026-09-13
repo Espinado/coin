@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ProfileController;
 use App\Livewire\Dashboard;
+use Illuminate\Support\Facades\Broadcast;
 use Illuminate\Support\Facades\Route;
 
 Route::domain(config('coin.user_domain'))
@@ -10,6 +11,8 @@ Route::domain(config('coin.user_domain'))
         Route::view('/', 'home')->name('home');
 
         Route::get('/dashboard', Dashboard::class)->middleware(['auth'])->name('dashboard');
+
+        Broadcast::routes(['middleware' => ['web', 'broadcast.auth:web']]);
 
         Route::middleware('auth')->group(function () {
             Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

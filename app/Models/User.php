@@ -71,6 +71,16 @@ class User extends Authenticatable
         return self::kycStatuses()[$this->kyc_status] ?? ucfirst($this->kyc_status);
     }
 
+    public function kycBadgeStyle(): string
+    {
+        return match ($this->kyc_status) {
+            self::KYC_APPROVED => 'background: oklch(0.6 0.14 160 / 0.2); border: 1px solid oklch(0.7 0.14 160 / 0.4); color: oklch(0.88 0.14 160);',
+            self::KYC_REJECTED => 'background: rgba(255,143,143,0.15); border: 1px solid rgba(255,143,143,0.35); color: #ff8f8f;',
+            self::KYC_PENDING => 'background: oklch(0.7 0.15 90 / 0.16); border: 1px solid oklch(0.8 0.14 90 / 0.4); color: oklch(0.9 0.14 90);',
+            default => 'background: rgba(150,235,250,0.08); border: 1px solid rgba(150,235,250,0.2); color: rgba(214,238,248,0.75);',
+        };
+    }
+
     public function wallet(): HasOne
     {
         return $this->hasOne(Wallet::class);
