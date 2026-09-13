@@ -133,6 +133,19 @@ html.coin-nav-open .coin-nav-mobile {
   z-index: 4;
 }
 
+.coin-nav-support--unread {
+  color: #f0fbff !important;
+}
+
+.coin-nav-support--unread .coin-nav-support-dot {
+  background: oklch(0.85 0.18 35) !important;
+  box-shadow: 0 0 10px oklch(0.85 0.18 35 / 0.8);
+}
+
+.coin-nav-support--unread .coin-nav-support-label {
+  font-weight: 600 !important;
+}
+
 .coin-support-badge {
   animation: coinSupportPulse 2s ease-in-out infinite;
 }

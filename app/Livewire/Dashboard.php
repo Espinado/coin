@@ -316,21 +316,30 @@ class Dashboard extends Component
 
         $this->reloadTickets();
 
-        if ($this->section === 7 && $this->selectedTicketId) {
+        $viewingTicket = $this->section === 7 && $this->selectedTicketId;
+
+        if ($viewingTicket) {
             if ($ticketId === null || $ticketId === $this->selectedTicketId) {
                 $this->markTicketRead($this->selectedTicketId);
             }
         }
 
         if (is_array($payload) && isset($payload['message'])) {
-            $this->dispatch('support-append-message', message: $payload['message']);
+            $message = $payload['message'];
+            $isFromAdmin = $message['is_from_admin'] ?? false;
+            $messageTicketId = $message['ticket_id'] ?? null;
 
-            if ($payload['message']['is_from_admin'] ?? false) {
+            if ($viewingTicket && ($messageTicketId === null || $messageTicketId === $this->selectedTicketId)) {
+                $this->dispatch('support-append-message', message: $message);
+                $this->dispatch('support-thread-scroll');
+            }
+
+            if ($isFromAdmin && ! $viewingTicket) {
+                $this->dispatch('support-message-received', message: 'New message from support');
+            } elseif ($isFromAdmin && $viewingTicket && $messageTicketId !== null && $messageTicketId !== $this->selectedTicketId) {
                 $this->dispatch('support-message-received', message: 'New message from support');
             }
         }
-
-        $this->dispatch('support-thread-scroll');
     }
 
     public function sendTicketReply(SupportTicketService $support): void

@@ -22,11 +22,22 @@ function updateUserSupportNavBadge(total) {
     }
 
     let badge = nav.querySelector('[data-user-support-nav-badge]');
+    const unread = Number(total) > 0;
 
-    if (! total || total <= 0) {
+    nav.classList.toggle('coin-nav-support--unread', unread);
+
+    if (! unread) {
         badge?.remove();
+        nav.querySelector('[data-user-support-nav-bg]')?.remove();
 
         return;
+    }
+
+    if (! nav.querySelector('[data-user-support-nav-bg]') && ! nav.classList.contains('coin-nav-support--active')) {
+        const bg = document.createElement('span');
+        bg.dataset.userSupportNavBg = '';
+        bg.style.cssText = 'position:absolute;inset:0;border-radius:10px;background:oklch(0.72 0.16 35 / 0.12);border:1px solid oklch(0.82 0.18 35 / 0.35);pointer-events:none;';
+        nav.prepend(bg);
     }
 
     if (! badge) {
