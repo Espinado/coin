@@ -97,6 +97,17 @@ class Dashboard extends Component
     {
         $this->section = $section;
         $this->menuOpen = false;
+
+        if ($section === 7) {
+            $this->prepareSupportChat();
+        }
+    }
+
+    public function openSupport(): void
+    {
+        $this->section = 7;
+        $this->menuOpen = false;
+        $this->prepareSupportChat();
     }
 
     public function setPeriod(int $period): void
@@ -225,6 +236,11 @@ class Dashboard extends Component
         ])->count();
     }
 
+    public function getUnreadSupportCountProperty(): int
+    {
+        return (int) $this->tickets->sum(fn (SupportTicket $ticket) => $ticket->unreadMessagesForUser());
+    }
+
     public function getTicketCategoriesProperty(): array
     {
         return SupportTicket::categories();
@@ -256,6 +272,7 @@ class Dashboard extends Component
         $this->selectedTicketId = $ticketId;
         $this->showCreateTicket = false;
         $this->replyBody = '';
+        $this->markTicketRead($ticketId);
     }
 
     public function createTicket(SupportTicketService $support): void
@@ -283,13 +300,25 @@ class Dashboard extends Component
         $this->newSubject = '';
         $this->newCategory = SupportTicket::CATEGORY_OTHER;
         $this->newBody = '';
+        $this->markTicketRead($ticket->id);
     }
 
     #[On('echo-private:support.user.{user.id},.SupportTicketMessageSent')]
     #[On('echo-private:support.user.{user.id},.SupportTicketUpdated')]
-    public function onSupportTicketRealtime(): void
+    public function onSupportTicketRealtime(mixed $payload = null): void
     {
+        $ticketId = is_int($payload)
+            ? $payload
+            : (is_array($payload) ? ($payload['message']['ticket_id'] ?? $payload['ticket']['id'] ?? null) : null);
+
         $this->reloadTickets();
+
+        if ($this->section === 7 && $this->selectedTicketId) {
+            if ($ticketId === null || $ticketId === $this->selectedTicketId) {
+                $this->markTicketRead($this->selectedTicketId);
+            }
+        }
+
         $this->dispatch('support-thread-scroll');
     }
 
@@ -342,5 +371,46 @@ class Dashboard extends Component
             ->with('messages')
             ->orderByDesc('updated_at')
             ->get();
+    }
+
+    private function prepareSupportChat(): void
+    {
+        $this->showCreateTicket = false;
+
+        if ($this->tickets->isEmpty()) {
+            $this->selectedTicketId = null;
+            $this->showCreateTicket = true;
+
+            return;
+        }
+
+        $preferred = $this->tickets->first(
+            fn (SupportTicket $ticket) => $ticket->unreadMessagesForUser() > 0
+        ) ?? $this->tickets->first();
+
+        $this->selectedTicketId = $preferred?->id;
+        $this->markTicketRead($this->selectedTicketId);
+    }
+
+    private function markTicketRead(?int $ticketId): void
+    {
+        if (! $ticketId) {
+            return;
+        }
+
+        $ticket = $this->tickets->firstWhere('id', $ticketId);
+
+        if (! $ticket) {
+            return;
+        }
+
+        $now = now();
+
+        SupportTicket::query()
+            ->whereKey($ticketId)
+            ->where('user_id', $this->user->id)
+            ->update(['user_last_read_at' => $now]);
+
+        $ticket->user_last_read_at = $now;
     }
 }

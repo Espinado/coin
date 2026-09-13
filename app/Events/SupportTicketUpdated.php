@@ -35,6 +35,8 @@ class SupportTicketUpdated implements ShouldBroadcastNow
     /** @return array<string, mixed> */
     public function broadcastWith(): array
     {
+        $this->ticket->loadMissing('messages');
+
         return [
             'ticket' => [
                 'id' => $this->ticket->id,
@@ -43,6 +45,9 @@ class SupportTicketUpdated implements ShouldBroadcastNow
                 'reference' => $this->ticket->reference,
                 'updated_at' => $this->ticket->updated_at?->format('M j, H:i'),
             ],
+            'unread_for_admin' => $this->ticket->unreadMessagesForAdmin(),
+            'unread_for_user' => $this->ticket->unreadMessagesForUser(),
+            'total_unread_for_admin' => SupportTicket::totalUnreadForAdmin(),
         ];
     }
 }

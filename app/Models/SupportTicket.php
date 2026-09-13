@@ -32,13 +32,72 @@ class SupportTicket extends Model
         'category',
         'status',
         'last_reply_at',
+        'user_last_read_at',
+        'admin_last_read_at',
     ];
 
     protected function casts(): array
     {
         return [
             'last_reply_at' => 'datetime',
+            'user_last_read_at' => 'datetime',
+            'admin_last_read_at' => 'datetime',
         ];
+    }
+
+    public static function totalUnreadForAdmin(): int
+    {
+        return (int) SupportTicketMessage::query()
+            ->join('support_tickets', 'support_tickets.id', '=', 'support_ticket_messages.support_ticket_id')
+            ->where('support_ticket_messages.author_type', SupportTicketMessage::AUTHOR_USER)
+            ->where(function ($query) {
+                $query->whereNull('support_tickets.admin_last_read_at')
+                    ->orWhereColumn('support_ticket_messages.created_at', '>', 'support_tickets.admin_last_read_at');
+            })
+            ->count();
+    }
+
+    public function unreadMessagesForAdmin(): int
+    {
+        return $this->messages
+            ->filter(function (SupportTicketMessage $message) {
+                if ($message->author_type !== SupportTicketMessage::AUTHOR_USER) {
+                    return false;
+                }
+
+                if ($this->admin_last_read_at === null) {
+                    return true;
+                }
+
+                return $message->created_at > $this->admin_last_read_at;
+            })
+            ->count();
+    }
+
+    public function markReadByAdmin(): void
+    {
+        $now = now();
+
+        $this->forceFill(['admin_last_read_at' => $now])->save();
+
+        $this->admin_last_read_at = $now;
+    }
+
+    public function unreadMessagesForUser(): int
+    {
+        return $this->messages
+            ->filter(function (SupportTicketMessage $message) {
+                if (! $message->isFromAdmin()) {
+                    return false;
+                }
+
+                if ($this->user_last_read_at === null) {
+                    return true;
+                }
+
+                return $message->created_at > $this->user_last_read_at;
+            })
+            ->count();
     }
 
     public static function categories(): array

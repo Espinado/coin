@@ -8,7 +8,9 @@ use App\Models\Admin;
 use App\Models\SupportTicket;
 use App\Models\SupportTicketMessage;
 use App\Models\User;
+use Illuminate\Broadcasting\BroadcastException;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class SupportTicketService
@@ -61,7 +63,7 @@ class SupportTicketService
 
         $ticket = $ticket->fresh(['user.wallet', 'user.contracts.plan', 'messages', 'assignedAdmin']);
 
-        SupportTicketUpdated::dispatch($ticket);
+        $this->broadcastSupportEvent(new SupportTicketUpdated($ticket));
 
         return $ticket;
     }
@@ -76,9 +78,21 @@ class SupportTicketService
 
         $ticket->update(['last_reply_at' => $message->created_at]);
 
-        SupportTicketMessageSent::dispatch($message->fresh());
+        $this->broadcastSupportEvent(new SupportTicketMessageSent($message->fresh()));
 
         return $message;
+    }
+
+    private function broadcastSupportEvent(object $event): void
+    {
+        try {
+            event($event);
+        } catch (BroadcastException $exception) {
+            Log::warning('Support realtime broadcast skipped.', [
+                'event' => $event::class,
+                'message' => $exception->getMessage(),
+            ]);
+        }
     }
 
     private function assertTicketOwner(SupportTicket $ticket, User $user): void

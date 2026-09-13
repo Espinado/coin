@@ -17,7 +17,7 @@ class SupportTicketController extends Controller
         $status = $request->string('status')->toString();
 
         $tickets = SupportTicket::query()
-            ->with(['user', 'assignedAdmin'])
+            ->with(['user', 'assignedAdmin', 'messages'])
             ->when($status !== '', fn ($query) => $query->where('status', $status))
             ->orderByDesc('updated_at')
             ->paginate(20)
@@ -38,6 +38,8 @@ class SupportTicketController extends Controller
             'messages',
             'assignedAdmin',
         ]);
+
+        $ticket->markReadByAdmin();
 
         return view('admin.support.show', [
             'ticket' => $ticket,
@@ -60,6 +62,7 @@ class SupportTicketController extends Controller
         );
 
         $ticket = $ticket->fresh();
+        $ticket->markReadByAdmin();
 
         if ($request->wantsJson()) {
             return response()->json([

@@ -37,15 +37,26 @@
             </thead>
             <tbody>
                 @forelse($tickets as $ticket)
-                    <tr style="border-bottom:1px solid rgba(255,255,255,0.06);">
+                    @php($unread = $ticket->unreadMessagesForAdmin())
+                    <tr data-support-ticket-id="{{ $ticket->id }}" style="border-bottom:1px solid rgba(255,255,255,0.06);{{ $unread > 0 ? 'background:rgba(255,180,84,0.05);' : '' }}">
                         <td style="padding:14px 18px;font-family:'JetBrains Mono',monospace;">
                             <a href="{{ route('admin.support.show', $ticket) }}">{{ $ticket->reference }}</a>
                         </td>
-                        <td style="padding:14px 18px;">{{ $ticket->user->accountLabel() }}<br><span style="color:rgba(232,237,245,0.62);font-size:12px;">{{ $ticket->user->email }}</span></td>
+                        <td style="padding:14px 18px;" data-support-user-cell>
+                            <div data-support-user-wrap style="display:flex;align-items:center;justify-content:space-between;gap:12px;">
+                                <div>
+                                    <span data-support-user-name style="font-weight:{{ $unread > 0 ? '600' : '400' }};">{{ $ticket->user->accountLabel() }}</span>
+                                    <br><span style="color:rgba(232,237,245,0.62);font-size:12px;">{{ $ticket->user->email }}</span>
+                                </div>
+                                @if($unread > 0)
+                                    <span class="admin-support-badge" data-support-row-badge style="flex-shrink:0;font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;min-width:22px;text-align:center;padding:4px 9px;border-radius:999px;background:linear-gradient(140deg,#ffb454,#e8872e);color:#1a1208;box-shadow:0 0 14px rgba(255,180,84,0.45);">{{ $unread }}</span>
+                                @endif
+                            </div>
+                        </td>
                         <td style="padding:14px 18px;">{{ $ticket->subject }}</td>
                         <td style="padding:14px 18px;">{{ $ticket->categoryLabel() }}</td>
                         <td style="padding:14px 18px;font-family:'JetBrains Mono',monospace;">{{ $ticket->statusLabel() }}</td>
-                        <td style="padding:14px 18px;color:rgba(232,237,245,0.72);">{{ $ticket->updated_at?->format('M j, H:i') }}</td>
+                        <td data-support-updated-cell style="padding:14px 18px;color:rgba(232,237,245,0.72);">{{ $ticket->updated_at?->format('M j, H:i') }}</td>
                     </tr>
                 @empty
                     <tr>

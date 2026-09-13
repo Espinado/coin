@@ -123,6 +123,33 @@ html.coin-nav-open .coin-nav-mobile {
   transition: transform 0.25s ease;
 }
 
+.coin-sidebar-nav {
+  position: relative;
+  z-index: 3;
+}
+
+.coin-nav-support {
+  position: relative;
+  z-index: 4;
+}
+
+.coin-support-badge {
+  animation: coinSupportPulse 2s ease-in-out infinite;
+}
+
+@keyframes coinSupportPulse {
+  0%,
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 16px oklch(0.82 0.2 35 / 0.55);
+  }
+
+  50% {
+    transform: scale(1.06);
+    box-shadow: 0 0 22px oklch(0.88 0.22 35 / 0.75);
+  }
+}
+
 .coin-dash-header {
   flex-wrap: wrap;
 }

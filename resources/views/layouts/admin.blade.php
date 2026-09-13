@@ -21,6 +21,13 @@
         .admin-btn { padding: 10px 16px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.14); background: rgba(255,255,255,0.06); color: #e8edf5; font-size: 13px; }
         .admin-btn-primary { border-color: rgba(255,180,84,0.45); background: linear-gradient(140deg, #ffb454, #e8872e); color: #1a1208; font-weight: 600; }
         input { font-family: inherit; }
+        .admin-support-badge {
+            animation: adminSupportPulse 2s ease-in-out infinite;
+        }
+        @keyframes adminSupportPulse {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 14px rgba(255,180,84,0.45); }
+            50% { transform: scale(1.06); box-shadow: 0 0 20px rgba(255,180,84,0.65); }
+        }
     </style>
     @stack('head')
 </head>
@@ -46,5 +53,9 @@
             @yield('content')
         </main>
     </div>
+    @stack('scripts')
+    @auth('admin')
+        @vite(['resources/js/admin-support-realtime.js'])
+    @endauth
 </body>
 </html>

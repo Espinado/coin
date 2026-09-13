@@ -1,25 +1,14 @@
 import './bootstrap';
-import { initEcho } from './echo';
 
 const config = window.supportChatConfig;
 
 if (config?.ticketId) {
-    const echo = initEcho();
-    const thread = document.getElementById('support-thread');
-    const statusLabel = document.getElementById('ticket-status-label');
     const replyForm = document.getElementById('support-reply-form');
     const replyBody = document.getElementById('support-reply-body');
     const replyStatus = document.getElementById('support-reply-status');
     const replyError = document.getElementById('support-reply-error');
-
-    echo.private(`support.ticket.${config.ticketId}`)
-        .listen('.SupportTicketMessageSent', (payload) => {
-            appendMessage(payload.message);
-            updateTicketMeta(payload.ticket);
-        })
-        .listen('.SupportTicketUpdated', (payload) => {
-            updateTicketMeta(payload.ticket);
-        });
+    const thread = document.getElementById('support-thread');
+    const statusLabel = document.getElementById('ticket-status-label');
 
     if (replyForm && replyBody) {
         replyForm.addEventListener('submit', async (event) => {
@@ -70,7 +59,7 @@ if (config?.ticketId) {
     }
 
     function appendMessage(message) {
-        if (!thread || document.querySelector(`[data-message-id="${message.id}"]`)) {
+        if (! thread || document.querySelector(`[data-message-id="${message.id}"]`)) {
             return;
         }
 
@@ -92,7 +81,7 @@ if (config?.ticketId) {
     }
 
     function updateTicketMeta(ticket) {
-        if (!ticket) {
+        if (! ticket) {
             return;
         }
 

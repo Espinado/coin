@@ -3,13 +3,16 @@
 @section('title', 'Coin Admin — '.$ticket->reference)
 
 @push('head')
-    @vite(['resources/js/admin-support.js'])
     <script>
         window.supportChatConfig = {
             ticketId: {{ $ticket->id }},
             replyUrl: @json(route('admin.support.reply', $ticket)),
         };
     </script>
+@endpush
+
+@push('scripts')
+    @vite(['resources/js/admin-support.js'])
 @endpush
 
 @section('content')

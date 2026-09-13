@@ -2,7 +2,8 @@
 <div class="coin-dashboard" style="display: flex; min-height: 100vh; width: 1440px; margin: 0 auto; background: #061423; color: #e6f4fa; font-family: 'Sora', 'Helvetica Neue', Helvetica, sans-serif;">
 
   <div class="coin-nav-overlay" wire:click="closeMenu"></div>
-  <aside class="coin-sidebar" style="width: 248px; flex: none; border-right: 1px solid rgba(150,235,250,0.1); background: rgba(4,16,28,0.6); padding: 22px 16px; display: flex; flex-direction: column; gap: 3px;">
+  <aside class="coin-sidebar" style="width: 248px; flex: none; border-right: 1px solid rgba(150,235,250,0.1); background: rgba(4,16,28,0.6); padding: 22px 16px; display: flex; flex-direction: column; gap: 3px; min-height: 0;">
+    <div class="coin-sidebar-nav" style="flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 3px;">
     <a href="{{ route('home') }}" style="display: flex; align-items: center; gap: 11px; padding: 4px 10px 24px; color: inherit;">
       <div style="width: 28px; height: 28px; border-radius: 9px; background: linear-gradient(145deg, oklch(0.86 0.12 192), oklch(0.6 0.13 210)); display: grid; place-items: center; box-shadow: 0 8px 22px -8px oklch(0.78 0.13 192 / 0.8);">
         <div style="width: 10px; height: 10px; border-radius: 3px; background: #061423;"></div>
@@ -53,20 +54,23 @@
       <span style="position: relative; width: 7px; height: 7px; border-radius: 2px; background: rgba(150,235,250,0.3);"></span>
       <span style="position: relative;">Settings</span>
     </button>
-    <button wire:click="setSection(7)" style="position: relative; display: flex; align-items: center; gap: 11px; padding: 11px 12px; border: 0; border-radius: 10px; background: none; font-family: inherit; font-size: 13.5px; color: rgba(230,244,250,0.72); text-align: left; cursor: pointer; width: 100%;">
-      @if($section === 7)<span style="position: absolute; inset: 0; border-radius: 10px; background: oklch(0.6 0.13 200 / 0.22); border: 1px solid oklch(0.86 0.11 195 / 0.3); pointer-events: none;"></span>@endif
-      <span style="position: relative; width: 7px; height: 7px; border-radius: 2px; background: rgba(150,235,250,0.3);"></span>
-      <span style="position: relative; flex: 1;">Support</span>
-      @if($this->openTicketCount > 0)
-        <span style="position: relative; font-family: 'JetBrains Mono', monospace; font-size: 10px; padding: 2px 7px; border-radius: 6px; background: rgba(150,235,250,0.1); color: rgba(214,238,248,0.8);">{{ $this->openTicketCount }}</span>
+    <button type="button" wire:click="openSupport" class="coin-nav-support" style="position: relative; display: flex; align-items: center; gap: 11px; padding: 11px 12px; border: 0; border-radius: 10px; background: none; font-family: inherit; font-size: 13.5px; color: {{ $this->unreadSupportCount > 0 ? '#f0fbff' : ($section === 7 ? '#e6f4fa' : 'rgba(230,244,250,0.72)') }}; text-align: left; cursor: pointer; width: 100%; z-index: 2;">
+      @if($section === 7)<span style="position: absolute; inset: 0; border-radius: 10px; background: oklch(0.6 0.13 200 / 0.22); border: 1px solid oklch(0.86 0.11 195 / 0.3); pointer-events: none;"></span>@elseif($this->unreadSupportCount > 0)<span style="position: absolute; inset: 0; border-radius: 10px; background: oklch(0.72 0.16 35 / 0.12); border: 1px solid oklch(0.82 0.18 35 / 0.35); pointer-events: none;"></span>@endif
+      <span style="position: relative; width: 7px; height: 7px; border-radius: 2px; background: {{ $this->unreadSupportCount > 0 ? 'oklch(0.85 0.18 35)' : ($section === 7 ? 'oklch(0.86 0.12 192)' : 'rgba(150,235,250,0.3)') }}; {{ $this->unreadSupportCount > 0 ? 'box-shadow: 0 0 10px oklch(0.85 0.18 35 / 0.8);' : '' }}"></span>
+      <span style="position: relative; flex: 1; font-weight: {{ $this->unreadSupportCount > 0 ? '600' : '400' }};">Live support</span>
+      @if($this->unreadSupportCount > 0)
+        <span class="coin-support-badge" style="position: relative; font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 700; min-width: 20px; text-align: center; padding: 3px 7px; border-radius: 999px; background: linear-gradient(140deg, oklch(0.88 0.2 35), oklch(0.72 0.22 25)); color: #1a0a04; box-shadow: 0 0 16px oklch(0.82 0.2 35 / 0.55);">{{ $this->unreadSupportCount }}</span>
+      @elseif($this->openTicketCount > 0)
+        <span style="position: relative; font-family: 'JetBrains Mono', monospace; font-size: 10px; padding: 2px 7px; border-radius: 6px; background: rgba(150,235,250,0.14); color: rgba(214,238,248,0.85);">{{ $this->openTicketCount }}</span>
       @endif
     </button>
-    <form method="POST" action="{{ route('logout') }}" style="margin-top: 8px;">
+    </div>
+    <form method="POST" action="{{ route('logout') }}" style="margin-top: 8px; flex-shrink: 0;">
       @csrf
       <button type="submit" style="width: 100%; padding: 10px 12px; border-radius: 10px; border: 1px solid rgba(150,235,250,0.16); background: rgba(150,235,250,0.04); color: rgba(230,244,250,0.78); font-family: inherit; font-size: 13px; cursor: pointer;">Log out</button>
     </form>
 
-    <div style="margin-top: auto; padding: 18px; border-radius: 14px; border: 1px solid oklch(0.86 0.11 195 / 0.26); background: linear-gradient(170deg, oklch(0.6 0.13 200 / 0.22), rgba(6,20,35,0.6));">
+    <div style="margin-top: 12px; flex-shrink: 0; padding: 18px; border-radius: 14px; border: 1px solid oklch(0.86 0.11 195 / 0.26); background: linear-gradient(170deg, oklch(0.6 0.13 200 / 0.22), rgba(6,20,35,0.6));">
       <div style="font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: 0.14em; color: rgba(214,238,248,0.7);">ACTIVE PLAN</div>
       <div style="margin-top: 9px; font-size: 15px; font-weight: 600;">{{ $primaryPlan?->name ?? '—' }}</div>
       <div style="margin-top: 4px; font-family: 'JetBrains Mono', monospace; font-size: 11.5px; color: rgba(214,238,248,0.78);">{{ $primaryContract?->formattedTflops() ?? '0' }} TFLOPS · {{ $primaryContract?->duration_days ?? 0 }} d</div>
@@ -727,3 +731,80 @@
 </div>
 
 </div>
+
+@script
+<script>
+  let activeTicketChannel = null;
+  let supportRefreshTimer = null;
+
+  const scheduleSupportRefresh = (ticketId = null) => {
+    clearTimeout(supportRefreshTimer);
+    supportRefreshTimer = setTimeout(() => {
+      $wire.onSupportTicketRealtime(ticketId);
+    }, 80);
+  };
+
+  const leaveTicketChannel = () => {
+    if (activeTicketChannel !== null && window.Echo) {
+      window.Echo.leave(`support.ticket.${activeTicketChannel}`);
+      activeTicketChannel = null;
+    }
+  };
+
+  const subscribeTicketChannel = (ticketId) => {
+    if (! window.Echo) {
+      return;
+    }
+
+    const id = Number(ticketId);
+
+    if (! id) {
+      leaveTicketChannel();
+
+      return;
+    }
+
+    if (activeTicketChannel === id) {
+      return;
+    }
+
+    leaveTicketChannel();
+    activeTicketChannel = id;
+
+    window.Echo.private(`support.ticket.${id}`)
+      .listen('.SupportTicketMessageSent', (payload) => {
+        scheduleSupportRefresh(payload.message?.ticket_id ?? id);
+      })
+      .listen('.SupportTicketUpdated', (payload) => {
+        scheduleSupportRefresh(payload.ticket?.id ?? id);
+      });
+  };
+
+  $wire.watch('selectedTicketId', (ticketId) => {
+    if ($wire.section === 7) {
+      subscribeTicketChannel(ticketId);
+    }
+  });
+
+  $wire.watch('section', (section) => {
+    if (section === 7) {
+      subscribeTicketChannel($wire.selectedTicketId);
+    } else {
+      leaveTicketChannel();
+    }
+  });
+
+  if ($wire.section === 7 && $wire.selectedTicketId) {
+    subscribeTicketChannel($wire.selectedTicketId);
+  }
+
+  $wire.on('support-thread-scroll', () => {
+    requestAnimationFrame(() => {
+      const thread = document.getElementById('support-thread');
+      if (thread) {
+        thread.lastElementChild?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+      }
+    });
+  });
+</script>
+@endscript

@@ -2,6 +2,7 @@
 
 namespace App\Events;
 
+use App\Models\SupportTicket;
 use App\Models\SupportTicketMessage;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PrivateChannel;
@@ -40,6 +41,7 @@ class SupportTicketMessageSent implements ShouldBroadcastNow
     public function broadcastWith(): array
     {
         $ticket = $this->message->ticket;
+        $ticket->loadMissing('messages');
 
         return [
             'message' => [
@@ -58,6 +60,9 @@ class SupportTicketMessageSent implements ShouldBroadcastNow
                 'reference' => $ticket->reference,
                 'updated_at' => $ticket->updated_at?->format('M j, H:i'),
             ],
+            'unread_for_admin' => $ticket->unreadMessagesForAdmin(),
+            'unread_for_user' => $ticket->unreadMessagesForUser(),
+            'total_unread_for_admin' => SupportTicket::totalUnreadForAdmin(),
         ];
     }
 }

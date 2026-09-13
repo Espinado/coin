@@ -11,7 +11,7 @@ class AdminNavComposer
     public function compose(View $view): void
     {
         $view->with([
-            'openCount' => SupportTicket::query()->where('status', SupportTicket::STATUS_OPEN)->count(),
+            'unreadSupportCount' => SupportTicket::totalUnreadForAdmin(),
             'pendingWithdrawalsCount' => Withdrawal::query()->where('status', Withdrawal::STATUS_PENDING)->count(),
         ]);
     }

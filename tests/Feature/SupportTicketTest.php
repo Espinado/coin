@@ -144,6 +144,62 @@ class SupportTicketTest extends TestCase
         Event::assertDispatched(SupportTicketUpdated::class);
     }
 
+    public function test_admin_unread_counts_and_mark_read_on_view(): void
+    {
+        $user = User::factory()->create();
+        $admin = Admin::query()->create([
+            'name' => 'Support Admin',
+            'email' => 'unread-admin@coin.test',
+            'password' => Hash::make('password'),
+        ]);
+
+        $ticket = app(SupportTicketService::class)->createForUser(
+            $user,
+            'Unread check',
+            SupportTicket::CATEGORY_OTHER,
+            'First user message',
+        );
+
+        app(SupportTicketService::class)->addUserMessage(
+            $ticket->fresh(),
+            $user,
+            'Second user message',
+        );
+
+        $this->assertSame(2, SupportTicket::totalUnreadForAdmin());
+        $this->assertSame(2, $ticket->fresh(['messages'])->unreadMessagesForAdmin());
+
+        $this->actingAs($admin, 'admin')
+            ->get('http://admin.coin.test/support/'.$ticket->id)
+            ->assertOk();
+
+        $this->assertSame(0, SupportTicket::totalUnreadForAdmin());
+        $this->assertNotNull($ticket->fresh()->admin_last_read_at);
+    }
+
+    public function test_admin_nav_shows_total_unread_support_count(): void
+    {
+        $user = User::factory()->create();
+        $admin = Admin::query()->create([
+            'name' => 'Support Admin',
+            'email' => 'nav-unread-admin@coin.test',
+            'password' => Hash::make('password'),
+        ]);
+
+        app(SupportTicketService::class)->createForUser(
+            $user,
+            'Nav badge check',
+            SupportTicket::CATEGORY_OTHER,
+            'Need help please',
+        );
+
+        $this->actingAs($admin, 'admin')
+            ->get('http://admin.coin.test/support')
+            ->assertOk()
+            ->assertSee('class="admin-support-badge"', false)
+            ->assertSee('>1<', false);
+    }
+
     public function test_regular_user_cannot_open_admin_support_pages(): void
     {
         $user = User::factory()->create([
