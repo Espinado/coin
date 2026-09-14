@@ -21,6 +21,51 @@ function reverbConfig() {
     };
 }
 
+function csrfToken() {
+    return document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ?? '';
+}
+
+function buildGuestAuthorizer(authEndpoint) {
+    const endpoint = authEndpoint.startsWith('http')
+        ? authEndpoint
+        : `${window.location.origin}${authEndpoint}`;
+
+    return (channel, options) => ({
+        authorize: (socketId, callback) => {
+            fetch(endpoint, {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Accept: 'application/json',
+                    'X-CSRF-TOKEN': csrfToken(),
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-Support-Guest-Token': window.coinReverb?.guestToken ?? '',
+                },
+                body: JSON.stringify({
+                    socket_id: socketId,
+                    channel_name: channel.name,
+                }),
+            })
+                .then((response) => {
+                    if (! response.ok) {
+                        throw new Error(`Guest channel auth failed (${response.status})`);
+                    }
+
+                    return response.json();
+                })
+                .then((data) => callback(null, data))
+                .catch((error) => {
+                    reverbLog('error', 'guest channel auth failed', {
+                        channel: channel.name,
+                        error: String(error),
+                    });
+                    callback(error);
+                });
+        },
+    });
+}
+
 export function hasEchoKey() {
     const config = reverbConfig();
 
@@ -42,9 +87,9 @@ export function initEcho() {
 
     logEchoConfig('init');
 
-    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ?? '';
+    const authEndpoint = config.guestAuthEndpoint ?? `${window.location.origin}/broadcasting/auth`;
 
-    window.Echo = new Echo({
+    const echoOptions = {
         broadcaster: 'reverb',
         key: config.key,
         wsHost: config.wsHost,
@@ -52,15 +97,22 @@ export function initEcho() {
         wssPort: config.wssPort,
         forceTLS: config.forceTLS,
         enabledTransports: ['ws', 'wss'],
-        authEndpoint: config.guestAuthEndpoint ?? `${window.location.origin}/broadcasting/auth`,
-        auth: {
+        disableStats: true,
+    };
+
+    if (config.guestAuthEndpoint) {
+        echoOptions.authorizer = buildGuestAuthorizer(authEndpoint);
+    } else {
+        echoOptions.authEndpoint = authEndpoint;
+        echoOptions.auth = {
             headers: {
-                'X-CSRF-TOKEN': csrfToken,
+                'X-CSRF-TOKEN': csrfToken(),
                 'X-Requested-With': 'XMLHttpRequest',
             },
-        },
-        disableStats: true,
-    });
+        };
+    }
+
+    window.Echo = new Echo(echoOptions);
 
     if (window.coinReverb?.monitor !== false) {
         attachEchoConnectionMonitor(window.Echo, 'init');

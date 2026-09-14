@@ -41,11 +41,24 @@ class SupportGuestSession
 
     public static function canAccessTicket(int $ticketId): bool
     {
-        $data = session(self::SESSION_KEY);
+        if (self::sessionMatchesTicket($ticketId)) {
+            return true;
+        }
 
-        return is_array($data)
-            && (int) ($data['ticket_id'] ?? 0) === $ticketId
-            && filled($data['token'] ?? null);
+        return self::tokenMatchesTicket($ticketId, request()->header('X-Support-Guest-Token'));
+    }
+
+    public static function tokenMatchesTicket(int $ticketId, ?string $token): bool
+    {
+        if (! filled($token)) {
+            return false;
+        }
+
+        return SupportTicket::query()
+            ->whereKey($ticketId)
+            ->whereNull('user_id')
+            ->where('guest_token', $token)
+            ->exists();
     }
 
     public static function token(): ?string
@@ -59,5 +72,14 @@ class SupportGuestSession
         $token = $data['token'] ?? null;
 
         return is_string($token) && $token !== '' ? $token : null;
+    }
+
+    private static function sessionMatchesTicket(int $ticketId): bool
+    {
+        $data = session(self::SESSION_KEY);
+
+        return is_array($data)
+            && (int) ($data['ticket_id'] ?? 0) === $ticketId
+            && filled($data['token'] ?? null);
     }
 }

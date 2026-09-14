@@ -24,9 +24,7 @@ window.readLivewireEventPayload = readLivewireEventPayload;
 let guestEchoTicketId = null;
 let guestEchoChannel = null;
 
-function handleGuestAdminMessage(payload) {
-    const message = payload?.message;
-
+function handleGuestAdminMessage(message) {
     if (! message?.is_from_admin) {
         return;
     }
@@ -41,15 +39,20 @@ function bootGuestSupportRealtime(ticketId) {
         return;
     }
 
-    if (guestEchoTicketId === ticketId && guestEchoChannel) {
-        return;
-    }
-
     const echo = initEcho();
 
     if (! echo) {
         reverbLog('error', 'guest Echo init failed');
 
+        return;
+    }
+
+    if (guestEchoTicketId && guestEchoTicketId !== ticketId && guestEchoChannel) {
+        echo.leave(`support.guest.${guestEchoTicketId}`);
+        guestEchoChannel = null;
+    }
+
+    if (guestEchoTicketId === ticketId && guestEchoChannel) {
         return;
     }
 
@@ -61,7 +64,7 @@ function bootGuestSupportRealtime(ticketId) {
                 ticketId: payload?.ticket?.id ?? payload?.message?.ticket_id ?? null,
             });
 
-            handleGuestAdminMessage(payload);
+            handleGuestAdminMessage(payload?.message);
         })
         .listen('.SupportTicketUpdated', (payload) => {
             reverbLog('info', 'guest channel: SupportTicketUpdated', {
@@ -69,7 +72,19 @@ function bootGuestSupportRealtime(ticketId) {
             });
         });
 
+    echo.connector.pusher.bind('pusher:subscription_error', (status) => {
+        if (String(status?.channel ?? '').includes(`support.guest.${ticketId}`)) {
+            reverbLog('error', 'guest channel subscription error', status);
+        }
+    });
+
     reverbLog('info', 'guest support realtime subscribed', { ticketId });
+}
+
+window.bootGuestSupportRealtime = bootGuestSupportRealtime;
+
+function updateGuestRealtimeConfig(config) {
+    window.coinReverb = Object.assign(window.coinReverb ?? {}, config);
 }
 
 function openGuestSupportFromPage() {
@@ -79,9 +94,22 @@ function openGuestSupportFromPage() {
 function registerGuestSupportLivewireHandlers() {
     Livewire.on('guest-support-opened', (payload) => {
         const ticketId = readLivewireEventPayload(payload, 'ticketId');
+        const guestToken = readLivewireEventPayload(payload, 'guestToken');
+
+        if (guestToken) {
+            updateGuestRealtimeConfig({ guestToken, guestTicketId: ticketId });
+        }
 
         if (ticketId) {
             bootGuestSupportRealtime(Number(ticketId));
+        }
+    });
+
+    Livewire.on('guest-support-new-messages', (payload) => {
+        const messages = readLivewireEventPayload(payload, 'messages') ?? [];
+
+        for (const message of messages) {
+            handleGuestAdminMessage(message);
         }
     });
 
@@ -117,6 +145,10 @@ document.addEventListener('livewire:init', () => {
     if (window.location.hash === '#support') {
         openGuestSupportFromPage();
     }
+
+    if (window.coinReverb?.guestTicketId) {
+        bootGuestSupportRealtime(Number(window.coinReverb.guestTicketId));
+    }
 });
 
 window.addEventListener('hashchange', () => {
@@ -133,14 +165,6 @@ document.querySelectorAll('[data-open-guest-support]').forEach((element) => {
     });
 });
 
-const initialTicketId = window.coinReverb?.guestTicketId;
-
 if (hasEchoKey()) {
     initEcho();
-
-    if (initialTicketId) {
-        document.addEventListener('livewire:init', () => {
-            bootGuestSupportRealtime(Number(initialTicketId));
-        }, { once: true });
-    }
 }

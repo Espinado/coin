@@ -9,7 +9,8 @@
         'port' => (int) ($reverbClient['port'] ?? 8080),
         'scheme' => $reverbClient['scheme'] ?? 'http',
         'guestTicketId' => $guestTicket?->id,
-        'guestAuthEndpoint' => url('/guest/broadcasting/auth'),
+        'guestToken' => $guestTicket?->guest_token,
+        'guestAuthEndpoint' => '/guest/broadcasting/auth',
         'debug' => (bool) config('broadcasting.connections.reverb.debug', false),
         'monitor' => (bool) config('broadcasting.connections.reverb.connection_monitor', true),
     ];

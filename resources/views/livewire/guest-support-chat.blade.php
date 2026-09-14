@@ -1,4 +1,4 @@
-<div id="guest-support-root" style="position:fixed;inset:0;z-index:9999;pointer-events:none;">
+<div id="guest-support-root" @if($isOpen && $ticketId) wire:poll.3s="pollMessages" @endif style="position:fixed;inset:0;z-index:9999;pointer-events:none;">
     @if(! $isOpen)
     <button type="button" wire:click="openChat" data-open-guest-support
         style="pointer-events:auto;position:fixed;right:24px;bottom:24px;display:flex;align-items:center;gap:10px;padding:14px 20px;border-radius:999px;border:1px solid oklch(0.86 0.11 195 / 0.5);background:linear-gradient(140deg, oklch(0.86 0.12 192), oklch(0.66 0.13 205));color:#04121f;font-family:'Sora','Helvetica Neue',Helvetica,sans-serif;font-size:14px;font-weight:600;cursor:pointer;box-shadow:0 20px 50px -22px oklch(0.8 0.13 195 / 0.7);">

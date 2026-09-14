@@ -28,6 +28,8 @@ class GuestSupportChat extends Component
 
     public int $replyFormKey = 0;
 
+    public int $lastSeenMessageId = 0;
+
     public function mount(): void
     {
         $ticket = SupportGuestSession::current();
@@ -35,6 +37,7 @@ class GuestSupportChat extends Component
         if ($ticket) {
             $this->ticketId = $ticket->id;
             $this->guestEmail = $ticket->guest_email ?? '';
+            $this->lastSeenMessageId = (int) ($ticket->messages->max('id') ?? 0);
             $this->markTicketRead($ticket);
         }
     }
@@ -46,13 +49,41 @@ class GuestSupportChat extends Component
 
         if ($this->ticketId) {
             $this->markTicketRead($this->selectedTicket);
-            $this->dispatch('guest-support-opened', ticketId: $this->ticketId);
+            $this->bootGuestRealtime();
         }
     }
 
     public function closeChat(): void
     {
         $this->isOpen = false;
+    }
+
+    public function pollMessages(): void
+    {
+        if (! $this->isOpen || ! $this->ticketId) {
+            return;
+        }
+
+        $ticket = SupportGuestSession::current()?->loadMissing('messages');
+
+        if (! $ticket || $ticket->id !== $this->ticketId) {
+            return;
+        }
+
+        $newAdminMessages = $ticket->messages
+            ->filter(fn (SupportTicketMessage $message) => $message->id > $this->lastSeenMessageId && $message->isFromAdmin())
+            ->values();
+
+        if ($newAdminMessages->isEmpty()) {
+            return;
+        }
+
+        $this->lastSeenMessageId = (int) $newAdminMessages->max('id');
+        $this->markTicketRead($ticket);
+
+        $this->dispatch('guest-support-new-messages', messages: $newAdminMessages
+            ->map(fn (SupportTicketMessage $message) => $this->formatMessageForBroadcast($message))
+            ->all());
     }
 
     public function createTicket(SupportTicketService $support): void
@@ -81,11 +112,12 @@ class GuestSupportChat extends Component
         );
 
         $this->ticketId = $ticket->id;
+        $this->lastSeenMessageId = (int) ($ticket->messages->max('id') ?? 0);
         $this->newSubject = '';
         $this->newBody = '';
         $this->newCategory = SupportTicket::CATEGORY_OTHER;
         $this->markTicketRead($ticket);
-        $this->dispatch('guest-support-opened', ticketId: $ticket->id);
+        $this->bootGuestRealtime($ticket);
         $this->dispatch('support-thread-scroll');
         $this->dispatch('support-message-sent');
     }
@@ -113,6 +145,7 @@ class GuestSupportChat extends Component
         $this->replyBody = '';
         $this->replyFormKey++;
         $this->ticketId = $ticket->id;
+        $this->lastSeenMessageId = max($this->lastSeenMessageId, $message->id);
         $this->dispatch('support-append-message', message: $this->formatMessageForBroadcast($message));
         $this->dispatch('support-thread-scroll');
         $this->dispatch('support-message-sent');
@@ -141,6 +174,26 @@ class GuestSupportChat extends Component
     public function render(): View
     {
         return view('livewire.guest-support-chat');
+    }
+
+    private function bootGuestRealtime(?SupportTicket $ticket = null): void
+    {
+        $ticket ??= $this->selectedTicket;
+
+        if (! $ticket) {
+            return;
+        }
+
+        $this->dispatch('guest-support-opened', ticketId: $ticket->id, guestToken: $ticket->guest_token);
+
+        $this->js(sprintf(
+            'window.coinReverb = Object.assign(window.coinReverb || {}, %s); window.bootGuestSupportRealtime?.(%d);',
+            json_encode([
+                'guestTicketId' => $ticket->id,
+                'guestToken' => $ticket->guest_token,
+            ], JSON_THROW_ON_ERROR),
+            $ticket->id,
+        ));
     }
 
     private function markTicketRead(?SupportTicket $ticket): void
