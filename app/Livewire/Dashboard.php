@@ -206,7 +206,7 @@ class Dashboard extends Component
     public function getSubtitleProperty(): string
     {
         if ($this->section === 0) {
-            return 'Portfolio overview · '.$this->activeContractCount.' active investment(s)';
+            return __('coin.sections.overview_sub').' · '.$this->activeContractCount.' '.__('coin.invest.active_count');
         }
 
         return app(DashboardDataService::class)->sectionMeta()[$this->section][1];
@@ -422,8 +422,8 @@ class Dashboard extends Component
             $this->depositAmount = '';
             $this->reloadPortfolioData();
             $this->actionMessage = config('coin.deposits.auto_confirm_mock')
-                ? 'Top-up credited to your available balance.'
-                : 'Top-up submitted and awaiting confirmation.';
+                ? __('coin.messages.top_up_credited')
+                : __('coin.messages.top_up_pending');
         } catch (\RuntimeException $exception) {
             $this->addError('depositAmount', $exception->getMessage());
         }
@@ -464,7 +464,7 @@ class Dashboard extends Component
             $this->reloadPortfolioData();
             $this->paymentModalReference = $withdrawal->reference;
             $this->paymentModalStep = 'success';
-            $this->actionMessage = 'Payout request submitted.';
+            $this->actionMessage = __('coin.messages.payout_submitted');
         } catch (\RuntimeException $exception) {
             $this->paymentModalStep = 'error';
             $this->paymentModalError = $exception->getMessage();
@@ -493,7 +493,7 @@ class Dashboard extends Component
         ]);
 
         $this->reloadPortfolioData();
-        $this->actionMessage = 'Profile contacts saved.';
+        $this->actionMessage = __('coin.messages.profile_saved');
     }
 
     public function openInvestmentPaymentModal(): void
@@ -504,13 +504,13 @@ class Dashboard extends Component
         $plan = $this->selectedPlan;
 
         if (! $plan instanceof Plan) {
-            $this->addError('purchase', 'Select an investment plan first.');
+            $this->addError('purchase', __('coin.messages.select_plan'));
 
             return;
         }
 
         if ($plan->isEnterprise() && $plan->min_deposit === null) {
-            $this->addError('purchase', 'Contact sales for Enterprise plans.');
+            $this->addError('purchase', __('coin.invest.contact_sales'));
 
             return;
         }
@@ -529,7 +529,7 @@ class Dashboard extends Component
 
         if (! $plan instanceof Plan) {
             $this->closePaymentModal();
-            $this->addError('purchase', 'Select an investment plan first.');
+            $this->addError('purchase', __('coin.messages.select_plan'));
 
             return;
         }
@@ -546,7 +546,7 @@ class Dashboard extends Component
             $this->selectedPlanId = $plan->id;
             $this->paymentModalReference = $contract->code;
             $this->paymentModalStep = 'success';
-            $this->actionMessage = 'Investment activated. Principal is locked until maturity.';
+            $this->actionMessage = __('coin.messages.investment_active');
         } catch (\RuntimeException $exception) {
             $this->paymentModalStep = 'error';
             $this->paymentModalError = $exception->getMessage();
@@ -715,7 +715,7 @@ class Dashboard extends Component
     public function render(): View
     {
         return view('livewire.dashboard')
-            ->layout('layouts.coin-dashboard', ['title' => 'Coin — Dashboard']);
+            ->layout('layouts.coin-dashboard', ['title' => 'Coin — '.__('coin.nav.portal')]);
     }
 
     private function dailyAmount(): float

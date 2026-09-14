@@ -118,20 +118,20 @@ class SupportTicket extends Model
     public static function categories(): array
     {
         return [
-            self::CATEGORY_WITHDRAWAL => 'Payout',
-            self::CATEGORY_CONTRACT => 'Contract',
-            self::CATEGORY_KYC => 'KYC',
-            self::CATEGORY_ACCOUNT => 'Account',
-            self::CATEGORY_OTHER => 'Other',
+            self::CATEGORY_WITHDRAWAL => __('coin.ticket.category.withdrawal'),
+            self::CATEGORY_CONTRACT => __('coin.ticket.category.contract'),
+            self::CATEGORY_KYC => __('coin.ticket.category.kyc'),
+            self::CATEGORY_ACCOUNT => __('coin.ticket.category.account'),
+            self::CATEGORY_OTHER => __('coin.ticket.category.other'),
         ];
     }
 
     public static function statuses(): array
     {
         return [
-            self::STATUS_OPEN => 'Open',
-            self::STATUS_PENDING => 'Pending',
-            self::STATUS_CLOSED => 'Closed',
+            self::STATUS_OPEN => __('coin.ticket.status.open'),
+            self::STATUS_PENDING => __('coin.ticket.status.pending'),
+            self::STATUS_CLOSED => __('coin.ticket.status.closed'),
         ];
     }
 

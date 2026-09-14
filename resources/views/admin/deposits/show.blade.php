@@ -1,6 +1,6 @@
 @extends('layouts.admin')
 
-@section('title', 'Coin Admin — Top-up #'.$deposit->id)
+@section('title', __('coin.admin.page_title', ['section' => __('coin.admin.top_up_detail', ['id' => $deposit->id])]))
 
 @section('content')
     @include('admin.partials.nav')
@@ -12,12 +12,12 @@
     <div style="display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:16px;align-items:start;">
         <div>
             <div class="admin-card">
-                <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.12em;color:rgba(232,237,245,0.62);">TOP-UP #{{ $deposit->id }}</div>
+                <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.12em;color:rgba(232,237,245,0.62);">{{ strtoupper(__('coin.admin.top_up_detail', ['id' => $deposit->id])) }}</div>
                 <h1 style="margin:10px 0 0;font-size:22px;font-weight:600;">{{ $deposit->formattedAmount() }}</h1>
                 <p style="margin:8px 0 0;font-size:13px;color:rgba(232,237,245,0.72);">{{ ucfirst($deposit->status) }} · {{ $deposit->created_at?->format('M j, Y H:i') }}</p>
                 <div style="margin-top:16px;font-size:13px;line-height:1.7;">
-                    <div><strong>Method:</strong> {{ $deposit->method }}</div>
-                    @if($deposit->confirmed_at)<div><strong>Processed:</strong> {{ $deposit->confirmed_at->format('M j, Y H:i') }}</div>@endif
+                    <div><strong>{{ __('coin.admin.method') }}:</strong> {{ $deposit->method }}</div>
+                    @if($deposit->confirmed_at)<div><strong>{{ __('coin.admin.processed') }}:</strong> {{ $deposit->confirmed_at->format('M j, Y H:i') }}</div>@endif
                 </div>
             </div>
 
@@ -25,11 +25,11 @@
             <div class="admin-card" style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap;">
                 <form method="POST" action="{{ route('admin.deposits.confirm', $deposit) }}">
                     @csrf
-                    <button type="submit" class="admin-btn admin-btn-primary">Confirm & credit</button>
+                    <button type="submit" class="admin-btn admin-btn-primary">{{ __('coin.admin.confirm_and_credit') }}</button>
                 </form>
                 <form method="POST" action="{{ route('admin.deposits.reject', $deposit) }}">
                     @csrf
-                    <button type="submit" class="admin-btn" style="border-color:rgba(255,143,143,0.45);color:#ff8f8f;">Reject</button>
+                    <button type="submit" class="admin-btn" style="border-color:rgba(255,143,143,0.45);color:#ff8f8f;">{{ __('coin.admin.reject') }}</button>
                 </form>
             </div>
             @endif

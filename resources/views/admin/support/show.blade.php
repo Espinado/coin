@@ -89,7 +89,7 @@
             @else
                 <div style="margin-top:18px;display:flex;flex-direction:column;gap:10px;font-size:13px;">
                     <div style="display:flex;justify-content:space-between;gap:12px;"><span style="color:rgba(232,237,245,0.62);">Balance</span><span style="font-family:'JetBrains Mono',monospace;">{{ $ticket->user->wallet?->formattedBalance() ?? '—' }}</span></div>
-                    <div style="display:flex;justify-content:space-between;gap:12px;"><span style="color:rgba(232,237,245,0.62);">Available</span><span style="font-family:'JetBrains Mono',monospace;">{{ $ticket->user->wallet?->formattedAvailable() ?? '—' }}</span></div>
+                    <div style="display:flex;justify-content:space-between;gap:12px;"><span style="color:rgba(232,237,245,0.62);">{{ __('coin.available') }}</span><span style="font-family:'JetBrains Mono',monospace;">{{ $ticket->user->wallet?->formattedAvailable() ?? '—' }}</span></div>
                     <div style="display:flex;justify-content:space-between;gap:12px;"><span style="color:rgba(232,237,245,0.62);">Active TFLOPS</span><span style="font-family:'JetBrains Mono',monospace;">{{ number_format($ticket->user->active_tflops) }}</span></div>
                     <div style="display:flex;justify-content:space-between;gap:12px;"><span style="color:rgba(232,237,245,0.62);">Contracts</span><span style="font-family:'JetBrains Mono',monospace;">{{ $ticket->user->contracts->count() }}</span></div>
                 </div>

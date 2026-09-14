@@ -1,6 +1,6 @@
 @extends('layouts.admin')
 
-@section('title', 'Coin Admin — Settings')
+@section('title', __('coin.admin.page_title', ['section' => __('coin.admin.settings')]))
 
 @section('content')
     @include('admin.partials.nav')
@@ -10,8 +10,8 @@
     @endif
 
     <div class="admin-card">
-        <h1 style="margin:0;font-size:24px;font-weight:600;">Platform settings</h1>
-        <p style="margin:8px 0 0;font-size:14px;color:rgba(232,237,245,0.72);">Payouts, referrals, and platform toggles.</p>
+        <h1 style="margin:0;font-size:24px;font-weight:600;">{{ __('coin.admin.platform_settings') }}</h1>
+        <p style="margin:8px 0 0;font-size:14px;color:rgba(232,237,245,0.72);">{{ __('coin.admin.settings_sub') }}</p>
     </div>
 
     <div class="admin-card" style="margin-top:16px;">
@@ -26,7 +26,7 @@
                         <label style="display:flex;align-items:center;gap:8px;margin-top:12px;font-size:13px;">
                             <input type="hidden" name="{{ $key }}" value="0">
                             <input type="checkbox" name="{{ $key }}" value="1" @checked(old($key, filter_var($values[$key] ?? $definition['default'], FILTER_VALIDATE_BOOL)))>
-                            Enabled
+                            {{ __('coin.admin.enabled') }}
                         </label>
                     @elseif($key === 'token_symbol')
                         <input type="text" name="{{ $key }}" value="{{ old($key, $values[$key] ?? $definition['default']) }}"
@@ -40,7 +40,7 @@
             @endforeach
 
             <div style="grid-column:1/-1;">
-                <button type="submit" class="admin-btn admin-btn-primary">Save settings</button>
+                <button type="submit" class="admin-btn admin-btn-primary">{{ __('coin.admin.save_settings') }}</button>
             </div>
         </form>
     </div>

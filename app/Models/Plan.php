@@ -82,18 +82,18 @@ class Plan extends Model
     public function actionLabel(?Plan $activePlan = null): string
     {
         if ($this->isCurrentFor($activePlan)) {
-            return 'Manage investment';
+            return __('coin.invest.manage');
         }
 
         if ($this->isEnterprise()) {
-            return 'Contact sales';
+            return __('coin.invest.contact_sales');
         }
 
         if ($activePlan !== null && $this->sort_order > $activePlan->sort_order) {
-            return 'Upgrade';
+            return __('coin.invest.upgrade');
         }
 
-        return 'Invest';
+        return __('coin.actions.invest');
     }
 
     public function calculatorTermLabel(): string

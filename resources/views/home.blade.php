@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Coin — Investment Platform</title>
+    <title>Coin — Инвестиционная платформа</title>
     @livewireStyles
     @vite(['resources/js/guest-support.js'])
     @include('partials.coin-reverb-config-guest')
@@ -41,12 +41,12 @@
     </div>
     <button type="button" class="coin-burger" onClick="{{ toggleMenu }}" aria-label="Open menu"><span></span><span></span><span></span></button>
     <nav class="coin-nav coin-nav-desktop" style="display: flex; align-items: center; gap: 30px;">
-      <a href="#product" style="font-size: 14px; color: rgba(230,244,250,0.78);">Product</a>
-      <a href="#how" style="font-size: 14px; color: rgba(230,244,250,0.78);">How it works</a>
-      <a href="#plans" style="font-size: 14px; color: rgba(230,244,250,0.78);">Plans</a>
-      <a href="#infra" style="font-size: 14px; color: rgba(230,244,250,0.78);">Security</a>
-      <a href="/dashboard" style="font-size: 14px; color: rgba(230,244,250,0.78);">Dashboard</a>
-      <a href="#faq" style="font-size: 14px; color: rgba(230,244,250,0.78);">FAQ</a>
+      <a href="#product" style="font-size: 14px; color: rgba(230,244,250,0.78);">Продукт</a>
+      <a href="#how" style="font-size: 14px; color: rgba(230,244,250,0.78);">Как это работает</a>
+      <a href="#plans" style="font-size: 14px; color: rgba(230,244,250,0.78);">Планы</a>
+      <a href="#infra" style="font-size: 14px; color: rgba(230,244,250,0.78);">Безопасность</a>
+      <a href="/dashboard" style="font-size: 14px; color: rgba(230,244,250,0.78);">Личный кабинет</a>
+      <a href="#faq" style="font-size: 14px; color: rgba(230,244,250,0.78);">Вопросы</a>
     </nav>
     <nav class="coin-nav coin-nav-mobile">
       <a href="#product" onClick="{{ closeMenu }}" style="font-size: 14px; color: rgba(230,244,250,0.78);">Product</a>
@@ -57,20 +57,20 @@
       <a href="#faq" onClick="{{ closeMenu }}" style="font-size: 14px; color: rgba(230,244,250,0.78);">FAQ</a>
     </nav>
     <div class="coin-header-actions" style="display: flex; align-items: center; gap: 12px;">
-      <a href="/dashboard" style="padding: 11px 22px; border-radius: 11px; border: 1px solid oklch(0.86 0.11 195 / 0.5); background: linear-gradient(140deg, oklch(0.86 0.12 192), oklch(0.66 0.13 205)); color: #04121f; font-family: inherit; font-size: 14px; font-weight: 600; cursor: pointer;">Dashboard</a>
+      <a href="/dashboard" style="padding: 11px 22px; border-radius: 11px; border: 1px solid oklch(0.86 0.11 195 / 0.5); background: linear-gradient(140deg, oklch(0.86 0.12 192), oklch(0.66 0.13 205)); color: #04121f; font-family: inherit; font-size: 14px; font-weight: 600; cursor: pointer;">Личный кабинет</a>
     </div>
   </header>
 
   <section data-screen-label="Hero" style="position: relative; z-index: 5; display: grid; grid-template-columns: 1fr 540px; gap: 60px; align-items: center; padding: 96px 72px 104px;">
     <div>
       <div style="display: inline-flex; align-items: center; gap: 10px; padding: 7px 14px; border-radius: 999px; border: 1px solid rgba(150,235,250,0.2); background: rgba(150,235,250,0.06); font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.14em; color: oklch(0.88 0.11 195);">
-        <span style="width: 6px; height: 6px; border-radius: 50%; background: oklch(0.85 0.15 160); animation: paiPulse 2.4s infinite;"></span>INVESTMENT PLATFORM
+        <span style="width: 6px; height: 6px; border-radius: 50%; background: oklch(0.85 0.15 160); animation: paiPulse 2.4s infinite;"></span>ИНВЕСТИЦИОННАЯ ПЛАТФОРМА
       </div>
-      <h1 style="margin: 26px 0 0; font-size: 66px; line-height: 1.06; letter-spacing: -0.04em; font-weight: 600; color: #f0fbff;">Invest USDT and earn daily profit</h1>
-      <p style="margin: 24px 0 0; max-width: 520px; font-size: 17px; line-height: 1.62; color: rgba(230,244,250,0.72);">Top up your account with USDT, buy an investment plan with fixed APR, and track daily profit in your dashboard. Principal unlocks at maturity.</p>
+      <h1 style="margin: 26px 0 0; font-size: 66px; line-height: 1.06; letter-spacing: -0.04em; font-weight: 600; color: #f0fbff;">Инвестируйте USDT и получайте прибыль каждый день</h1>
+      <p style="margin: 24px 0 0; max-width: 520px; font-size: 17px; line-height: 1.62; color: rgba(230,244,250,0.72);">Пополните счёт USDT, купите план с фиксированной доходностью и следите за прибылью в личном кабинете. Тело возвращается в конце срока.</p>
       <div style="display: flex; gap: 14px; margin-top: 36px;">
-        <button style="padding: 16px 28px; border-radius: 13px; border: 1px solid oklch(0.86 0.11 195 / 0.5); background: linear-gradient(140deg, oklch(0.86 0.12 192), oklch(0.66 0.13 205)); color: #04121f; font-family: inherit; font-size: 15.5px; font-weight: 600; cursor: pointer; box-shadow: 0 20px 50px -22px oklch(0.8 0.13 195 / 0.7);">Start investing</button>
-        <button style="padding: 16px 26px; border-radius: 13px; border: 1px solid rgba(150,235,250,0.2); background: rgba(150,235,250,0.05); color: #e6f4fa; font-family: inherit; font-size: 15.5px; font-weight: 500; cursor: pointer;">How it works</button>
+        <button style="padding: 16px 28px; border-radius: 13px; border: 1px solid oklch(0.86 0.11 195 / 0.5); background: linear-gradient(140deg, oklch(0.86 0.12 192), oklch(0.66 0.13 205)); color: #04121f; font-family: inherit; font-size: 15.5px; font-weight: 600; cursor: pointer; box-shadow: 0 20px 50px -22px oklch(0.8 0.13 195 / 0.7);">Начать</button>
+        <button style="padding: 16px 26px; border-radius: 13px; border: 1px solid rgba(150,235,250,0.2); background: rgba(150,235,250,0.05); color: #e6f4fa; font-family: inherit; font-size: 15.5px; font-weight: 500; cursor: pointer;">Как это работает</button>
       </div>
       <div style="display: flex; gap: 36px; margin-top: 44px; padding-top: 26px; border-top: 1px solid rgba(150,235,250,0.1);">
         <div>

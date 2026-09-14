@@ -1,6 +1,6 @@
 @extends('layouts.admin')
 
-@section('title', 'Coin Admin — Plans')
+@section('title', __('coin.admin.page_title', ['section' => __('coin.admin.plans')]))
 
 @section('content')
     @include('admin.partials.nav')
@@ -12,10 +12,10 @@
     <div class="admin-card">
         <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;">
             <div>
-                <h1 style="margin:0;font-size:24px;font-weight:600;">Plans</h1>
-                <p style="margin:8px 0 0;font-size:14px;color:rgba(232,237,245,0.72);">Investment plan catalog. Active plans appear in the user dashboard immediately.</p>
+                <h1 style="margin:0;font-size:24px;font-weight:600;">{{ __('coin.admin.plans') }}</h1>
+                <p style="margin:8px 0 0;font-size:14px;color:rgba(232,237,245,0.72);">{{ __('coin.admin.plans_sub') }}</p>
             </div>
-            <a href="{{ route('admin.plans.create') }}" class="admin-btn admin-btn-primary">New plan</a>
+            <a href="{{ route('admin.plans.create') }}" class="admin-btn admin-btn-primary">{{ __('coin.admin.new_plan') }}</a>
         </div>
     </div>
 
@@ -23,11 +23,11 @@
         <table style="width:100%;border-collapse:collapse;font-size:13px;">
             <thead>
                 <tr style="text-align:left;border-bottom:1px solid rgba(255,255,255,0.08);color:rgba(232,237,245,0.62);font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.1em;">
-                    <th style="padding:14px 18px;">PLAN</th>
-                    <th style="padding:14px 18px;">MIN INVESTMENT</th>
-                    <th style="padding:14px 18px;">APR</th>
-                    <th style="padding:14px 18px;">TERM</th>
-                    <th style="padding:14px 18px;">STATUS</th>
+                    <th style="padding:14px 18px;">{{ strtoupper(__('coin.plan')) }}</th>
+                    <th style="padding:14px 18px;">{{ strtoupper(__('coin.admin.min_purchase')) }}</th>
+                    <th style="padding:14px 18px;">{{ strtoupper(__('coin.admin.apr')) }}</th>
+                    <th style="padding:14px 18px;">{{ strtoupper(__('coin.admin.lock_period')) }}</th>
+                    <th style="padding:14px 18px;">{{ strtoupper(__('coin.admin.visibility')) }}</th>
                     <th style="padding:14px 18px;"></th>
                 </tr>
             </thead>
@@ -38,9 +38,9 @@
                         <td style="padding:14px 18px;">{{ $plan->formattedMinDeposit() ?? $plan->price_label }}</td>
                         <td style="padding:14px 18px;">{{ $plan->formattedAnnualProfit() ?? '—' }}</td>
                         <td style="padding:14px 18px;">{{ $plan->formattedDuration() }}</td>
-                        <td style="padding:14px 18px;">{{ $plan->is_active ? 'Active' : 'Hidden' }}@if($plan->is_featured) · Featured @endif</td>
+                        <td style="padding:14px 18px;">{{ $plan->is_active ? __('coin.admin.published') : __('coin.admin.hidden') }}@if($plan->is_featured) · {{ __('coin.admin.highlighted') }} @endif</td>
                         <td style="padding:14px 18px;text-align:right;">
-                            <a href="{{ route('admin.plans.edit', $plan) }}" class="admin-btn">Edit</a>
+                            <a href="{{ route('admin.plans.edit', $plan) }}" class="admin-btn">{{ __('coin.edit') }}</a>
                         </td>
                     </tr>
                 @endforeach

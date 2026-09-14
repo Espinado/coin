@@ -43,11 +43,11 @@ class Withdrawal extends Model
     public static function statuses(): array
     {
         return [
-            self::STATUS_PENDING => 'Pending',
-            self::STATUS_APPROVED => 'Approved',
-            self::STATUS_PROCESSING => 'Processing',
-            self::STATUS_PAID => 'Paid',
-            self::STATUS_REJECTED => 'Rejected',
+            self::STATUS_PENDING => __('coin.withdrawal_status.pending'),
+            self::STATUS_APPROVED => __('coin.withdrawal_status.approved'),
+            self::STATUS_PROCESSING => __('coin.withdrawal_status.processing'),
+            self::STATUS_PAID => __('coin.withdrawal_status.paid'),
+            self::STATUS_REJECTED => __('coin.withdrawal_status.rejected'),
         ];
     }
 

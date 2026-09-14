@@ -1,6 +1,6 @@
 @extends('layouts.admin')
 
-@section('title', 'Coin Admin — Payout '.$withdrawal->reference)
+@section('title', __('coin.admin.page_title', ['section' => __('coin.admin.payout_detail', ['reference' => $withdrawal->reference])]))
 
 @section('content')
     @include('admin.partials.nav')
@@ -16,14 +16,14 @@
                 <h1 style="margin:10px 0 0;font-size:22px;font-weight:600;">{{ $withdrawal->formattedAmount() }} COIN</h1>
                 <p style="margin:8px 0 0;font-size:13px;color:rgba(232,237,245,0.72);">{{ $withdrawal->statusLabel() }} · {{ $withdrawal->created_at?->format('M j, Y H:i') }}</p>
                 <div style="margin-top:16px;font-size:13px;line-height:1.7;">
-                    <div><strong>Payout address:</strong> {{ $withdrawal->payout_address }}</div>
-                    @if($withdrawal->network_label)<div><strong>Network:</strong> {{ $withdrawal->network_label }}</div>@endif
-                    @if($withdrawal->admin_note)<div style="margin-top:10px;"><strong>Admin note:</strong> {{ $withdrawal->admin_note }}</div>@endif
+                    <div><strong>{{ __('coin.admin.payout_address') }}:</strong> {{ $withdrawal->payout_address }}</div>
+                    @if($withdrawal->network_label)<div><strong>{{ __('coin.admin.network') }}:</strong> {{ $withdrawal->network_label }}</div>@endif
+                    @if($withdrawal->admin_note)<div style="margin-top:10px;"><strong>{{ __('coin.admin.admin_note') }}:</strong> {{ $withdrawal->admin_note }}</div>@endif
                 </div>
             </div>
 
             <div class="admin-card" style="margin-top:16px;">
-                <h2 style="margin:0 0 14px;font-size:16px;font-weight:600;">Update status</h2>
+                <h2 style="margin:0 0 14px;font-size:16px;font-weight:600;">{{ __('coin.admin.update_status') }}</h2>
                 <form method="POST" action="{{ route('admin.withdrawals.status', $withdrawal) }}" style="display:flex;flex-direction:column;gap:12px;">
                     @csrf
                     @method('PATCH')
@@ -32,9 +32,9 @@
                             <option value="{{ $value }}" @selected($withdrawal->status === $value)>{{ $label }}</option>
                         @endforeach
                     </select>
-                    <textarea name="admin_note" rows="3" placeholder="Optional note for audit trail..."
+                    <textarea name="admin_note" rows="3" placeholder="{{ __('coin.admin.audit_note_placeholder') }}"
                         style="width:100%;box-sizing:border-box;padding:12px 14px;border-radius:10px;border:1px solid rgba(255,255,255,0.12);background:#070a10;color:#e8edf5;">{{ old('admin_note', $withdrawal->admin_note) }}</textarea>
-                    <button type="submit" class="admin-btn admin-btn-primary" style="align-self:flex-start;">Save status</button>
+                    <button type="submit" class="admin-btn admin-btn-primary" style="align-self:flex-start;">{{ __('coin.admin.save_status') }}</button>
                 </form>
             </div>
         </div>

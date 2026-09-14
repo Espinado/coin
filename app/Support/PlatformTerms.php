@@ -15,11 +15,15 @@ final class PlatformTerms
 
     public static function displayTransactionType(string $type): string
     {
-        return match ($type) {
+        $normalized = match ($type) {
             'Deposit', self::TX_TOP_UP => self::TX_TOP_UP,
             'Withdrawal', self::TX_PAYOUT => self::TX_PAYOUT,
             'Plan purchase', self::TX_INVESTMENT => self::TX_INVESTMENT,
             default => $type,
         };
+
+        $key = 'coin.tx.'.$normalized;
+
+        return __($key) !== $key ? __($key) : $normalized;
     }
 }

@@ -1,8 +1,8 @@
 <section data-screen-label="Support" style="padding: 28px 32px 40px; display: grid; grid-template-columns: minmax(0, 340px) minmax(0, 1fr); gap: 16px; align-items: start;">
   <div style="padding: 22px; border-radius: 16px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.035);">
     <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;">
-      <span style="font-size:15px;font-weight:600;">Conversations</span>
-      <button type="button" wire:click="openCreateTicket" style="padding:8px 12px;border-radius:9px;border:1px solid oklch(0.86 0.11 195 / 0.5);background:linear-gradient(140deg, oklch(0.86 0.12 192), oklch(0.66 0.13 205));color:#04121f;font-family:inherit;font-size:12.5px;font-weight:600;cursor:pointer;">New chat</button>
+      <span style="font-size:15px;font-weight:600;">{{ __('coin.support.conversations') }}</span>
+      <button type="button" wire:click="openCreateTicket" style="padding:8px 12px;border-radius:9px;border:1px solid oklch(0.86 0.11 195 / 0.5);background:linear-gradient(140deg, oklch(0.86 0.12 192), oklch(0.66 0.13 205));color:#04121f;font-family:inherit;font-size:12.5px;font-weight:600;cursor:pointer;">{{ __('coin.support.new_chat') }}</button>
     </div>
     <div style="margin-top:18px;display:flex;flex-direction:column;gap:10px;">
       @forelse($tickets as $ticket)
@@ -20,7 +20,7 @@
           <div style="margin-top:6px;font-size:12px;color:rgba(214,238,248,0.62);">{{ $ticket->updated_at?->format('M j, H:i') }}</div>
         </button>
       @empty
-        <div style="padding:16px;border-radius:12px;border:1px dashed rgba(150,235,250,0.18);font-size:13px;color:rgba(214,238,248,0.72);">No conversations yet. Start a live chat if you need help with payouts, investments, or your account.</div>
+        <div style="padding:16px;border-radius:12px;border:1px dashed rgba(150,235,250,0.18);font-size:13px;color:rgba(214,238,248,0.72);">{{ __('coin.support.no_conversations') }}</div>
       @endforelse
     </div>
   </div>
@@ -30,27 +30,27 @@
       <div style="display:flex;align-items:center;gap:12px;">
         <span style="width:10px;height:10px;border-radius:50%;background:oklch(0.85 0.15 160);box-shadow:0 0 12px oklch(0.85 0.15 160);animation:dbPulse 2.4s infinite;"></span>
         <div>
-          <div style="font-size:15px;font-weight:600;">Live support chat</div>
-          <div style="margin-top:4px;font-size:12.5px;color:rgba(214,238,248,0.68);">Operators are online · replies appear instantly</div>
+          <div style="font-size:15px;font-weight:600;">{{ __('coin.support.live_chat') }}</div>
+          <div style="margin-top:4px;font-size:12.5px;color:rgba(214,238,248,0.68);">{{ __('coin.support.operators_online') }}</div>
         </div>
       </div>
       @if($this->unreadSupportCount > 0)
-        <span class="coin-support-badge" style="font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;padding:6px 12px;border-radius:999px;background:linear-gradient(140deg, oklch(0.88 0.2 35), oklch(0.72 0.22 25));color:#1a0a04;">{{ $this->unreadSupportCount }} unread</span>
+        <span class="coin-support-badge" style="font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;padding:6px 12px;border-radius:999px;background:linear-gradient(140deg, oklch(0.88 0.2 35), oklch(0.72 0.22 25));color:#1a0a04;">{{ $this->unreadSupportCount }} {{ __('coin.support.unread') }}</span>
       @endif
     </div>
 
     @if($showCreateTicket)
       <div style="padding:24px;border-radius:16px;border:1px solid rgba(150,235,250,0.12);background:rgba(150,235,250,0.035);flex:1;">
-        <div style="font-size:17px;font-weight:600;">Start a new chat</div>
-        <p style="margin:8px 0 0;font-size:13px;line-height:1.55;color:rgba(214,238,248,0.72);">Describe your issue. An operator will join this conversation in real time.</p>
+        <div style="font-size:17px;font-weight:600;">{{ __('coin.support.start_new') }}</div>
+        <p style="margin:8px 0 0;font-size:13px;line-height:1.55;color:rgba(214,238,248,0.72);">{{ __('coin.support.start_new_hint') }}</p>
         <form wire:submit.prevent="createTicket" wire:key="support-create-form-{{ $createFormKey }}" style="margin-top:20px;display:flex;flex-direction:column;gap:14px;">
           <div>
-            <div style="font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.12em;color:rgba(214,238,248,0.68);">SUBJECT</div>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.12em;color:rgba(214,238,248,0.68);">{{ mb_strtoupper(__('coin.support.subject')) }}</div>
             <input type="text" wire:model.live.debounce.250ms="newSubject" maxlength="120" style="width:100%;box-sizing:border-box;margin-top:8px;padding:12px 14px;border-radius:10px;border:1px solid rgba(150,235,250,0.16);background:rgba(4,16,28,0.6);color:#eafcff;font-size:14px;">
             @error('newSubject')<div style="margin-top:8px;font-size:12.5px;color:oklch(0.78 0.16 25);">{{ $message }}</div>@enderror
           </div>
           <div>
-            <div style="font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.12em;color:rgba(214,238,248,0.68);">CATEGORY</div>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.12em;color:rgba(214,238,248,0.68);">{{ mb_strtoupper(__('coin.support.category')) }}</div>
             <select wire:model="newCategory" style="width:100%;box-sizing:border-box;margin-top:8px;padding:12px 14px;border-radius:10px;border:1px solid rgba(150,235,250,0.16);background:rgba(4,16,28,0.6);color:#eafcff;font-size:14px;">
               @foreach($this->ticketCategories as $value => $label)
                 <option value="{{ $value }}">{{ $label }}</option>
@@ -59,14 +59,14 @@
             @error('newCategory')<div style="margin-top:8px;font-size:12.5px;color:oklch(0.78 0.16 25);">{{ $message }}</div>@enderror
           </div>
           <div>
-            <div style="font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.12em;color:rgba(214,238,248,0.68);">MESSAGE</div>
-            <textarea wire:model.live.debounce.250ms="newBody" rows="6" maxlength="5000" placeholder="Write your first message to the support team..."
+            <div style="font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.12em;color:rgba(214,238,248,0.68);">{{ mb_strtoupper(__('coin.support.message')) }}</div>
+            <textarea wire:model.live.debounce.250ms="newBody" rows="6" maxlength="5000" placeholder="{{ __('coin.support.message_placeholder') }}"
               style="width:100%;box-sizing:border-box;margin-top:8px;padding:12px 14px;border-radius:10px;border:1px solid rgba(150,235,250,0.16);background:rgba(4,16,28,0.6);color:#eafcff;font-size:14px;resize:vertical;"></textarea>
             @error('newBody')<div style="margin-top:8px;font-size:12.5px;color:oklch(0.78 0.16 25);">{{ $message }}</div>@enderror
           </div>
           <div style="display:flex;gap:10px;">
-            <button type="submit" style="padding:11px 18px;border-radius:10px;border:1px solid oklch(0.86 0.11 195 / 0.5);background:linear-gradient(140deg, oklch(0.86 0.12 192), oklch(0.66 0.13 205));color:#04121f;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;">Start chat</button>
-            <button type="button" wire:click="cancelCreateTicket" style="padding:11px 18px;border-radius:10px;border:1px solid rgba(150,235,250,0.2);background:rgba(150,235,250,0.06);color:#e6f4fa;font-family:inherit;font-size:13px;cursor:pointer;">Cancel</button>
+            <button type="submit" style="padding:11px 18px;border-radius:10px;border:1px solid oklch(0.86 0.11 195 / 0.5);background:linear-gradient(140deg, oklch(0.86 0.12 192), oklch(0.66 0.13 205));color:#04121f;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;">{{ __('coin.support.start_chat') }}</button>
+            <button type="button" wire:click="cancelCreateTicket" style="padding:11px 18px;border-radius:10px;border:1px solid rgba(150,235,250,0.2);background:rgba(150,235,250,0.06);color:#e6f4fa;font-family:inherit;font-size:13px;cursor:pointer;">{{ __('coin.cancel') }}</button>
           </div>
         </form>
       </div>
@@ -98,20 +98,20 @@
         @if($ticket->status !== \App\Models\SupportTicket::STATUS_CLOSED)
           <div style="padding:20px 24px;border-radius:16px;border:1px solid rgba(150,235,250,0.12);background:rgba(150,235,250,0.035);">
             <form wire:submit.prevent="sendTicketReply" wire:key="support-reply-form-{{ $ticket->id }}-{{ $replyFormKey }}" style="display:flex;flex-direction:column;gap:12px;">
-              <textarea wire:model="replyBody" rows="3" maxlength="5000" placeholder="Type a message to the operator..."
+              <textarea wire:model="replyBody" rows="3" maxlength="5000" placeholder="{{ __('coin.support.reply_placeholder') }}"
                 style="width:100%;box-sizing:border-box;padding:12px 14px;border-radius:10px;border:1px solid rgba(150,235,250,0.16);background:rgba(4,16,28,0.6);color:#eafcff;font-size:14px;resize:vertical;"></textarea>
               @error('replyBody')<div style="font-size:12.5px;color:oklch(0.78 0.16 25);">{{ $message }}</div>@enderror
-              <button type="submit" style="align-self:flex-start;padding:11px 18px;border-radius:10px;border:1px solid oklch(0.86 0.11 195 / 0.5);background:linear-gradient(140deg, oklch(0.86 0.12 192), oklch(0.66 0.13 205));color:#04121f;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;">Send message</button>
+              <button type="submit" style="align-self:flex-start;padding:11px 18px;border-radius:10px;border:1px solid oklch(0.86 0.11 195 / 0.5);background:linear-gradient(140deg, oklch(0.86 0.12 192), oklch(0.66 0.13 205));color:#04121f;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;">{{ __('coin.support.send_message') }}</button>
             </form>
           </div>
         @else
-          <div style="padding:18px;border-radius:14px;border:1px dashed rgba(150,235,250,0.18);font-size:13px;color:rgba(214,238,248,0.72);">This chat is closed. Start a new conversation if you need further help.</div>
+          <div style="padding:18px;border-radius:14px;border:1px dashed rgba(150,235,250,0.18);font-size:13px;color:rgba(214,238,248,0.72);">{{ __('coin.support.chat_closed') }}</div>
         @endif
       </div>
     @else
       <div style="padding:32px;border-radius:16px;border:1px dashed rgba(150,235,250,0.18);background:rgba(150,235,250,0.02);font-size:14px;line-height:1.6;color:rgba(214,238,248,0.72);flex:1;display:flex;flex-direction:column;justify-content:center;align-items:flex-start;gap:16px;">
-        <div>Select a conversation on the left or start a new live chat with an operator.</div>
-        <button type="button" wire:click="openCreateTicket" style="padding:11px 18px;border-radius:10px;border:1px solid oklch(0.86 0.11 195 / 0.5);background:linear-gradient(140deg, oklch(0.86 0.12 192), oklch(0.66 0.13 205));color:#04121f;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;">Start live chat</button>
+        <div>{{ __('coin.support.select_or_start') }}</div>
+        <button type="button" wire:click="openCreateTicket" style="padding:11px 18px;border-radius:10px;border:1px solid oklch(0.86 0.11 195 / 0.5);background:linear-gradient(140deg, oklch(0.86 0.12 192), oklch(0.66 0.13 205));color:#04121f;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;">{{ __('coin.support.start_live_chat') }}</button>
       </div>
     @endif
   </div>

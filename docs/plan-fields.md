@@ -5,49 +5,49 @@
 
 ---
 
-## Идентификация и отображение
+## What users see on cards
 
 | Поле (форма) | DB | Назначение | Где используется |
 |---|---|---|---|
-| **Name** | `name` | Человекочитаемое название плана («Node», «Core»). | Карточки планов в dashboard, landing, admin-список, контракты, транзакции «Investment». |
-| **Slug** | `slug` | Уникальный машинный ключ (`node`, `core`, `enterprise`). Не менять на prod без необходимости. | `PlanSeeder`, логика Enterprise (`slug === 'enterprise'` → кнопка «Contact sales», блокировка покупки без min). |
-| **Tier label** | `tier_label` | Короткий бейдж уровня (`START`, `POPULAR`, `CUSTOM`). | Верхний правый угол карточки плана в dashboard. |
-| **Price label** | `price_label` | Маркетинговая цена для UI (`$1,100`, `Custom`). Не списывается с баланса. | Крупная цифра на карточке, калькулятор «Estimated price», admin index (fallback если нет min). |
-| **Infrastructure** | `infra` | Описание «где размещён» капитал (`Shared pool`, `Reserved racks`). | Карточки планов, sidebar калькулятора, `location_label` нового контракта. |
+| **Plan name** | `name` | Название плана («Enterprise», «Core»). | Карточки, dashboard, контракты, транзакции «Investment». |
+| **Card badge** | `tier_label` | Бейдж уровня (`START`, `CUSTOM`). | Угол карточки плана. |
+| **Headline price (display only)** | `price_label` | Маркетинговый текст (`Custom`, `$1,100`). **Не списывается.** | Крупная цифра на карточке. |
+| **Pool name** | `infra` | Подпись пула (`Reserved racks`). | Карточка, sidebar калькулятора, `location_label` контракта. |
+| **Capacity bar fill (%)** | `capacity_percent` | Декоративная полоска 0–100. | Низ карточки. **Не лимит продаж.** |
 
 ---
 
-## Финансовые параметры (бизнес-логика)
+## Purchase & returns
 
 | Поле (форма) | DB | Назначение | Где используется |
 |---|---|---|---|
-| **Min investment** | `min_deposit` | Минимальная сумма покупки плана в USDT. | Валидация `PlanPurchaseService` — сумма инвестиции не может быть ниже. Карточки: «Min investment». Enterprise: если `null` — покупка только через sales. |
-| **Default investment amount** | `price_amount` | Сумма по умолчанию, если пользователь не указал другую. | `PlanPurchaseService::purchase()` когда amount не передан. Fallback principal в отображении контрактов. |
-| **Annual profit %** | `annual_profit_percent` | Годовая ставка (APR). **Главный параметр начисления прибыли.** | Daily profit = `principal × APR / 365`. Копируется в контракт при покупке. `ProfitAccrualService` начисляет по APR контракта. Калькулятор dashboard (per day / month / year). |
-| **Currency** | `currency` | Валюта плана (обычно `USDT`). | Форматирование сумм, wallet-транзакции, контракты. |
-| **Duration days** | `duration_days` | Срок контракта в днях. Principal locked до этой даты. | При покупке: `ends_at = started_at + duration_days`. Maturity release в `ProfitAccrualService`. UI: «90 days», «By agreement» если пусто. |
+| **Minimum purchase (USDT)** | `min_deposit` | Минимум при Invest. | `PlanPurchaseService`. Enterprise без min → «Contact sales». |
+| **Default purchase amount (USDT)** | `price_amount` | Сумма по умолчанию. | `PlanPurchaseService` если amount не передан. |
+| **Annual return · APR (%)** | `annual_profit_percent` | **Главный параметр прибыли.** | Daily = principal × APR ÷ 365. `ProfitAccrualService`. |
+| **Currency** | `currency` | Валюта (USDT). | Суммы, транзакции, контракты. |
+| **Lock period (days)** | `duration_days` | Срок блокировки principal. | `ends_at`, maturity release. Пусто → «By agreement». |
+| **Card hint: daily profit** | `daily_estimate` | Статичная подсказка «~X/day». | Только display; расчёт через APR. |
 
 ---
 
-## Калькулятор и legacy (наследие AI Compute)
+## Investment calculator slider
 
 | Поле (форма) | DB | Назначение | Где используется |
 |---|---|---|---|
-| **TFLOPS (legacy calculator)** | `tflops` | Историческое поле; сейчас **прокси для суммы инвестиции на слайдере**. При выборе плана `power` слайдера = `tflops`. | `Dashboard::selectPlan()`, поле `contracts.tflops`. **Не связано с реальными TFLOPS.** Для Node 250 → слайдер стартует с 250 USDT. |
-| **Max TFLOPS (calculator)** | `max_tflops` | Верхняя граница диапазона слайдера для автоподбора плана. | `DashboardDataService::planForPower()` — при движении слайдера выбирается план, где `power <= max_tflops`. |
-| **Reward multiplier** | `reward_multiplier` | Коэффициент из эпохи AI Compute. **Не участвует в daily profit accrual.** | Legacy `EpochService`, `calculatorTiers()` (не используется в UI dashboard). Оставить ≈1.0 для совместимости. |
-| **Daily estimate** | `daily_estimate` | Статичная подсказка «~X / day» на карточке. | `Plan::formattedDailyEstimate()` — только display, если заполнено. Реальный расчёт идёт через APR. |
+| **Calculator start amount (USDT)** | `tflops` | Старт слайдера при выборе плана. | `Dashboard::selectPlan()`. Legacy имя колонки. |
+| **Calculator max amount (USDT)** | `max_tflops` | Верхняя граница автоподбора плана. | `DashboardDataService::planForPower()`. |
 
 ---
 
-## Сортировка, витрина, ёмкость
+## System & admin
 
 | Поле (форма) | DB | Назначение | Где используется |
 |---|---|---|---|
-| **Sort order** | `sort_order` | Порядок планов (меньше = выше). | Admin index, dashboard список планов, сравнение upgrade (`sort_order > activePlan`). |
-| **Capacity %** | `capacity_percent` | Декоративная полоска «заполненности» плана (0–100). | Progress bar внизу карточки плана. **Не лимитирует покупки.** |
-| **Active** | `is_active` | План доступен для покупки. | `DashboardDataService` — только `is_active = true`. Скрытые планы не показываются пользователю. |
-| **Featured** | `is_featured` | Метка «рекомендуемый» в admin-списке. | Admin index (`Active · Featured`). На landing/dashboard пока не выделает отдельно. |
+| **System key (slug)** | `slug` | Уникальный ключ (`enterprise`). | Enterprise rules, seeder. |
+| **List order** | `sort_order` | Порядок в списке (меньше = выше). | Dashboard, upgrade logic. |
+| **[Legacy] Reward multiplier** | `reward_multiplier` | Старое поле AI Compute. **Не влияет на profit.** | Оставить 1.0. |
+| **Published** | `is_active` | План виден и доступен для покупки. | `DashboardDataService`. |
+| **Highlighted in admin list** | `is_featured` | Метка в admin index. | Только админка. |
 
 ---
 

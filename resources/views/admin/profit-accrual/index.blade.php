@@ -1,6 +1,6 @@
 @extends('layouts.admin')
 
-@section('title', 'Coin Admin — Profit accrual')
+@section('title', __('coin.admin.page_title', ['section' => __('coin.admin.profit_accrual')]))
 
 @section('content')
     @include('admin.partials.nav')
@@ -12,14 +12,14 @@
     <div class="admin-card">
         <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;">
             <div>
-                <h1 style="margin:0;font-size:24px;font-weight:600;">Profit accrual</h1>
+                <h1 style="margin:0;font-size:24px;font-weight:600;">{{ __('coin.admin.profit_accrual') }}</h1>
                 <p style="margin:8px 0 0;font-size:14px;color:rgba(232,237,245,0.72);">
-                    Daily profit for active investments · formula: principal × APR / 365 · cron: <code style="font-family:'JetBrains Mono',monospace;">coin:accrue-daily-profits</code>
+                    {!! __('coin.admin.profit_accrual_sub', ['command' => '<code style="font-family:\'JetBrains Mono\',monospace;">coin:accrue-daily-profits</code>']) !!}
                 </p>
             </div>
-            <form method="POST" action="{{ route('admin.profit-accrual.run') }}" onsubmit="return confirm('Run daily profit accrual for all active investments?');">
+            <form method="POST" action="{{ route('admin.profit-accrual.run') }}" onsubmit="return confirm(@json(__('coin.admin.run_accrual_confirm')));">
                 @csrf
-                <button type="submit" class="admin-btn admin-btn-primary">Run accrual now</button>
+                <button type="submit" class="admin-btn admin-btn-primary">{{ __('coin.admin.run_accrual_now') }}</button>
             </form>
         </div>
     </div>
@@ -28,10 +28,10 @@
         <table style="width:100%;border-collapse:collapse;font-size:13px;">
             <thead>
                 <tr style="text-align:left;border-bottom:1px solid rgba(255,255,255,0.08);color:rgba(232,237,245,0.62);font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.1em;">
-                    <th style="padding:14px 18px;">WHEN</th>
-                    <th style="padding:14px 18px;">USER</th>
-                    <th style="padding:14px 18px;">SOURCE</th>
-                    <th style="padding:14px 18px;">AMOUNT</th>
+                    <th style="padding:14px 18px;">{{ strtoupper(__('coin.admin.when')) }}</th>
+                    <th style="padding:14px 18px;">{{ strtoupper(__('coin.user')) }}</th>
+                    <th style="padding:14px 18px;">{{ strtoupper(__('coin.admin.source')) }}</th>
+                    <th style="padding:14px 18px;">{{ strtoupper(__('coin.amount')) }}</th>
                 </tr>
             </thead>
             <tbody>
@@ -43,7 +43,7 @@
                         <td style="padding:14px 18px;font-family:'JetBrains Mono',monospace;">{{ $tx->amount_label }}</td>
                     </tr>
                 @empty
-                    <tr><td colspan="4" style="padding:24px 18px;color:rgba(232,237,245,0.62);">No accruals yet. Run the first daily accrual after users have active investments.</td></tr>
+                    <tr><td colspan="4" style="padding:24px 18px;color:rgba(232,237,245,0.62);">{{ __('coin.admin.no_accruals') }}</td></tr>
                 @endforelse
             </tbody>
         </table>

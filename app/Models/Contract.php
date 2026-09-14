@@ -105,11 +105,13 @@ class Contract extends Model
 
     public function statusLabel(): string
     {
-        return strtoupper($this->status);
+        $key = 'coin.contract_status.'.$this->status;
+
+        return __($key) !== $key ? __($key) : strtoupper($this->status);
     }
 
     public function title(): string
     {
-        return 'Investment · '.($this->plan?->name ?? '—');
+        return __('coin.investment').' · '.($this->plan?->name ?? '—');
     }
 }

@@ -96,16 +96,16 @@ class PlatformSettingsService
     public function definitions(): array
     {
         return [
-            'reward_rate' => ['label' => 'Reward rate (legacy compute)', 'type' => 'number', 'default' => self::DEFAULTS['reward_rate']],
-            'epochs_per_day' => ['label' => 'Epochs per day (legacy)', 'type' => 'number', 'default' => self::DEFAULTS['epochs_per_day']],
-            'token_symbol' => ['label' => 'Token symbol', 'type' => 'text', 'default' => self::DEFAULTS['token_symbol']],
-            'min_withdrawal' => ['label' => 'Minimum payout', 'type' => 'number', 'default' => self::DEFAULTS['min_withdrawal']],
-            'network_fee' => ['label' => 'Network fee', 'type' => 'number', 'default' => self::DEFAULTS['network_fee']],
-            'withdrawal_processing_hours' => ['label' => 'Payout processing (hours)', 'type' => 'number', 'default' => self::DEFAULTS['withdrawal_processing_hours']],
-            'referral_level1_percent' => ['label' => 'Referral commission % (plan purchase)', 'type' => 'number', 'default' => self::DEFAULTS['referral_level1_percent']],
-            'referral_level2_percent' => ['label' => 'Referral level 2 % (unused)', 'type' => 'number', 'default' => self::DEFAULTS['referral_level2_percent']],
-            'kyc_required_for_withdrawal' => ['label' => 'KYC required for payout', 'type' => 'boolean', 'default' => self::DEFAULTS['kyc_required_for_withdrawal']],
-            'maintenance_mode' => ['label' => 'Maintenance mode', 'type' => 'boolean', 'default' => self::DEFAULTS['maintenance_mode']],
+            'reward_rate' => ['label' => 'Ставка награды (устар.)', 'type' => 'number', 'default' => self::DEFAULTS['reward_rate']],
+            'epochs_per_day' => ['label' => 'Эпох в день (устар.)', 'type' => 'number', 'default' => self::DEFAULTS['epochs_per_day']],
+            'token_symbol' => ['label' => __('coin.settings.token_symbol'), 'type' => 'text', 'default' => self::DEFAULTS['token_symbol']],
+            'min_withdrawal' => ['label' => __('coin.settings.min_payout'), 'type' => 'number', 'default' => self::DEFAULTS['min_withdrawal']],
+            'network_fee' => ['label' => __('coin.settings.network_fee'), 'type' => 'number', 'default' => self::DEFAULTS['network_fee']],
+            'withdrawal_processing_hours' => ['label' => __('coin.settings.payout_hours'), 'type' => 'number', 'default' => self::DEFAULTS['withdrawal_processing_hours']],
+            'referral_level1_percent' => ['label' => __('coin.settings.referral_percent'), 'type' => 'number', 'default' => self::DEFAULTS['referral_level1_percent']],
+            'referral_level2_percent' => ['label' => 'Реферальный % (уровень 2, не использ.)', 'type' => 'number', 'default' => self::DEFAULTS['referral_level2_percent']],
+            'kyc_required_for_withdrawal' => ['label' => __('coin.settings.kyc_for_payout'), 'type' => 'boolean', 'default' => self::DEFAULTS['kyc_required_for_withdrawal']],
+            'maintenance_mode' => ['label' => __('coin.settings.maintenance'), 'type' => 'boolean', 'default' => self::DEFAULTS['maintenance_mode']],
         ];
     }
 

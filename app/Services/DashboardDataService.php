@@ -70,14 +70,14 @@ class DashboardDataService
     public function sectionMeta(): array
     {
         return [
-            ['Overview', 'Portfolio summary and account activity'],
-            ['Investment plans', 'Choose a plan and invest from your balance'],
-            ['My investments', 'Active and completed plan purchases'],
-            ['Statistics', 'Profit history and portfolio performance'],
-            ['Wallet', 'Balance, top-ups, and payouts'],
-            ['Referrals', 'Invite friends · 20% from their plan purchases'],
-            ['Settings', 'Profile, contacts, and payout details'],
-            ['Support', 'Live chat with the Coin support team'],
+            [__('coin.sections.overview_title'), __('coin.sections.overview_sub')],
+            [__('coin.sections.plans_title'), __('coin.sections.plans_sub')],
+            [__('coin.sections.investments_title'), __('coin.sections.investments_sub')],
+            [__('coin.sections.stats_title'), __('coin.sections.stats_sub')],
+            [__('coin.sections.wallet_title'), __('coin.sections.wallet_sub')],
+            [__('coin.sections.referrals_title'), __('coin.sections.referrals_sub')],
+            [__('coin.sections.settings_title'), __('coin.sections.settings_sub')],
+            [__('coin.sections.support_title'), __('coin.sections.support_sub')],
         ];
     }
 
