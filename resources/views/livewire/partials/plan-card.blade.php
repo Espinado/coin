@@ -1,7 +1,11 @@
 @php
     $isCurrent = $plan->isCurrentFor($primaryPlan);
+    $isSelected = (int) ($selectedPlanId ?? 0) === $plan->id;
     $isEnterprise = $plan->slug === 'enterprise';
     $isCluster = $plan->slug === 'cluster';
+    $selectedStyle = $isSelected && ! $isCurrent
+        ? 'border: 1px solid oklch(0.86 0.11 195 / 0.36); background: linear-gradient(170deg, oklch(0.6 0.13 200 / 0.18), rgba(150,235,250,0.04)); box-shadow: 0 24px 60px -40px oklch(0.7 0.14 195 / 0.7);'
+        : '';
 @endphp
 
 @if($isCurrent)
@@ -24,10 +28,13 @@
     <div style="display: flex; justify-content: space-between; gap: 14px;"><span style="color: rgba(214,238,248,0.74); min-width: 0;">Infrastructure</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">{{ $plan->infra }}</span></div>
   </div>
   <div style="margin-top: 20px; height: 5px; border-radius: 3px; background: rgba(150,235,250,0.14);"><div style="width: {{ $plan->capacity_percent ?? 0 }}%; height: 100%; border-radius: 3px; background: oklch(0.86 0.12 192);"></div></div>
-  <button style="margin-top: 22px; padding: 11px; border-radius: 10px; border: 1px solid oklch(0.86 0.11 195 / 0.5); background: linear-gradient(140deg, oklch(0.86 0.12 192), oklch(0.66 0.13 205)); color: #04121f; font-family: inherit; font-size: 13.5px; font-weight: 600; cursor: pointer;">Manage plan</button>
+  <button type="button" wire:click="selectPlan({{ $plan->id }})" style="margin-top: 22px; padding: 11px; border-radius: 10px; border: 1px solid oklch(0.86 0.11 195 / 0.5); background: linear-gradient(140deg, oklch(0.86 0.12 192), oklch(0.66 0.13 205)); color: #04121f; font-family: inherit; font-size: 13.5px; font-weight: 600; cursor: pointer;">Manage plan</button>
 </div>
 @elseif($isEnterprise)
-<div style="padding: 24px; border-radius: 18px; border: 1px solid rgba(180,180,255,0.16); background: linear-gradient(170deg, rgba(120,110,220,0.13), rgba(150,235,250,0.02)); display: flex; flex-direction: column;">
+<div style="position: relative; padding: 24px; border-radius: 18px; {{ $selectedStyle ?: 'border: 1px solid rgba(180,180,255,0.16); background: linear-gradient(170deg, rgba(120,110,220,0.13), rgba(150,235,250,0.02));' }} display: flex; flex-direction: column;">
+  @if($isSelected)
+  <div style="position: absolute; top: -10px; left: 24px; padding: 4px 10px; border-radius: 7px; background: linear-gradient(140deg, oklch(0.88 0.12 192), oklch(0.66 0.13 205)); font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: 0.12em; color: #04121f;">SELECTED</div>
+  @endif
   <div style="display: flex; align-items: center; justify-content: space-between;">
     <div style="width: 56px; height: 44px; border-radius: 11px; background: linear-gradient(160deg, #2a2a58, #0d1230); border: 1px solid rgba(180,180,255,0.3); padding: 7px; display: flex; flex-direction: column; gap: 5px;">
       <div style="display: flex; align-items: center; gap: 5px;"><span style="width: 4px; height: 4px; border-radius: 50%; background: oklch(0.85 0.15 160);"></span><span style="flex: 1; height: 3px; border-radius: 2px; background: rgba(190,190,255,0.5);"></span></div>
@@ -46,10 +53,13 @@
     <div style="display: flex; justify-content: space-between; gap: 14px;"><span style="color: rgba(214,238,248,0.72); min-width: 0;">Infrastructure</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">{{ $plan->infra }}</span></div>
   </div>
   <div style="margin-top: 20px; height: 5px; border-radius: 3px; background: rgba(150,235,250,0.12);"><div style="width: {{ $plan->capacity_percent ?? 100 }}%; height: 100%; border-radius: 3px; background: linear-gradient(90deg, oklch(0.78 0.15 292), oklch(0.88 0.12 192));"></div></div>
-  <button style="margin-top: 22px; padding: 11px; border-radius: 10px; border: 1px solid rgba(180,180,255,0.28); background: rgba(150,140,255,0.1); color: #e6f4fa; font-family: inherit; font-size: 13.5px; font-weight: 500; cursor: pointer;">Contact sales</button>
+  <button type="button" wire:click="selectPlan({{ $plan->id }})" style="margin-top: 22px; padding: 11px; border-radius: 10px; border: 1px solid rgba(180,180,255,0.28); background: rgba(150,140,255,0.1); color: #e6f4fa; font-family: inherit; font-size: 13.5px; font-weight: 500; cursor: pointer;">Contact sales</button>
 </div>
 @else
-<div style="padding: 24px; border-radius: 18px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.04); display: flex; flex-direction: column;">
+<div style="position: relative; padding: 24px; border-radius: 18px; {{ $selectedStyle ?: 'border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.04);' }} display: flex; flex-direction: column;">
+  @if($isSelected)
+  <div style="position: absolute; top: -10px; left: 24px; padding: 4px 10px; border-radius: 7px; background: linear-gradient(140deg, oklch(0.88 0.12 192), oklch(0.66 0.13 205)); font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: 0.12em; color: #04121f;">SELECTED</div>
+  @endif
   <div style="display: flex; align-items: center; justify-content: space-between;">
     @if($isCluster)
     <div style="position: relative; width: 58px; height: 44px;">
@@ -75,6 +85,6 @@
     <div style="display: flex; justify-content: space-between; gap: 14px;"><span style="color: rgba(214,238,248,0.72); min-width: 0;">Infrastructure</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">{{ $plan->infra }}</span></div>
   </div>
   <div style="margin-top: 20px; height: 5px; border-radius: 3px; background: rgba(150,235,250,0.12);"><div style="width: {{ $plan->capacity_percent ?? 0 }}%; height: 100%; border-radius: 3px; background: {{ $isCluster ? 'oklch(0.8 0.12 198)' : 'oklch(0.7 0.11 205)' }};"></div></div>
-  <button style="margin-top: 22px; padding: 11px; border-radius: 10px; border: 1px solid rgba(150,235,250,0.2); background: rgba(150,235,250,0.06); color: #e6f4fa; font-family: inherit; font-size: 13.5px; font-weight: 500; cursor: pointer;">{{ $isCluster ? 'Upgrade' : 'Activate' }}</button>
+  <button type="button" wire:click="selectPlan({{ $plan->id }})" style="margin-top: 22px; padding: 11px; border-radius: 10px; border: 1px solid {{ $isSelected ? 'oklch(0.86 0.11 195 / 0.5)' : 'rgba(150,235,250,0.2)' }}; background: {{ $isSelected ? 'linear-gradient(140deg, oklch(0.86 0.12 192), oklch(0.66 0.13 205))' : 'rgba(150,235,250,0.06)' }}; color: {{ $isSelected ? '#04121f' : '#e6f4fa' }}; font-family: inherit; font-size: 13.5px; font-weight: {{ $isSelected ? '600' : '500' }}; cursor: pointer;">{{ $isCluster ? 'Upgrade' : 'Activate' }}</button>
 </div>
 @endif

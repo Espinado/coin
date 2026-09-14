@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Models\Plan;
 use App\Models\SupportTicket;
 use App\Models\SupportTicketMessage;
 use App\Services\DashboardDataService;
@@ -17,6 +18,8 @@ class Dashboard extends Component
     public int $section = 0;
 
     public int $power = 1200;
+
+    public ?int $selectedPlanId = null;
 
     public int $period = 1;
 
@@ -92,6 +95,8 @@ class Dashboard extends Component
         $this->primaryContract = $payload['primaryContract'];
         $this->primaryPlan = $payload['primaryPlan'];
         $this->power = (int) ($this->user->active_tflops ?: 1200);
+        $this->selectedPlanId = $this->primaryPlan?->id
+            ?? $data->planForPower($this->power)?->id;
         $this->tickets = $this->user->supportTickets()
             ->with('messages')
             ->orderByDesc('updated_at')
@@ -126,6 +131,27 @@ class Dashboard extends Component
     public function setPeriod(int $period): void
     {
         $this->period = $period;
+    }
+
+    public function selectPlan(int $planId): void
+    {
+        $plan = $this->plans->firstWhere('id', $planId);
+
+        if (! $plan instanceof Plan) {
+            return;
+        }
+
+        $this->selectedPlanId = $plan->id;
+        $this->power = (int) $plan->tflops;
+    }
+
+    public function updatedPower(): void
+    {
+        $plan = app(DashboardDataService::class)->planForPower($this->power);
+
+        if ($plan instanceof Plan) {
+            $this->selectedPlanId = $plan->id;
+        }
     }
 
     public function toggleMenu(): void
@@ -188,19 +214,42 @@ class Dashboard extends Component
         return number_format($this->power, 0, '.', ',');
     }
 
+    public function getSelectedPlanProperty(): ?Plan
+    {
+        if ($this->selectedPlanId !== null) {
+            $selected = $this->plans->firstWhere('id', $this->selectedPlanId);
+
+            if ($selected instanceof Plan) {
+                return $selected;
+            }
+        }
+
+        return app(DashboardDataService::class)->planForPower($this->power);
+    }
+
     public function getPlanNameProperty(): string
     {
-        return $this->currentTier()['name'];
+        return $this->selectedPlan?->name ?? '—';
     }
 
     public function getPlanInfraProperty(): string
     {
-        return $this->currentTier()['infra'];
+        return $this->selectedPlan?->infra ?? '—';
     }
 
     public function getPlanPriceProperty(): string
     {
-        return $this->currentTier()['price'];
+        return $this->selectedPlan?->price_label ?? '—';
+    }
+
+    public function getPlanComputeProperty(): string
+    {
+        return number_format($this->power, 0, '.', ',').' TFLOPS';
+    }
+
+    public function getPlanTermProperty(): string
+    {
+        return $this->selectedPlan?->formattedDuration() ?? '—';
     }
 
     public function getDailyProperty(): string
@@ -402,15 +451,14 @@ class Dashboard extends Component
 
     private function dailyAmount(): float
     {
-        $tier = $this->currentTier();
+        $plan = $this->selectedPlan;
         $rate = app(DashboardDataService::class)->rewardRate();
 
-        return $this->power * $rate * (float) $tier['mult'];
-    }
+        if (! $plan instanceof Plan) {
+            return 0;
+        }
 
-    private function currentTier(): array
-    {
-        return app(DashboardDataService::class)->tierForPower($this->power);
+        return $this->power * $rate * (float) $plan->reward_multiplier;
     }
 
     private function formatAmount(float $value, int $decimals): string

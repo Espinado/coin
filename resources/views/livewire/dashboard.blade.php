@@ -276,7 +276,7 @@
       <section data-screen-label="Plans" style="padding: 28px 32px 40px; display: flex; flex-direction: column; gap: 16px;">
         <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px;">
           @foreach($plans as $plan)
-            @include('livewire.partials.plan-card', ['plan' => $plan, 'primaryPlan' => $primaryPlan])
+            @include('livewire.partials.plan-card', ['plan' => $plan, 'primaryPlan' => $primaryPlan, 'selectedPlanId' => $selectedPlanId])
           @endforeach
         </div>
         <div style="padding: 26px 28px; border-radius: 18px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.035); display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 340px); gap: 40px; align-items: center;">
@@ -311,6 +311,8 @@
             <div style="margin-top: 12px; font-size: 22px; font-weight: 600; letter-spacing: -0.02em;">{{ $this->planName }}</div>
             <div style="height: 1px; background: rgba(150,235,250,0.14); margin: 20px 0;"></div>
             <div style="display: flex; flex-direction: column; gap: 12px; font-size: 13px;">
+              <div style="display: flex; justify-content: space-between; gap: 14px;"><span style="color: rgba(214,238,248,0.72); min-width: 0;">Compute</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">{{ $this->planCompute }}</span></div>
+              <div style="display: flex; justify-content: space-between; gap: 14px;"><span style="color: rgba(214,238,248,0.72); min-width: 0;">Term</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">{{ $this->planTerm }}</span></div>
               <div style="display: flex; justify-content: space-between; gap: 14px;"><span style="color: rgba(214,238,248,0.72); min-width: 0;">Infrastructure</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">{{ $this->planInfra }}</span></div>
               <div style="display: flex; justify-content: space-between; gap: 14px;"><span style="color: rgba(214,238,248,0.72); min-width: 0;">Estimated price</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">{{ $this->planPrice }}</span></div>
               <div style="display: flex; justify-content: space-between; gap: 14px;"><span style="color: rgba(214,238,248,0.72); min-width: 0;">Reward token</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">{{ $symbol }}</span></div>

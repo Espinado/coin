@@ -78,8 +78,23 @@ class DashboardDataService
     {
         return $this->calculatorTiers()->first(
             fn (array $tier) => $power <= $tier['max'],
-            $this->calculatorTiers()->last()
+            $this->calculatorTiers()->last() ?? [
+                'max' => PHP_INT_MAX,
+                'name' => '—',
+                'infra' => '—',
+                'price' => '—',
+                'mult' => 1.0,
+            ],
         );
+    }
+
+    public function planForPower(int $power): ?Plan
+    {
+        return Plan::query()
+            ->where('is_active', true)
+            ->orderBy('sort_order')
+            ->get()
+            ->first(fn (Plan $plan) => $power <= ($plan->max_tflops ?? PHP_INT_MAX));
     }
 
     public function rewardRate(): float
