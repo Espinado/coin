@@ -87,7 +87,7 @@ class GuestSupportChat extends Component
         $this->markTicketRead($ticket);
         $this->dispatch('guest-support-opened', ticketId: $ticket->id);
         $this->dispatch('support-thread-scroll');
-        $this->dispatch('support-message-sent', message: 'Message sent');
+        $this->dispatch('support-message-sent');
     }
 
     public function sendReply(SupportTicketService $support): void
@@ -115,38 +115,7 @@ class GuestSupportChat extends Component
         $this->ticketId = $ticket->id;
         $this->dispatch('support-append-message', message: $this->formatMessageForBroadcast($message));
         $this->dispatch('support-thread-scroll');
-        $this->dispatch('support-message-sent', message: 'Message sent');
-    }
-
-    #[On('guest-support-realtime')]
-    public function onSupportTicketRealtime(mixed $payload = null): void
-    {
-        if (! $this->ticketId) {
-            return;
-        }
-
-        $ticket = SupportGuestSession::current();
-
-        if (! $ticket || $ticket->id !== $this->ticketId) {
-            return;
-        }
-
-        if ($this->isOpen) {
-            $this->markTicketRead($ticket);
-        }
-
-        if (is_array($payload) && isset($payload['message'])) {
-            $message = $payload['message'];
-
-            if ($message['is_from_admin'] ?? false) {
-                if ($this->isOpen) {
-                    $this->dispatch('support-append-message', message: $message);
-                    $this->dispatch('support-thread-scroll');
-                } else {
-                    $this->dispatch('support-message-received', incomingMessage: $message);
-                }
-            }
-        }
+        $this->dispatch('support-message-sent');
     }
 
     public function getSelectedTicketProperty(): ?SupportTicket

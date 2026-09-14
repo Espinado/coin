@@ -88,34 +88,3 @@
         </div>
     @endif
 </div>
-
-@script
-<script>
-    Livewire.on('support-thread-scroll', () => {
-        window.scrollSupportThreadToBottom?.('guest-support-thread');
-    });
-
-    Livewire.on('support-append-message', (payload) => {
-        const message = window.readLivewireEventPayload?.(payload, 'message') ?? payload?.message ?? payload?.[0]?.message;
-
-        if (! message) {
-            return;
-        }
-
-        window.appendSupportMessage?.(message, { threadId: 'guest-support-thread' });
-    });
-
-    Livewire.on('support-message-sent', (payload) => {
-        const text = window.readLivewireEventPayload?.(payload, 'message') ?? 'Message sent';
-        window.showSupportToast?.(text);
-    });
-
-    Livewire.on('support-message-received', (payload) => {
-        const message = window.readLivewireEventPayload?.(payload, 'incomingMessage');
-
-        if (message) {
-            window.showIncomingMessageToast?.(message, 'New message from support');
-        }
-    });
-</script>
-@endscript

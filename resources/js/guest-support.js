@@ -22,36 +22,51 @@ function readLivewireEventPayload(payload, key = null) {
 window.readLivewireEventPayload = readLivewireEventPayload;
 
 let guestEchoTicketId = null;
+let guestEchoChannel = null;
+
+function handleGuestAdminMessage(payload) {
+    const message = payload?.message;
+
+    if (! message?.is_from_admin) {
+        return;
+    }
+
+    appendSupportMessage(message, { threadId: 'guest-support-thread' });
+    scrollSupportThreadToBottom('guest-support-thread');
+    showIncomingMessageToast(message, 'Получено новое сообщение');
+}
 
 function bootGuestSupportRealtime(ticketId) {
-    if (! ticketId || guestEchoTicketId === ticketId) {
+    if (! ticketId) {
+        return;
+    }
+
+    if (guestEchoTicketId === ticketId && guestEchoChannel) {
+        return;
+    }
+
+    const echo = initEcho();
+
+    if (! echo) {
+        reverbLog('error', 'guest Echo init failed');
+
         return;
     }
 
     guestEchoTicketId = ticketId;
 
-    const echo = initEcho();
-
-    if (! echo) {
-        return;
-    }
-
-    echo.private(`support.guest.${ticketId}`)
+    guestEchoChannel = echo.private(`support.guest.${ticketId}`)
         .listen('.SupportTicketMessageSent', (payload) => {
             reverbLog('info', 'guest channel: SupportTicketMessageSent', {
                 ticketId: payload?.ticket?.id ?? payload?.message?.ticket_id ?? null,
             });
 
-            if (payload?.message?.is_from_admin) {
-                Livewire.dispatch('guest-support-realtime', payload);
-            }
+            handleGuestAdminMessage(payload);
         })
         .listen('.SupportTicketUpdated', (payload) => {
             reverbLog('info', 'guest channel: SupportTicketUpdated', {
                 ticketId: payload?.ticket?.id ?? null,
             });
-
-            Livewire.dispatch('guest-support-realtime', payload);
         });
 
     reverbLog('info', 'guest support realtime subscribed', { ticketId });
@@ -61,7 +76,7 @@ function openGuestSupportFromPage() {
     Livewire.dispatch('open-guest-support');
 }
 
-document.addEventListener('livewire:init', () => {
+function registerGuestSupportLivewireHandlers() {
     Livewire.on('guest-support-opened', (payload) => {
         const ticketId = readLivewireEventPayload(payload, 'ticketId');
 
@@ -69,6 +84,28 @@ document.addEventListener('livewire:init', () => {
             bootGuestSupportRealtime(Number(ticketId));
         }
     });
+
+    Livewire.on('support-thread-scroll', () => {
+        scrollSupportThreadToBottom('guest-support-thread');
+    });
+
+    Livewire.on('support-append-message', (payload) => {
+        const message = readLivewireEventPayload(payload, 'message');
+
+        if (! message) {
+            return;
+        }
+
+        appendSupportMessage(message, { threadId: 'guest-support-thread' });
+    });
+
+    Livewire.on('support-message-sent', () => {
+        showSupportToast('Сообщение отправлено');
+    });
+}
+
+document.addEventListener('livewire:init', () => {
+    registerGuestSupportLivewireHandlers();
 
     document.querySelectorAll('a[href="#support"]').forEach((link) => {
         link.addEventListener('click', (event) => {
@@ -98,9 +135,12 @@ document.querySelectorAll('[data-open-guest-support]').forEach((element) => {
 
 const initialTicketId = window.coinReverb?.guestTicketId;
 
-if (hasEchoKey() && initialTicketId) {
+if (hasEchoKey()) {
     initEcho();
-    bootGuestSupportRealtime(Number(initialTicketId));
-} else if (hasEchoKey()) {
-    initEcho();
+
+    if (initialTicketId) {
+        document.addEventListener('livewire:init', () => {
+            bootGuestSupportRealtime(Number(initialTicketId));
+        }, { once: true });
+    }
 }

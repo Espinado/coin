@@ -17,6 +17,7 @@ function reverbConfig() {
         wssPort: port,
         forceTLS: scheme === 'https',
         debug: Boolean(runtime.debug),
+        guestAuthEndpoint: runtime.guestAuthEndpoint ?? null,
     };
 }
 
@@ -51,7 +52,7 @@ export function initEcho() {
         wssPort: config.wssPort,
         forceTLS: config.forceTLS,
         enabledTransports: ['ws', 'wss'],
-        authEndpoint: runtime.guestAuthEndpoint ?? `${window.location.origin}/broadcasting/auth`,
+        authEndpoint: config.guestAuthEndpoint ?? `${window.location.origin}/broadcasting/auth`,
         auth: {
             headers: {
                 'X-CSRF-TOKEN': csrfToken,
