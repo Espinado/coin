@@ -2,6 +2,7 @@
 
 namespace App\View\Composers;
 
+use App\Models\Deposit;
 use App\Models\SupportTicket;
 use App\Models\Withdrawal;
 use Illuminate\View\View;
@@ -12,6 +13,7 @@ class AdminNavComposer
     {
         $view->with([
             'unreadSupportCount' => SupportTicket::totalUnreadForAdmin(),
+            'pendingDepositsCount' => Deposit::query()->where('status', Deposit::STATUS_PENDING)->count(),
             'pendingWithdrawalsCount' => Withdrawal::query()->where('status', Withdrawal::STATUS_PENDING)->count(),
         ]);
     }

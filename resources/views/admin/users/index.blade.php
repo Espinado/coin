@@ -27,8 +27,9 @@
                     <th style="padding:14px 18px;">EMAIL</th>
                     <th style="padding:14px 18px;">KYC</th>
                     <th style="padding:14px 18px;">BALANCE</th>
-                    <th style="padding:14px 18px;">CONTRACTS</th>
+                    <th style="padding:14px 18px;">DEPOSITS</th>
                     <th style="padding:14px 18px;">JOINED</th>
+                    <th style="padding:14px 18px;">LAST LOGIN</th>
                 </tr>
             </thead>
             <tbody>
@@ -40,9 +41,10 @@
                         <td style="padding:14px 18px;font-family:'JetBrains Mono',monospace;">{{ $user->wallet?->formattedBalance() ?? '—' }}</td>
                         <td style="padding:14px 18px;">{{ $user->contracts_count }}</td>
                         <td style="padding:14px 18px;">{{ $user->created_at?->format('M j, Y') }}</td>
+                        <td style="padding:14px 18px;">{{ $user->last_login_at?->format('M j, Y H:i') ?? '—' }}</td>
                     </tr>
                 @empty
-                    <tr><td colspan="6" style="padding:24px 18px;color:rgba(232,237,245,0.62);">No users found.</td></tr>
+                    <tr><td colspan="7" style="padding:24px 18px;color:rgba(232,237,245,0.62);">No users found.</td></tr>
                 @endforelse
             </tbody>
         </table>

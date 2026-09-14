@@ -6,8 +6,11 @@ use App\Models\Plan;
 use App\Models\SupportTicket;
 use App\Models\SupportTicketMessage;
 use App\Services\DashboardDataService;
+use App\Services\DepositService;
+use App\Services\PlanPurchaseService;
 use App\Services\PlatformSettingsService;
 use App\Services\SupportTicketService;
+use App\Services\WithdrawalService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Collection;
 use Livewire\Attributes\On;
@@ -43,6 +46,12 @@ class Dashboard extends Component
     public Collection $referralAccruals;
 
     /** @var Collection<int, mixed> */
+    public Collection $referralCommissions;
+
+    /** @var Collection<int, mixed> */
+    public Collection $profitTransactions;
+
+    /** @var Collection<int, mixed> */
     public Collection $plans;
 
     /** @var Collection<int, mixed> */
@@ -76,6 +85,18 @@ class Dashboard extends Component
 
     public int $createFormKey = 0;
 
+    public string $depositAmount = '';
+
+    public string $withdrawAmount = '';
+
+    public ?string $actionMessage = null;
+
+    public string $profilePhone = '';
+
+    public string $profileTelegram = '';
+
+    public string $profileCountry = '';
+
     public function mount(DashboardDataService $data, PlatformSettingsService $settings): void
     {
         $this->symbol = $settings->tokenSymbol();
@@ -92,8 +113,13 @@ class Dashboard extends Component
         $this->periodTotals = $payload['periodTotals'];
         $this->referral = $payload['referral'];
         $this->referralAccruals = $payload['referralAccruals'];
+        $this->referralCommissions = $payload['referralCommissions'];
+        $this->profitTransactions = $payload['profitTransactions'];
         $this->primaryContract = $payload['primaryContract'];
         $this->primaryPlan = $payload['primaryPlan'];
+        $this->profilePhone = (string) ($this->user->phone ?? '');
+        $this->profileTelegram = (string) ($this->user->telegram ?? '');
+        $this->profileCountry = (string) ($this->user->country_code ?? '');
         $this->power = (int) ($this->user->active_tflops ?: 1200);
         $this->selectedPlanId = $this->primaryPlan?->id
             ?? $data->planForPower($this->power)?->id;
@@ -172,7 +198,7 @@ class Dashboard extends Component
     public function getSubtitleProperty(): string
     {
         if ($this->section === 0) {
-            return 'Account overview · epoch '.($this->user->epoch_label ?? '—');
+            return 'Portfolio overview · '.$this->activeContractCount.' active deposit(s)';
         }
 
         return app(DashboardDataService::class)->sectionMeta()[$this->section][1];
@@ -185,9 +211,71 @@ class Dashboard extends Component
 
     public function getTotalAllocatedTflopsProperty(): string
     {
-        $total = $this->activeContracts->sum('tflops');
+        return $this->totalLockedBalance;
+    }
 
-        return number_format($total, 0, '.', ',').' TF';
+    public function getTotalLockedBalanceProperty(): string
+    {
+        $total = $this->activeContracts->sum(
+            fn ($contract) => (float) ($contract->principal_amount ?? $contract->plan?->price_amount ?? 0)
+        );
+
+        if ($total <= 0 && $this->wallet?->locked_balance) {
+            $total = (float) $this->wallet->locked_balance;
+        }
+
+        return number_format($total, 2, '.', ',').' USDT';
+    }
+
+    /** @return array{items: list<array{name: string, percent: int, color: string}>, utilized: int, gradient: string} */
+    public function getPlanAllocationProperty(): array
+    {
+        $colors = [
+            'oklch(0.86 0.12 192)',
+            'oklch(0.72 0.11 215)',
+            'oklch(0.7 0.15 292)',
+            'rgba(214,238,248,0.2)',
+        ];
+
+        $total = $this->activeContracts->sum(
+            fn ($contract) => (float) ($contract->principal_amount ?? $contract->plan?->price_amount ?? 0)
+        );
+
+        if ($total <= 0) {
+            return [
+                'items' => [],
+                'utilized' => 0,
+                'gradient' => 'rgba(214,238,248,0.16) 100%',
+            ];
+        }
+
+        $grouped = $this->activeContracts->groupBy(
+            fn ($contract) => $contract->plan?->name ?? 'Other'
+        );
+
+        $items = [];
+        $offset = 0;
+        $gradientParts = [];
+
+        foreach ($grouped as $name => $contracts) {
+            $amount = $contracts->sum(
+                fn ($contract) => (float) ($contract->principal_amount ?? $contract->plan?->price_amount ?? 0)
+            );
+            $percent = (int) round($amount / $total * 100);
+            $color = $colors[count($items) % count($colors)];
+            $items[] = ['name' => (string) $name, 'percent' => $percent, 'color' => $color];
+            $end = min(100, $offset + max($percent, 1));
+            $gradientParts[] = $color.' '.$offset.'% '.$end.'%';
+            $offset = $end;
+        }
+
+        $walletTotal = (float) ($this->wallet?->balance ?? $total);
+
+        return [
+            'items' => $items,
+            'utilized' => min(100, (int) round($total / max(1, $walletTotal) * 100)),
+            'gradient' => implode(', ', $gradientParts) ?: 'rgba(214,238,248,0.16) 100%',
+        ];
     }
 
     public function getLifetimeRewardsProperty(): string
@@ -244,7 +332,13 @@ class Dashboard extends Component
 
     public function getPlanComputeProperty(): string
     {
-        return number_format($this->power, 0, '.', ',').' TFLOPS';
+        $plan = $this->selectedPlan;
+
+        if ($plan?->formattedMinDeposit()) {
+            return $plan->formattedMinDeposit();
+        }
+
+        return number_format($this->power, 0, '.', ',').' USDT';
     }
 
     public function getPlanTermProperty(): string
@@ -274,16 +368,16 @@ class Dashboard extends Component
 
     public function getPeriodLabelProperty(): string
     {
-        $keys = ['day', 'week', 'month'];
-
-        return $this->periodTotals[$keys[$this->period]]->period_label ?? 'PER WEEK';
+        return match ($this->period) {
+            0 => 'PER DAY',
+            2 => 'PER MONTH',
+            default => 'PER WEEK',
+        };
     }
 
     public function getPeriodTotalProperty(): string
     {
-        $keys = ['day', 'week', 'month'];
-
-        return $this->periodTotals[$keys[$this->period]]->total_label ?? '35.28';
+        return number_format($this->profitTotalForPeriod($this->period), 2, '.', ',');
     }
 
     public function getSelectedTicketProperty(): ?SupportTicket
@@ -303,6 +397,95 @@ class Dashboard extends Component
     public function getTicketCategoriesProperty(): array
     {
         return SupportTicket::categories();
+    }
+
+    public function requestDeposit(DepositService $deposits): void
+    {
+        $this->resetActionFeedback();
+
+        $validated = $this->validate([
+            'depositAmount' => ['required', 'numeric', 'min:1'],
+        ], [], [
+            'depositAmount' => 'amount',
+        ]);
+
+        try {
+            $deposits->createPending($this->user, (float) $validated['depositAmount']);
+            $this->depositAmount = '';
+            $this->reloadPortfolioData();
+            $this->actionMessage = config('coin.deposits.auto_confirm_mock')
+                ? 'Deposit credited to your available balance.'
+                : 'Deposit submitted and awaiting confirmation.';
+        } catch (\RuntimeException $exception) {
+            $this->addError('depositAmount', $exception->getMessage());
+        }
+    }
+
+    public function requestWithdrawal(WithdrawalService $withdrawals): void
+    {
+        $this->resetActionFeedback();
+
+        $validated = $this->validate([
+            'withdrawAmount' => ['required', 'numeric', 'min:1'],
+        ], [], [
+            'withdrawAmount' => 'amount',
+        ]);
+
+        try {
+            $withdrawals->createForUser($this->user, (float) $validated['withdrawAmount']);
+            $this->withdrawAmount = '';
+            $this->reloadPortfolioData();
+            $this->actionMessage = 'Withdrawal request submitted.';
+        } catch (\RuntimeException $exception) {
+            $this->addError('withdrawAmount', $exception->getMessage());
+        }
+    }
+
+    public function saveProfile(): void
+    {
+        $this->resetActionFeedback();
+
+        $validated = $this->validate([
+            'profilePhone' => ['nullable', 'string', 'max:32'],
+            'profileTelegram' => ['nullable', 'string', 'max:64'],
+            'profileCountry' => ['nullable', 'string', 'size:2'],
+        ], [], [
+            'profilePhone' => 'phone',
+            'profileTelegram' => 'telegram',
+            'profileCountry' => 'country',
+        ]);
+
+        $this->user->update([
+            'phone' => $validated['profilePhone'] ?: null,
+            'telegram' => $validated['profileTelegram'] ?: null,
+            'country_code' => $validated['profileCountry'] ? strtoupper($validated['profileCountry']) : null,
+        ]);
+
+        $this->reloadPortfolioData();
+        $this->actionMessage = 'Profile contacts saved.';
+    }
+
+    public function purchaseSelectedPlan(PlanPurchaseService $purchases): void
+    {
+        $this->resetActionFeedback();
+
+        $plan = $this->selectedPlan;
+
+        if (! $plan instanceof Plan) {
+            $this->addError('purchase', 'Select an investment plan first.');
+
+            return;
+        }
+
+        try {
+            $purchases->purchase($this->user, $plan, (float) $this->power);
+            $this->reloadPortfolioData();
+            $this->selectedPlanId = $plan->id;
+            $this->section = 2;
+            $this->actionMessage = 'Investment activated. Principal is locked until maturity.';
+        } catch (\RuntimeException $exception) {
+            $this->addError('purchase', $exception->getMessage());
+        }
     }
 
     public function copyReferralLink(): void
@@ -457,13 +640,64 @@ class Dashboard extends Component
     private function dailyAmount(): float
     {
         $plan = $this->selectedPlan;
-        $rate = app(DashboardDataService::class)->rewardRate();
 
         if (! $plan instanceof Plan) {
             return 0;
         }
 
-        return $this->power * $rate * (float) $plan->reward_multiplier;
+        $principal = (float) $this->power;
+        $apr = (float) ($plan->annual_profit_percent ?? 0);
+
+        if ($principal <= 0 || $apr <= 0) {
+            return 0;
+        }
+
+        return round($principal * ($apr / 100) / 365, 2);
+    }
+
+    private function reloadPortfolioData(): void
+    {
+        $payload = app(DashboardDataService::class)->forUser($this->user->fresh());
+
+        $this->user = auth()->user()->fresh();
+        $this->wallet = $payload['wallet'];
+        $this->plans = $payload['plans'];
+        $this->activeContracts = $payload['activeContracts'];
+        $this->completedContracts = $payload['completedContracts'];
+        $this->transactions = $payload['transactions'];
+        $this->periodTotals = $payload['periodTotals'];
+        $this->referral = $payload['referral'];
+        $this->referralAccruals = $payload['referralAccruals'];
+        $this->referralCommissions = $payload['referralCommissions'];
+        $this->profitTransactions = $payload['profitTransactions'];
+        $this->primaryContract = $payload['primaryContract'];
+        $this->primaryPlan = $payload['primaryPlan'];
+        $this->profilePhone = (string) ($this->user->phone ?? '');
+        $this->profileTelegram = (string) ($this->user->telegram ?? '');
+        $this->profileCountry = (string) ($this->user->country_code ?? '');
+    }
+
+    private function profitTotalForPeriod(int $period): float
+    {
+        $since = match ($period) {
+            0 => now()->startOfDay(),
+            2 => now()->startOfMonth(),
+            default => now()->startOfWeek(),
+        };
+
+        return (float) $this->profitTransactions
+            ->filter(function ($transaction) use ($since) {
+                $at = $transaction->occurred_at ?? $transaction->created_at;
+
+                return $at && $at >= $since;
+            })
+            ->sum(fn ($transaction) => max(0, (float) ($transaction->amount ?? 0)));
+    }
+
+    private function resetActionFeedback(): void
+    {
+        $this->actionMessage = null;
+        $this->resetErrorBag();
     }
 
     private function formatAmount(float $value, int $decimals): string

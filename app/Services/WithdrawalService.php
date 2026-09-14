@@ -47,6 +47,8 @@ class WithdrawalService
                 'user_id' => $user->id,
                 'reference' => 'WD-'.Str::upper(Str::random(8)),
                 'amount' => $amount,
+                'currency' => $wallet->currency ?: 'USDT',
+                'withdrawal_type' => 'available_balance',
                 'payout_address' => $payoutAddress ?? $wallet->payout_address ?? '—',
                 'network_label' => $wallet->network_label,
                 'status' => Withdrawal::STATUS_PENDING,

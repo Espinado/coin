@@ -13,15 +13,22 @@
     <div style="margin-top:18px;display:flex;flex-direction:column;gap:10px;font-size:13px;">
         <div style="display:flex;justify-content:space-between;gap:12px;"><span style="color:rgba(232,237,245,0.62);">Balance</span><span style="font-family:'JetBrains Mono',monospace;">{{ $user->wallet?->formattedBalance() ?? '—' }}</span></div>
         <div style="display:flex;justify-content:space-between;gap:12px;"><span style="color:rgba(232,237,245,0.62);">Available</span><span style="font-family:'JetBrains Mono',monospace;">{{ $user->wallet?->formattedAvailable() ?? '—' }}</span></div>
+        <div style="display:flex;justify-content:space-between;gap:12px;"><span style="color:rgba(232,237,245,0.62);">Locked</span><span style="font-family:'JetBrains Mono',monospace;">{{ $user->wallet?->formattedLocked() ?? '—' }}</span></div>
         <div style="display:flex;justify-content:space-between;gap:12px;"><span style="color:rgba(232,237,245,0.62);">Pending</span><span style="font-family:'JetBrains Mono',monospace;">{{ $user->wallet?->formattedPending() ?? '—' }}</span></div>
-        <div style="display:flex;justify-content:space-between;gap:12px;"><span style="color:rgba(232,237,245,0.62);">Active TFLOPS</span><span style="font-family:'JetBrains Mono',monospace;">{{ number_format($user->active_tflops) }}</span></div>
-        <div style="display:flex;justify-content:space-between;gap:12px;"><span style="color:rgba(232,237,245,0.62);">Contracts</span><span style="font-family:'JetBrains Mono',monospace;">{{ $user->contracts->count() }}</span></div>
+        <div style="display:flex;justify-content:space-between;gap:12px;"><span style="color:rgba(232,237,245,0.62);">Deposits</span><span style="font-family:'JetBrains Mono',monospace;">{{ $user->contracts->count() }}</span></div>
+        <div style="display:flex;justify-content:space-between;gap:12px;"><span style="color:rgba(232,237,245,0.62);">Referrals</span><span style="font-family:'JetBrains Mono',monospace;">{{ $user->referralProfile?->invited_count ?? 0 }}</span></div>
+        @isset($referralEarnings)
+        <div style="display:flex;justify-content:space-between;gap:12px;"><span style="color:rgba(232,237,245,0.62);">Referral earned</span><span style="font-family:'JetBrains Mono',monospace;">{{ number_format($referralEarnings, 2, '.', ',') }}</span></div>
+        @endisset
+        @isset($referralVolume)
+        <div style="display:flex;justify-content:space-between;gap:12px;"><span style="color:rgba(232,237,245,0.62);">Referral volume</span><span style="font-family:'JetBrains Mono',monospace;">{{ number_format($referralVolume, 2, '.', ',') }}</span></div>
+        @endisset
     </div>
     @if($user->relationLoaded('contracts') && $user->contracts->isNotEmpty())
         <div style="margin-top:18px;display:flex;flex-direction:column;gap:8px;font-size:12.5px;">
             @foreach($user->contracts->take(5) as $contract)
                 <div style="padding:10px 12px;border-radius:10px;background:rgba(255,255,255,0.03);">
-                    {{ $contract->plan?->name }} · {{ $contract->formattedTflops() }} TF · {{ $contract->status }}
+                    {{ $contract->plan?->name }} · {{ $contract->formattedPrincipal() }} · {{ $contract->status }}
                 </div>
             @endforeach
         </div>

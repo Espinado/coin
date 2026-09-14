@@ -22,6 +22,8 @@ class DashboardDataService
             'rewardPeriodTotals',
             'referralProfile',
             'referralAccruals',
+            'referralCommissionsEarned.referral',
+            'referralCommissionsEarned.contract.plan',
             'supportTickets',
         ]);
 
@@ -39,6 +41,11 @@ class DashboardDataService
             'periodTotals' => $user->rewardPeriodTotals->keyBy('period_key'),
             'referral' => $user->referralProfile,
             'referralAccruals' => $user->referralAccruals->sortBy('sort_order')->values(),
+            'referralCommissions' => $user->referralCommissionsEarned->sortByDesc('created_at')->values(),
+            'profitTransactions' => $user->walletTransactions
+                ->filter(fn ($tx) => in_array($tx->type, ['Daily profit', 'Referral credit', 'Principal release'], true))
+                ->sortByDesc(fn ($tx) => $tx->occurred_at ?? $tx->sort_order)
+                ->values(),
             'primaryContract' => $primaryContract,
             'primaryPlan' => $primaryContract?->plan,
         ];
@@ -63,13 +70,13 @@ class DashboardDataService
     public function sectionMeta(): array
     {
         return [
-            ['Overview', 'Account overview · epoch 20 914'],
-            ['Plans', 'AI compute plans and reward calculator'],
-            ['Contracts', 'Active and completed contracts'],
-            ['Statistics', 'Rewards, distribution, and performance'],
-            ['Wallet', 'Balance, deposits, and withdrawals'],
-            ['Referrals', 'Your referral network and commission share'],
-            ['Settings', 'Profile, security, and payout details'],
+            ['Overview', 'Portfolio summary and account activity'],
+            ['Investment plans', 'Choose a plan and invest from your balance'],
+            ['My deposits', 'Active and completed investment deposits'],
+            ['Statistics', 'Profit history and portfolio performance'],
+            ['Wallet', 'Balance, top-ups, and withdrawals'],
+            ['Referrals', 'Invite friends · 20% from their plan purchases'],
+            ['Settings', 'Profile, contacts, and payout details'],
             ['Support', 'Live chat with the Coin support team'],
         ];
     }

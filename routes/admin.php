@@ -3,7 +3,9 @@
 use App\Http\Controllers\Admin\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\ReverbDebugLogController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\DepositController;
 use App\Http\Controllers\Admin\EpochController;
+use App\Http\Controllers\Admin\ProfitAccrualController;
 use App\Http\Controllers\Admin\PlanController;
 use App\Http\Controllers\Admin\SettingsController;
 use App\Http\Controllers\Admin\SupportTicketController;
@@ -41,6 +43,11 @@ Route::middleware(['admin.domain', 'reject.web.on.admin'])->group(function () {
         Route::get('users/{user}', [UserController::class, 'show'])->name('admin.users.show');
         Route::patch('users/{user}', [UserController::class, 'update'])->name('admin.users.update');
 
+        Route::get('deposits', [DepositController::class, 'index'])->name('admin.deposits.index');
+        Route::get('deposits/{deposit}', [DepositController::class, 'show'])->name('admin.deposits.show');
+        Route::post('deposits/{deposit}/confirm', [DepositController::class, 'confirm'])->name('admin.deposits.confirm');
+        Route::post('deposits/{deposit}/reject', [DepositController::class, 'reject'])->name('admin.deposits.reject');
+
         Route::get('withdrawals', [WithdrawalController::class, 'index'])->name('admin.withdrawals.index');
         Route::get('withdrawals/{withdrawal}', [WithdrawalController::class, 'show'])->name('admin.withdrawals.show');
         Route::patch('withdrawals/{withdrawal}/status', [WithdrawalController::class, 'updateStatus'])->name('admin.withdrawals.status');
@@ -52,9 +59,12 @@ Route::middleware(['admin.domain', 'reject.web.on.admin'])->group(function () {
         Route::patch('plans/{plan}', [PlanController::class, 'update'])->name('admin.plans.update');
         Route::delete('plans/{plan}', [PlanController::class, 'destroy'])->name('admin.plans.destroy');
 
-        Route::get('epochs', [EpochController::class, 'index'])->name('admin.epochs.index');
+        Route::get('profit-accrual', [ProfitAccrualController::class, 'index'])->name('admin.profit-accrual.index');
+        Route::post('profit-accrual/run', [ProfitAccrualController::class, 'run'])->name('admin.profit-accrual.run');
+
+        Route::redirect('epochs', '/profit-accrual')->name('admin.epochs.index');
         Route::get('epochs/{epoch}', [EpochController::class, 'show'])->name('admin.epochs.show');
-        Route::post('epochs/run', [EpochController::class, 'run'])->name('admin.epochs.run');
+        Route::post('epochs/run', [ProfitAccrualController::class, 'run'])->name('admin.epochs.run');
 
         Route::get('settings', [SettingsController::class, 'edit'])->name('admin.settings.edit');
         Route::patch('settings', [SettingsController::class, 'update'])->name('admin.settings.update');

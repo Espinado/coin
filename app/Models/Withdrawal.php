@@ -21,6 +21,8 @@ class Withdrawal extends Model
         'user_id',
         'reference',
         'amount',
+        'currency',
+        'withdrawal_type',
         'payout_address',
         'network_label',
         'status',

@@ -57,7 +57,7 @@ class ReferralProfile extends Model
 
     public function commissionLabel(): string
     {
-        return "{$this->level1_percent}% / {$this->level2_percent}%";
+        return "{$this->level1_percent}% on plan purchase";
     }
 
     public function shareUrl(): string

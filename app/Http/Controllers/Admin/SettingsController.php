@@ -13,14 +13,14 @@ class SettingsController extends Controller
     public function edit(PlatformSettingsService $settings): View
     {
         return view('admin.settings.edit', [
-            'definitions' => $settings->definitions(),
+            'definitions' => $settings->adminDefinitions(),
             'values' => $settings->all(),
         ]);
     }
 
     public function update(Request $request, PlatformSettingsService $settings): RedirectResponse
     {
-        $definitions = $settings->definitions();
+        $definitions = $settings->adminDefinitions();
         $rules = [];
 
         foreach ($definitions as $key => $definition) {

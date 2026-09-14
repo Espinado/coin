@@ -4,7 +4,6 @@ namespace Database\Seeders;
 
 use App\Models\Admin;
 use App\Models\Contract;
-use App\Models\Epoch;
 use App\Models\Plan;
 use App\Models\ReferralAccrual;
 use App\Models\ReferralProfile;
@@ -15,8 +14,8 @@ use App\Models\User;
 use App\Models\Wallet;
 use App\Models\WalletTransaction;
 use App\Models\Withdrawal;
-use App\Services\EpochService;
 use App\Services\PlatformSettingsService;
+use App\Services\ProfitAccrualService;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
@@ -30,7 +29,7 @@ class CoinDemoSeeder extends Seeder
 
         $primary = $this->seedPrimaryUser($plans, $settings, false);
         $this->seedSecondaryUsers($plans, $settings);
-        $this->seedEpochHistory($admin);
+        $this->seedProfitAccrual($admin);
         $this->finalizePrimaryUserWallet($primary, $settings);
         $this->seedSupportTickets($admin, $primary);
         $this->seedWithdrawals($primary, $admin);
@@ -46,29 +45,35 @@ class CoinDemoSeeder extends Seeder
                 'password' => Hash::make('test1234'),
                 'email_verified_at' => now(),
                 'account_slug' => '8f21',
-                'epoch_label' => '20 914 · 02:14:38',
+                'epoch_label' => 'Daily accrual · 00:05 UTC',
                 'active_tflops' => 1450,
-                'nodes_label' => '12 nodes · FRA-02, IAD-01',
-                'expected_daily_reward' => 5.04,
-                'avg_epoch_label' => '1.68',
+                'nodes_label' => '2 deposits · Core, Node',
+                'expected_daily_reward' => 0.53,
+                'avg_epoch_label' => '0.53',
                 'availability_label' => '99.98%',
-                'load_label' => '90.2%',
+                'load_label' => '91.0%',
                 'next_expiry_label' => 'Dec 4',
                 'kyc_status' => User::KYC_APPROVED,
                 'is_blocked' => false,
+                'phone' => '+371 2000 0001',
+                'telegram' => '@testuser',
+                'country_code' => 'LV',
+                'last_login_at' => now()->subHours(2),
             ]
         );
 
         Wallet::query()->updateOrCreate(
             ['user_id' => $user->id],
             [
+                'currency' => 'USDT',
                 'balance' => 1482.60,
-                'available' => 1362.60,
+                'available' => 132.60,
+                'locked_balance' => 1350.00,
                 'pending' => 120.00,
-                'usd_estimate_label' => '≈ $2,964',
+                'usd_estimate_label' => '≈ $1,483',
                 'payout_address' => '0x7c4b912a9f8833e2d1b0c8a4f',
-                'pending_note' => 'Credits in next epoch · 02:14:38',
-                'network_label' => 'ERC-20',
+                'pending_note' => 'Withdrawal WD-DEMO120 · processing',
+                'network_label' => 'TRC-20',
                 'min_withdrawal_label' => number_format($settings->minWithdrawal(), 2, '.', ''),
             ]
         );
@@ -83,17 +88,16 @@ class CoinDemoSeeder extends Seeder
                 'level1_percent' => $settings->getInt('referral_level1_percent'),
                 'level2_percent' => $settings->getInt('referral_level2_percent'),
                 'level1_users' => 18,
-                'level2_users' => 10,
+                'level2_users' => 0,
             ]
         );
 
         ReferralAccrual::query()->where('user_id', $user->id)->delete();
         foreach ([
-            ['user·4a71', 'Level 1', 'Core', '+2.40 COIN', 1],
-            ['user·9c02', 'Level 1', 'Cluster', '+8.10 COIN', 2],
-            ['user·1f88', 'Level 2', 'Node', '+0.50 COIN', 3],
-            ['user·6b30', 'Level 1', 'Core', '+2.40 COIN', 4],
-            ['user·2e54', 'Level 2', 'Node', '+0.50 COIN', 5],
+            ['user·4a71', 'Level 1', 'Core', '+50.00 USDT', 1],
+            ['user·9c02', 'Level 1', 'Cluster', '+680.00 USDT', 2],
+            ['user·6b30', 'Level 1', 'Core', '+220.00 USDT', 3],
+            ['user·2e54', 'Level 1', 'Node', '+50.00 USDT', 4],
         ] as [$userLabel, $level, $planName, $amount, $order]) {
             ReferralAccrual::query()->create([
                 'user_id' => $user->id,
@@ -106,9 +110,9 @@ class CoinDemoSeeder extends Seeder
         }
 
         foreach ([
-            ['day', 'PER DAY', '5.04'],
-            ['week', 'PER WEEK', '35.28'],
-            ['month', 'PER MONTH', '151.20'],
+            ['day', 'PER DAY', '0.53'],
+            ['week', 'PER WEEK', '3.71'],
+            ['month', 'PER MONTH', '15.90'],
         ] as [$key, $label, $total]) {
             RewardPeriodTotal::query()->updateOrCreate(
                 ['user_id' => $user->id, 'period_key' => $key],
@@ -121,51 +125,60 @@ class CoinDemoSeeder extends Seeder
 
         Contract::query()->updateOrCreate(
             ['code' => 'CTR-20914-A'],
-            [
-                'user_id' => $user->id,
-                'plan_id' => $core->id,
-                'status' => 'active',
-                'tflops' => 1200,
-                'duration_days' => 180,
-                'days_elapsed' => 83,
-                'accrued_amount' => 1214.80,
-                'progress_percent' => 46,
-                'started_label' => '8 Jun 2026',
-                'ends_label' => 'Dec 4 2026',
-                'location_label' => 'FRA-02, IAD-01',
-            ]
+            array_merge(
+                $this->investmentFields($core, 1100, 83),
+                [
+                    'user_id' => $user->id,
+                    'plan_id' => $core->id,
+                    'status' => 'active',
+                    'tflops' => 1200,
+                    'duration_days' => 180,
+                    'days_elapsed' => 83,
+                    'accrued_amount' => 38.25,
+                    'progress_percent' => 46,
+                    'started_label' => '8 Jun 2026',
+                    'ends_label' => 'Dec 4 2026',
+                    'location_label' => 'USDT · Core',
+                ]
+            )
         );
 
         Contract::query()->updateOrCreate(
             ['code' => 'CTR-20802-B'],
-            [
-                'user_id' => $user->id,
-                'plan_id' => $node->id,
-                'status' => 'active',
-                'tflops' => 250,
-                'duration_days' => 90,
-                'days_elapsed' => 65,
-                'accrued_amount' => 155.40,
-                'progress_percent' => 72,
-                'started_label' => '2 Apr 2026',
-                'ends_label' => '30 Sep 2026',
-                'location_label' => 'SIN-03',
-            ]
+            array_merge(
+                $this->investmentFields($node, 250, 65),
+                [
+                    'user_id' => $user->id,
+                    'plan_id' => $node->id,
+                    'status' => 'active',
+                    'tflops' => 250,
+                    'duration_days' => 90,
+                    'days_elapsed' => 65,
+                    'accrued_amount' => 5.34,
+                    'progress_percent' => 72,
+                    'started_label' => '2 Apr 2026',
+                    'ends_label' => '30 Sep 2026',
+                    'location_label' => 'USDT · Node',
+                ]
+            )
         );
 
         Contract::query()->updateOrCreate(
             ['code' => 'CTR-19640-C'],
-            [
-                'user_id' => $user->id,
-                'plan_id' => $node->id,
-                'status' => 'completed',
-                'tflops' => 250,
-                'duration_days' => 90,
-                'days_elapsed' => 90,
-                'accrued_amount' => 148.60,
-                'progress_percent' => 100,
-                'completed_summary' => 'CTR-19640-C · 250 TFLOPS · completed 12 Mar 2026 · accrued 148.60',
-            ]
+            array_merge(
+                $this->investmentFields($node, 250, 90),
+                [
+                    'user_id' => $user->id,
+                    'plan_id' => $node->id,
+                    'status' => 'completed',
+                    'tflops' => 250,
+                    'duration_days' => 90,
+                    'days_elapsed' => 90,
+                    'accrued_amount' => 7.40,
+                    'progress_percent' => 100,
+                    'completed_summary' => 'CTR-19640-C · 250 USDT · completed 12 Mar 2026 · profit 7.40 USDT',
+                ]
+            )
         );
 
         if ($withTransactions) {
@@ -175,21 +188,37 @@ class CoinDemoSeeder extends Seeder
         return $user;
     }
 
+    /** @return array<string, mixed> */
+    private function investmentFields(Plan $plan, float $principal, int $daysElapsed): array
+    {
+        $duration = (int) ($plan->duration_days ?: 180);
+
+        return [
+            'principal_amount' => $principal,
+            'currency' => $plan->currency ?? 'USDT',
+            'annual_profit_percent' => $plan->annual_profit_percent,
+            'started_at' => now()->subDays($daysElapsed),
+            'ends_at' => now()->subDays($daysElapsed)->addDays($duration),
+        ];
+    }
+
     private function finalizePrimaryUserWallet(User $primary, PlatformSettingsService $settings): void
     {
         Wallet::query()->where('user_id', $primary->id)->update([
+            'currency' => 'USDT',
             'balance' => 1482.60,
-            'available' => 1362.60,
+            'available' => 132.60,
+            'locked_balance' => 1350.00,
             'pending' => 120.00,
-            'usd_estimate_label' => '≈ $2,964',
-            'pending_note' => 'Credits in next epoch · 02:14:38',
+            'usd_estimate_label' => '≈ $1,483',
+            'pending_note' => 'Withdrawal WD-DEMO120 · processing',
             'min_withdrawal_label' => number_format($settings->minWithdrawal(), 2, '.', ''),
         ]);
 
         $primary->update([
-            'epoch_label' => '20 914 · 02:14:38',
-            'expected_daily_reward' => 5.04,
-            'avg_epoch_label' => '1.68',
+            'epoch_label' => 'Daily accrual · 00:05 UTC',
+            'expected_daily_reward' => 0.53,
+            'avg_epoch_label' => '0.53',
         ]);
 
         $this->seedPrimaryWalletTransactions($primary);
@@ -200,21 +229,26 @@ class CoinDemoSeeder extends Seeder
         WalletTransaction::query()->where('user_id', $user->id)->delete();
 
         foreach ([
-            ['09:12', 'Reward credit', 'Epoch 20914', '+1.71 COIN', 'positive', 'COMPLETED', 1],
-            ['01:12', 'Reward credit', 'Epoch 20913', '+1.68 COIN', 'positive', 'COMPLETED', 2],
-            ['Sep 7', 'Referral credit', 'Level 1 · 2 contracts', '+4.20 COIN', 'positive', 'COMPLETED', 3],
-            ['Sep 6', 'Withdrawal', 'WD-PAID901', '−119.50 COIN', 'neutral', 'COMPLETED', 4],
-            ['Sep 5', 'Plan purchase', 'Node · 250 TFLOPS', '−250.00 COIN', 'neutral', 'COMPLETED', 5],
-            ['Sep 4', 'Deposit', '0x7c4b912a…', '+500.00 COIN', 'positive', 'PENDING', 6],
-            ['Sep 3', 'Reward credit', 'Epoch 20912', '+1.65 COIN', 'positive', 'COMPLETED', 7],
-            ['Sep 2', 'Reward credit', 'Epoch 20911', '+1.62 COIN', 'positive', 'COMPLETED', 8],
+            ['09:12', 'Daily profit', 'Core · CTR-20914-A', 0.45, 'positive', 'COMPLETED', 1],
+            ['01:12', 'Daily profit', 'Node · CTR-20802-B', 0.08, 'positive', 'COMPLETED', 2],
+            ['Sep 7', 'Referral commission', 'Level 1 · Core purchase', 220.00, 'positive', 'COMPLETED', 3],
+            ['Sep 6', 'Withdrawal', 'WD-PAID901', -119.50, 'neutral', 'COMPLETED', 4],
+            ['Sep 5', 'Plan purchase', 'Node · 250 USDT', -250.00, 'neutral', 'COMPLETED', 5],
+            ['Sep 4', 'Deposit', 'Mock USDT · pending', 500.00, 'positive', 'PENDING', 6],
+            ['Sep 3', 'Daily profit', 'Core · CTR-20914-A', 0.45, 'positive', 'COMPLETED', 7],
+            ['Sep 2', 'Daily profit', 'Node · CTR-20802-B', 0.08, 'positive', 'COMPLETED', 8],
         ] as [$time, $type, $source, $amount, $tone, $status, $order]) {
+            $prefix = $amount >= 0 ? '+' : '';
+
             WalletTransaction::query()->create([
                 'user_id' => $user->id,
                 'occurred_label' => $time,
+                'occurred_at' => now()->subDays(9 - $order),
                 'type' => $type,
                 'source' => $source,
-                'amount_label' => $amount,
+                'amount' => abs($amount),
+                'currency' => 'USDT',
+                'amount_label' => $prefix.number_format(abs($amount), 2, '.', '').' USDT',
                 'amount_tone' => $tone,
                 'status_label' => $status,
                 'sort_order' => $order,
@@ -232,7 +266,7 @@ class CoinDemoSeeder extends Seeder
                 'slug' => 'a4c2',
                 'kyc' => User::KYC_PENDING,
                 'blocked' => false,
-                'tflops' => 250,
+                'principal' => 250,
                 'plan' => 'node',
                 'contract_code' => 'CTR-30101-M',
             ],
@@ -242,7 +276,7 @@ class CoinDemoSeeder extends Seeder
                 'slug' => 'b001',
                 'kyc' => User::KYC_REJECTED,
                 'blocked' => true,
-                'tflops' => 0,
+                'principal' => 0,
                 'plan' => null,
                 'contract_code' => null,
             ],
@@ -252,7 +286,7 @@ class CoinDemoSeeder extends Seeder
                 'slug' => 'c7d9',
                 'kyc' => User::KYC_APPROVED,
                 'blocked' => false,
-                'tflops' => 4000,
+                'principal' => 3400,
                 'plan' => 'cluster',
                 'contract_code' => 'CTR-40001-I',
             ],
@@ -262,7 +296,7 @@ class CoinDemoSeeder extends Seeder
                 'slug' => 'd2e8',
                 'kyc' => User::KYC_NONE,
                 'blocked' => false,
-                'tflops' => 250,
+                'principal' => 250,
                 'plan' => 'node',
                 'contract_code' => 'CTR-50001-R',
             ],
@@ -276,11 +310,13 @@ class CoinDemoSeeder extends Seeder
                     'password' => Hash::make('test1234'),
                     'email_verified_at' => now()->subDays(20 - $index),
                     'account_slug' => $definition['slug'],
-                    'epoch_label' => '20 914 · 01:48:12',
-                    'active_tflops' => $definition['tflops'],
-                    'nodes_label' => $definition['tflops'] > 0 ? '4 nodes · FRA-02' : '—',
-                    'expected_daily_reward' => $definition['tflops'] > 0 ? round($definition['tflops'] * 0.0042 * 3, 2) : 0,
-                    'avg_epoch_label' => $definition['tflops'] > 0 ? '0.35' : '0.00',
+                    'epoch_label' => 'Daily accrual · 00:05 UTC',
+                    'active_tflops' => $definition['principal'] > 0 ? $plans[$definition['plan']]->tflops : 0,
+                    'nodes_label' => $definition['principal'] > 0 ? '1 deposit · '.$plans[$definition['plan']]->name : '—',
+                    'expected_daily_reward' => $definition['principal'] > 0
+                        ? round($definition['principal'] * ($plans[$definition['plan']]->annual_profit_percent / 100) / 365, 2)
+                        : 0,
+                    'avg_epoch_label' => $definition['principal'] > 0 ? '0.08' : '0.00',
                     'availability_label' => '99.90%',
                     'load_label' => '84.0%',
                     'next_expiry_label' => 'Nov 18',
@@ -289,36 +325,46 @@ class CoinDemoSeeder extends Seeder
                 ]
             );
 
+            $locked = $definition['principal'] > 0 ? $definition['principal'] : 0;
+
             Wallet::query()->updateOrCreate(
                 ['user_id' => $user->id],
                 [
-                    'balance' => 200 + ($index * 150),
-                    'available' => 180 + ($index * 140),
+                    'currency' => 'USDT',
+                    'balance' => 200 + ($index * 150) + $locked,
+                    'available' => 200 + ($index * 150),
+                    'locked_balance' => $locked,
                     'pending' => 20,
                     'usd_estimate_label' => '≈ $'.number_format((400 + $index * 300), 0),
                     'payout_address' => '0x'.substr(md5($definition['email']), 0, 8).'…'.substr(md5($definition['slug']), 0, 4),
-                    'pending_note' => 'Awaiting next epoch',
-                    'network_label' => 'ERC-20',
+                    'pending_note' => 'Awaiting next accrual',
+                    'network_label' => 'TRC-20',
                     'min_withdrawal_label' => number_format($settings->minWithdrawal(), 2, '.', ''),
                 ]
             );
 
             if ($definition['plan']) {
+                $plan = $plans[$definition['plan']];
+                $elapsed = 40 + $index;
+
                 Contract::query()->updateOrCreate(
                     ['code' => $definition['contract_code']],
-                    [
-                        'user_id' => $user->id,
-                        'plan_id' => $plans[$definition['plan']]->id,
-                        'status' => 'active',
-                        'tflops' => $plans[$definition['plan']]->tflops,
-                        'duration_days' => $plans[$definition['plan']]->duration_days ?? 180,
-                        'days_elapsed' => 40 + $index,
-                        'accrued_amount' => 80 + ($index * 25),
-                        'progress_percent' => min(95, 30 + ($index * 15)),
-                        'started_label' => '15 Jul 2026',
-                        'ends_label' => 'Jan 2027',
-                        'location_label' => 'FRA-02',
-                    ]
+                    array_merge(
+                        $this->investmentFields($plan, (float) $definition['principal'], $elapsed),
+                        [
+                            'user_id' => $user->id,
+                            'plan_id' => $plan->id,
+                            'status' => 'active',
+                            'tflops' => $plan->tflops,
+                            'duration_days' => $plan->duration_days ?? 180,
+                            'days_elapsed' => $elapsed,
+                            'accrued_amount' => 12 + ($index * 4),
+                            'progress_percent' => min(95, 30 + ($index * 15)),
+                            'started_label' => '15 Jul 2026',
+                            'ends_label' => 'Jan 2027',
+                            'location_label' => 'USDT · '.$plan->name,
+                        ]
+                    )
                 );
             }
         }
@@ -340,17 +386,17 @@ class CoinDemoSeeder extends Seeder
                 'status' => SupportTicket::STATUS_PENDING,
                 'messages' => [
                     ['user', 'I requested a withdrawal 2 days ago and it is still pending settlement. Can you check status?'],
-                    ['admin', 'Thanks for reaching out. Your payout is queued for the next settlement window.'],
+                    ['admin', 'Thanks for reaching out. Your payout is queued for the next processing window.'],
                 ],
             ],
             [
                 'user_id' => $maria?->id ?? $primary->id,
                 'reference' => 'TKT-OPEN02',
-                'subject' => 'Contract activation delay',
+                'subject' => 'Deposit not credited yet',
                 'category' => SupportTicket::CATEGORY_CONTRACT,
                 'status' => SupportTicket::STATUS_OPEN,
                 'messages' => [
-                    ['user', 'My Node contract shows active but rewards have not started yet.'],
+                    ['user', 'My USDT deposit shows pending in the dashboard for more than an hour.'],
                 ],
             ],
             [
@@ -409,8 +455,9 @@ class CoinDemoSeeder extends Seeder
                 'reference' => $ref,
                 'user_id' => $userId,
                 'amount' => $amount,
+                'currency' => 'USDT',
                 'payout_address' => '0x7c4b912a9f8833e2d1b0c8a4f',
-                'network_label' => 'ERC-20',
+                'network_label' => 'TRC-20',
                 'status' => $status,
                 'processed_by' => in_array($status, [Withdrawal::STATUS_PAID, Withdrawal::STATUS_REJECTED], true) ? $admin?->id : null,
                 'admin_note' => $status === Withdrawal::STATUS_REJECTED ? 'KYC pending — payout rejected.' : null,
@@ -419,20 +466,12 @@ class CoinDemoSeeder extends Seeder
         }
     }
 
-    private function seedEpochHistory(?Admin $admin): void
+    private function seedProfitAccrual(?Admin $admin): void
     {
-        Epoch::query()->delete();
-
-        $service = app(EpochService::class);
+        $service = app(ProfitAccrualService::class);
 
         for ($i = 0; $i < 5; $i++) {
-            $service->runSettlement($admin);
-        }
-
-        $epochs = Epoch::query()->orderBy('id')->get();
-        foreach ($epochs as $index => $epoch) {
-            $epoch->update(['number' => 20910 + $index]);
+            $service->accrueDaily($admin);
         }
     }
-
 }

@@ -5,14 +5,14 @@ namespace Tests\Feature;
 use App\Models\Admin;
 use App\Models\Plan;
 use App\Models\User;
+use App\Models\WalletTransaction;
 use App\Models\Withdrawal;
-use App\Services\EpochService;
 use App\Services\PlatformSettingsService;
+use App\Services\ProfitAccrualService;
 use Database\Seeders\AdminSeeder;
 use Database\Seeders\CoinDemoSeeder;
 use Database\Seeders\PlatformSettingsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Hash;
 use Tests\TestCase;
 
 class AdminModuleTest extends TestCase
@@ -81,6 +81,10 @@ class AdminModuleTest extends TestCase
                 'slug' => 'pilot',
                 'tier_label' => 'TEST',
                 'price_label' => '$99',
+                'min_deposit' => 99,
+                'price_amount' => 99,
+                'annual_profit_percent' => 10,
+                'currency' => 'USDT',
                 'tflops' => 100,
                 'duration_days' => 30,
                 'infra' => 'Shared pool',
@@ -103,6 +107,10 @@ class AdminModuleTest extends TestCase
                 'slug' => 'pilot',
                 'tier_label' => 'TEST',
                 'price_label' => '$129',
+                'min_deposit' => 129,
+                'price_amount' => 129,
+                'annual_profit_percent' => 11,
+                'currency' => 'USDT',
                 'tflops' => 120,
                 'duration_days' => 30,
                 'infra' => 'Shared pool',
@@ -119,40 +127,35 @@ class AdminModuleTest extends TestCase
         $this->assertSame('Pilot Plus', $plan->fresh()->name);
     }
 
-    public function test_epoch_settlement_and_settings(): void
+    public function test_profit_accrual_and_settings(): void
     {
-        app(PlatformSettingsService::class)->setMany([
-            'reward_rate' => '0.0042',
-            'epochs_per_day' => '3',
-        ]);
+        $before = WalletTransaction::query()->where('type', 'Daily profit')->count();
 
-        $nextNumber = app(EpochService::class)->nextEpochNumber();
-        $epoch = app(EpochService::class)->runSettlement($this->admin);
+        $result = app(ProfitAccrualService::class)->accrueDaily($this->admin);
 
-        $this->assertSame($nextNumber, $epoch->number);
-        $this->assertGreaterThan(0, (float) $epoch->total_rewards);
+        $this->assertGreaterThan(0, $result['contracts_processed']);
+        $this->assertGreaterThan($before, WalletTransaction::query()->where('type', 'Daily profit')->count());
 
         $this->actingAs($this->admin, 'admin')
-            ->get('http://admin.coin.test/epochs')
+            ->get('http://admin.coin.test/profit-accrual')
             ->assertOk()
-            ->assertSee('#'.$epoch->number);
+            ->assertSee('Profit accrual')
+            ->assertSee('Daily profit');
 
         $this->actingAs($this->admin, 'admin')
             ->patch('http://admin.coin.test/settings', [
-                'reward_rate' => '0.0050',
-                'epochs_per_day' => '4',
-                'token_symbol' => 'COIN',
+                'token_symbol' => 'USDT',
                 'min_withdrawal' => '15',
                 'network_fee' => '0.50',
                 'withdrawal_processing_hours' => '24',
-                'referral_level1_percent' => '5',
-                'referral_level2_percent' => '2',
+                'referral_level1_percent' => '20',
+                'referral_level2_percent' => '0',
                 'kyc_required_for_withdrawal' => false,
                 'maintenance_mode' => false,
             ])
             ->assertRedirect();
 
-        $this->assertSame(0.005, app(PlatformSettingsService::class)->rewardRate());
+        $this->assertSame(20, app(PlatformSettingsService::class)->getInt('referral_level1_percent'));
     }
 
     public function test_admin_overview_dashboard(): void
@@ -164,6 +167,6 @@ class AdminModuleTest extends TestCase
             ->assertOk()
             ->assertSee('PLATFORM OVERVIEW')
             ->assertSee('PENDING WITHDRAWALS')
-            ->assertSee('20914');
+            ->assertSee('LOCKED PRINCIPAL');
     }
 }

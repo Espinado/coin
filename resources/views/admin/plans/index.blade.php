@@ -13,7 +13,7 @@
         <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;">
             <div>
                 <h1 style="margin:0;font-size:24px;font-weight:600;">Plans</h1>
-                <p style="margin:8px 0 0;font-size:14px;color:rgba(232,237,245,0.72);">Catalog for the user dashboard Plans section. Active plans appear immediately; hidden plans are excluded.</p>
+                <p style="margin:8px 0 0;font-size:14px;color:rgba(232,237,245,0.72);">Investment plan catalog. Active plans appear in the user dashboard immediately.</p>
             </div>
             <a href="{{ route('admin.plans.create') }}" class="admin-btn admin-btn-primary">New plan</a>
         </div>
@@ -24,9 +24,9 @@
             <thead>
                 <tr style="text-align:left;border-bottom:1px solid rgba(255,255,255,0.08);color:rgba(232,237,245,0.62);font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.1em;">
                     <th style="padding:14px 18px;">PLAN</th>
-                    <th style="padding:14px 18px;">TFLOPS</th>
-                    <th style="padding:14px 18px;">PRICE</th>
-                    <th style="padding:14px 18px;">MULT</th>
+                    <th style="padding:14px 18px;">MIN DEPOSIT</th>
+                    <th style="padding:14px 18px;">APR</th>
+                    <th style="padding:14px 18px;">TERM</th>
                     <th style="padding:14px 18px;">STATUS</th>
                     <th style="padding:14px 18px;"></th>
                 </tr>
@@ -35,9 +35,9 @@
                 @foreach($plans as $plan)
                     <tr style="border-bottom:1px solid rgba(255,255,255,0.06);">
                         <td style="padding:14px 18px;"><a href="{{ route('admin.plans.edit', $plan) }}">{{ $plan->name }}</a></td>
-                        <td style="padding:14px 18px;">{{ $plan->formattedTflops() }}</td>
-                        <td style="padding:14px 18px;">{{ $plan->price_label }}</td>
-                        <td style="padding:14px 18px;">{{ $plan->reward_multiplier }}×</td>
+                        <td style="padding:14px 18px;">{{ $plan->formattedMinDeposit() ?? $plan->price_label }}</td>
+                        <td style="padding:14px 18px;">{{ $plan->formattedAnnualProfit() ?? '—' }}</td>
+                        <td style="padding:14px 18px;">{{ $plan->formattedDuration() }}</td>
                         <td style="padding:14px 18px;">{{ $plan->is_active ? 'Active' : 'Hidden' }}@if($plan->is_featured) · Featured @endif</td>
                         <td style="padding:14px 18px;text-align:right;">
                             <a href="{{ route('admin.plans.edit', $plan) }}" class="admin-btn">Edit</a>

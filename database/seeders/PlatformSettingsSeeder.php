@@ -16,8 +16,8 @@ class PlatformSettingsSeeder extends Seeder
             'min_withdrawal' => '10.00',
             'network_fee' => '0.50',
             'withdrawal_processing_hours' => '24',
-            'referral_level1_percent' => '5',
-            'referral_level2_percent' => '2',
+            'referral_level1_percent' => '20',
+            'referral_level2_percent' => '0',
             'kyc_required_for_withdrawal' => '1',
             'maintenance_mode' => '0',
         ]);

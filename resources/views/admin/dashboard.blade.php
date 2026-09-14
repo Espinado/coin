@@ -9,7 +9,7 @@
         <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.14em;color:rgba(232,237,245,0.62);">PLATFORM OVERVIEW</div>
         <h1 style="margin:12px 0 0;font-size:24px;font-weight:600;">Admin console</h1>
         <p style="margin:10px 0 0;font-size:14px;line-height:1.6;color:rgba(232,237,245,0.72);">
-            Signed in as <strong>{{ $admin->name }}</strong>. Epoch {{ $metrics['current_epoch'] ?: '—' }} · reward rate {{ $metrics['reward_rate'] }} · {{ $metrics['epochs_per_day'] }} epochs/day.
+            Signed in as <strong>{{ $admin->name }}</strong>. {{ $metrics['active_contracts'] }} active deposits · {{ number_format($metrics['total_locked'], 2) }} {{ $metrics['token_symbol'] }} locked.
         </p>
     </div>
 
@@ -20,9 +20,9 @@
             <div style="margin-top:6px;font-size:12px;color:rgba(232,237,245,0.62);">+{{ $metrics['users_today'] }} today · {{ $metrics['kyc_pending'] }} KYC pending</div>
         </div>
         <div class="admin-card">
-            <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.12em;color:rgba(232,237,245,0.62);">ACTIVE COMPUTE</div>
-            <div style="margin-top:10px;font-size:28px;font-weight:600;">{{ number_format($metrics['total_tflops']) }}</div>
-            <div style="margin-top:6px;font-size:12px;color:rgba(232,237,245,0.62);">{{ $metrics['active_contracts'] }} active contracts</div>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.12em;color:rgba(232,237,245,0.62);">LOCKED PRINCIPAL</div>
+            <div style="margin-top:10px;font-size:28px;font-weight:600;">{{ number_format($metrics['total_locked'], 0) }}</div>
+            <div style="margin-top:6px;font-size:12px;color:rgba(232,237,245,0.62);">{{ $metrics['active_contracts'] }} active deposits · {{ $metrics['token_symbol'] }}</div>
         </div>
         <div class="admin-card">
             <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.12em;color:rgba(232,237,245,0.62);">PENDING WITHDRAWALS</div>
@@ -32,7 +32,7 @@
         <div class="admin-card">
             <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.12em;color:rgba(232,237,245,0.62);">OPEN SUPPORT</div>
             <div style="margin-top:10px;font-size:28px;font-weight:600;">{{ $metrics['open_tickets'] }}</div>
-            <div style="margin-top:6px;font-size:12px;color:rgba(232,237,245,0.62);">Last epoch rewards: {{ number_format($metrics['last_epoch_rewards'], 2) }} {{ $metrics['token_symbol'] }}</div>
+            <div style="margin-top:6px;font-size:12px;color:rgba(232,237,245,0.62);">Today's profit accruals: {{ number_format($metrics['today_profit'], 2) }} {{ $metrics['token_symbol'] }}</div>
         </div>
     </div>
 
@@ -41,7 +41,8 @@
             <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.12em;color:rgba(232,237,245,0.62);">QUICK LINKS</div>
             <div style="margin-top:14px;display:flex;flex-direction:column;gap:8px;font-size:13px;">
                 <a href="{{ route('admin.withdrawals.index', ['status' => 'pending']) }}">Review pending withdrawals</a>
-                <a href="{{ route('admin.epochs.index') }}">Run epoch settlement</a>
+                <a href="{{ route('admin.profit-accrual.index') }}">Run profit accrual</a>
+                <a href="{{ route('admin.deposits.index') }}">Review deposits</a>
                 <a href="{{ route('admin.plans.index') }}">Manage plans</a>
                 <a href="{{ route('admin.settings.edit') }}">Platform settings</a>
             </div>

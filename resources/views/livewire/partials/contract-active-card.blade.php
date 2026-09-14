@@ -19,15 +19,16 @@
       <button wire:click="setSection(1)" style="padding: 10px 16px; border-radius: 10px; border: 1px solid {{ $isPrimary ? 'oklch(0.86 0.11 195 / 0.5)' : 'rgba(150,235,250,0.2)' }}; background: {{ $isPrimary ? 'linear-gradient(140deg, oklch(0.86 0.12 192), oklch(0.66 0.13 205))' : 'rgba(150,235,250,0.06)' }}; color: {{ $isPrimary ? '#04121f' : '#e6f4fa' }}; font-family: inherit; font-size: 13px; font-weight: {{ $isPrimary ? '600' : '500' }}; cursor: pointer;">{{ $isPrimary ? 'Upgrade' : 'Upgrade' }}</button>
     </div>
   </div>
-  <div style="display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 20px; margin-top: 24px;">
-    <div><div style="font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.12em; color: rgba(214,238,248,0.68);">START DATE</div><div style="margin-top: 9px; font-size: 14px;">{{ $contract->started_label }}</div></div>
-    <div><div style="font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.12em; color: rgba(214,238,248,0.68);">TERM</div><div style="margin-top: 9px; font-size: 14px;">{{ $contract->duration_days }} days</div></div>
-    <div><div style="font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.12em; color: rgba(214,238,248,0.68);">COMPUTE</div><div style="margin-top: 9px; font-size: 14px;">{{ $contract->formattedTflops() }} TFLOPS</div></div>
-    <div><div style="font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.12em; color: rgba(214,238,248,0.68);">ACCRUED</div><div style="margin-top: 9px; font-size: 14px; color: oklch(0.9 0.12 192);">{{ $contract->formattedAccrued() }}</div></div>
-    <div><div style="font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.12em; color: rgba(214,238,248,0.68);">END DATE</div><div style="margin-top: 9px; font-size: 14px;">{{ $contract->ends_label }}</div></div>
+  <div style="display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 20px; margin-top: 24px;">
+    <div><div style="font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.12em; color: rgba(214,238,248,0.68);">PRINCIPAL</div><div style="margin-top: 9px; font-size: 14px;">{{ $contract->formattedPrincipal() }}</div></div>
+    <div><div style="font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.12em; color: rgba(214,238,248,0.68);">APR</div><div style="margin-top: 9px; font-size: 14px;">{{ $contract->formattedAnnualProfit() ?? '—' }}</div></div>
+    <div><div style="font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.12em; color: rgba(214,238,248,0.68);">DAILY PROFIT</div><div style="margin-top: 9px; font-size: 14px; color: oklch(0.9 0.12 192);">{{ $contract->formattedDailyProfit() }}</div></div>
+    <div><div style="font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.12em; color: rgba(214,238,248,0.68);">PROFIT ACCRUED</div><div style="margin-top: 9px; font-size: 14px; color: oklch(0.9 0.12 192);">{{ $contract->formattedAccrued() }}</div></div>
+    <div><div style="font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.12em; color: rgba(214,238,248,0.68);">MATURITY</div><div style="margin-top: 9px; font-size: 14px;">{{ $contract->ends_label }}</div></div>
+    <div><div style="font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.12em; color: rgba(214,238,248,0.68);">PROGRESS</div><div style="margin-top: 9px; font-size: 14px;">{{ $contract->progress_percent }}%</div></div>
   </div>
   <div style="margin-top: 24px;">
-    <div style="display: flex; justify-content: space-between; font-size: 12.5px; color: rgba(214,238,248,0.74);"><span>Contract progress</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">{{ $contract->days_elapsed }} / {{ $contract->duration_days }} days</span></div>
+    <div style="display: flex; justify-content: space-between; font-size: 12.5px; color: rgba(214,238,248,0.74);"><span>Deposit progress</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">{{ $contract->days_elapsed }} / {{ $contract->duration_days }} days</span></div>
     <div style="margin-top: 10px; height: 6px; border-radius: 4px; background: rgba(150,235,250,0.12);"><div style="width: {{ $contract->progress_percent }}%; height: 100%; border-radius: 4px; background: linear-gradient(90deg, oklch(0.72 0.11 215), oklch(0.88 0.12 192));"></div></div>
   </div>
 </div>

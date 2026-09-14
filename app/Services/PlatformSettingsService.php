@@ -17,8 +17,8 @@ class PlatformSettingsService
         'min_withdrawal' => '10.00',
         'network_fee' => '0.50',
         'withdrawal_processing_hours' => '24',
-        'referral_level1_percent' => '5',
-        'referral_level2_percent' => '2',
+        'referral_level1_percent' => '20',
+        'referral_level2_percent' => '0',
         'kyc_required_for_withdrawal' => '0',
         'maintenance_mode' => '0',
     ];
@@ -96,16 +96,26 @@ class PlatformSettingsService
     public function definitions(): array
     {
         return [
-            'reward_rate' => ['label' => 'Reward rate (per TFLOPS per epoch)', 'type' => 'number', 'default' => self::DEFAULTS['reward_rate']],
-            'epochs_per_day' => ['label' => 'Epochs per day', 'type' => 'number', 'default' => self::DEFAULTS['epochs_per_day']],
+            'reward_rate' => ['label' => 'Reward rate (legacy compute)', 'type' => 'number', 'default' => self::DEFAULTS['reward_rate']],
+            'epochs_per_day' => ['label' => 'Epochs per day (legacy)', 'type' => 'number', 'default' => self::DEFAULTS['epochs_per_day']],
             'token_symbol' => ['label' => 'Token symbol', 'type' => 'text', 'default' => self::DEFAULTS['token_symbol']],
             'min_withdrawal' => ['label' => 'Minimum withdrawal', 'type' => 'number', 'default' => self::DEFAULTS['min_withdrawal']],
             'network_fee' => ['label' => 'Network fee', 'type' => 'number', 'default' => self::DEFAULTS['network_fee']],
             'withdrawal_processing_hours' => ['label' => 'Withdrawal processing (hours)', 'type' => 'number', 'default' => self::DEFAULTS['withdrawal_processing_hours']],
-            'referral_level1_percent' => ['label' => 'Referral level 1 %', 'type' => 'number', 'default' => self::DEFAULTS['referral_level1_percent']],
-            'referral_level2_percent' => ['label' => 'Referral level 2 %', 'type' => 'number', 'default' => self::DEFAULTS['referral_level2_percent']],
+            'referral_level1_percent' => ['label' => 'Referral commission % (plan purchase)', 'type' => 'number', 'default' => self::DEFAULTS['referral_level1_percent']],
+            'referral_level2_percent' => ['label' => 'Referral level 2 % (unused)', 'type' => 'number', 'default' => self::DEFAULTS['referral_level2_percent']],
             'kyc_required_for_withdrawal' => ['label' => 'KYC required for withdrawal', 'type' => 'boolean', 'default' => self::DEFAULTS['kyc_required_for_withdrawal']],
             'maintenance_mode' => ['label' => 'Maintenance mode', 'type' => 'boolean', 'default' => self::DEFAULTS['maintenance_mode']],
         ];
+    }
+
+    /** @return array<string, array{label: string, type: string, default: string}> */
+    public function adminDefinitions(): array
+    {
+        return array_filter(
+            $this->definitions(),
+            fn (string $key) => ! in_array($key, ['reward_rate', 'epochs_per_day'], true),
+            ARRAY_FILTER_USE_KEY,
+        );
     }
 }

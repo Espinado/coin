@@ -9,9 +9,11 @@ class Wallet extends Model
 {
     protected $fillable = [
         'user_id',
+        'currency',
         'balance',
         'available',
         'pending',
+        'locked_balance',
         'usd_estimate_label',
         'payout_address',
         'pending_note',
@@ -25,6 +27,7 @@ class Wallet extends Model
             'balance' => 'decimal:2',
             'available' => 'decimal:2',
             'pending' => 'decimal:2',
+            'locked_balance' => 'decimal:2',
         ];
     }
 
@@ -46,5 +49,10 @@ class Wallet extends Model
     public function formattedPending(): string
     {
         return number_format((float) $this->pending, 2, '.', ',');
+    }
+
+    public function formattedLocked(): string
+    {
+        return number_format((float) ($this->locked_balance ?? 0), 2, '.', ',');
     }
 }

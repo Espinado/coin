@@ -42,7 +42,11 @@ class UserController extends Controller
             'contracts.plan',
             'walletTransactions',
             'referralProfile',
-            'referralAccruals',
+            'referrer',
+            'directReferrals',
+            'referralCommissionsEarned.referral',
+            'referralCommissionsEarned.contract.plan',
+            'deposits' => fn ($query) => $query->latest()->limit(10),
             'supportTickets',
             'withdrawals' => fn ($query) => $query->latest()->limit(10),
         ]);
@@ -50,6 +54,8 @@ class UserController extends Controller
         return view('admin.users.show', [
             'user' => $user,
             'kycStatuses' => User::kycStatuses(),
+            'referralVolume' => (float) $user->referralCommissionsEarned->sum('purchase_amount'),
+            'referralEarnings' => (float) $user->referralCommissionsEarned->sum('commission_amount'),
         ]);
     }
 
@@ -58,6 +64,10 @@ class UserController extends Controller
         $validated = $request->validate([
             'kyc_status' => ['required', 'in:'.implode(',', array_keys(User::kycStatuses()))],
             'is_blocked' => ['required', 'boolean'],
+            'admin_lead_note' => ['nullable', 'string', 'max:5000'],
+            'phone' => ['nullable', 'string', 'max:32'],
+            'telegram' => ['nullable', 'string', 'max:64'],
+            'country_code' => ['nullable', 'string', 'size:2'],
         ]);
 
         $user->update($validated);

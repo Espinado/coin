@@ -12,6 +12,10 @@ class Plan extends Model
         'name',
         'tier_label',
         'price_label',
+        'min_deposit',
+        'price_amount',
+        'annual_profit_percent',
+        'currency',
         'tflops',
         'duration_days',
         'infra',
@@ -27,6 +31,9 @@ class Plan extends Model
     protected function casts(): array
     {
         return [
+            'min_deposit' => 'decimal:2',
+            'price_amount' => 'decimal:2',
+            'annual_profit_percent' => 'decimal:2',
             'reward_multiplier' => 'decimal:2',
             'daily_estimate' => 'decimal:2',
             'is_featured' => 'boolean',
@@ -75,7 +82,7 @@ class Plan extends Model
     public function actionLabel(?Plan $activePlan = null): string
     {
         if ($this->isCurrentFor($activePlan)) {
-            return 'Manage plan';
+            return 'Manage deposit';
         }
 
         if ($this->isEnterprise()) {
@@ -86,7 +93,7 @@ class Plan extends Model
             return 'Upgrade';
         }
 
-        return 'Activate';
+        return 'Invest';
     }
 
     public function calculatorTermLabel(): string
@@ -108,10 +115,32 @@ class Plan extends Model
 
     public function formattedComputeLabel(): string
     {
+        if ($this->min_deposit !== null) {
+            return number_format((float) $this->min_deposit, 0, '.', ',').' '.($this->currency ?? 'USDT');
+        }
+
         if ($this->isEnterprise()) {
-            return number_format($this->tflops, 0, '.', ',').'+ TFLOPS';
+            return 'Custom';
         }
 
         return $this->formattedTflops().' TFLOPS';
+    }
+
+    public function formattedAnnualProfit(): ?string
+    {
+        if ($this->annual_profit_percent === null) {
+            return null;
+        }
+
+        return number_format((float) $this->annual_profit_percent, 1, '.', '').'%';
+    }
+
+    public function formattedMinDeposit(): ?string
+    {
+        if ($this->min_deposit === null) {
+            return null;
+        }
+
+        return number_format((float) $this->min_deposit, 0, '.', ',').' '.($this->currency ?? 'USDT');
     }
 }

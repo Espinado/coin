@@ -16,7 +16,20 @@ class WalletTransaction extends Model
         'amount_tone',
         'status_label',
         'sort_order',
+        'amount',
+        'currency',
+        'reference_type',
+        'reference_id',
+        'occurred_at',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'amount' => 'decimal:2',
+            'occurred_at' => 'datetime',
+        ];
+    }
 
     public function user(): BelongsTo
     {

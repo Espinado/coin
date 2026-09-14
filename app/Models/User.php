@@ -26,6 +26,11 @@ class User extends Authenticatable
     protected $fillable = [
         'name',
         'email',
+        'phone',
+        'telegram',
+        'country_code',
+        'last_login_at',
+        'admin_lead_note',
         'password',
         'referred_by_user_id',
         'account_slug',
@@ -51,6 +56,7 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
+            'last_login_at' => 'datetime',
             'password' => 'hashed',
             'expected_daily_reward' => 'decimal:2',
             'is_blocked' => 'boolean',
@@ -131,6 +137,16 @@ class User extends Authenticatable
     public function withdrawals(): HasMany
     {
         return $this->hasMany(Withdrawal::class);
+    }
+
+    public function deposits(): HasMany
+    {
+        return $this->hasMany(Deposit::class);
+    }
+
+    public function referralCommissionsEarned(): HasMany
+    {
+        return $this->hasMany(ReferralCommission::class, 'referrer_user_id');
     }
 
     public function accountLabel(): string
