@@ -251,6 +251,20 @@ class Dashboard extends Component
         return SupportTicket::categories();
     }
 
+    public function copyReferralLink(): void
+    {
+        $url = $this->referral?->shareUrl();
+
+        abort_unless(filled($url), 404);
+
+        $this->js(sprintf(
+            'navigator.clipboard.writeText(%s).then(() => window.showSupportToast?.(%s)).catch(() => window.showSupportToast?.(%s, "error"))',
+            json_encode($url, JSON_THROW_ON_ERROR),
+            json_encode('Link copied'),
+            json_encode('Could not copy link'),
+        ));
+    }
+
     public function openCreateTicket(): void
     {
         $this->showCreateTicket = true;

@@ -59,4 +59,17 @@ class ReferralProfile extends Model
     {
         return "{$this->level1_percent}% / {$this->level2_percent}%";
     }
+
+    public function shareUrl(): string
+    {
+        $domain = config('coin.user_domain');
+        $scheme = parse_url((string) config('app.url'), PHP_URL_SCHEME) ?: 'https';
+
+        return "{$scheme}://{$domain}/r/{$this->code}";
+    }
+
+    public function sharePath(): string
+    {
+        return '/r/'.$this->code;
+    }
 }

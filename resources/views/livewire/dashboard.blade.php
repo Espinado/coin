@@ -568,8 +568,8 @@
           <div style="font-size: 20px; font-weight: 600; letter-spacing: -0.02em;">Invite. Grow. Earn.</div>
           <p style="margin: 10px 0 0; max-width: 620px; font-size: 14px; line-height: 1.6; color: rgba(214,238,248,0.75);">Share your link: when someone activates AI compute, a share of network fees from their contract is credited to your reward balance while the contract is active.</p>
           <div style="display: flex; align-items: center; gap: 12px; margin-top: 22px; flex-wrap: wrap;">
-            <div style="padding: 13px 18px; border-radius: 11px; border: 1px dashed rgba(150,235,250,0.3); background: rgba(4,16,28,0.5); font-family: 'JetBrains Mono', monospace; font-size: 13.5px; color: #eafcff;">coin.local/r/<span style="color: oklch(0.88 0.11 195);">{{ $referral?->code }}</span></div>
-            <button style="padding: 13px 22px; border-radius: 11px; border: 1px solid oklch(0.86 0.11 195 / 0.5); background: linear-gradient(140deg, oklch(0.86 0.12 192), oklch(0.66 0.13 205)); color: #04121f; font-family: inherit; font-size: 13.5px; font-weight: 600; cursor: pointer;">Copy link</button>
+            <div id="referral-share-url" style="padding: 13px 18px; border-radius: 11px; border: 1px dashed rgba(150,235,250,0.3); background: rgba(4,16,28,0.5); font-family: 'JetBrains Mono', monospace; font-size: 13.5px; color: #eafcff;">{{ $referral?->shareUrl() }}</div>
+            <button type="button" wire:click="copyReferralLink" style="padding: 13px 22px; border-radius: 11px; border: 1px solid oklch(0.86 0.11 195 / 0.5); background: linear-gradient(140deg, oklch(0.86 0.12 192), oklch(0.66 0.13 205)); color: #04121f; font-family: inherit; font-size: 13.5px; font-weight: 600; cursor: pointer;">Copy link</button>
             <button style="padding: 13px 20px; border-radius: 11px; border: 1px solid rgba(150,235,250,0.2); background: rgba(150,235,250,0.06); color: #e6f4fa; font-family: inherit; font-size: 13.5px; font-weight: 500; cursor: pointer;">Invite by email</button>
           </div>
         </div>
