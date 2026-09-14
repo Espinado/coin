@@ -32,11 +32,12 @@
 @endphp
 @teleport('body')
 <div
-  style="position: fixed; inset: 0; z-index: 9999; display: grid; place-items: center; padding: 24px; background: rgba(2, 8, 16, 0.82); backdrop-filter: blur(8px);"
+  class="coin-payment-overlay"
+  style="position: fixed; inset: 0; z-index: 9999; display: flex; align-items: safe center; justify-content: center; padding: 24px; background: rgba(2, 8, 16, 0.82); backdrop-filter: blur(8px); overflow-y: auto;"
   @if($paymentModalStep !== 'processing') wire:click="closePaymentModal" wire:keydown.escape.window="closePaymentModal" @endif
 >
   <div
-    style="width: min(100%, 420px); border-radius: 20px; border: 1px solid rgba(150,235,250,0.18); background: linear-gradient(170deg, rgba(12, 34, 52, 0.98), rgba(6, 20, 35, 0.98)); box-shadow: 0 32px 80px -24px rgba(0, 0, 0, 0.75); overflow: hidden;"
+    style="width: min(100%, 420px); max-height: min(90dvh, 720px); margin: auto; border-radius: 20px; border: 1px solid rgba(150,235,250,0.18); background: linear-gradient(170deg, rgba(12, 34, 52, 0.98), rgba(6, 20, 35, 0.98)); box-shadow: 0 32px 80px -24px rgba(0, 0, 0, 0.75); overflow: hidden; overflow-y: auto;"
     wire:click.stop
   >
     <div style="padding: 18px 22px; border-bottom: 1px solid rgba(150,235,250,0.1); display: flex; align-items: center; justify-content: space-between; gap: 12px;">

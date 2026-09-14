@@ -11,7 +11,7 @@
           <span style="font-size: 16.5px; font-weight: 600;">{{ $contract->title() }}</span>
           <span style="padding: 3px 9px; border-radius: 6px; background: oklch(0.6 0.14 160 / 0.2); border: 1px solid oklch(0.7 0.14 160 / 0.4); font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.1em; color: oklch(0.88 0.14 160);">{{ $contract->statusLabel() }}</span>
         </div>
-        <div style="margin-top: 5px; font-family: 'JetBrains Mono', monospace; font-size: 11.5px; color: rgba(214,238,248,0.7);">{{ $contract->code }} · {{ $contract->location_label }}</div>
+        <div style="margin-top: 5px; font-family: 'JetBrains Mono', monospace; font-size: 11.5px; color: rgba(214,238,248,0.7);">{{ $contract->code }} · {{ $contract->displayLocationLabel() }}</div>
       </div>
     </div>
     <div style="display: flex; gap: 8px;">
@@ -24,11 +24,11 @@
     <div><div style="font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.12em; color: rgba(214,238,248,0.68);">{{ mb_strtoupper(__('coin.contract.apr')) }}</div><div style="margin-top: 9px; font-size: 14px;">{{ $contract->formattedAnnualProfit() ?? '—' }}</div></div>
     <div><div style="font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.12em; color: rgba(214,238,248,0.68);">{{ mb_strtoupper(__('coin.contract.daily_profit')) }}</div><div style="margin-top: 9px; font-size: 14px; color: oklch(0.9 0.12 192);">{{ $contract->formattedDailyProfit() }}</div></div>
     <div><div style="font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.12em; color: rgba(214,238,248,0.68);">{{ mb_strtoupper(__('coin.contract.profit_accrued')) }}</div><div style="margin-top: 9px; font-size: 14px; color: oklch(0.9 0.12 192);">{{ $contract->formattedAccrued() }}</div></div>
-    <div><div style="font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.12em; color: rgba(214,238,248,0.68);">{{ mb_strtoupper(__('coin.contract.maturity')) }}</div><div style="margin-top: 9px; font-size: 14px;">{{ $contract->ends_label }}</div></div>
+    <div><div style="font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.12em; color: rgba(214,238,248,0.68);">{{ mb_strtoupper(__('coin.contract.maturity')) }}</div><div style="margin-top: 9px; font-size: 14px;">{{ $contract->formattedEndsAt() }}</div></div>
     <div><div style="font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.12em; color: rgba(214,238,248,0.68);">{{ mb_strtoupper(__('coin.contract.progress')) }}</div><div style="margin-top: 9px; font-size: 14px;">{{ $contract->progress_percent }}%</div></div>
   </div>
   <div style="margin-top: 24px;">
-    <div style="display: flex; justify-content: space-between; font-size: 12.5px; color: rgba(214,238,248,0.74);"><span>{{ __('coin.contract.progress_label') }}</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">{{ $contract->days_elapsed }} / {{ $contract->duration_days }} {{ __('coin.contract.days') }}</span></div>
+    <div style="display: flex; justify-content: space-between; font-size: 12.5px; color: rgba(214,238,248,0.74);"><span>{{ __('coin.contract.progress_label') }}</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">{{ $contract->days_elapsed }} / {{ $contract->termDays() }} {{ __('coin.contract.days') }}</span></div>
     <div style="margin-top: 10px; height: 6px; border-radius: 4px; background: rgba(150,235,250,0.12);"><div style="width: {{ $contract->progress_percent }}%; height: 100%; border-radius: 4px; background: linear-gradient(90deg, oklch(0.72 0.11 215), oklch(0.88 0.12 192));"></div></div>
   </div>
 </div>

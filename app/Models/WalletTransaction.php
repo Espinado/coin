@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\LocaleFormat;
 use App\Support\PlatformTerms;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -57,5 +58,24 @@ class WalletTransaction extends Model
             'PENDING' => 'oklch(0.88 0.15 90)',
             default => 'oklch(0.88 0.14 160)',
         };
+    }
+
+    public function formattedOccurredAt(): string
+    {
+        if ($this->occurred_at) {
+            return LocaleFormat::shortDateTime($this->occurred_at);
+        }
+
+        return (string) $this->occurred_label;
+    }
+
+    public function displayStatus(): string
+    {
+        return PlatformTerms::displayTransactionStatus((string) $this->status_label);
+    }
+
+    public function displaySource(): string
+    {
+        return PlatformTerms::displayTransactionSource((string) $this->source);
     }
 }

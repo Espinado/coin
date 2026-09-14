@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Support\LocaleFormat;
 use App\Models\User;
 use App\Models\Wallet;
 use App\Models\WalletTransaction;
@@ -56,7 +57,7 @@ class WalletService
 
         return WalletTransaction::query()->create([
             'user_id' => $user->id,
-            'occurred_label' => now()->format('M j · H:i'),
+            'occurred_label' => LocaleFormat::shortDateTime(now()),
             'type' => $type,
             'source' => $source,
             'amount_label' => $prefix.number_format(abs($amount), 2, '.', '').' '.$currency,

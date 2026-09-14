@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Support\LocaleFormat;
+use App\Support\PlanLabels;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -61,10 +63,52 @@ class Contract extends Model
 
     public function formattedPrincipal(): string
     {
-        $amount = $this->principal_amount ?? $this->plan?->price_amount ?? $this->tflops;
+        $amount = (float) ($this->principal_amount ?? 0);
         $currency = $this->currency ?? $this->plan?->currency ?? 'USDT';
 
-        return number_format((float) $amount, 2, '.', ',').' '.$currency;
+        return number_format($amount, 2, '.', ',').' '.$currency;
+    }
+
+    public function termDays(): int
+    {
+        if ($this->duration_days > 0) {
+            return (int) $this->duration_days;
+        }
+
+        if ($this->started_at && $this->ends_at) {
+            return (int) $this->started_at->diffInDays($this->ends_at);
+        }
+
+        return (int) ($this->plan?->duration_days ?? 0);
+    }
+
+    public function formattedDuration(): string
+    {
+        $days = $this->termDays();
+
+        if ($days <= 0) {
+            return __('coin.invest.by_agreement');
+        }
+
+        return __('coin.invest.duration_days', ['count' => $days]);
+    }
+
+    public function formattedEndsAt(): string
+    {
+        if ($this->ends_at) {
+            return LocaleFormat::date($this->ends_at);
+        }
+
+        if (filled($this->ends_label) && $this->ends_label !== 'By agreement') {
+            return $this->ends_label;
+        }
+
+        return __('coin.invest.by_agreement');
+    }
+
+    public function displayLocationLabel(): string
+    {
+        return PlanLabels::infra($this->location_label);
     }
 
     public function dailyProfitAmount(): float
@@ -112,6 +156,6 @@ class Contract extends Model
 
     public function title(): string
     {
-        return __('coin.investment').' · '.($this->plan?->name ?? '—');
+        return __('coin.investment').' · '.($this->plan?->displayName() ?? '—');
     }
 }

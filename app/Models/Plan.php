@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\PlanLabels;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
@@ -60,13 +61,28 @@ class Plan extends Model
         return '~'.number_format((float) $this->daily_estimate, 1, '.', '').' / day';
     }
 
+    public function displayTierLabel(): string
+    {
+        return PlanLabels::tier((string) $this->tier_label);
+    }
+
+    public function displayName(): string
+    {
+        return PlanLabels::name((string) $this->slug, (string) $this->name);
+    }
+
+    public function displayInfra(): string
+    {
+        return PlanLabels::infra($this->infra);
+    }
+
     public function formattedDuration(): string
     {
         if ($this->duration_days === null) {
-            return 'By agreement';
+            return __('coin.invest.by_agreement');
         }
 
-        return $this->duration_days.' days';
+        return __('coin.invest.duration_days', ['count' => $this->duration_days]);
     }
 
     public function isCurrentFor(?Plan $activePlan): bool
@@ -93,24 +109,24 @@ class Plan extends Model
             return __('coin.invest.upgrade');
         }
 
-        return __('coin.actions.invest');
+        return __('coin.actions.select');
     }
 
     public function calculatorTermLabel(): string
     {
         if ($this->duration_days === null) {
-            return 'CUSTOM TERM';
+            return __('coin.invest.custom_term');
         }
 
         if ($this->duration_days >= 365) {
-            return '12-MONTH CONTRACT';
+            return __('coin.invest.contract_12_month');
         }
 
         if ($this->duration_days >= 180) {
-            return '6-MONTH CONTRACT';
+            return __('coin.invest.contract_6_month');
         }
 
-        return $this->duration_days.'-DAY CONTRACT';
+        return __('coin.invest.contract_n_days', ['days' => $this->duration_days]);
     }
 
     public function formattedComputeLabel(): string
@@ -120,10 +136,10 @@ class Plan extends Model
         }
 
         if ($this->isEnterprise()) {
-            return 'Custom';
+            return __('coin.invest.by_agreement');
         }
 
-        return $this->formattedTflops().' TFLOPS';
+        return number_format((float) $this->tflops, 0, '.', ',').' '.($this->currency ?? 'USDT');
     }
 
     public function formattedAnnualProfit(): ?string

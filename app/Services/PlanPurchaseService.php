@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Support\LocaleFormat;
 use App\Support\PlatformTerms;
 
 use App\Models\Contract;
@@ -70,15 +71,15 @@ class PlanPurchaseService
                 'days_elapsed' => 0,
                 'accrued_amount' => 0,
                 'progress_percent' => 0,
-                'started_label' => $startedAt->format('M j, Y'),
-                'ends_label' => $endsAt?->format('M j, Y') ?? 'By agreement',
+                'started_label' => LocaleFormat::date($startedAt),
+                'ends_label' => $endsAt ? LocaleFormat::date($endsAt) : __('coin.invest.by_agreement'),
                 'location_label' => $plan->infra,
             ]);
 
             $this->wallets->record(
                 $user,
                 PlatformTerms::TX_INVESTMENT,
-                $plan->name,
+                $plan->displayName(),
                 -$amount,
                 $currency,
                 'neutral',

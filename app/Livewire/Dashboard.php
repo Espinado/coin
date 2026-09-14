@@ -142,6 +142,7 @@ class Dashboard extends Component
     {
         $this->section = $section;
         $this->menuOpen = false;
+        $this->actionMessage = null;
 
         if ($section === 7) {
             $this->prepareSupportChat();
@@ -180,7 +181,7 @@ class Dashboard extends Component
         $this->power = (int) $plan->tflops;
     }
 
-    public function buyPlan(int $planId): void
+    public function selectPlanAndScroll(int $planId): void
     {
         $plan = $this->plans->firstWhere('id', $planId);
 
@@ -194,8 +195,9 @@ class Dashboard extends Component
             return;
         }
 
+        $this->section = 1;
         $this->selectPlan($planId);
-        $this->openInvestmentPaymentModal();
+        $this->dispatch('scroll-to-calculator');
     }
 
     public function updatedPower(): void
@@ -344,12 +346,24 @@ class Dashboard extends Component
 
     public function getPlanNameProperty(): string
     {
-        return $this->selectedPlan?->name ?? '—';
+        return $this->selectedPlan?->displayName() ?? '—';
     }
 
     public function getPlanInfraProperty(): string
     {
-        return $this->selectedPlan?->infra ?? '—';
+        return $this->selectedPlan?->displayInfra() ?? '—';
+    }
+
+    public function getWalletCurrencyProperty(): string
+    {
+        return $this->wallet?->currency ?? 'USDT';
+    }
+
+    public function getNetworkFeeLabelProperty(): string
+    {
+        $fee = app(PlatformSettingsService::class)->getFloat('network_fee');
+
+        return number_format($fee, 2, ',', '').' '.$this->walletCurrency;
     }
 
     public function getPlanPriceProperty(): string
@@ -396,9 +410,9 @@ class Dashboard extends Component
     public function getPeriodLabelProperty(): string
     {
         return match ($this->period) {
-            0 => 'PER DAY',
-            2 => 'PER MONTH',
-            default => 'PER WEEK',
+            0 => __('coin.invest.per_day'),
+            2 => __('coin.invest.per_month'),
+            default => __('coin.stats.per_week'),
         };
     }
 
@@ -608,7 +622,13 @@ class Dashboard extends Component
             return;
         }
 
+        $wasTopUp = $this->paymentModal === 'topup';
+
         $this->resetPaymentModal();
+
+        if ($wasTopUp) {
+            $this->depositAmount = '';
+        }
     }
 
     public function copyReferralLink(): void

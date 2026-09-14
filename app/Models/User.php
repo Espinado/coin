@@ -151,7 +151,26 @@ class User extends Authenticatable
 
     public function accountLabel(): string
     {
-        return 'Account '.($this->account_slug ?? substr(md5((string) $this->id), 0, 4));
+        if (filled($this->name)) {
+            return (string) $this->name;
+        }
+
+        return __('coin.profile.account_fallback', [
+            'id' => $this->account_slug ?? substr(md5((string) $this->id), 0, 4),
+        ]);
+    }
+
+    public function avatarInitial(): string
+    {
+        if (filled($this->name)) {
+            return mb_strtoupper(mb_substr(trim($this->name), 0, 1));
+        }
+
+        if (filled($this->email)) {
+            return mb_strtoupper(mb_substr($this->email, 0, 1));
+        }
+
+        return 'C';
     }
 
     public function formattedDailyReward(): string

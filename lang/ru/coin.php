@@ -42,7 +42,39 @@ return [
         'Daily profit' => 'Дневная прибыль',
         'Referral credit' => 'Реферальный бонус',
         'Referral commission' => 'Реферальная комиссия',
-        'Principal release' => 'Возврат тела инвестиции',
+        'Principal release' => 'Возврат суммы инвестиции',
+    ],
+
+    'tx_status' => [
+        'COMPLETED' => 'Завершено',
+        'PENDING' => 'Ожидает',
+        'FAILED' => 'Ошибка',
+        'REJECTED' => 'Отклонено',
+    ],
+
+    'tx_sources' => [
+        'mock_top_up' => 'Демо-пополнение',
+    ],
+
+    'plan_tiers' => [
+        'START' => 'Старт',
+        'POPULAR' => 'Популярный',
+        'PRO' => 'Про',
+        'CUSTOM' => 'Индивидуально',
+    ],
+
+    'plan_infra' => [
+        'shared_pool' => 'Общий пул',
+        'priority_pool' => 'Приоритетный пул',
+        'dedicated_pods' => 'Выделенные узлы',
+        'reserved_racks' => 'Резервные стойки',
+    ],
+
+    'plan_names' => [
+        'node' => 'Node',
+        'core' => 'Core',
+        'cluster' => 'Cluster',
+        'enterprise' => 'Enterprise',
     ],
 
     // ——— Меню пользователя (dashboard) ———
@@ -88,9 +120,9 @@ return [
     'wallet' => [
         'total_balance' => 'Общий баланс',
         'available' => 'Доступно',
-        'available_hint' => 'Прибыль и возвращённое тело',
+        'available_hint' => 'Прибыль и возвращённые вложения',
         'locked' => 'В инвестициях',
-        'locked_hint' => 'Тело активных планов',
+        'locked_hint' => 'Сумма активных планов',
         'locked_in_investments' => 'Заблокировано в инвестициях',
         'pending_payout' => 'Ожидает вывода',
         'top_up_title' => 'Пополнение счёта',
@@ -107,7 +139,7 @@ return [
         'min_payout' => 'Мин. вывод',
         'manage_addresses' => 'Управление адресами',
         'pending_settlement' => 'Ожидает зачисления',
-        'locked_principal_hint' => 'Тело активных инвестиций',
+        'locked_principal_hint' => 'Сумма активных инвестиций',
         'top_up_sub' => 'Добавить USDT на баланс счёта',
         'payout_sub' => 'Перевод доступного баланса на ваш кошелёк',
         'max' => 'МАКС',
@@ -119,6 +151,8 @@ return [
 
     'actions' => [
         'quick' => 'Быстрые действия',
+        'select' => 'Выбрать',
+        'selecting' => 'Выбираем…',
         'invest' => 'Купить план',
         'new_investment' => 'Новая инвестиция',
         'top_up' => 'Пополнить',
@@ -161,7 +195,13 @@ return [
         'renew' => 'Продлить',
         'estimated_price' => 'Ориентировочная цена',
         'currency' => 'Валюта',
-        'estimates_note' => 'Расчёты основаны на APR плана. Дневная прибыль начисляется на доступный баланс; тело разблокируется в конце срока.',
+        'estimates_note' => 'Расчёты основаны на APR плана. Дневная прибыль начисляется на доступный баланс; сумма инвестиции разблокируется в конце срока.',
+        'by_agreement' => 'По договорённости',
+        'duration_days' => ':count дн.',
+        'custom_term' => 'Индивидуальный срок',
+        'contract_12_month' => 'Контракт на 12 месяцев',
+        'contract_6_month' => 'Контракт на 6 месяцев',
+        'contract_n_days' => 'Контракт на :days дн.',
         'days_suffix' => 'дн.',
         'days_apr' => ':days дн. · :apr APR',
         'active_count_line' => ':count активных',
@@ -299,7 +339,7 @@ return [
     ],
 
     'contract' => [
-        'principal' => 'Тело инвестиции',
+        'principal' => 'Сумма инвестиции',
         'apr' => 'Годовая доходность',
         'daily_profit' => 'Прибыль за день',
         'profit_accrued' => 'Начислено прибыли',
@@ -320,6 +360,7 @@ return [
     'profile' => [
         'title' => 'Профиль',
         'display_name' => 'Отображаемое имя',
+        'account_fallback' => 'Аккаунт :id',
         'phone' => 'Телефон',
         'telegram' => 'Telegram',
         'country_iso' => 'Страна (ISO)',
@@ -408,7 +449,7 @@ return [
         'signed_in_as' => 'Вы вошли как :name. :count активных инвестиций · :locked :symbol в инвестициях.',
         'users_today_kyc' => '+:today сегодня · :kyc KYC на проверке',
         'active_investments' => ':count активных инвестиций',
-        'locked_principal' => 'Тело в инвестициях',
+        'locked_principal' => 'Сумма в инвестициях',
         'pending_payouts' => 'Ожидают вывода',
         'open_support' => 'Открытые обращения',
         'today_profit_accruals' => 'Начислено сегодня: :amount :symbol',
@@ -430,7 +471,7 @@ return [
         'plans_sub' => 'Каталог инвестиционных планов. Активные планы сразу видны в личном кабинете.',
         'settings_sub' => 'Выводы, рефералы и переключатели платформы.',
         'users_sub' => 'Поиск аккаунтов, проверка KYC и управление доступом.',
-        'profit_accrual_sub' => 'Ежедневная прибыль по активным инвестициям · формула: тело × APR / 365 · cron: :command',
+        'profit_accrual_sub' => 'Ежедневная прибыль по активным инвестициям · формула: сумма × APR / 365 · cron: :command',
         'all_statuses' => 'Все статусы',
         'filter' => 'Фильтр',
         'search' => 'Поиск',
@@ -540,7 +581,7 @@ return [
 
     'landing' => [
         'hero_title' => 'Инвестируйте USDT и получайте прибыль каждый день',
-        'hero_sub' => 'Пополните счёт USDT, купите план с фиксированной доходностью и следите за прибылью в личном кабинете. Тело возвращается в конце срока.',
+        'hero_sub' => 'Пополните счёт USDT, купите план с фиксированной доходностью и следите за прибылью в личном кабинете. Сумма инвестиции возвращается в конце срока.',
         'start' => 'Начать',
         'min_investment' => 'Мин. сумма',
         'choose_plan' => 'Выберите план',

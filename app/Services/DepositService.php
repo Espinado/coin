@@ -58,7 +58,7 @@ class DepositService
             $this->wallets->record(
                 $user,
                 PlatformTerms::TX_TOP_UP,
-                'Mock top-up',
+                __('coin.tx_sources.mock_top_up'),
                 $amount,
                 $currency,
                 'positive',
