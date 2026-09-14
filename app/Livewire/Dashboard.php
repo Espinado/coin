@@ -89,6 +89,14 @@ class Dashboard extends Component
 
     public string $withdrawAmount = '';
 
+    public ?string $paymentModal = null;
+
+    public string $paymentModalStep = 'review';
+
+    public ?string $paymentModalError = null;
+
+    public ?string $paymentModalReference = null;
+
     public ?string $actionMessage = null;
 
     public string $profilePhone = '';
@@ -198,7 +206,7 @@ class Dashboard extends Component
     public function getSubtitleProperty(): string
     {
         if ($this->section === 0) {
-            return 'Portfolio overview · '.$this->activeContractCount.' active deposit(s)';
+            return 'Portfolio overview · '.$this->activeContractCount.' active investment(s)';
         }
 
         return app(DashboardDataService::class)->sectionMeta()[$this->section][1];
@@ -414,29 +422,52 @@ class Dashboard extends Component
             $this->depositAmount = '';
             $this->reloadPortfolioData();
             $this->actionMessage = config('coin.deposits.auto_confirm_mock')
-                ? 'Deposit credited to your available balance.'
-                : 'Deposit submitted and awaiting confirmation.';
+                ? 'Top-up credited to your available balance.'
+                : 'Top-up submitted and awaiting confirmation.';
         } catch (\RuntimeException $exception) {
             $this->addError('depositAmount', $exception->getMessage());
         }
     }
 
-    public function requestWithdrawal(WithdrawalService $withdrawals): void
+    public function openPayoutPaymentModal(): void
     {
         $this->resetActionFeedback();
+        $this->resetPaymentModal();
 
-        $validated = $this->validate([
+        $this->validate([
             'withdrawAmount' => ['required', 'numeric', 'min:1'],
         ], [], [
             'withdrawAmount' => 'amount',
         ]);
 
+        $this->paymentModal = 'payout';
+        $this->paymentModalStep = 'review';
+    }
+
+    public function confirmPayoutPayment(WithdrawalService $withdrawals): void
+    {
+        if ($this->paymentModal !== 'payout' || $this->paymentModalStep !== 'review') {
+            return;
+        }
+
+        $this->paymentModalError = null;
+        $this->paymentModalStep = 'processing';
+
+        $amount = (float) $this->withdrawAmount;
+
         try {
-            $withdrawals->createForUser($this->user, (float) $validated['withdrawAmount']);
+            sleep(2);
+
+            $withdrawal = $withdrawals->createForUser($this->user, $amount);
+
             $this->withdrawAmount = '';
             $this->reloadPortfolioData();
-            $this->actionMessage = 'Withdrawal request submitted.';
+            $this->paymentModalReference = $withdrawal->reference;
+            $this->paymentModalStep = 'success';
+            $this->actionMessage = 'Payout request submitted.';
         } catch (\RuntimeException $exception) {
+            $this->paymentModalStep = 'error';
+            $this->paymentModalError = $exception->getMessage();
             $this->addError('withdrawAmount', $exception->getMessage());
         }
     }
@@ -465,9 +496,10 @@ class Dashboard extends Component
         $this->actionMessage = 'Profile contacts saved.';
     }
 
-    public function purchaseSelectedPlan(PlanPurchaseService $purchases): void
+    public function openInvestmentPaymentModal(): void
     {
         $this->resetActionFeedback();
+        $this->resetPaymentModal();
 
         $plan = $this->selectedPlan;
 
@@ -477,15 +509,64 @@ class Dashboard extends Component
             return;
         }
 
+        if ($plan->isEnterprise() && $plan->min_deposit === null) {
+            $this->addError('purchase', 'Contact sales for Enterprise plans.');
+
+            return;
+        }
+
+        $this->paymentModal = 'investment';
+        $this->paymentModalStep = 'review';
+    }
+
+    public function confirmInvestmentPayment(PlanPurchaseService $purchases): void
+    {
+        if ($this->paymentModal !== 'investment' || $this->paymentModalStep !== 'review') {
+            return;
+        }
+
+        $plan = $this->selectedPlan;
+
+        if (! $plan instanceof Plan) {
+            $this->closePaymentModal();
+            $this->addError('purchase', 'Select an investment plan first.');
+
+            return;
+        }
+
+        $this->paymentModalError = null;
+        $this->paymentModalStep = 'processing';
+
         try {
-            $purchases->purchase($this->user, $plan, (float) $this->power);
+            sleep(2);
+
+            $contract = $purchases->purchase($this->user, $plan, (float) $this->power);
+
             $this->reloadPortfolioData();
             $this->selectedPlanId = $plan->id;
-            $this->section = 2;
+            $this->paymentModalReference = $contract->code;
+            $this->paymentModalStep = 'success';
             $this->actionMessage = 'Investment activated. Principal is locked until maturity.';
         } catch (\RuntimeException $exception) {
+            $this->paymentModalStep = 'error';
+            $this->paymentModalError = $exception->getMessage();
             $this->addError('purchase', $exception->getMessage());
         }
+    }
+
+    public function finishInvestmentPayment(): void
+    {
+        $this->section = 2;
+        $this->closePaymentModal();
+    }
+
+    public function closePaymentModal(): void
+    {
+        if ($this->paymentModalStep === 'processing') {
+            return;
+        }
+
+        $this->resetPaymentModal();
     }
 
     public function copyReferralLink(): void
@@ -698,6 +779,14 @@ class Dashboard extends Component
     {
         $this->actionMessage = null;
         $this->resetErrorBag();
+    }
+
+    private function resetPaymentModal(): void
+    {
+        $this->paymentModal = null;
+        $this->paymentModalStep = 'review';
+        $this->paymentModalError = null;
+        $this->paymentModalReference = null;
     }
 
     private function formatAmount(float $value, int $decimals): string

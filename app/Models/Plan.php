@@ -82,7 +82,7 @@ class Plan extends Model
     public function actionLabel(?Plan $activePlan = null): string
     {
         if ($this->isCurrentFor($activePlan)) {
-            return 'Manage deposit';
+            return 'Manage investment';
         }
 
         if ($this->isEnterprise()) {

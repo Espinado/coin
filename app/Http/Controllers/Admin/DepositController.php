@@ -48,7 +48,7 @@ class DepositController extends Controller
 
         return redirect()
             ->route('admin.deposits.show', $deposit)
-            ->with('status', 'Deposit confirmed and credited.');
+            ->with('status', 'Top-up confirmed and credited.');
     }
 
     public function reject(Deposit $deposit, DepositService $deposits): RedirectResponse
@@ -57,6 +57,6 @@ class DepositController extends Controller
 
         return redirect()
             ->route('admin.deposits.show', $deposit)
-            ->with('status', 'Deposit rejected.');
+            ->with('status', 'Top-up rejected.');
     }
 }

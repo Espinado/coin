@@ -1,6 +1,6 @@
 @extends('layouts.admin')
 
-@section('title', 'Coin Admin — Deposits')
+@section('title', 'Coin Admin — Top-ups')
 
 @section('content')
     @include('admin.partials.nav')
@@ -8,8 +8,8 @@
     <div class="admin-card">
         <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;">
             <div>
-                <h1 style="margin:0;font-size:24px;font-weight:600;">Deposits</h1>
-                <p style="margin:8px 0 0;font-size:14px;color:rgba(232,237,245,0.72);">Review and confirm mock top-up requests.</p>
+                <h1 style="margin:0;font-size:24px;font-weight:600;">Top-ups</h1>
+                <p style="margin:8px 0 0;font-size:14px;color:rgba(232,237,245,0.72);">Review and confirm account funding requests (USDT to wallet).</p>
             </div>
             <form method="GET" action="{{ route('admin.deposits.index') }}" style="display:flex;gap:8px;">
                 <select name="status" style="padding:10px 12px;border-radius:10px;border:1px solid rgba(255,255,255,0.12);background:#070a10;color:#e8edf5;">
@@ -44,7 +44,7 @@
                         <td style="padding:14px 18px;">{{ $deposit->created_at?->format('M j, Y H:i') }}</td>
                     </tr>
                 @empty
-                    <tr><td colspan="5" style="padding:18px;color:rgba(232,237,245,0.65);">No deposits yet.</td></tr>
+                    <tr><td colspan="5" style="padding:18px;color:rgba(232,237,245,0.65);">No top-ups yet.</td></tr>
                 @endforelse
             </tbody>
         </table>

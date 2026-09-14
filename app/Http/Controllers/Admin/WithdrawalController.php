@@ -55,6 +55,6 @@ class WithdrawalController extends Controller
 
         return redirect()
             ->route('admin.withdrawals.show', $withdrawal)
-            ->with('status', 'Withdrawal status updated.');
+            ->with('status', 'Payout status updated.');
     }
 }

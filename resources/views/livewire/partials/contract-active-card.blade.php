@@ -28,7 +28,7 @@
     <div><div style="font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.12em; color: rgba(214,238,248,0.68);">PROGRESS</div><div style="margin-top: 9px; font-size: 14px;">{{ $contract->progress_percent }}%</div></div>
   </div>
   <div style="margin-top: 24px;">
-    <div style="display: flex; justify-content: space-between; font-size: 12.5px; color: rgba(214,238,248,0.74);"><span>Deposit progress</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">{{ $contract->days_elapsed }} / {{ $contract->duration_days }} days</span></div>
+    <div style="display: flex; justify-content: space-between; font-size: 12.5px; color: rgba(214,238,248,0.74);"><span>Investment progress</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">{{ $contract->days_elapsed }} / {{ $contract->duration_days }} days</span></div>
     <div style="margin-top: 10px; height: 6px; border-radius: 4px; background: rgba(150,235,250,0.12);"><div style="width: {{ $contract->progress_percent }}%; height: 100%; border-radius: 4px; background: linear-gradient(90deg, oklch(0.72 0.11 215), oklch(0.88 0.12 192));"></div></div>
   </div>
 </div>

@@ -1,6 +1,6 @@
 @extends('layouts.admin')
 
-@section('title', 'Coin Admin — Withdrawals')
+@section('title', 'Coin Admin — Payouts')
 
 @section('content')
     @include('admin.partials.nav')
@@ -8,7 +8,7 @@
     <div class="admin-card">
         <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;">
             <div>
-                <h1 style="margin:0;font-size:24px;font-weight:600;">Withdrawals</h1>
+                <h1 style="margin:0;font-size:24px;font-weight:600;">Payouts</h1>
                 <p style="margin:8px 0 0;font-size:14px;color:rgba(232,237,245,0.72);">Approve, process, pay, or reject payout requests.</p>
             </div>
             <form method="GET" action="{{ route('admin.withdrawals.index') }}" style="display:flex;gap:8px;">
@@ -44,7 +44,7 @@
                         <td style="padding:14px 18px;">{{ $withdrawal->created_at?->format('M j, Y H:i') }}</td>
                     </tr>
                 @empty
-                    <tr><td colspan="5" style="padding:24px 18px;color:rgba(232,237,245,0.62);">No withdrawals found.</td></tr>
+                    <tr><td colspan="5" style="padding:24px 18px;color:rgba(232,237,245,0.62);">No payouts found.</td></tr>
                 @endforelse
             </tbody>
         </table>

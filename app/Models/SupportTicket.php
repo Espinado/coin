@@ -118,7 +118,7 @@ class SupportTicket extends Model
     public static function categories(): array
     {
         return [
-            self::CATEGORY_WITHDRAWAL => 'Withdrawal',
+            self::CATEGORY_WITHDRAWAL => 'Payout',
             self::CATEGORY_CONTRACT => 'Contract',
             self::CATEGORY_KYC => 'KYC',
             self::CATEGORY_ACCOUNT => 'Account',

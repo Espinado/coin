@@ -67,7 +67,7 @@
         <span style="width: 6px; height: 6px; border-radius: 50%; background: oklch(0.85 0.15 160); animation: paiPulse 2.4s infinite;"></span>INVESTMENT PLATFORM
       </div>
       <h1 style="margin: 26px 0 0; font-size: 66px; line-height: 1.06; letter-spacing: -0.04em; font-weight: 600; color: #f0fbff;">Invest USDT and earn daily profit</h1>
-      <p style="margin: 24px 0 0; max-width: 520px; font-size: 17px; line-height: 1.62; color: rgba(230,244,250,0.72);">Deposit USDT, choose an investment plan with fixed APR, and track daily profit in your dashboard. Principal unlocks at maturity.</p>
+      <p style="margin: 24px 0 0; max-width: 520px; font-size: 17px; line-height: 1.62; color: rgba(230,244,250,0.72);">Top up your account with USDT, buy an investment plan with fixed APR, and track daily profit in your dashboard. Principal unlocks at maturity.</p>
       <div style="display: flex; gap: 14px; margin-top: 36px;">
         <button style="padding: 16px 28px; border-radius: 13px; border: 1px solid oklch(0.86 0.11 195 / 0.5); background: linear-gradient(140deg, oklch(0.86 0.12 192), oklch(0.66 0.13 205)); color: #04121f; font-family: inherit; font-size: 15.5px; font-weight: 600; cursor: pointer; box-shadow: 0 20px 50px -22px oklch(0.8 0.13 195 / 0.7);">Start investing</button>
         <button style="padding: 16px 26px; border-radius: 13px; border: 1px solid rgba(150,235,250,0.2); background: rgba(150,235,250,0.05); color: #e6f4fa; font-family: inherit; font-size: 15.5px; font-weight: 500; cursor: pointer;">How it works</button>
@@ -162,7 +162,7 @@
         <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.16em; color: oklch(0.88 0.11 195);">HOW IT WORKS</div>
         <h2 style="margin: 18px 0 0; font-size: 46px; line-height: 1.08; letter-spacing: -0.035em; font-weight: 600; color: #f0fbff;">Four steps</h2>
       </div>
-      <p style="max-width: 400px; margin: 0 0 6px; font-size: 15.5px; line-height: 1.62; color: rgba(230,244,250,0.72);">From USDT deposit to daily profit accrual. Everything is tracked in your dashboard.</p>
+      <p style="max-width: 400px; margin: 0 0 6px; font-size: 15.5px; line-height: 1.62; color: rgba(230,244,250,0.72);">From account top-up to plan purchase to daily profit. Everything is tracked in your dashboard.</p>
     </div>
 
     <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-top: 48px;">
@@ -174,7 +174,7 @@
           <span style="font-family: 'JetBrains Mono', monospace; font-size: 20px; color: oklch(0.86 0.11 195 / 0.6);">01</span>
         </div>
         <h3 style="margin: 22px 0 0; font-size: 18px; font-weight: 600; letter-spacing: -0.015em; color: #f0fbff;">Choose a plan</h3>
-        <p style="margin: 9px 0 0; font-size: 14px; line-height: 1.6; color: rgba(230,244,250,0.7);">Each plan defines minimum deposit, APR, and contract term.</p>
+        <p style="margin: 9px 0 0; font-size: 14px; line-height: 1.6; color: rgba(230,244,250,0.7);">Each plan defines minimum investment, APR, and contract term.</p>
       </div>
       <div style="padding: 28px 24px; border-radius: 18px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.04);">
         <div style="display: flex; align-items: center; justify-content: space-between;">
@@ -183,8 +183,8 @@
           </div>
           <span style="font-family: 'JetBrains Mono', monospace; font-size: 20px; color: oklch(0.86 0.11 195 / 0.6);">02</span>
         </div>
-        <h3 style="margin: 22px 0 0; font-size: 18px; font-weight: 600; letter-spacing: -0.015em; color: #f0fbff;">Deposit USDT</h3>
-        <p style="margin: 9px 0 0; font-size: 14px; line-height: 1.6; color: rgba(230,244,250,0.7);">Fund your wallet and invest from available balance.</p>
+        <h3 style="margin: 22px 0 0; font-size: 18px; font-weight: 600; letter-spacing: -0.015em; color: #f0fbff;">Top up account</h3>
+        <p style="margin: 9px 0 0; font-size: 14px; line-height: 1.6; color: rgba(230,244,250,0.7);">Add USDT to your wallet, then invest from available balance.</p>
       </div>
       <div style="padding: 28px 24px; border-radius: 18px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.04);">
         <div style="display: flex; align-items: center; justify-content: space-between;">
@@ -194,7 +194,7 @@
           <span style="font-family: 'JetBrains Mono', monospace; font-size: 20px; color: oklch(0.86 0.11 195 / 0.6);">03</span>
         </div>
         <h3 style="margin: 22px 0 0; font-size: 18px; font-weight: 600; letter-spacing: -0.015em; color: #f0fbff;">Principal is locked</h3>
-        <p style="margin: 9px 0 0; font-size: 14px; line-height: 1.6; color: rgba(230,244,250,0.7);">Your deposit stays locked until the contract matures.</p>
+        <p style="margin: 9px 0 0; font-size: 14px; line-height: 1.6; color: rgba(230,244,250,0.7);">Your investment principal stays locked until the contract matures.</p>
       </div>
       <div style="padding: 28px 24px; border-radius: 18px; border: 1px solid oklch(0.86 0.11 195 / 0.28); background: linear-gradient(170deg, oklch(0.6 0.13 200 / 0.2), rgba(150,235,250,0.03));">
         <div style="display: flex; align-items: center; justify-content: space-between;">
@@ -204,7 +204,7 @@
           <span style="font-family: 'JetBrains Mono', monospace; font-size: 20px; color: oklch(0.88 0.11 195 / 0.75);">04</span>
         </div>
         <h3 style="margin: 22px 0 0; font-size: 18px; font-weight: 600; letter-spacing: -0.015em; color: #f0fbff;">Earn daily profit</h3>
-        <p style="margin: 9px 0 0; font-size: 14px; line-height: 1.6; color: rgba(230,244,250,0.75);">Profit accrues daily to your available balance. Withdraw anytime.</p>
+        <p style="margin: 9px 0 0; font-size: 14px; line-height: 1.6; color: rgba(230,244,250,0.75);">Profit accrues daily to your available balance. Request a payout anytime.</p>
       </div>
     </div>
   </section>
@@ -226,7 +226,7 @@
         </div>
         <div style="height: 1px; background: rgba(150,235,250,0.12); margin: 24px 0;"></div>
         <div style="display: flex; flex-direction: column; gap: 14px; font-size: 13.5px;">
-          <div style="display: flex; justify-content: space-between; gap: 14px;"><span style="color: rgba(230,244,250,0.72); min-width: 0;">Min deposit</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">250 USDT</span></div>
+          <div style="display: flex; justify-content: space-between; gap: 14px;"><span style="color: rgba(230,244,250,0.72); min-width: 0;">Min investment</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">250 USDT</span></div>
           <div style="display: flex; justify-content: space-between; gap: 14px;"><span style="color: rgba(230,244,250,0.72); min-width: 0;">Term</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">90 days</span></div>
           <div style="display: flex; justify-content: space-between; gap: 14px;"><span style="color: rgba(230,244,250,0.72); min-width: 0;">APR</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">12%</span></div>
           <div style="display: flex; justify-content: space-between; gap: 14px;"><span style="color: rgba(230,244,250,0.72); min-width: 0;">Daily profit est.</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">~0.08 / day</span></div>
@@ -245,7 +245,7 @@
         </div>
         <div style="height: 1px; background: rgba(150,235,250,0.16); margin: 24px 0;"></div>
         <div style="display: flex; flex-direction: column; gap: 14px; font-size: 13.5px;">
-          <div style="display: flex; justify-content: space-between; gap: 14px;"><span style="color: rgba(230,244,250,0.74); min-width: 0;">Min deposit</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">1,100 USDT</span></div>
+          <div style="display: flex; justify-content: space-between; gap: 14px;"><span style="color: rgba(230,244,250,0.74); min-width: 0;">Min investment</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">1,100 USDT</span></div>
           <div style="display: flex; justify-content: space-between; gap: 14px;"><span style="color: rgba(230,244,250,0.74); min-width: 0;">Term</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">180 days</span></div>
           <div style="display: flex; justify-content: space-between; gap: 14px;"><span style="color: rgba(230,244,250,0.74); min-width: 0;">APR</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">15%</span></div>
           <div style="display: flex; justify-content: space-between; gap: 14px;"><span style="color: rgba(230,244,250,0.74); min-width: 0;">Daily profit est.</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">~0.45 / day</span></div>
@@ -263,7 +263,7 @@
         </div>
         <div style="height: 1px; background: rgba(150,235,250,0.12); margin: 24px 0;"></div>
         <div style="display: flex; flex-direction: column; gap: 14px; font-size: 13.5px;">
-          <div style="display: flex; justify-content: space-between; gap: 14px;"><span style="color: rgba(230,244,250,0.72); min-width: 0;">Min deposit</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">3,400 USDT</span></div>
+          <div style="display: flex; justify-content: space-between; gap: 14px;"><span style="color: rgba(230,244,250,0.72); min-width: 0;">Min investment</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">3,400 USDT</span></div>
           <div style="display: flex; justify-content: space-between; gap: 14px;"><span style="color: rgba(230,244,250,0.72); min-width: 0;">Term</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">365 days</span></div>
           <div style="display: flex; justify-content: space-between; gap: 14px;"><span style="color: rgba(230,244,250,0.72); min-width: 0;">APR</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">18%</span></div>
           <div style="display: flex; justify-content: space-between; gap: 14px;"><span style="color: rgba(230,244,250,0.72); min-width: 0;">Daily profit est.</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">~1.68 / day</span></div>
@@ -277,7 +277,7 @@
       <div>
         <div style="font-size: 20px; font-weight: 600; letter-spacing: -0.02em;">Profit estimate</div>
         <div style="margin-top: 22px; display: flex; align-items: baseline; justify-content: space-between;">
-          <span style="font-size: 13.5px; color: rgba(230,244,250,0.74);">Deposit amount</span>
+          <span style="font-size: 13.5px; color: rgba(230,244,250,0.74);">Investment amount</span>
           <span style="font-family: 'JetBrains Mono', monospace; font-size: 18px; color: #f0fbff;">{{ powerLabel }} <span style="font-size: 12px; color: rgba(230,244,250,0.7);">USDT</span></span>
         </div>
         <input type="range" min="100" max="10000" step="100" value="{{ power }}" onChange="{{ onPower }}" style="width: 100%; margin-top: 16px; height: 4px; cursor: pointer;" />
@@ -300,27 +300,27 @@
     <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 48px;">
       <div style="padding: 28px; border-radius: 18px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.04);">
         <div style="width: 42px; height: 42px; border-radius: 12px; border: 1px solid rgba(150,235,250,0.22); background: rgba(150,235,250,0.07); display: grid; place-items: center;"><span style="width: 15px; height: 15px; border-radius: 4px; background: oklch(0.86 0.12 192);"></span></div>
-        <h3 style="margin: 20px 0 0; font-size: 17.5px; font-weight: 600; letter-spacing: -0.015em; color: #f0fbff;">USDT deposits</h3>
-        <p style="margin: 9px 0 0; font-size: 14px; line-height: 1.6; color: rgba(230,244,250,0.7);">Fund your wallet with USDT and invest from available balance.</p>
+        <h3 style="margin: 20px 0 0; font-size: 17.5px; font-weight: 600; letter-spacing: -0.015em; color: #f0fbff;">Account top-ups</h3>
+        <p style="margin: 9px 0 0; font-size: 14px; line-height: 1.6; color: rgba(230,244,250,0.7);">Add USDT to your wallet, then buy investment plans from available balance.</p>
       </div>
       <div style="padding: 28px; border-radius: 18px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.04);">
         <div style="width: 42px; height: 42px; border-radius: 12px; border: 1px solid rgba(150,235,250,0.22); background: rgba(150,235,250,0.07); display: grid; place-items: center;"><span style="width: 15px; height: 15px; border-radius: 50%; border: 2px solid oklch(0.86 0.11 195);"></span></div>
         <h3 style="margin: 20px 0 0; font-size: 17.5px; font-weight: 600; letter-spacing: -0.015em; color: #f0fbff;">Transparent accruals</h3>
-        <p style="margin: 9px 0 0; font-size: 14px; line-height: 1.6; color: rgba(230,244,250,0.7);">Each accrual shows deposit, APR, and profit amount.</p>
+        <p style="margin: 9px 0 0; font-size: 14px; line-height: 1.6; color: rgba(230,244,250,0.7);">Each accrual shows investment, APR, and profit amount.</p>
       </div>
       <div style="padding: 28px; border-radius: 18px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.04);">
         <div style="width: 42px; height: 42px; border-radius: 12px; border: 1px solid rgba(150,235,250,0.22); background: rgba(150,235,250,0.07); display: grid; place-items: center;"><span style="display: flex; gap: 4px;"><span style="width: 6px; height: 6px; border-radius: 50%; background: oklch(0.86 0.12 192);"></span><span style="width: 6px; height: 6px; border-radius: 50%; background: oklch(0.7 0.15 292);"></span></span></div>
         <h3 style="margin: 20px 0 0; font-size: 17.5px; font-weight: 600; letter-spacing: -0.015em; color: #f0fbff;">Flexible plans</h3>
-        <p style="margin: 9px 0 0; font-size: 14px; line-height: 1.6; color: rgba(230,244,250,0.7);">Add new deposits anytime; each contract has its own term.</p>
+        <p style="margin: 9px 0 0; font-size: 14px; line-height: 1.6; color: rgba(230,244,250,0.7);">Add new investments anytime; each contract has its own term.</p>
       </div>
       <div style="padding: 28px; border-radius: 18px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.04);">
         <div style="width: 42px; height: 42px; border-radius: 12px; border: 1px solid rgba(150,235,250,0.22); background: rgba(150,235,250,0.07); display: grid; place-items: center;"><span style="width: 14px; height: 16px; border-radius: 3px; border: 1.5px solid oklch(0.86 0.11 195);"></span></div>
         <h3 style="margin: 20px 0 0; font-size: 17.5px; font-weight: 600; letter-spacing: -0.015em; color: #f0fbff;">Dashboard</h3>
-        <p style="margin: 9px 0 0; font-size: 14px; line-height: 1.6; color: rgba(230,244,250,0.7);">Deposits, wallet, profit history, and referrals in one interface.</p>
+        <p style="margin: 9px 0 0; font-size: 14px; line-height: 1.6; color: rgba(230,244,250,0.7);">Investments, wallet, profit history, and referrals in one interface.</p>
       </div>
       <div style="padding: 28px; border-radius: 18px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.04);">
         <div style="width: 42px; height: 42px; border-radius: 12px; border: 1px solid rgba(150,235,250,0.22); background: rgba(150,235,250,0.07); display: grid; place-items: center;"><span style="width: 15px; height: 15px; border-radius: 50%; border: 1.5px solid rgba(150,235,250,0.35); border-top-color: oklch(0.88 0.12 192);"></span></div>
-        <h3 style="margin: 20px 0 0; font-size: 17.5px; font-weight: 600; letter-spacing: -0.015em; color: #f0fbff;">Fast withdrawals</h3>
+        <h3 style="margin: 20px 0 0; font-size: 17.5px; font-weight: 600; letter-spacing: -0.015em; color: #f0fbff;">Fast payouts</h3>
         <p style="margin: 9px 0 0; font-size: 14px; line-height: 1.6; color: rgba(230,244,250,0.7);">Fee and processing time are shown before you confirm.</p>
       </div>
       <div style="padding: 28px; border-radius: 18px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.04);">
@@ -336,7 +336,7 @@
       <div>
         <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.16em; color: oklch(0.88 0.11 195);">SECURITY</div>
         <h2 style="margin: 18px 0 0; font-size: 46px; line-height: 1.08; letter-spacing: -0.035em; font-weight: 600; color: #f0fbff;">Secure custody and transparent terms</h2>
-        <p style="margin: 22px 0 0; max-width: 470px; font-size: 16.5px; line-height: 1.62; color: rgba(230,244,250,0.72);">Deposits, locked principal, daily profit accrual, and maturity release are handled in one system — with full history in your dashboard.</p>
+        <p style="margin: 22px 0 0; max-width: 470px; font-size: 16.5px; line-height: 1.62; color: rgba(230,244,250,0.72);">Top-ups, investments, daily profit accrual, and maturity release are handled in one system — with full history in your dashboard.</p>
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 36px; max-width: 460px;">
           <div style="padding: 20px; border-radius: 16px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.04);">
             <div style="font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.14em; color: rgba(230,244,250,0.7);">ACTIVE PLANS</div>
@@ -402,7 +402,7 @@
         <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.16em; color: oklch(0.88 0.11 195);">DASHBOARD</div>
         <h2 style="margin: 18px 0 0; font-size: 46px; line-height: 1.08; letter-spacing: -0.035em; font-weight: 600; color: #f0fbff;">Everything in one place</h2>
       </div>
-      <p style="max-width: 380px; margin: 0 0 6px; font-size: 15.5px; line-height: 1.62; color: rgba(230,244,250,0.72);">Balance, locked deposits, plans, wallet, profit history, and referrals — this is what the dashboard looks like.</p>
+      <p style="max-width: 380px; margin: 0 0 6px; font-size: 15.5px; line-height: 1.62; color: rgba(230,244,250,0.72);">Balance, active investments, plans, wallet, profit history, and referrals — this is what the dashboard looks like.</p>
     </div>
 
     <div style="border-radius: 22px; border: 1px solid rgba(150,235,250,0.16); background: linear-gradient(180deg, rgba(11,32,49,0.96), rgba(5,16,27,0.98)); box-shadow: 0 60px 120px -60px #000; overflow: hidden;">
@@ -535,7 +535,7 @@
             <sc-if value="{{ closed0 }}" hint-placeholder-val="{{ false }}"><span style="font-family: 'JetBrains Mono', monospace; font-size: 18px; color: rgba(230,244,250,0.6); flex: none;">+</span></sc-if>
           </button>
           <sc-if value="{{ open0 }}" hint-placeholder-val="{{ true }}">
-            <p style="margin: 0; padding: 0 80px 24px 2px; font-size: 15px; line-height: 1.65; color: rgba(230,244,250,0.72);">An investment platform where you deposit USDT, choose a plan with fixed APR, and receive daily profit to your available balance.</p>
+            <p style="margin: 0; padding: 0 80px 24px 2px; font-size: 15px; line-height: 1.65; color: rgba(230,244,250,0.72);">An investment platform where you top up USDT, buy a plan with fixed APR, and receive daily profit to your available balance.</p>
           </sc-if>
         </div>
         <div style="border-top: 1px solid rgba(150,235,250,0.12);">
@@ -545,7 +545,7 @@
             <sc-if value="{{ closed1 }}" hint-placeholder-val="{{ true }}"><span style="font-family: 'JetBrains Mono', monospace; font-size: 18px; color: rgba(230,244,250,0.6); flex: none;">+</span></sc-if>
           </button>
           <sc-if value="{{ open1 }}" hint-placeholder-val="{{ false }}">
-            <p style="margin: 0; padding: 0 80px 24px 2px; font-size: 15px; line-height: 1.65; color: rgba(230,244,250,0.72);">A plan defines minimum deposit, APR, and contract term. When you invest, principal is locked until maturity.</p>
+            <p style="margin: 0; padding: 0 80px 24px 2px; font-size: 15px; line-height: 1.65; color: rgba(230,244,250,0.72);">A plan defines minimum investment, APR, and contract term. When you buy a plan, principal is locked until maturity.</p>
           </sc-if>
         </div>
         <div style="border-top: 1px solid rgba(150,235,250,0.12);">
@@ -570,7 +570,7 @@
         </div>
         <div style="border-top: 1px solid rgba(150,235,250,0.12);">
           <button onClick="{{ toggle4 }}" style="width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 22px 2px; background: none; border: 0; text-align: left; font-family: inherit; font-size: 17.5px; font-weight: 500; letter-spacing: -0.02em; color: #f0fbff; cursor: pointer;">
-            <span>How do I withdraw?</span>
+            <span>How do I request a payout?</span>
             <sc-if value="{{ open4 }}" hint-placeholder-val="{{ false }}"><span style="font-family: 'JetBrains Mono', monospace; font-size: 18px; color: oklch(0.88 0.11 195); flex: none;">−</span></sc-if>
             <sc-if value="{{ closed4 }}" hint-placeholder-val="{{ true }}"><span style="font-family: 'JetBrains Mono', monospace; font-size: 18px; color: rgba(230,244,250,0.6); flex: none;">+</span></sc-if>
           </button>
@@ -585,7 +585,7 @@
             <sc-if value="{{ closed5 }}" hint-placeholder-val="{{ true }}"><span style="font-family: 'JetBrains Mono', monospace; font-size: 18px; color: rgba(230,244,250,0.6); flex: none;">+</span></sc-if>
           </button>
           <sc-if value="{{ open5 }}" hint-placeholder-val="{{ false }}">
-            <p style="margin: 0; padding: 0 80px 24px 2px; font-size: 15px; line-height: 1.65; color: rgba(230,244,250,0.72);">Balance, locked deposits, profit history, wallet, withdrawals, referrals, and support.</p>
+            <p style="margin: 0; padding: 0 80px 24px 2px; font-size: 15px; line-height: 1.65; color: rgba(230,244,250,0.72);">Balance, investments, profit history, wallet, payouts, referrals, and support.</p>
           </sc-if>
         </div>
       </div>
@@ -596,7 +596,7 @@
     <div style="position: absolute; bottom: -280px; left: 50%; width: 900px; height: 520px; margin-left: -450px; border-radius: 50%; background: radial-gradient(closest-side, oklch(0.6 0.13 198 / 0.34), transparent 74%); filter: blur(24px);"></div>
     <div style="position: relative;">
       <h2 style="margin: 0 auto; max-width: 720px; font-size: 56px; line-height: 1.06; letter-spacing: -0.04em; font-weight: 600; color: #f2fdff;">Start investing today</h2>
-      <p style="margin: 22px auto 0; max-width: 500px; font-size: 16.5px; line-height: 1.6; color: rgba(230,244,250,0.74);">Deposit USDT, choose a plan, and track daily profit in your dashboard.</p>
+      <p style="margin: 22px auto 0; max-width: 500px; font-size: 16.5px; line-height: 1.6; color: rgba(230,244,250,0.74);">Top up USDT, buy a plan, and track daily profit in your dashboard.</p>
       <div style="display: flex; justify-content: center; gap: 14px; margin-top: 36px;">
         <button style="padding: 17px 32px; border-radius: 13px; border: 1px solid oklch(0.86 0.11 195 / 0.5); background: linear-gradient(140deg, oklch(0.86 0.12 192), oklch(0.66 0.13 205)); color: #04121f; font-family: inherit; font-size: 16px; font-weight: 600; cursor: pointer; box-shadow: 0 24px 60px -24px oklch(0.8 0.13 195 / 0.8);">Start investing</button>
         <button style="padding: 17px 28px; border-radius: 13px; border: 1px solid rgba(150,235,250,0.2); background: rgba(150,235,250,0.05); color: #e6f4fa; font-family: inherit; font-size: 16px; font-weight: 500; cursor: pointer;">Contact us</button>

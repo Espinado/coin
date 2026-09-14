@@ -20,7 +20,7 @@
           <div style="margin-top:6px;font-size:12px;color:rgba(214,238,248,0.62);">{{ $ticket->updated_at?->format('M j, H:i') }}</div>
         </button>
       @empty
-        <div style="padding:16px;border-radius:12px;border:1px dashed rgba(150,235,250,0.18);font-size:13px;color:rgba(214,238,248,0.72);">No conversations yet. Start a live chat if you need help with withdrawals, contracts, or your account.</div>
+        <div style="padding:16px;border-radius:12px;border:1px dashed rgba(150,235,250,0.18);font-size:13px;color:rgba(214,238,248,0.72);">No conversations yet. Start a live chat if you need help with payouts, investments, or your account.</div>
       @endforelse
     </div>
   </div>

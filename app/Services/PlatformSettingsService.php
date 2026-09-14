@@ -99,12 +99,12 @@ class PlatformSettingsService
             'reward_rate' => ['label' => 'Reward rate (legacy compute)', 'type' => 'number', 'default' => self::DEFAULTS['reward_rate']],
             'epochs_per_day' => ['label' => 'Epochs per day (legacy)', 'type' => 'number', 'default' => self::DEFAULTS['epochs_per_day']],
             'token_symbol' => ['label' => 'Token symbol', 'type' => 'text', 'default' => self::DEFAULTS['token_symbol']],
-            'min_withdrawal' => ['label' => 'Minimum withdrawal', 'type' => 'number', 'default' => self::DEFAULTS['min_withdrawal']],
+            'min_withdrawal' => ['label' => 'Minimum payout', 'type' => 'number', 'default' => self::DEFAULTS['min_withdrawal']],
             'network_fee' => ['label' => 'Network fee', 'type' => 'number', 'default' => self::DEFAULTS['network_fee']],
-            'withdrawal_processing_hours' => ['label' => 'Withdrawal processing (hours)', 'type' => 'number', 'default' => self::DEFAULTS['withdrawal_processing_hours']],
+            'withdrawal_processing_hours' => ['label' => 'Payout processing (hours)', 'type' => 'number', 'default' => self::DEFAULTS['withdrawal_processing_hours']],
             'referral_level1_percent' => ['label' => 'Referral commission % (plan purchase)', 'type' => 'number', 'default' => self::DEFAULTS['referral_level1_percent']],
             'referral_level2_percent' => ['label' => 'Referral level 2 % (unused)', 'type' => 'number', 'default' => self::DEFAULTS['referral_level2_percent']],
-            'kyc_required_for_withdrawal' => ['label' => 'KYC required for withdrawal', 'type' => 'boolean', 'default' => self::DEFAULTS['kyc_required_for_withdrawal']],
+            'kyc_required_for_withdrawal' => ['label' => 'KYC required for payout', 'type' => 'boolean', 'default' => self::DEFAULTS['kyc_required_for_withdrawal']],
             'maintenance_mode' => ['label' => 'Maintenance mode', 'type' => 'boolean', 'default' => self::DEFAULTS['maintenance_mode']],
         ];
     }

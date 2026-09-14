@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use App\Support\PlatformTerms;
+
 use App\Models\Contract;
 use App\Models\Plan;
 use App\Models\User;
@@ -34,7 +36,7 @@ class PlanPurchaseService
         }
 
         if ($minDeposit > 0 && $amount < $minDeposit) {
-            throw new RuntimeException('Amount is below the minimum deposit for this plan.');
+            throw new RuntimeException('Amount is below the minimum investment for this plan.');
         }
 
         $wallet = $this->wallets->ensureWallet($user);
@@ -75,7 +77,7 @@ class PlanPurchaseService
 
             $this->wallets->record(
                 $user,
-                'Plan purchase',
+                PlatformTerms::TX_INVESTMENT,
                 $plan->name,
                 -$amount,
                 $currency,

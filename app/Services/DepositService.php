@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use App\Support\PlatformTerms;
+
 use App\Models\Admin;
 use App\Models\Deposit;
 use App\Models\User;
@@ -17,7 +19,7 @@ class DepositService
     public function createPending(User $user, float $amount, string $currency = 'USDT'): Deposit
     {
         if ($amount <= 0) {
-            throw new RuntimeException('Deposit amount must be greater than zero.');
+            throw new RuntimeException('Top-up amount must be greater than zero.');
         }
 
         $deposit = DB::transaction(function () use ($user, $amount, $currency) {
@@ -40,7 +42,7 @@ class DepositService
     public function confirm(Deposit $deposit, ?Admin $admin = null): Deposit
     {
         if ($deposit->status !== Deposit::STATUS_PENDING) {
-            throw new RuntimeException('Only pending deposits can be confirmed.');
+            throw new RuntimeException('Only pending top-ups can be confirmed.');
         }
 
         return DB::transaction(function () use ($deposit, $admin) {
@@ -55,7 +57,7 @@ class DepositService
 
             $this->wallets->record(
                 $user,
-                'Deposit',
+                PlatformTerms::TX_TOP_UP,
                 'Mock top-up',
                 $amount,
                 $currency,
@@ -77,7 +79,7 @@ class DepositService
     public function reject(Deposit $deposit, ?Admin $admin = null): Deposit
     {
         if ($deposit->status !== Deposit::STATUS_PENDING) {
-            throw new RuntimeException('Only pending deposits can be rejected.');
+            throw new RuntimeException('Only pending top-ups can be rejected.');
         }
 
         $deposit->update([

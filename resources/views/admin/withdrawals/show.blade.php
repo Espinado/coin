@@ -1,6 +1,6 @@
 @extends('layouts.admin')
 
-@section('title', 'Coin Admin — '.$withdrawal->reference)
+@section('title', 'Coin Admin — Payout '.$withdrawal->reference)
 
 @section('content')
     @include('admin.partials.nav')

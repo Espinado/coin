@@ -24,7 +24,7 @@
             <thead>
                 <tr style="text-align:left;border-bottom:1px solid rgba(255,255,255,0.08);color:rgba(232,237,245,0.62);font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.1em;">
                     <th style="padding:14px 18px;">PLAN</th>
-                    <th style="padding:14px 18px;">MIN DEPOSIT</th>
+                    <th style="padding:14px 18px;">MIN INVESTMENT</th>
                     <th style="padding:14px 18px;">APR</th>
                     <th style="padding:14px 18px;">TERM</th>
                     <th style="padding:14px 18px;">STATUS</th>

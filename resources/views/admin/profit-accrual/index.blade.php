@@ -14,10 +14,10 @@
             <div>
                 <h1 style="margin:0;font-size:24px;font-weight:600;">Profit accrual</h1>
                 <p style="margin:8px 0 0;font-size:14px;color:rgba(232,237,245,0.72);">
-                    Daily profit for active deposits · formula: principal × APR / 365 · cron: <code style="font-family:'JetBrains Mono',monospace;">coin:accrue-daily-profits</code>
+                    Daily profit for active investments · formula: principal × APR / 365 · cron: <code style="font-family:'JetBrains Mono',monospace;">coin:accrue-daily-profits</code>
                 </p>
             </div>
-            <form method="POST" action="{{ route('admin.profit-accrual.run') }}" onsubmit="return confirm('Run daily profit accrual for all active deposits?');">
+            <form method="POST" action="{{ route('admin.profit-accrual.run') }}" onsubmit="return confirm('Run daily profit accrual for all active investments?');">
                 @csrf
                 <button type="submit" class="admin-btn admin-btn-primary">Run accrual now</button>
             </form>
@@ -43,7 +43,7 @@
                         <td style="padding:14px 18px;font-family:'JetBrains Mono',monospace;">{{ $tx->amount_label }}</td>
                     </tr>
                 @empty
-                    <tr><td colspan="4" style="padding:24px 18px;color:rgba(232,237,245,0.62);">No accruals yet. Run the first daily accrual after users have active deposits.</td></tr>
+                    <tr><td colspan="4" style="padding:24px 18px;color:rgba(232,237,245,0.62);">No accruals yet. Run the first daily accrual after users have active investments.</td></tr>
                 @endforelse
             </tbody>
         </table>

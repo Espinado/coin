@@ -42,7 +42,7 @@
                         <label style="display:flex;align-items:center;gap:8px;margin-top:12px;font-size:13px;">
                             <input type="hidden" name="is_blocked" value="0">
                             <input type="checkbox" name="is_blocked" value="1" @checked(old('is_blocked', $user->is_blocked))>
-                            Block sign-in and withdrawals
+                            Block sign-in and payouts
                         </label>
                     </div>
                     <div>
@@ -68,7 +68,7 @@
             </div>
 
             <div class="admin-card" style="margin-top:16px;">
-                <h2 style="margin:0 0 14px;font-size:16px;font-weight:600;">Investment deposits</h2>
+                <h2 style="margin:0 0 14px;font-size:16px;font-weight:600;">Investments</h2>
                 @forelse($user->contracts as $contract)
                     <div style="padding:12px 0;border-bottom:1px solid rgba(255,255,255,0.06);font-size:13px;">
                         <strong>{{ $contract->code }}</strong> · {{ $contract->plan?->name }} · {{ $contract->formattedPrincipal() }} · {{ $contract->status }}
@@ -77,12 +77,12 @@
                         </div>
                     </div>
                 @empty
-                    <p style="margin:0;color:rgba(232,237,245,0.62);">No deposits yet.</p>
+                    <p style="margin:0;color:rgba(232,237,245,0.62);">No investments yet.</p>
                 @endforelse
             </div>
 
             <div class="admin-card" style="margin-top:16px;">
-                <h2 style="margin:0 0 14px;font-size:16px;font-weight:600;">Top-ups (deposits)</h2>
+                <h2 style="margin:0 0 14px;font-size:16px;font-weight:600;">Top-ups</h2>
                 @forelse($user->deposits as $deposit)
                     <div style="display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.06);font-size:13px;">
                         <span><a href="{{ route('admin.deposits.show', $deposit) }}">#{{ $deposit->id }}</a> · {{ ucfirst($deposit->status) }}</span>
@@ -94,14 +94,14 @@
             </div>
 
             <div class="admin-card" style="margin-top:16px;">
-                <h2 style="margin:0 0 14px;font-size:16px;font-weight:600;">Withdrawals</h2>
+                <h2 style="margin:0 0 14px;font-size:16px;font-weight:600;">Payouts</h2>
                 @forelse($user->withdrawals as $withdrawal)
                     <div style="display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.06);font-size:13px;">
                         <span><a href="{{ route('admin.withdrawals.show', $withdrawal) }}">{{ $withdrawal->reference }}</a> · {{ $withdrawal->statusLabel() }}</span>
                         <span style="font-family:'JetBrains Mono',monospace;">{{ $withdrawal->formattedAmount() }}</span>
                     </div>
                 @empty
-                    <p style="margin:0;color:rgba(232,237,245,0.62);">No withdrawals yet.</p>
+                    <p style="margin:0;color:rgba(232,237,245,0.62);">No payouts yet.</p>
                 @endforelse
             </div>
 

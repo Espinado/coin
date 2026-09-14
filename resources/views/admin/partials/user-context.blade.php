@@ -15,7 +15,7 @@
         <div style="display:flex;justify-content:space-between;gap:12px;"><span style="color:rgba(232,237,245,0.62);">Available</span><span style="font-family:'JetBrains Mono',monospace;">{{ $user->wallet?->formattedAvailable() ?? '—' }}</span></div>
         <div style="display:flex;justify-content:space-between;gap:12px;"><span style="color:rgba(232,237,245,0.62);">Locked</span><span style="font-family:'JetBrains Mono',monospace;">{{ $user->wallet?->formattedLocked() ?? '—' }}</span></div>
         <div style="display:flex;justify-content:space-between;gap:12px;"><span style="color:rgba(232,237,245,0.62);">Pending</span><span style="font-family:'JetBrains Mono',monospace;">{{ $user->wallet?->formattedPending() ?? '—' }}</span></div>
-        <div style="display:flex;justify-content:space-between;gap:12px;"><span style="color:rgba(232,237,245,0.62);">Deposits</span><span style="font-family:'JetBrains Mono',monospace;">{{ $user->contracts->count() }}</span></div>
+        <div style="display:flex;justify-content:space-between;gap:12px;"><span style="color:rgba(232,237,245,0.62);">Investments</span><span style="font-family:'JetBrains Mono',monospace;">{{ $user->contracts->count() }}</span></div>
         <div style="display:flex;justify-content:space-between;gap:12px;"><span style="color:rgba(232,237,245,0.62);">Referrals</span><span style="font-family:'JetBrains Mono',monospace;">{{ $user->referralProfile?->invited_count ?? 0 }}</span></div>
         @isset($referralEarnings)
         <div style="display:flex;justify-content:space-between;gap:12px;"><span style="color:rgba(232,237,245,0.62);">Referral earned</span><span style="font-family:'JetBrains Mono',monospace;">{{ number_format($referralEarnings, 2, '.', ',') }}</span></div>

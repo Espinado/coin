@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use App\Support\PlatformTerms;
+
 use App\Models\Admin;
 use App\Models\User;
 use App\Models\Wallet;
@@ -26,13 +28,13 @@ class WithdrawalService
         }
 
         if ($this->settings->getBool('kyc_required_for_withdrawal') && $user->kyc_status !== User::KYC_APPROVED) {
-            throw new RuntimeException('KYC approval is required before withdrawal.');
+            throw new RuntimeException('KYC approval is required before requesting a payout.');
         }
 
         $min = $this->settings->minWithdrawal();
 
         if ($amount < $min) {
-            throw new RuntimeException("Minimum withdrawal is {$min}.");
+            throw new RuntimeException("Minimum payout is {$min}.");
         }
 
         if ((float) $wallet->available < $amount) {
@@ -112,7 +114,7 @@ class WithdrawalService
         WalletTransaction::query()->create([
             'user_id' => $withdrawal->user_id,
             'occurred_label' => now()->format('M j · H:i'),
-            'type' => 'Withdrawal',
+            'type' => PlatformTerms::TX_PAYOUT,
             'source' => $withdrawal->reference,
             'amount_label' => '-'.number_format($net, 2, '.', '').' '.$symbol,
             'amount_tone' => 'neutral',

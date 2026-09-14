@@ -72,9 +72,9 @@ class DashboardDataService
         return [
             ['Overview', 'Portfolio summary and account activity'],
             ['Investment plans', 'Choose a plan and invest from your balance'],
-            ['My deposits', 'Active and completed investment deposits'],
+            ['My investments', 'Active and completed plan purchases'],
             ['Statistics', 'Profit history and portfolio performance'],
-            ['Wallet', 'Balance, top-ups, and withdrawals'],
+            ['Wallet', 'Balance, top-ups, and payouts'],
             ['Referrals', 'Invite friends · 20% from their plan purchases'],
             ['Settings', 'Profile, contacts, and payout details'],
             ['Support', 'Live chat with the Coin support team'],

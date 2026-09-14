@@ -110,6 +110,6 @@ class Contract extends Model
 
     public function title(): string
     {
-        return 'Deposit · '.($this->plan?->name ?? '—');
+        return 'Investment · '.($this->plan?->name ?? '—');
     }
 }

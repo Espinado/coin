@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\PlatformTerms;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -34,6 +35,11 @@ class WalletTransaction extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function displayType(): string
+    {
+        return PlatformTerms::displayTransactionType($this->type);
     }
 
     public function amountColor(): string

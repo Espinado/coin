@@ -11,7 +11,7 @@
 
     <div class="admin-card">
         <h1 style="margin:0;font-size:24px;font-weight:600;">Platform settings</h1>
-        <p style="margin:8px 0 0;font-size:14px;color:rgba(232,237,245,0.72);">Withdrawals, referrals, and platform toggles.</p>
+        <p style="margin:8px 0 0;font-size:14px;color:rgba(232,237,245,0.72);">Payouts, referrals, and platform toggles.</p>
     </div>
 
     <div class="admin-card" style="margin-top:16px;">

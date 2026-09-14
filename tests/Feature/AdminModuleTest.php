@@ -7,10 +7,13 @@ use App\Models\Plan;
 use App\Models\User;
 use App\Models\WalletTransaction;
 use App\Models\Withdrawal;
+use App\Services\DepositService;
+use App\Services\PlanPurchaseService;
 use App\Services\PlatformSettingsService;
 use App\Services\ProfitAccrualService;
 use Database\Seeders\AdminSeeder;
 use Database\Seeders\CoinDemoSeeder;
+use Database\Seeders\PlanSeeder;
 use Database\Seeders\PlatformSettingsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -30,8 +33,11 @@ class AdminModuleTest extends TestCase
             'coin.admin_domain' => 'admin.coin.test',
         ]);
 
+        config(['coin.deposits.auto_confirm_mock' => true]);
+
         $this->seed(AdminSeeder::class);
         $this->seed(PlatformSettingsSeeder::class);
+        $this->seed(PlanSeeder::class);
         $this->seed(CoinDemoSeeder::class);
 
         $this->admin = Admin::query()->firstOrFail();
@@ -60,7 +66,12 @@ class AdminModuleTest extends TestCase
 
     public function test_admin_withdrawal_status_update(): void
     {
-        $withdrawal = Withdrawal::query()->where('reference', 'WD-DEMO120')->firstOrFail();
+        $user = User::query()->where('email', 'test@test.lv')->firstOrFail();
+
+        app(DepositService::class)->createPending($user, 200);
+        $user->refresh();
+
+        $withdrawal = app(\App\Services\WithdrawalService::class)->createForUser($user, 50);
 
         $this->actingAs($this->admin, 'admin')
             ->patch('http://admin.coin.test/withdrawals/'.$withdrawal->id.'/status', [
@@ -129,6 +140,12 @@ class AdminModuleTest extends TestCase
 
     public function test_profit_accrual_and_settings(): void
     {
+        $user = User::query()->where('email', 'test@test.lv')->firstOrFail();
+        $plan = Plan::query()->where('slug', 'core')->firstOrFail();
+
+        app(DepositService::class)->createPending($user, 2000);
+        app(PlanPurchaseService::class)->purchase($user->fresh(), $plan, 1100);
+
         $before = WalletTransaction::query()->where('type', 'Daily profit')->count();
 
         $result = app(ProfitAccrualService::class)->accrueDaily($this->admin);
@@ -160,13 +177,13 @@ class AdminModuleTest extends TestCase
 
     public function test_admin_overview_dashboard(): void
     {
-        $this->assertGreaterThanOrEqual(5, User::query()->count());
+        $this->assertSame(1, User::query()->count());
 
         $this->actingAs($this->admin, 'admin')
             ->get('http://admin.coin.test/dashboard')
             ->assertOk()
             ->assertSee('PLATFORM OVERVIEW')
-            ->assertSee('PENDING WITHDRAWALS')
+            ->assertSee('PENDING PAYOUTS')
             ->assertSee('LOCKED PRINCIPAL');
     }
 }
