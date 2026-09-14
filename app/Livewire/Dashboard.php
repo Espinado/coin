@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Models\Deposit;
 use App\Models\Plan;
 use App\Models\SupportTicket;
 use App\Models\SupportTicketMessage;
@@ -177,6 +178,24 @@ class Dashboard extends Component
 
         $this->selectedPlanId = $plan->id;
         $this->power = (int) $plan->tflops;
+    }
+
+    public function buyPlan(int $planId): void
+    {
+        $plan = $this->plans->firstWhere('id', $planId);
+
+        if (! $plan instanceof Plan) {
+            return;
+        }
+
+        if ($plan->isCurrentFor($this->primaryPlan)) {
+            $this->section = 2;
+
+            return;
+        }
+
+        $this->selectPlan($planId);
+        $this->openInvestmentPaymentModal();
     }
 
     public function updatedPower(): void
@@ -407,24 +426,47 @@ class Dashboard extends Component
         return SupportTicket::categories();
     }
 
-    public function requestDeposit(DepositService $deposits): void
+    public function openTopUpPaymentModal(): void
     {
         $this->resetActionFeedback();
+        $this->resetPaymentModal();
 
-        $validated = $this->validate([
+        $this->validate([
             'depositAmount' => ['required', 'numeric', 'min:1'],
         ], [], [
             'depositAmount' => 'amount',
         ]);
 
+        $this->paymentModal = 'topup';
+        $this->paymentModalStep = 'review';
+    }
+
+    public function confirmTopUpPayment(DepositService $deposits): void
+    {
+        if ($this->paymentModal !== 'topup' || $this->paymentModalStep !== 'review') {
+            return;
+        }
+
+        $this->paymentModalError = null;
+        $this->paymentModalStep = 'processing';
+
+        $amount = (float) $this->depositAmount;
+
         try {
-            $deposits->createPending($this->user, (float) $validated['depositAmount']);
+            sleep(2);
+
+            $deposit = $deposits->createPending($this->user, $amount);
+
             $this->depositAmount = '';
             $this->reloadPortfolioData();
-            $this->actionMessage = config('coin.deposits.auto_confirm_mock')
+            $this->paymentModalReference = 'TOP-'.$deposit->id;
+            $this->paymentModalStep = 'success';
+            $this->actionMessage = $deposit->fresh()->status === Deposit::STATUS_CONFIRMED
                 ? __('coin.messages.top_up_credited')
                 : __('coin.messages.top_up_pending');
         } catch (\RuntimeException $exception) {
+            $this->paymentModalStep = 'error';
+            $this->paymentModalError = $exception->getMessage();
             $this->addError('depositAmount', $exception->getMessage());
         }
     }
@@ -546,7 +588,7 @@ class Dashboard extends Component
             $this->selectedPlanId = $plan->id;
             $this->paymentModalReference = $contract->code;
             $this->paymentModalStep = 'success';
-            $this->actionMessage = __('coin.messages.investment_active');
+            $this->actionMessage = __('coin.messages.plan_activated');
         } catch (\RuntimeException $exception) {
             $this->paymentModalStep = 'error';
             $this->paymentModalError = $exception->getMessage();

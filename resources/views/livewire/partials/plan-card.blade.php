@@ -34,7 +34,7 @@
     <div style="display: flex; justify-content: space-between; gap: 14px;"><span style="color: rgba(214,238,248,0.74); min-width: 0;">{{ __('coin.invest.infrastructure') }}</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">{{ $plan->infra }}</span></div>
   </div>
   <div style="margin-top: 20px; height: 5px; border-radius: 3px; background: rgba(150,235,250,0.14);"><div style="width: {{ $plan->capacity_percent ?? 0 }}%; height: 100%; border-radius: 3px; background: oklch(0.86 0.12 192);"></div></div>
-  <button type="button" wire:click="selectPlan({{ $plan->id }})" style="margin-top: 22px; padding: 11px; border-radius: 10px; border: 1px solid {{ $currentMuted ? 'rgba(150,235,250,0.2)' : 'oklch(0.86 0.11 195 / 0.5)' }}; background: {{ $currentMuted ? 'rgba(150,235,250,0.06)' : 'linear-gradient(140deg, oklch(0.86 0.12 192), oklch(0.66 0.13 205))' }}; color: {{ $currentMuted ? '#e6f4fa' : '#04121f' }}; font-family: inherit; font-size: 13.5px; font-weight: {{ $currentMuted ? '500' : '600' }}; cursor: pointer;">{{ __('coin.invest.manage') }}</button>
+  <button type="button" wire:click="setSection(2)" style="margin-top: 22px; padding: 11px; border-radius: 10px; border: 1px solid {{ $currentMuted ? 'rgba(150,235,250,0.2)' : 'oklch(0.86 0.11 195 / 0.5)' }}; background: {{ $currentMuted ? 'rgba(150,235,250,0.06)' : 'linear-gradient(140deg, oklch(0.86 0.12 192), oklch(0.66 0.13 205))' }}; color: {{ $currentMuted ? '#e6f4fa' : '#04121f' }}; font-family: inherit; font-size: 13.5px; font-weight: {{ $currentMuted ? '500' : '600' }}; cursor: pointer;">{{ __('coin.invest.manage') }}</button>
 </div>
 @elseif($isEnterprise)
 <div style="position: relative; padding: 24px; border-radius: 18px; {{ $selectedStyle ?: 'border: 1px solid rgba(180,180,255,0.16); background: linear-gradient(170deg, rgba(120,110,220,0.13), rgba(150,235,250,0.02));' }} display: flex; flex-direction: column;">
@@ -91,6 +91,9 @@
     <div style="display: flex; justify-content: space-between; gap: 14px;"><span style="color: rgba(214,238,248,0.72); min-width: 0;">{{ __('coin.invest.infrastructure') }}</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">{{ $plan->infra }}</span></div>
   </div>
   <div style="margin-top: 20px; height: 5px; border-radius: 3px; background: rgba(150,235,250,0.12);"><div style="width: {{ $plan->capacity_percent ?? 0 }}%; height: 100%; border-radius: 3px; background: {{ $isCluster ? 'oklch(0.8 0.12 198)' : 'oklch(0.7 0.11 205)' }};"></div></div>
-  <button type="button" wire:click="selectPlan({{ $plan->id }})" style="margin-top: 22px; padding: 11px; border-radius: 10px; border: 1px solid {{ $isSelected ? 'oklch(0.86 0.11 195 / 0.5)' : 'rgba(150,235,250,0.2)' }}; background: {{ $isSelected ? 'linear-gradient(140deg, oklch(0.86 0.12 192), oklch(0.66 0.13 205))' : 'rgba(150,235,250,0.06)' }}; color: {{ $isSelected ? '#04121f' : '#e6f4fa' }}; font-family: inherit; font-size: 13.5px; font-weight: {{ $isSelected ? '600' : '500' }}; cursor: pointer;">{{ $actionLabel }}</button>
+  <button type="button" wire:click="buyPlan({{ $plan->id }})" wire:loading.attr="disabled" wire:target="buyPlan" style="margin-top: 22px; padding: 11px; border-radius: 10px; border: 1px solid {{ $isSelected ? 'oklch(0.86 0.11 195 / 0.5)' : 'rgba(150,235,250,0.2)' }}; background: {{ $isSelected ? 'linear-gradient(140deg, oklch(0.86 0.12 192), oklch(0.66 0.13 205))' : 'rgba(150,235,250,0.06)' }}; color: {{ $isSelected ? '#04121f' : '#e6f4fa' }}; font-family: inherit; font-size: 13.5px; font-weight: {{ $isSelected ? '600' : '500' }}; cursor: pointer;">
+    <span wire:loading.remove wire:target="buyPlan">{{ $actionLabel }}</span>
+    <span wire:loading wire:target="buyPlan">{{ __('coin.payment_modal.confirming') }}</span>
+  </button>
 </div>
 @endif

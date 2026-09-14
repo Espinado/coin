@@ -2,15 +2,37 @@
 @php
   $currency = $wallet?->currency ?? 'USDT';
   $isInvestment = $paymentModal === 'investment';
+  $isTopUp = $paymentModal === 'topup';
   $isPayout = $paymentModal === 'payout';
   $amount = $isInvestment
     ? number_format((float) $power, 0, '.', ',')
-    : number_format((float) $withdrawAmount, 2, '.', ',');
+    : number_format((float) ($isTopUp ? $depositAmount : $withdrawAmount), 2, '.', ',');
   $planName = $this->planName;
   $payoutAddress = $wallet?->payout_address;
+  $successTitle = match (true) {
+    $isInvestment => __('coin.payment_modal.plan_activated_title'),
+    $isTopUp => __('coin.payment_modal.top_up_success_title'),
+    default => __('coin.payment_modal.success'),
+  };
+  $successBody = match (true) {
+    $isInvestment => __('coin.payment_modal.plan_activated'),
+    $isTopUp => __('coin.payment_modal.top_up_success'),
+    default => __('coin.payment_modal.payout_success'),
+  };
+  $reviewLabel = match (true) {
+    $isInvestment => __('coin.payment_modal.plan_purchase'),
+    $isTopUp => __('coin.payment_modal.top_up_request'),
+    default => __('coin.payment_modal.payout_request'),
+  };
+  $reviewHint = match (true) {
+    $isInvestment => __('coin.payment_modal.from_balance'),
+    $isTopUp => __('coin.payment_modal.top_up_to_balance'),
+    default => __('coin.payment_modal.to_wallet'),
+  };
 @endphp
+@teleport('body')
 <div
-  style="position: fixed; inset: 0; z-index: 120; display: grid; place-items: center; padding: 24px; background: rgba(2, 8, 16, 0.82); backdrop-filter: blur(8px);"
+  style="position: fixed; inset: 0; z-index: 9999; display: grid; place-items: center; padding: 24px; background: rgba(2, 8, 16, 0.82); backdrop-filter: blur(8px);"
   @if($paymentModalStep !== 'processing') wire:click="closePaymentModal" wire:keydown.escape.window="closePaymentModal" @endif
 >
   <div
@@ -35,13 +57,13 @@
     <div style="padding: 22px;">
       @if($paymentModalStep === 'review')
         <div style="font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.12em; color: rgba(214,238,248,0.66);">
-          {{ $isInvestment ? __('coin.payment_modal.plan_purchase') : __('coin.payment_modal.payout_request') }}
+          {{ $reviewLabel }}
         </div>
         <div style="margin-top: 10px; font-size: 22px; font-weight: 600; letter-spacing: -0.02em; color: #f0fbff;">
           {{ $amount }} {{ $currency }}
         </div>
         <div style="margin-top: 6px; font-size: 13px; color: rgba(214,238,248,0.72);">
-          {{ $isInvestment ? __('coin.payment_modal.from_balance') : __('coin.payment_modal.to_wallet') }}
+          {{ $reviewHint }}
         </div>
 
         <div style="margin-top: 20px; padding: 16px; border-radius: 14px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.04); display: flex; flex-direction: column; gap: 12px; font-size: 13px;">
@@ -49,6 +71,10 @@
           <div style="display: flex; justify-content: space-between; gap: 12px;"><span style="color: rgba(214,238,248,0.72);">{{ __('coin.plan') }}</span><span style="font-weight: 500; text-align: right;">{{ $planName }}</span></div>
           <div style="display: flex; justify-content: space-between; gap: 12px;"><span style="color: rgba(214,238,248,0.72);">{{ __('coin.invest.term') }}</span><span style="font-family: 'JetBrains Mono', monospace; text-align: right;">{{ $this->planTerm }}</span></div>
           <div style="display: flex; justify-content: space-between; gap: 12px;"><span style="color: rgba(214,238,248,0.72);">{{ __('coin.payment_modal.payment_method') }}</span><span style="text-align: right;">{{ __('coin.payment_modal.available_balance') }}</span></div>
+          @elseif($isTopUp)
+          <div style="display: flex; justify-content: space-between; gap: 12px;"><span style="color: rgba(214,238,248,0.72);">{{ __('coin.payment_modal.payment_method') }}</span><span style="text-align: right;">USDT</span></div>
+          <div style="display: flex; justify-content: space-between; gap: 12px;"><span style="color: rgba(214,238,248,0.72);">{{ __('coin.wallet.network') }}</span><span style="font-family: 'JetBrains Mono', monospace; text-align: right;">{{ $wallet?->network_label ?? 'TRC20' }}</span></div>
+          <div style="display: flex; justify-content: space-between; gap: 12px;"><span style="color: rgba(214,238,248,0.72);">{{ __('coin.payment_modal.destination') }}</span><span style="text-align: right;">{{ __('coin.payment_modal.top_up_destination') }}</span></div>
           @else
           <div style="display: flex; justify-content: space-between; gap: 12px;"><span style="color: rgba(214,238,248,0.72);">{{ __('coin.payment_modal.destination') }}</span><span style="font-family: 'JetBrains Mono', monospace; font-size: 11px; text-align: right; word-break: break-all; max-width: 220px;">{{ $payoutAddress }}</span></div>
           <div style="display: flex; justify-content: space-between; gap: 12px;"><span style="color: rgba(214,238,248,0.72);">{{ __('coin.wallet.network') }}</span><span style="font-family: 'JetBrains Mono', monospace; text-align: right;">{{ $wallet?->network_label }}</span></div>
@@ -59,14 +85,19 @@
         </div>
 
         @if($isInvestment)
-        <button type="button" wire:click="confirmInvestmentPayment" wire:loading.attr="disabled" style="width: 100%; margin-top: 22px; padding: 13px; border-radius: 11px; border: 1px solid oklch(0.86 0.11 195 / 0.5); background: linear-gradient(140deg, oklch(0.86 0.12 192), oklch(0.66 0.13 205)); color: #04121f; font-family: inherit; font-size: 14px; font-weight: 600; cursor: pointer;">
+        <button type="button" wire:click="confirmInvestmentPayment" wire:loading.attr="disabled" wire:target="confirmInvestmentPayment" style="width: 100%; margin-top: 22px; padding: 13px; border-radius: 11px; border: 1px solid oklch(0.86 0.11 195 / 0.5); background: linear-gradient(140deg, oklch(0.86 0.12 192), oklch(0.66 0.13 205)); color: #04121f; font-family: inherit; font-size: 14px; font-weight: 600; cursor: pointer;">
           <span wire:loading.remove wire:target="confirmInvestmentPayment">{{ __('coin.payment_modal.confirm') }}</span>
-          <span wire:loading wire:target="confirmInvestmentPayment">…</span>
+          <span wire:loading wire:target="confirmInvestmentPayment">{{ __('coin.payment_modal.confirming') }}</span>
+        </button>
+        @elseif($isTopUp)
+        <button type="button" wire:click="confirmTopUpPayment" wire:loading.attr="disabled" wire:target="confirmTopUpPayment" style="width: 100%; margin-top: 22px; padding: 13px; border-radius: 11px; border: 1px solid oklch(0.86 0.11 195 / 0.5); background: linear-gradient(140deg, oklch(0.86 0.12 192), oklch(0.66 0.13 205)); color: #04121f; font-family: inherit; font-size: 14px; font-weight: 600; cursor: pointer;">
+          <span wire:loading.remove wire:target="confirmTopUpPayment">{{ __('coin.payment_modal.confirm') }}</span>
+          <span wire:loading wire:target="confirmTopUpPayment">{{ __('coin.payment_modal.confirming') }}</span>
         </button>
         @else
-        <button type="button" wire:click="confirmPayoutPayment" wire:loading.attr="disabled" style="width: 100%; margin-top: 22px; padding: 13px; border-radius: 11px; border: 1px solid oklch(0.86 0.11 195 / 0.5); background: linear-gradient(140deg, oklch(0.86 0.12 192), oklch(0.66 0.13 205)); color: #04121f; font-family: inherit; font-size: 14px; font-weight: 600; cursor: pointer;">
+        <button type="button" wire:click="confirmPayoutPayment" wire:loading.attr="disabled" wire:target="confirmPayoutPayment" style="width: 100%; margin-top: 22px; padding: 13px; border-radius: 11px; border: 1px solid oklch(0.86 0.11 195 / 0.5); background: linear-gradient(140deg, oklch(0.86 0.12 192), oklch(0.66 0.13 205)); color: #04121f; font-family: inherit; font-size: 14px; font-weight: 600; cursor: pointer;">
           <span wire:loading.remove wire:target="confirmPayoutPayment">{{ __('coin.payment_modal.confirm') }}</span>
-          <span wire:loading wire:target="confirmPayoutPayment">…</span>
+          <span wire:loading wire:target="confirmPayoutPayment">{{ __('coin.payment_modal.confirming') }}</span>
         </button>
         @endif
         <p style="margin: 14px 0 0; font-size: 11px; line-height: 1.5; text-align: center; color: rgba(214,238,248,0.55);">{{ __('coin.payment_modal.demo_note') }}</p>
@@ -84,13 +115,9 @@
           <div style="width: 62px; height: 62px; margin: 0 auto; border-radius: 50%; background: rgba(120, 230, 180, 0.14); border: 1px solid rgba(120, 230, 180, 0.35); display: grid; place-items: center;">
             <span style="font-size: 28px; color: oklch(0.86 0.14 160);">✓</span>
           </div>
-          <div style="margin-top: 20px; font-size: 20px; font-weight: 600; color: #f0fbff;">{{ __('coin.payment_modal.success') }}</div>
+          <div style="margin-top: 20px; font-size: 20px; font-weight: 600; color: #f0fbff;">{{ $successTitle }}</div>
           <div style="margin-top: 8px; font-size: 13.5px; line-height: 1.55; color: rgba(214,238,248,0.75);">
-            @if($isInvestment)
-              {{ __('coin.payment_modal.invest_success') }}
-            @else
-              {{ __('coin.payment_modal.payout_success') }}
-            @endif
+            {{ $successBody }}
           </div>
           @if($paymentModalReference)
           <div style="margin-top: 18px; padding: 12px 14px; border-radius: 12px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.04); font-family: 'JetBrains Mono', monospace; font-size: 12px; color: rgba(214,238,248,0.82);">
@@ -129,4 +156,5 @@
     to { transform: rotate(360deg); }
   }
 </style>
+@endteleport
 @endif
