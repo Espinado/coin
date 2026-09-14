@@ -252,6 +252,11 @@ class Dashboard extends Component
         return $this->selectedPlan?->formattedDuration() ?? '—';
     }
 
+    public function getCalculatorTermLabelProperty(): string
+    {
+        return $this->selectedPlan?->calculatorTermLabel() ?? 'CONTRACT TERM';
+    }
+
     public function getDailyProperty(): string
     {
         return $this->formatAmount($this->dailyAmount(), 2);

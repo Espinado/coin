@@ -66,4 +66,52 @@ class Plan extends Model
     {
         return $activePlan !== null && $this->id === $activePlan->id;
     }
+
+    public function isEnterprise(): bool
+    {
+        return $this->slug === 'enterprise';
+    }
+
+    public function actionLabel(?Plan $activePlan = null): string
+    {
+        if ($this->isCurrentFor($activePlan)) {
+            return 'Manage plan';
+        }
+
+        if ($this->isEnterprise()) {
+            return 'Contact sales';
+        }
+
+        if ($activePlan !== null && $this->sort_order > $activePlan->sort_order) {
+            return 'Upgrade';
+        }
+
+        return 'Activate';
+    }
+
+    public function calculatorTermLabel(): string
+    {
+        if ($this->duration_days === null) {
+            return 'CUSTOM TERM';
+        }
+
+        if ($this->duration_days >= 365) {
+            return '12-MONTH CONTRACT';
+        }
+
+        if ($this->duration_days >= 180) {
+            return '6-MONTH CONTRACT';
+        }
+
+        return $this->duration_days.'-DAY CONTRACT';
+    }
+
+    public function formattedComputeLabel(): string
+    {
+        if ($this->isEnterprise()) {
+            return number_format($this->tflops, 0, '.', ',').'+ TFLOPS';
+        }
+
+        return $this->formattedTflops().' TFLOPS';
+    }
 }

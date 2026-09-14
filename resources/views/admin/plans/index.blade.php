@@ -13,7 +13,7 @@
         <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;">
             <div>
                 <h1 style="margin:0;font-size:24px;font-weight:600;">Plans</h1>
-                <p style="margin:8px 0 0;font-size:14px;color:rgba(232,237,245,0.72);">Global compute catalog shown in the user dashboard.</p>
+                <p style="margin:8px 0 0;font-size:14px;color:rgba(232,237,245,0.72);">Catalog for the user dashboard Plans section. Active plans appear immediately; hidden plans are excluded.</p>
             </div>
             <a href="{{ route('admin.plans.create') }}" class="admin-btn admin-btn-primary">New plan</a>
         </div>

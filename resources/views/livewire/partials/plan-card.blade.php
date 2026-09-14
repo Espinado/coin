@@ -1,8 +1,9 @@
 @php
     $isCurrent = $plan->isCurrentFor($primaryPlan);
     $isSelected = (int) ($selectedPlanId ?? 0) === $plan->id;
-    $isEnterprise = $plan->slug === 'enterprise';
+    $isEnterprise = $plan->isEnterprise();
     $isCluster = $plan->slug === 'cluster';
+    $actionLabel = $plan->actionLabel($primaryPlan);
     $anotherPlanSelected = $primaryPlan && (int) ($selectedPlanId ?? 0) !== (int) $primaryPlan->id;
     $currentMuted = $isCurrent && $anotherPlanSelected && ! $isSelected;
     $selectedStyle = $isSelected && ! $isCurrent
@@ -23,11 +24,11 @@
   <div style="margin-top: 20px; font-size: 19px; font-weight: 600; letter-spacing: -0.02em;">{{ $plan->name }}</div>
   <div style="margin-top: 14px; display: flex; align-items: baseline; gap: 7px;">
     <span style="font-size: 30px; font-weight: 600; letter-spacing: -0.03em;">{{ $plan->price_label }}</span>
-    <span style="font-size: 12.5px; color: rgba(214,238,248,0.72);">placeholder</span>
+    <span style="font-size: 12.5px; color: rgba(214,238,248,0.72);">{{ $plan->formattedDuration() }}</span>
   </div>
   <div style="height: 1px; background: rgba(150,235,250,0.16); margin: 20px 0;"></div>
   <div style="display: flex; flex-direction: column; gap: 13px; font-size: 13px;">
-    <div style="display: flex; justify-content: space-between; gap: 14px;"><span style="color: rgba(214,238,248,0.74); min-width: 0;">Compute</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">{{ $plan->formattedTflops() }} TFLOPS</span></div>
+    <div style="display: flex; justify-content: space-between; gap: 14px;"><span style="color: rgba(214,238,248,0.74); min-width: 0;">Compute</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">{{ $plan->formattedComputeLabel() }}</span></div>
     <div style="display: flex; justify-content: space-between; gap: 14px;"><span style="color: rgba(214,238,248,0.74); min-width: 0;">Term</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">{{ $plan->formattedDuration() }}</span></div>
     <div style="display: flex; justify-content: space-between; gap: 14px;"><span style="color: rgba(214,238,248,0.74); min-width: 0;">Reward estimate</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">{{ $plan->formattedDailyEstimate() ?? 'Estimated' }}</span></div>
     <div style="display: flex; justify-content: space-between; gap: 14px;"><span style="color: rgba(214,238,248,0.74); min-width: 0;">Infrastructure</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">{{ $plan->infra }}</span></div>
@@ -52,7 +53,7 @@
   <div style="margin-top: 14px; display: flex; align-items: baseline; gap: 7px;"><span style="font-size: 30px; font-weight: 600; letter-spacing: -0.03em;">{{ $plan->price_label }}</span></div>
   <div style="height: 1px; background: rgba(150,235,250,0.12); margin: 20px 0;"></div>
   <div style="display: flex; flex-direction: column; gap: 13px; font-size: 13px;">
-    <div style="display: flex; justify-content: space-between; gap: 14px;"><span style="color: rgba(214,238,248,0.72); min-width: 0;">Compute</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">{{ number_format($plan->tflops, 0, '.', ',') }}+ TFLOPS</span></div>
+    <div style="display: flex; justify-content: space-between; gap: 14px;"><span style="color: rgba(214,238,248,0.72); min-width: 0;">Compute</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">{{ $plan->formattedComputeLabel() }}</span></div>
     <div style="display: flex; justify-content: space-between; gap: 14px;"><span style="color: rgba(214,238,248,0.72); min-width: 0;">Term</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">{{ $plan->formattedDuration() }}</span></div>
     <div style="display: flex; justify-content: space-between; gap: 14px;"><span style="color: rgba(214,238,248,0.72); min-width: 0;">Reward estimate</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">Estimated</span></div>
     <div style="display: flex; justify-content: space-between; gap: 14px;"><span style="color: rgba(214,238,248,0.72); min-width: 0;">Infrastructure</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">{{ $plan->infra }}</span></div>
@@ -80,16 +81,16 @@
   <div style="margin-top: 20px; font-size: 19px; font-weight: 600; letter-spacing: -0.02em;">{{ $plan->name }}</div>
   <div style="margin-top: 14px; display: flex; align-items: baseline; gap: 7px;">
     <span style="font-size: 30px; font-weight: 600; letter-spacing: -0.03em;">{{ $plan->price_label }}</span>
-    <span style="font-size: 12.5px; color: rgba(214,238,248,0.7);">placeholder</span>
+    <span style="font-size: 12.5px; color: rgba(214,238,248,0.7);">{{ $plan->formattedDuration() }}</span>
   </div>
   <div style="height: 1px; background: rgba(150,235,250,0.12); margin: 20px 0;"></div>
   <div style="display: flex; flex-direction: column; gap: 13px; font-size: 13px;">
-    <div style="display: flex; justify-content: space-between; gap: 14px;"><span style="color: rgba(214,238,248,0.72); min-width: 0;">Compute</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">{{ $plan->formattedTflops() }} TFLOPS</span></div>
+    <div style="display: flex; justify-content: space-between; gap: 14px;"><span style="color: rgba(214,238,248,0.72); min-width: 0;">Compute</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">{{ $plan->formattedComputeLabel() }}</span></div>
     <div style="display: flex; justify-content: space-between; gap: 14px;"><span style="color: rgba(214,238,248,0.72); min-width: 0;">Term</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">{{ $plan->formattedDuration() }}</span></div>
     <div style="display: flex; justify-content: space-between; gap: 14px;"><span style="color: rgba(214,238,248,0.72); min-width: 0;">Reward estimate</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">{{ $plan->formattedDailyEstimate() ?? 'Estimated' }}</span></div>
     <div style="display: flex; justify-content: space-between; gap: 14px;"><span style="color: rgba(214,238,248,0.72); min-width: 0;">Infrastructure</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">{{ $plan->infra }}</span></div>
   </div>
   <div style="margin-top: 20px; height: 5px; border-radius: 3px; background: rgba(150,235,250,0.12);"><div style="width: {{ $plan->capacity_percent ?? 0 }}%; height: 100%; border-radius: 3px; background: {{ $isCluster ? 'oklch(0.8 0.12 198)' : 'oklch(0.7 0.11 205)' }};"></div></div>
-  <button type="button" wire:click="selectPlan({{ $plan->id }})" style="margin-top: 22px; padding: 11px; border-radius: 10px; border: 1px solid {{ $isSelected ? 'oklch(0.86 0.11 195 / 0.5)' : 'rgba(150,235,250,0.2)' }}; background: {{ $isSelected ? 'linear-gradient(140deg, oklch(0.86 0.12 192), oklch(0.66 0.13 205))' : 'rgba(150,235,250,0.06)' }}; color: {{ $isSelected ? '#04121f' : '#e6f4fa' }}; font-family: inherit; font-size: 13.5px; font-weight: {{ $isSelected ? '600' : '500' }}; cursor: pointer;">{{ $isCluster ? 'Upgrade' : 'Activate' }}</button>
+  <button type="button" wire:click="selectPlan({{ $plan->id }})" style="margin-top: 22px; padding: 11px; border-radius: 10px; border: 1px solid {{ $isSelected ? 'oklch(0.86 0.11 195 / 0.5)' : 'rgba(150,235,250,0.2)' }}; background: {{ $isSelected ? 'linear-gradient(140deg, oklch(0.86 0.12 192), oklch(0.66 0.13 205))' : 'rgba(150,235,250,0.06)' }}; color: {{ $isSelected ? '#04121f' : '#e6f4fa' }}; font-family: inherit; font-size: 13.5px; font-weight: {{ $isSelected ? '600' : '500' }}; cursor: pointer;">{{ $actionLabel }}</button>
 </div>
 @endif

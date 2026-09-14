@@ -283,7 +283,7 @@
           <div>
             <div style="display: flex; align-items: baseline; gap: 12px;">
               <span style="font-size: 17px; font-weight: 600;">Reward calculator</span>
-              <span style="font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.12em; color: rgba(214,238,248,0.66);">12-MONTH CONTRACT</span>
+              <span style="font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.12em; color: rgba(214,238,248,0.66);">{{ $this->calculatorTermLabel }}</span>
             </div>
             <div style="margin-top: 22px; display: flex; align-items: baseline; justify-content: space-between;">
               <span style="font-size: 13.5px; color: rgba(214,238,248,0.74);">Select compute</span>
