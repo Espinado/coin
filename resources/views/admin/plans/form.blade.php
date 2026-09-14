@@ -19,19 +19,19 @@
             @if($isEdit) @method('PATCH') @endif
 
             @foreach([
-                ['name', 'Name', 'text'],
-                ['slug', 'Slug', 'text'],
-                ['tier_label', 'Tier label', 'text'],
-                ['price_label', 'Price label', 'text'],
-                ['tflops', 'TFLOPS', 'number'],
-                ['duration_days', 'Duration days', 'number'],
-                ['infra', 'Infrastructure', 'text'],
+                ['name', 'Name', 'text', null],
+                ['slug', 'Slug', 'text', null],
+                ['tier_label', 'Tier label', 'text', null],
+                ['price_label', 'Price label', 'text', null],
+                ['tflops', 'TFLOPS', 'number', null],
+                ['duration_days', 'Duration days', 'number', null],
+                ['infra', 'Infrastructure', 'text', null],
                 ['reward_multiplier', 'Reward multiplier', 'number', '0.01'],
                 ['daily_estimate', 'Daily estimate', 'number', '0.01'],
-                ['max_tflops', 'Max TFLOPS (calculator)', 'number'],
-                ['sort_order', 'Sort order', 'number'],
-                ['capacity_percent', 'Capacity %', 'number'],
-            ] as [$field, $label, $type, $step ?? null])
+                ['max_tflops', 'Max TFLOPS (calculator)', 'number', null],
+                ['sort_order', 'Sort order', 'number', null],
+                ['capacity_percent', 'Capacity %', 'number', null],
+            ] as [$field, $label, $type, $step])
                 <div>
                     <label style="display:block;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.12em;color:rgba(232,237,245,0.65);">{{ strtoupper($label) }}</label>
                     <input type="{{ $type }}" name="{{ $field }}" value="{{ old($field, $plan->{$field}) }}" @if($step) step="{{ $step }}" @endif
