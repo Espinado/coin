@@ -1,5 +1,5 @@
-export function scrollSupportThreadToBottom(behavior = 'auto') {
-    const thread = document.getElementById('support-thread');
+export function scrollSupportThreadToBottom(threadId = 'support-thread', behavior = 'auto') {
+    const thread = document.getElementById(threadId);
 
     if (! thread) {
         return;
@@ -22,13 +22,14 @@ export function escapeSupportHtml(value) {
 }
 
 export function appendSupportMessage(message, options = {}) {
-    const thread = document.getElementById('support-thread');
+    const threadId = options.threadId ?? 'support-thread';
+    const thread = document.getElementById(threadId);
 
     if (! thread || ! message?.id) {
         return false;
     }
 
-    if (document.querySelector(`[data-message-id="${message.id}"]`)) {
+    if (document.querySelector(`#${threadId} [data-message-id="${message.id}"]`)) {
         return false;
     }
 
@@ -57,7 +58,7 @@ export function appendSupportMessage(message, options = {}) {
 
     wrapper.querySelector('div:last-child').textContent = message.body ?? '';
     thread.appendChild(wrapper);
-    scrollSupportThreadToBottom('smooth');
+    scrollSupportThreadToBottom(threadId, 'smooth');
 
     return true;
 }

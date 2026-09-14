@@ -51,7 +51,7 @@ export function initEcho() {
         wssPort: config.wssPort,
         forceTLS: config.forceTLS,
         enabledTransports: ['ws', 'wss'],
-        authEndpoint: `${window.location.origin}/broadcasting/auth`,
+        authEndpoint: runtime.guestAuthEndpoint ?? `${window.location.origin}/broadcasting/auth`,
         auth: {
             headers: {
                 'X-CSRF-TOKEN': csrfToken,

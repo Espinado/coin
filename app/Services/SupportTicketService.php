@@ -17,6 +17,39 @@ use Throwable;
 
 class SupportTicketService
 {
+    public function createForGuest(string $email, string $subject, string $category, string $body): SupportTicket
+    {
+        return DB::transaction(function () use ($email, $subject, $category, $body) {
+            $ticket = SupportTicket::query()->create([
+                'user_id' => null,
+                'guest_email' => $email,
+                'guest_token' => Str::random(64),
+                'reference' => $this->nextReference(),
+                'subject' => $subject,
+                'category' => $category,
+                'status' => SupportTicket::STATUS_OPEN,
+                'last_reply_at' => now(),
+            ]);
+
+            $this->addMessage($ticket, SupportTicketMessage::AUTHOR_GUEST, 0, $body);
+
+            SupportGuestSession::put($ticket);
+
+            return $ticket->load('messages');
+        });
+    }
+
+    public function addGuestMessage(SupportTicket $ticket, string $token, string $body): SupportTicketMessage
+    {
+        $this->assertGuestTicketAccess($ticket, $token);
+
+        if ($ticket->status === SupportTicket::STATUS_CLOSED) {
+            $ticket->update(['status' => SupportTicket::STATUS_OPEN]);
+        }
+
+        return $this->addMessage($ticket, SupportTicketMessage::AUTHOR_GUEST, 0, $body);
+    }
+
     public function createForUser(User $user, string $subject, string $category, string $body): SupportTicket
     {
         return DB::transaction(function () use ($user, $subject, $category, $body) {
@@ -122,6 +155,12 @@ class SupportTicketService
     private function assertTicketOwner(SupportTicket $ticket, User $user): void
     {
         abort_unless($ticket->user_id === $user->id, 403);
+    }
+
+    private function assertGuestTicketAccess(SupportTicket $ticket, string $token): void
+    {
+        abort_unless($ticket->isGuest(), 403);
+        abort_unless(hash_equals($ticket->guest_token ?? '', $token), 403);
     }
 
     private function nextReference(): string

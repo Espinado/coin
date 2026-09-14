@@ -9,6 +9,7 @@ export default defineConfig({
                 'resources/js/app.js',
                 'resources/js/admin-support.js',
                 'resources/js/admin-support-realtime.js',
+                'resources/js/guest-support.js',
             ],
             refresh: true,
         }),

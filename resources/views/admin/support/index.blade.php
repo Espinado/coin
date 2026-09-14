@@ -45,8 +45,11 @@
                         <td style="padding:14px 18px;" data-support-user-cell>
                             <div data-support-user-wrap style="display:flex;align-items:center;justify-content:space-between;gap:12px;">
                                 <div>
-                                    <span data-support-user-name style="font-weight:{{ $unread > 0 ? '600' : '400' }};">{{ $ticket->user->accountLabel() }}</span>
-                                    <br><span style="color:rgba(232,237,245,0.62);font-size:12px;">{{ $ticket->user->email }}</span>
+                                    <span data-support-user-name style="font-weight:{{ $unread > 0 ? '600' : '400' }};">{{ $ticket->contactLabel() }}</span>
+                                    <br><span style="color:rgba(232,237,245,0.62);font-size:12px;">{{ $ticket->contactEmail() }}</span>
+                                    @if($ticket->isGuest())
+                                        <br><span style="color:rgba(255,180,84,0.85);font-size:11px;">Guest chat</span>
+                                    @endif
                                 </div>
                                 @if($unread > 0)
                                     <span class="admin-support-badge" data-support-row-badge style="flex-shrink:0;font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;min-width:22px;text-align:center;padding:4px 9px;border-radius:999px;background:linear-gradient(140deg,#ffb454,#e8872e);color:#1a1208;box-shadow:0 0 14px rgba(255,180,84,0.45);">{{ $unread }}</span>

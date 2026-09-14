@@ -26,6 +26,8 @@ class SupportTicket extends Model
 
     protected $fillable = [
         'user_id',
+        'guest_email',
+        'guest_token',
         'assigned_admin_id',
         'reference',
         'subject',
@@ -49,7 +51,7 @@ class SupportTicket extends Model
     {
         return (int) SupportTicketMessage::query()
             ->join('support_tickets', 'support_tickets.id', '=', 'support_ticket_messages.support_ticket_id')
-            ->where('support_ticket_messages.author_type', SupportTicketMessage::AUTHOR_USER)
+            ->whereIn('support_ticket_messages.author_type', SupportTicketMessage::customerAuthorTypes())
             ->where(function ($query) {
                 $query->whereNull('support_tickets.admin_last_read_at')
                     ->orWhereColumn('support_ticket_messages.created_at', '>', 'support_tickets.admin_last_read_at');
@@ -74,7 +76,7 @@ class SupportTicket extends Model
     {
         return $this->messages
             ->filter(function (SupportTicketMessage $message) {
-                if ($message->author_type !== SupportTicketMessage::AUTHOR_USER) {
+                if (! $message->isFromCustomer()) {
                     return false;
                 }
 
@@ -131,6 +133,25 @@ class SupportTicket extends Model
             self::STATUS_PENDING => 'Pending',
             self::STATUS_CLOSED => 'Closed',
         ];
+    }
+
+    public function isGuest(): bool
+    {
+        return $this->user_id === null;
+    }
+
+    public function contactLabel(): string
+    {
+        if ($this->user) {
+            return $this->user->accountLabel();
+        }
+
+        return 'Guest';
+    }
+
+    public function contactEmail(): ?string
+    {
+        return $this->user?->email ?? $this->guest_email;
     }
 
     public function user(): BelongsTo

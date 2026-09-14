@@ -3,6 +3,7 @@
 use App\Models\Admin;
 use App\Models\SupportTicket;
 use App\Models\User;
+use App\Services\SupportGuestSession;
 use Illuminate\Support\Facades\Broadcast;
 use Illuminate\Support\Facades\Log;
 
@@ -43,6 +44,13 @@ Broadcast::channel('support.user.{userId}', function ($user, int $userId) {
 Broadcast::channel('support.admin', function ($user) {
     $allowed = $user instanceof Admin;
     logSupportChannelAuth('support.admin', $user, $allowed, 'admin_only');
+
+    return $allowed;
+});
+
+Broadcast::channel('support.guest.{ticketId}', function ($user, int $ticketId) {
+    $allowed = SupportGuestSession::canAccessTicket($ticketId);
+    logSupportChannelAuth('support.guest.'.$ticketId, $user, $allowed, 'guest_session');
 
     return $allowed;
 });

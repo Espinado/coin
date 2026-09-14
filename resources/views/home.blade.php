@@ -3,7 +3,11 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Coin — AI Compute</title>
+    @livewireStyles
+    @vite(['resources/js/guest-support.js'])
+    @include('partials.coin-reverb-config-guest')
     <script src="{{ asset('coin/support.js') }}"></script>
 </head>
 <body>
@@ -627,8 +631,8 @@
         <div style="font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.14em; color: rgba(230,244,250,0.65);">SUPPORT</div>
         <div style="display: flex; flex-direction: column; gap: 11px; margin-top: 16px; font-size: 13.5px;">
           <a href="#faq" style="color: rgba(230,244,250,0.78);">FAQ</a>
-          <a href="#" style="color: rgba(230,244,250,0.78);">Help</a>
-          <a href="#" style="color: rgba(230,244,250,0.78);">Contact</a>
+          <a href="#support" style="color: rgba(230,244,250,0.78);">Help</a>
+          <a href="#support" style="color: rgba(230,244,250,0.78);">Contact</a>
         </div>
       </div>
       <div>
@@ -690,5 +694,8 @@ class Component extends DCLogic {
 }
 </script>
 @endverbatim
+
+@livewire('guest-support-chat')
+@livewireScripts
 </body>
 </html>

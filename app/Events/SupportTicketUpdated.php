@@ -4,27 +4,22 @@ namespace App\Events;
 
 use App\Models\SupportTicket;
 use Illuminate\Broadcasting\InteractsWithSockets;
-use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
 class SupportTicketUpdated implements ShouldBroadcastNow
 {
-    use Dispatchable, InteractsWithSockets, SerializesModels;
+    use Dispatchable, InteractsWithSockets, SerializesModels, SupportTicketBroadcastChannels;
 
     public function __construct(
         public SupportTicket $ticket,
     ) {}
 
-    /** @return array<int, PrivateChannel> */
+    /** @return array<int, \Illuminate\Broadcasting\PrivateChannel> */
     public function broadcastOn(): array
     {
-        return [
-            new PrivateChannel('support.ticket.'.$this->ticket->id),
-            new PrivateChannel('support.user.'.$this->ticket->user_id),
-            new PrivateChannel('support.admin'),
-        ];
+        return $this->supportTicketChannels($this->ticket);
     }
 
     public function broadcastAs(): string
@@ -48,7 +43,9 @@ class SupportTicketUpdated implements ShouldBroadcastNow
             'unread_for_admin' => $this->ticket->unreadMessagesForAdmin(),
             'unread_for_user' => $this->ticket->unreadMessagesForUser(),
             'total_unread_for_admin' => SupportTicket::totalUnreadForAdmin(),
-            'total_unread_for_user' => SupportTicket::totalUnreadForUser($this->ticket->user_id),
+            'total_unread_for_user' => $this->ticket->user_id
+                ? SupportTicket::totalUnreadForUser($this->ticket->user_id)
+                : 0,
         ];
     }
 }

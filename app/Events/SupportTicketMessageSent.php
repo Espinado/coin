@@ -5,14 +5,13 @@ namespace App\Events;
 use App\Models\SupportTicket;
 use App\Models\SupportTicketMessage;
 use Illuminate\Broadcasting\InteractsWithSockets;
-use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
 class SupportTicketMessageSent implements ShouldBroadcastNow
 {
-    use Dispatchable, InteractsWithSockets, SerializesModels;
+    use Dispatchable, InteractsWithSockets, SerializesModels, SupportTicketBroadcastChannels;
 
     public function __construct(
         public SupportTicketMessage $message,
@@ -20,16 +19,10 @@ class SupportTicketMessageSent implements ShouldBroadcastNow
         $this->message->loadMissing('ticket.user');
     }
 
-    /** @return array<int, PrivateChannel> */
+    /** @return array<int, \Illuminate\Broadcasting\PrivateChannel> */
     public function broadcastOn(): array
     {
-        $ticket = $this->message->ticket;
-
-        return [
-            new PrivateChannel('support.ticket.'.$ticket->id),
-            new PrivateChannel('support.user.'.$ticket->user_id),
-            new PrivateChannel('support.admin'),
-        ];
+        return $this->supportTicketChannels($this->message->ticket);
     }
 
     public function broadcastAs(): string
@@ -63,7 +56,9 @@ class SupportTicketMessageSent implements ShouldBroadcastNow
             'unread_for_admin' => $ticket->unreadMessagesForAdmin(),
             'unread_for_user' => $ticket->unreadMessagesForUser(),
             'total_unread_for_admin' => SupportTicket::totalUnreadForAdmin(),
-            'total_unread_for_user' => SupportTicket::totalUnreadForUser($ticket->user_id),
+            'total_unread_for_user' => $ticket->user_id
+                ? SupportTicket::totalUnreadForUser($ticket->user_id)
+                : 0,
         ];
     }
 }

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\GuestBroadcastAuthController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReverbDebugLogController;
 use App\Livewire\Dashboard;
@@ -10,6 +11,10 @@ Route::domain(config('coin.user_domain'))
     ->middleware('user.domain')
     ->group(function () {
         Route::view('/', 'home')->name('home');
+
+        Route::post('/guest/broadcasting/auth', [GuestBroadcastAuthController::class, 'store'])
+            ->middleware('web')
+            ->name('guest.broadcasting.auth');
 
         Route::get('/dashboard', Dashboard::class)->middleware(['auth'])->name('dashboard');
 

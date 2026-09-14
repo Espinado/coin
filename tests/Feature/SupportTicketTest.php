@@ -7,6 +7,7 @@ use App\Events\SupportTicketUpdated;
 use App\Models\Admin;
 use App\Models\SupportTicket;
 use App\Models\User;
+use App\Services\SupportGuestSession;
 use App\Services\SupportTicketService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Event;
@@ -198,6 +199,38 @@ class SupportTicketTest extends TestCase
             ->assertOk()
             ->assertSee('class="admin-support-badge"', false)
             ->assertSee('>1<', false);
+    }
+
+    public function test_guest_can_create_support_ticket_with_email(): void
+    {
+        $ticket = app(SupportTicketService::class)->createForGuest(
+            'guest@example.com',
+            'Pricing question',
+            SupportTicket::CATEGORY_OTHER,
+            'How much does the Core plan cost?',
+        );
+
+        $this->assertDatabaseHas('support_tickets', [
+            'id' => $ticket->id,
+            'user_id' => null,
+            'guest_email' => 'guest@example.com',
+            'subject' => 'Pricing question',
+        ]);
+
+        $this->assertTrue($ticket->isGuest());
+        $this->assertSame('guest@example.com', SupportGuestSession::current()?->guest_email);
+
+        $token = SupportGuestSession::token();
+        $this->assertNotNull($token);
+
+        app(SupportTicketService::class)->addGuestMessage(
+            $ticket->fresh(),
+            $token,
+            'Follow-up from guest',
+        );
+
+        $this->assertDatabaseCount('support_ticket_messages', 2);
+        $this->assertSame(2, SupportTicket::totalUnreadForAdmin());
     }
 
     public function test_regular_user_cannot_open_admin_support_pages(): void

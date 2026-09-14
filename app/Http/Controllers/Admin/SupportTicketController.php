@@ -40,11 +40,16 @@ class SupportTicketController extends Controller
     public function show(SupportTicket $ticket): View
     {
         $ticket->load([
-            'user.wallet',
-            'user.contracts.plan',
             'messages',
             'assignedAdmin',
         ]);
+
+        if (! $ticket->isGuest()) {
+            $ticket->load([
+                'user.wallet',
+                'user.contracts.plan',
+            ]);
+        }
 
         $ticket->markReadByAdmin();
 
