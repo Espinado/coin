@@ -283,6 +283,7 @@ return [
         'previous' => 'Назад',
         'next' => 'Далее',
         'showing' => ':from–:to из :total',
+        'per_page' => 'Строк на странице',
     ],
 
     'referrals' => [

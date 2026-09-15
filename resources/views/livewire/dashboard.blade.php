@@ -569,13 +569,15 @@
           </div>
           <div style="display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr) minmax(0, 1.4fr) minmax(0, 0.8fr) minmax(0, 0.8fr); padding: 16px 0 12px; border-bottom: 1px solid rgba(150,235,250,0.1); font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.12em; color: rgba(214,238,248,0.66);"><span>{{ mb_strtoupper(__('coin.table.date')) }}</span><span>{{ mb_strtoupper(__('coin.table.type')) }}</span><span>{{ mb_strtoupper(__('coin.table.destination')) }}</span><span>{{ mb_strtoupper(__('coin.table.status')) }}</span><span style="text-align: right;">{{ mb_strtoupper(__('coin.table.amount')) }}</span></div>
           @forelse($walletTransactions as $transaction)
-          <div style="display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr) minmax(0, 1.4fr) minmax(0, 0.8fr) minmax(0, 0.8fr); padding: 13px 0;@if(!$loop->last || $walletTransactions->hasPages()) border-bottom: 1px solid rgba(150,235,250,0.07);@endif font-size: 13px; align-items: center;"><span style="color: rgba(214,238,248,0.78);">{{ $transaction->formattedOccurredAt() }}</span><span style="color: rgba(214,238,248,0.78);">{{ $transaction->displayType() }}</span><span style="font-family: 'JetBrains Mono', monospace; color: rgba(214,238,248,0.72);">{{ $transaction->displaySource() }}</span><span style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: {{ $transaction->statusColor() }};">{{ $transaction->displayStatus() }}</span><span style="font-family: 'JetBrains Mono', monospace; text-align: right; color: {{ $transaction->amountColor() }};">{{ $transaction->amount_label }}</span></div>
+          <div style="display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr) minmax(0, 1.4fr) minmax(0, 0.8fr) minmax(0, 0.8fr); padding: 13px 0;@if(!$loop->last || $walletTransactions->total() > 0) border-bottom: 1px solid rgba(150,235,250,0.07);@endif font-size: 13px; align-items: center;"><span style="color: rgba(214,238,248,0.78);">{{ $transaction->formattedOccurredAt() }}</span><span style="color: rgba(214,238,248,0.78);">{{ $transaction->displayType() }}</span><span style="font-family: 'JetBrains Mono', monospace; color: rgba(214,238,248,0.72);">{{ $transaction->displaySource() }}</span><span style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: {{ $transaction->statusColor() }};">{{ $transaction->displayStatus() }}</span><span style="font-family: 'JetBrains Mono', monospace; text-align: right; color: {{ $transaction->amountColor() }};">{{ $transaction->amount_label }}</span></div>
           @empty
           <div style="padding: 24px 0; font-size: 13px; color: rgba(214,238,248,0.68);">{{ __('coin.admin.no_transactions') }}</div>
           @endforelse
-          @if($walletTransactions->hasPages())
-            @include('livewire.partials.coin-pagination', ['paginator' => $walletTransactions])
-          @endif
+          @include('livewire.partials.coin-pagination', [
+            'paginator' => $walletTransactions,
+            'perPageProperty' => 'walletPerPage',
+            'perPageOptions' => [10, 20, 50],
+          ])
         </div>
       </section>
     @endif

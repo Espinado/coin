@@ -129,6 +129,13 @@ class Dashboard extends Component
 
     public string $profileCountry = '';
 
+    public int $walletPerPage = 10;
+
+    public function updatedWalletPerPage(): void
+    {
+        $this->resetPage('walletPage');
+    }
+
     public function mount(DashboardDataService $data, PlatformSettingsService $settings): void
     {
         $this->symbol = $settings->tokenSymbol();
@@ -1046,7 +1053,7 @@ class Dashboard extends Component
                 ->where('user_id', auth()->id())
                 ->orderByDesc('sort_order')
                 ->orderByDesc('id')
-                ->paginate(20, pageName: 'walletPage'),
+                ->paginate($this->walletPageSize(), pageName: 'walletPage'),
         ])->layout('layouts.coin-dashboard', ['title' => 'Coin — '.__('coin.nav.portal')]);
     }
 
@@ -1066,6 +1073,11 @@ class Dashboard extends Component
         }
 
         return round($principal * ($apr / 100) / 365, 2);
+    }
+
+    private function walletPageSize(): int
+    {
+        return in_array($this->walletPerPage, [10, 20, 50], true) ? $this->walletPerPage : 10;
     }
 
     private function reloadPortfolioData(): void
