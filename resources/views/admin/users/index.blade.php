@@ -6,30 +6,30 @@
     @include('admin.partials.nav')
 
     <div class="admin-card">
-        <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;">
-            <div>
-                <h1 style="margin:0;font-size:24px;font-weight:600;">{{ __('coin.admin.users') }}</h1>
-                <p style="margin:8px 0 0;font-size:14px;color:rgba(232,237,245,0.72);">{{ __('coin.admin.users_sub') }}</p>
-            </div>
-            <form method="GET" action="{{ route('admin.users.index') }}" style="display:flex;gap:8px;">
-                <input type="search" name="q" value="{{ $search }}" placeholder="{{ __('coin.admin.search_placeholder') }}"
-                    style="padding:10px 12px;border-radius:10px;border:1px solid rgba(255,255,255,0.12);background:#070a10;color:#e8edf5;min-width:240px;">
-                <button type="submit" class="admin-btn">{{ __('coin.admin.search') }}</button>
-            </form>
+        <div style="margin-bottom:16px;">
+            <h1 style="margin:0;font-size:24px;font-weight:600;">{{ __('coin.admin.users') }}</h1>
+            <p style="margin:8px 0 0;font-size:14px;color:rgba(232,237,245,0.72);">{{ __('coin.admin.users_sub') }}</p>
         </div>
+        @include('admin.partials.list-toolbar', [
+            'action' => route('admin.users.index'),
+            'search' => $search,
+            'sort' => $sort,
+            'dir' => $dir,
+            'perPage' => $perPage,
+        ])
     </div>
 
     <div class="admin-card" style="margin-top:16px;padding:0;overflow:hidden;">
         <table style="width:100%;border-collapse:collapse;font-size:13px;">
             <thead>
-                <tr style="text-align:left;border-bottom:1px solid rgba(255,255,255,0.08);color:rgba(232,237,245,0.62);font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.1em;">
-                    <th style="padding:14px 18px;">{{ strtoupper(__('coin.admin.account')) }}</th>
-                    <th style="padding:14px 18px;">{{ strtoupper(__('coin.admin.email')) }}</th>
-                    <th style="padding:14px 18px;">{{ strtoupper(__('coin.admin.kyc')) }}</th>
-                    <th style="padding:14px 18px;">{{ strtoupper(__('coin.balance')) }}</th>
-                    <th style="padding:14px 18px;">{{ strtoupper(__('coin.admin.deposits')) }}</th>
-                    <th style="padding:14px 18px;">{{ strtoupper(__('coin.admin.joined')) }}</th>
-                    <th style="padding:14px 18px;">{{ strtoupper(__('coin.admin.last_login')) }}</th>
+                <tr style="text-align:left;border-bottom:1px solid rgba(255,255,255,0.08);">
+                    @include('admin.partials.sortable-th', ['column' => 'account', 'label' => strtoupper(__('coin.admin.account')), 'sort' => $sort, 'dir' => $dir])
+                    @include('admin.partials.sortable-th', ['column' => 'email', 'label' => strtoupper(__('coin.admin.email')), 'sort' => $sort, 'dir' => $dir])
+                    @include('admin.partials.sortable-th', ['column' => 'kyc', 'label' => strtoupper(__('coin.admin.kyc')), 'sort' => $sort, 'dir' => $dir])
+                    @include('admin.partials.sortable-th', ['column' => 'balance', 'label' => strtoupper(__('coin.balance')), 'sort' => $sort, 'dir' => $dir])
+                    @include('admin.partials.sortable-th', ['column' => 'contracts', 'label' => strtoupper(__('coin.admin.deposits')), 'sort' => $sort, 'dir' => $dir])
+                    @include('admin.partials.sortable-th', ['column' => 'created_at', 'label' => strtoupper(__('coin.admin.joined')), 'sort' => $sort, 'dir' => $dir])
+                    @include('admin.partials.sortable-th', ['column' => 'last_login', 'label' => strtoupper(__('coin.admin.last_login')), 'sort' => $sort, 'dir' => $dir])
                 </tr>
             </thead>
             <tbody>
@@ -50,5 +50,5 @@
         </table>
     </div>
 
-    <div style="margin-top:16px;">{{ $users->links() }}</div>
+    @include('admin.partials.list-pagination', ['paginator' => $users])
 @endsection

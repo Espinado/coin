@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Admin\Concerns\AdminListQuery;
 use App\Http\Controllers\Admin\Concerns\RedirectsWithAdminFlash;
 use App\Http\Controllers\Controller;
 use App\Models\Deposit;
@@ -13,27 +14,43 @@ use RuntimeException;
 
 class DepositController extends Controller
 {
+    use AdminListQuery;
     use RedirectsWithAdminFlash;
 
     public function index(Request $request): View
     {
         $status = $request->string('status')->toString();
+        $search = $this->adminSearchTerm($request);
 
-        $deposits = Deposit::query()
+        $query = Deposit::query()
             ->with(['user', 'confirmedBy'])
             ->when($status !== '', fn ($query) => $query->where('status', $status))
-            ->orderByDesc('created_at')
-            ->paginate(20)
-            ->withQueryString();
+            ->when($search !== '', function ($query) use ($search) {
+                $query->where(function ($inner) use ($search) {
+                    if (ctype_digit($search)) {
+                        $inner->where('id', (int) $search);
+                    }
+
+                    $inner->orWhereHas('user', fn ($userQuery) => $userQuery
+                        ->where('email', 'like', "%{$search}%")
+                        ->orWhere('name', 'like', "%{$search}%")
+                        ->orWhere('account_slug', 'like', "%{$search}%"));
+                });
+            });
+
+        $this->adminApplySort($request, $query, [
+            'id' => 'id',
+            'amount' => 'amount',
+            'status' => 'status',
+            'created_at' => 'created_at',
+        ], 'created_at', 'desc', [
+            'user' => fn ($depositQuery, $direction) => $this->adminOrderByRelatedUser($depositQuery, 'email', $direction),
+        ]);
 
         return view('admin.deposits.index', [
-            'deposits' => $deposits,
-            'status' => $status,
-            'statuses' => [
-                Deposit::STATUS_PENDING => 'Pending',
-                Deposit::STATUS_CONFIRMED => 'Confirmed',
-                Deposit::STATUS_REJECTED => 'Rejected',
-            ],
+            'deposits' => $this->adminPaginate($query, $request),
+            'statuses' => $this->depositStatuses(),
+            ...$this->adminListState($request),
         ]);
     }
 
@@ -72,5 +89,15 @@ class DepositController extends Controller
         }
 
         return $this->adminSuccess('coin.admin.top_up_rejected', 'admin.deposits.index');
+    }
+
+    /** @return array<string, string> */
+    private function depositStatuses(): array
+    {
+        return [
+            Deposit::STATUS_PENDING => __('coin.admin.deposit_status_pending'),
+            Deposit::STATUS_CONFIRMED => __('coin.admin.deposit_status_confirmed'),
+            Deposit::STATUS_REJECTED => __('coin.admin.deposit_status_rejected'),
+        ];
     }
 }

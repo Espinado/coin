@@ -1,38 +1,38 @@
 @extends('layouts.admin')
 
-@section('title', 'Coin Admin — Support')
+@section('title', __('coin.admin.page_title', ['section' => __('coin.admin.support')]))
 
 @section('content')
     @include('admin.partials.nav')
 
     <div class="admin-card">
-        <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;">
-            <div>
-                <h1 style="margin:0;font-size:24px;font-weight:600;">Support tickets</h1>
-                <p style="margin:8px 0 0;font-size:14px;color:rgba(232,237,245,0.72);">User requests from the dashboard support section.</p>
-            </div>
-            <form method="GET" action="{{ route('admin.support.index') }}" style="display:flex;gap:8px;">
-                <select name="status" style="padding:10px 12px;border-radius:10px;border:1px solid rgba(255,255,255,0.12);background:#070a10;color:#e8edf5;">
-                    <option value="">All statuses</option>
-                    @foreach($statuses as $value => $label)
-                        <option value="{{ $value }}" @selected($status === $value)>{{ $label }}</option>
-                    @endforeach
-                </select>
-                <button type="submit" class="admin-btn">Filter</button>
-            </form>
+        <div style="margin-bottom:16px;">
+            <h1 style="margin:0;font-size:24px;font-weight:600;">{{ __('coin.admin.support') }}</h1>
+            <p style="margin:8px 0 0;font-size:14px;color:rgba(232,237,245,0.72);">{{ __('coin.admin.support_sub') }}</p>
         </div>
+        @include('admin.partials.list-toolbar', [
+            'action' => route('admin.support.index'),
+            'search' => $search,
+            'status' => $status,
+            'statuses' => $statuses,
+            'showStatus' => true,
+            'sort' => $sort,
+            'dir' => $dir,
+            'perPage' => $perPage,
+            'searchPlaceholder' => __('coin.admin.search_placeholder_support'),
+        ])
     </div>
 
     <div class="admin-card" style="margin-top:16px;padding:0;overflow:hidden;">
         <table style="width:100%;border-collapse:collapse;font-size:13px;">
             <thead>
-                <tr style="text-align:left;border-bottom:1px solid rgba(255,255,255,0.08);color:rgba(232,237,245,0.62);font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.1em;">
-                    <th style="padding:14px 18px;">REFERENCE</th>
-                    <th style="padding:14px 18px;">USER</th>
-                    <th style="padding:14px 18px;">SUBJECT</th>
-                    <th style="padding:14px 18px;">CATEGORY</th>
-                    <th style="padding:14px 18px;">STATUS</th>
-                    <th style="padding:14px 18px;">UPDATED</th>
+                <tr style="text-align:left;border-bottom:1px solid rgba(255,255,255,0.08);">
+                    @include('admin.partials.sortable-th', ['column' => 'reference', 'label' => strtoupper(__('coin.admin.reference')), 'sort' => $sort, 'dir' => $dir])
+                    @include('admin.partials.sortable-th', ['column' => 'user', 'label' => strtoupper(__('coin.user')), 'sort' => $sort, 'dir' => $dir])
+                    @include('admin.partials.sortable-th', ['column' => 'subject', 'label' => strtoupper(__('coin.support.subject')), 'sort' => $sort, 'dir' => $dir])
+                    @include('admin.partials.sortable-th', ['column' => 'category', 'label' => strtoupper(__('coin.support.category')), 'sort' => $sort, 'dir' => $dir])
+                    @include('admin.partials.sortable-th', ['column' => 'status', 'label' => strtoupper(__('coin.status')), 'sort' => $sort, 'dir' => $dir])
+                    @include('admin.partials.sortable-th', ['column' => 'updated_at', 'label' => strtoupper(__('coin.admin.updated')), 'sort' => $sort, 'dir' => $dir])
                 </tr>
             </thead>
             <tbody>
@@ -48,7 +48,7 @@
                                     <span data-support-user-name style="font-weight:{{ $unread > 0 ? '600' : '400' }};">{{ $ticket->contactLabel() }}</span>
                                     <br><span style="color:rgba(232,237,245,0.62);font-size:12px;">{{ $ticket->contactEmail() }}</span>
                                     @if($ticket->isGuest())
-                                        <br><span style="color:rgba(255,180,84,0.85);font-size:11px;">Guest chat</span>
+                                        <br><span style="color:rgba(255,180,84,0.85);font-size:11px;">{{ __('coin.admin.guest_chat') }}</span>
                                     @endif
                                 </div>
                                 @if($unread > 0)
@@ -63,14 +63,12 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="6" style="padding:24px 18px;color:rgba(232,237,245,0.72);">No tickets yet.</td>
+                        <td colspan="6" style="padding:24px 18px;color:rgba(232,237,245,0.72);">{{ __('coin.admin.no_tickets') }}</td>
                     </tr>
                 @endforelse
             </tbody>
         </table>
     </div>
 
-    @if($tickets->hasPages())
-        <div style="margin-top:16px;">{{ $tickets->links() }}</div>
-    @endif
+    @include('admin.partials.list-pagination', ['paginator' => $tickets])
 @endsection

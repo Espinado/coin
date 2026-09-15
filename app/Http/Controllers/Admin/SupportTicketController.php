@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Admin\Concerns\AdminListQuery;
 use App\Http\Controllers\Admin\Concerns\RedirectsWithAdminFlash;
 use App\Http\Controllers\Controller;
 use App\Models\SupportTicket;
@@ -13,6 +14,7 @@ use Illuminate\View\View;
 
 class SupportTicketController extends Controller
 {
+    use AdminListQuery;
     use RedirectsWithAdminFlash;
 
     public function unreadCount(): JsonResponse
@@ -25,18 +27,42 @@ class SupportTicketController extends Controller
     public function index(Request $request): View
     {
         $status = $request->string('status')->toString();
+        $search = $this->adminSearchTerm($request);
 
-        $tickets = SupportTicket::query()
+        $query = SupportTicket::query()
             ->with(['user', 'assignedAdmin', 'messages'])
             ->when($status !== '', fn ($query) => $query->where('status', $status))
-            ->orderByDesc('updated_at')
-            ->paginate(20)
-            ->withQueryString();
+            ->when($search !== '', function ($query) use ($search) {
+                $query->where(function ($inner) use ($search) {
+                    $inner->where('reference', 'like', "%{$search}%")
+                        ->orWhere('subject', 'like', "%{$search}%")
+                        ->orWhere('guest_email', 'like', "%{$search}%")
+                        ->orWhereHas('user', fn ($userQuery) => $userQuery
+                            ->where('email', 'like', "%{$search}%")
+                            ->orWhere('name', 'like', "%{$search}%")
+                            ->orWhere('account_slug', 'like', "%{$search}%"));
+                });
+            });
+
+        $this->adminApplySort($request, $query, [
+            'reference' => 'reference',
+            'subject' => 'subject',
+            'category' => 'category',
+            'status' => 'status',
+            'updated_at' => 'updated_at',
+        ], 'updated_at', 'desc', [
+            'user' => function ($ticketQuery, $direction) {
+                $ticketQuery
+                    ->leftJoin('users', 'users.id', '=', 'support_tickets.user_id')
+                    ->orderByRaw('COALESCE(users.email, support_tickets.guest_email) '.$direction)
+                    ->select('support_tickets.*');
+            },
+        ]);
 
         return view('admin.support.index', [
-            'tickets' => $tickets,
-            'status' => $status,
+            'tickets' => $this->adminPaginate($query, $request),
             'statuses' => SupportTicket::statuses(),
+            ...$this->adminListState($request),
         ]);
     }
 

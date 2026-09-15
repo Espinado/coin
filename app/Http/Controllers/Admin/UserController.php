@@ -2,22 +2,25 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Admin\Concerns\AdminListQuery;
 use App\Http\Controllers\Admin\Concerns\RedirectsWithAdminFlash;
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Models\Wallet;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class UserController extends Controller
 {
+    use AdminListQuery;
     use RedirectsWithAdminFlash;
 
     public function index(Request $request): View
     {
-        $search = trim($request->string('q')->toString());
+        $search = $this->adminSearchTerm($request);
 
-        $users = User::query()
+        $query = User::query()
             ->withCount(['contracts', 'supportTickets', 'withdrawals'])
             ->with('wallet')
             ->when($search !== '', function ($query) use ($search) {
@@ -26,15 +29,29 @@ class UserController extends Controller
                         ->orWhere('name', 'like', "%{$search}%")
                         ->orWhere('account_slug', 'like', "%{$search}%");
                 });
-            })
-            ->orderByDesc('created_at')
-            ->paginate(20)
-            ->withQueryString();
+            });
+
+        $this->adminApplySort($request, $query, [
+            'account' => 'account_slug',
+            'email' => 'email',
+            'kyc' => 'kyc_status',
+            'contracts' => 'contracts_count',
+            'created_at' => 'created_at',
+            'last_login' => 'last_login_at',
+        ], 'created_at', 'desc', [
+            'balance' => fn ($userQuery, $direction) => $userQuery->orderBy(
+                Wallet::query()
+                    ->select('balance')
+                    ->whereColumn('wallets.user_id', 'users.id')
+                    ->limit(1),
+                $direction,
+            ),
+        ]);
 
         return view('admin.users.index', [
-            'users' => $users,
-            'search' => $search,
+            'users' => $this->adminPaginate($query, $request),
             'kycStatuses' => User::kycStatuses(),
+            ...$this->adminListState($request),
         ]);
     }
 

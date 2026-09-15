@@ -13,8 +13,31 @@ class ProfitHistory extends Component
 
     public int $profitPerPage = 10;
 
+    public string $profitSearch = '';
+
+    public string $profitSort = '';
+
+    public string $profitDir = 'desc';
+
     public function updatedProfitPerPage(): void
     {
+        $this->resetPage('profitPage');
+    }
+
+    public function updatedProfitSearch(): void
+    {
+        $this->resetPage('profitPage');
+    }
+
+    public function sortProfit(string $column): void
+    {
+        if ($this->profitSort === $column) {
+            $this->profitDir = $this->profitDir === 'asc' ? 'desc' : 'asc';
+        } else {
+            $this->profitSort = $column;
+            $this->profitDir = 'desc';
+        }
+
         $this->resetPage('profitPage');
     }
 
@@ -24,8 +47,8 @@ class ProfitHistory extends Component
             'transactions' => WalletTransaction::query()
                 ->where('user_id', auth()->id())
                 ->profitHistory()
-                ->orderByDesc('occurred_at')
-                ->orderByDesc('id')
+                ->searchTerm($this->profitSearch)
+                ->applyListSort($this->profitSort, $this->profitDir, 'occurred_at')
                 ->paginate($this->pageSize(), pageName: 'profitPage'),
         ])->layout('layouts.coin-dashboard', [
             'title' => 'Coin — '.__('coin.stats.profit_history'),

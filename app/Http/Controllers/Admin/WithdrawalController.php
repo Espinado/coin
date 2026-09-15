@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Admin\Concerns\AdminListQuery;
 use App\Http\Controllers\Admin\Concerns\RedirectsWithAdminFlash;
 use App\Http\Controllers\Controller;
 use App\Models\Withdrawal;
@@ -13,23 +14,40 @@ use RuntimeException;
 
 class WithdrawalController extends Controller
 {
+    use AdminListQuery;
     use RedirectsWithAdminFlash;
 
     public function index(Request $request): View
     {
         $status = $request->string('status')->toString();
+        $search = $this->adminSearchTerm($request);
 
-        $withdrawals = Withdrawal::query()
+        $query = Withdrawal::query()
             ->with(['user', 'processedByAdmin'])
             ->when($status !== '', fn ($query) => $query->where('status', $status))
-            ->orderByDesc('created_at')
-            ->paginate(20)
-            ->withQueryString();
+            ->when($search !== '', function ($query) use ($search) {
+                $query->where(function ($inner) use ($search) {
+                    $inner->where('reference', 'like', "%{$search}%")
+                        ->orWhereHas('user', fn ($userQuery) => $userQuery
+                            ->where('email', 'like', "%{$search}%")
+                            ->orWhere('name', 'like', "%{$search}%")
+                            ->orWhere('account_slug', 'like', "%{$search}%"));
+                });
+            });
+
+        $this->adminApplySort($request, $query, [
+            'reference' => 'reference',
+            'amount' => 'amount',
+            'status' => 'status',
+            'created_at' => 'created_at',
+        ], 'created_at', 'desc', [
+            'user' => fn ($withdrawalQuery, $direction) => $this->adminOrderByRelatedUser($withdrawalQuery, 'email', $direction),
+        ]);
 
         return view('admin.withdrawals.index', [
-            'withdrawals' => $withdrawals,
-            'status' => $status,
+            'withdrawals' => $this->adminPaginate($query, $request),
             'statuses' => Withdrawal::statuses(),
+            ...$this->adminListState($request),
         ]);
     }
 

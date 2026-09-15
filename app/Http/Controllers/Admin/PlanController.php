@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Admin\Concerns\AdminListQuery;
 use App\Http\Controllers\Admin\Concerns\RedirectsWithAdminFlash;
 use App\Http\Controllers\Controller;
 use App\Models\Plan;
@@ -12,12 +13,34 @@ use Illuminate\View\View;
 
 class PlanController extends Controller
 {
+    use AdminListQuery;
     use RedirectsWithAdminFlash;
 
-    public function index(): View
+    public function index(Request $request): View
     {
+        $search = $this->adminSearchTerm($request);
+
+        $query = Plan::query()
+            ->when($search !== '', function ($query) use ($search) {
+                $query->where(function ($inner) use ($search) {
+                    $inner->where('name', 'like', "%{$search}%")
+                        ->orWhere('slug', 'like', "%{$search}%")
+                        ->orWhere('tier_label', 'like', "%{$search}%");
+                });
+            });
+
+        $this->adminApplySort($request, $query, [
+            'name' => 'name',
+            'min_deposit' => 'min_deposit',
+            'annual_profit_percent' => 'annual_profit_percent',
+            'duration_days' => 'duration_days',
+            'visibility' => 'is_active',
+            'sort_order' => 'sort_order',
+        ], 'sort_order', 'asc');
+
         return view('admin.plans.index', [
-            'plans' => Plan::query()->orderBy('sort_order')->get(),
+            'plans' => $this->adminPaginate($query, $request),
+            ...$this->adminListState($request),
         ]);
     }
 

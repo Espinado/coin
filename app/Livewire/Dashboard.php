@@ -131,8 +131,31 @@ class Dashboard extends Component
 
     public int $walletPerPage = 10;
 
+    public string $walletSearch = '';
+
+    public string $walletSort = '';
+
+    public string $walletDir = 'desc';
+
     public function updatedWalletPerPage(): void
     {
+        $this->resetPage('walletPage');
+    }
+
+    public function updatedWalletSearch(): void
+    {
+        $this->resetPage('walletPage');
+    }
+
+    public function sortWallet(string $column): void
+    {
+        if ($this->walletSort === $column) {
+            $this->walletDir = $this->walletDir === 'asc' ? 'desc' : 'asc';
+        } else {
+            $this->walletSort = $column;
+            $this->walletDir = 'desc';
+        }
+
         $this->resetPage('walletPage');
     }
 
@@ -1051,8 +1074,8 @@ class Dashboard extends Component
         return view('livewire.dashboard', [
             'walletTransactions' => WalletTransaction::query()
                 ->where('user_id', auth()->id())
-                ->orderByDesc('sort_order')
-                ->orderByDesc('id')
+                ->searchTerm($this->walletSearch)
+                ->applyListSort($this->walletSort, $this->walletDir, 'sort_order')
                 ->paginate($this->walletPageSize(), pageName: 'walletPage'),
         ])->layout('layouts.coin-dashboard', ['title' => 'Coin — '.__('coin.nav.portal')]);
     }

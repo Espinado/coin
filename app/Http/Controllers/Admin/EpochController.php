@@ -2,18 +2,32 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Admin\Concerns\AdminListQuery;
 use App\Http\Controllers\Controller;
 use App\Models\Epoch;
 use App\Services\EpochService;
 use App\Services\PlatformSettingsService;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class EpochController extends Controller
 {
-    public function index(PlatformSettingsService $settings): View
+    use AdminListQuery;
+
+    public function index(Request $request, PlatformSettingsService $settings): View
     {
+        $query = Epoch::query()->with('triggeredByAdmin');
+
+        $this->adminApplySort($request, $query, [
+            'number' => 'number',
+            'contracts_settled' => 'contracts_settled',
+            'total_rewards' => 'total_rewards',
+            'reward_rate' => 'reward_rate',
+            'completed_at' => 'completed_at',
+        ], 'number', 'desc');
+
         return view('admin.epochs.index', [
-            'epochs' => Epoch::query()->with('triggeredByAdmin')->latest('number')->paginate(15),
+            'epochs' => $this->adminPaginate($query, $request, 15),
             'currentEpoch' => app(EpochService::class)->currentEpochNumber(),
             'nextEpoch' => app(EpochService::class)->nextEpochNumber(),
             'settings' => [
@@ -21,6 +35,7 @@ class EpochController extends Controller
                 'epochs_per_day' => $settings->epochsPerDay(),
                 'token_symbol' => $settings->tokenSymbol(),
             ],
+            ...$this->adminListState($request, 15),
         ]);
     }
 

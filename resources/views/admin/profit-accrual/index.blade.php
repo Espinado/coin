@@ -10,25 +10,35 @@
     @endif
 
     <div class="admin-card">
-        <h1 style="margin:0;font-size:24px;font-weight:600;">{{ __('coin.admin.profit_accrual') }}</h1>
-        <p style="margin:8px 0 0;font-size:14px;color:rgba(232,237,245,0.72);">
-            {!! __('coin.admin.profit_accrual_sub', ['command' => '<code style="font-family:\'JetBrains Mono\',monospace;">coin:accrue-daily-profits</code>']) !!}
-        </p>
-        <p style="margin:8px 0 0;font-size:13px;color:rgba(232,237,245,0.58);">{{ __('coin.admin.profit_accrual_auto_only') }}</p>
+        <div style="margin-bottom:16px;">
+            <h1 style="margin:0;font-size:24px;font-weight:600;">{{ __('coin.admin.profit_accrual') }}</h1>
+            <p style="margin:8px 0 0;font-size:14px;color:rgba(232,237,245,0.72);">
+                {!! __('coin.admin.profit_accrual_sub', ['command' => '<code style="font-family:\'JetBrains Mono\',monospace;">coin:accrue-daily-profits</code>']) !!}
+            </p>
+            <p style="margin:8px 0 0;font-size:13px;color:rgba(232,237,245,0.58);">{{ __('coin.admin.profit_accrual_auto_only') }}</p>
+        </div>
+        @include('admin.partials.list-toolbar', [
+            'action' => route('admin.profit-accrual.index'),
+            'search' => $search,
+            'sort' => $sort,
+            'dir' => $dir,
+            'perPage' => $perPage,
+            'searchPlaceholder' => __('coin.admin.search_placeholder_accruals'),
+        ])
     </div>
 
     <div class="admin-card" style="margin-top:16px;padding:0;overflow:hidden;">
         <table style="width:100%;border-collapse:collapse;font-size:13px;">
             <thead>
-                <tr style="text-align:left;border-bottom:1px solid rgba(255,255,255,0.08);color:rgba(232,237,245,0.62);font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.1em;">
-                    <th style="padding:14px 18px;">{{ strtoupper(__('coin.admin.when')) }}</th>
-                    <th style="padding:14px 18px;">{{ strtoupper(__('coin.user')) }}</th>
-                    <th style="padding:14px 18px;">{{ strtoupper(__('coin.admin.source')) }}</th>
-                    <th style="padding:14px 18px;">{{ strtoupper(__('coin.amount')) }}</th>
+                <tr style="text-align:left;border-bottom:1px solid rgba(255,255,255,0.08);">
+                    @include('admin.partials.sortable-th', ['column' => 'occurred_at', 'label' => strtoupper(__('coin.admin.when')), 'sort' => $sort, 'dir' => $dir])
+                    @include('admin.partials.sortable-th', ['column' => 'user', 'label' => strtoupper(__('coin.user')), 'sort' => $sort, 'dir' => $dir])
+                    @include('admin.partials.sortable-th', ['column' => 'source', 'label' => strtoupper(__('coin.admin.source')), 'sort' => $sort, 'dir' => $dir])
+                    @include('admin.partials.sortable-th', ['column' => 'amount', 'label' => strtoupper(__('coin.amount')), 'sort' => $sort, 'dir' => $dir])
                 </tr>
             </thead>
             <tbody>
-                @forelse($recentAccruals as $tx)
+                @forelse($accruals as $tx)
                     <tr style="border-bottom:1px solid rgba(255,255,255,0.06);">
                         <td style="padding:14px 18px;">{{ $tx->occurred_at?->format('M j, Y H:i') ?? $tx->occurred_label }}</td>
                         <td style="padding:14px 18px;"><a href="{{ route('admin.users.show', $tx->user) }}">{{ $tx->user?->accountLabel() }}</a></td>
@@ -41,4 +51,6 @@
             </tbody>
         </table>
     </div>
+
+    @include('admin.partials.list-pagination', ['paginator' => $accruals])
 @endsection

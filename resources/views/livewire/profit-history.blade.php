@@ -27,11 +27,16 @@
           </span>
         </div>
 
+        @include('livewire.partials.transaction-list-toolbar', [
+          'searchProperty' => 'profitSearch',
+          'placeholder' => __('coin.stats.search_profit_history'),
+        ])
+
         <div style="display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr) minmax(0, 1.4fr) minmax(0, 0.8fr); padding: 16px 0 12px; border-bottom: 1px solid rgba(150,235,250,0.1); font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.12em; color: rgba(214,238,248,0.66);">
-          <span>{{ mb_strtoupper(__('coin.table.date')) }}</span>
-          <span>{{ mb_strtoupper(__('coin.table.type')) }}</span>
-          <span>{{ mb_strtoupper(__('coin.table.source')) }}</span>
-          <span style="text-align: right;">{{ mb_strtoupper(__('coin.table.amount')) }}</span>
+          <span>@include('livewire.partials.sortable-transaction-column', ['column' => 'occurred_at', 'label' => mb_strtoupper(__('coin.table.date')), 'sortProperty' => 'profitSort', 'dirProperty' => 'profitDir', 'sortMethod' => 'sortProfit'])</span>
+          <span>@include('livewire.partials.sortable-transaction-column', ['column' => 'type', 'label' => mb_strtoupper(__('coin.table.type')), 'sortProperty' => 'profitSort', 'dirProperty' => 'profitDir', 'sortMethod' => 'sortProfit'])</span>
+          <span>@include('livewire.partials.sortable-transaction-column', ['column' => 'source', 'label' => mb_strtoupper(__('coin.table.source')), 'sortProperty' => 'profitSort', 'dirProperty' => 'profitDir', 'sortMethod' => 'sortProfit'])</span>
+          <span>@include('livewire.partials.sortable-transaction-column', ['column' => 'amount', 'label' => mb_strtoupper(__('coin.table.amount')), 'sortProperty' => 'profitSort', 'dirProperty' => 'profitDir', 'sortMethod' => 'sortProfit', 'align' => 'right'])</span>
         </div>
 
         @forelse($transactions as $transaction)
