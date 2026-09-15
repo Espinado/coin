@@ -61,7 +61,6 @@
         <span class="coin-support-badge" data-user-support-nav-badge style="position: relative; font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 700; min-width: 20px; text-align: center; padding: 3px 7px; border-radius: 999px; background: linear-gradient(140deg, oklch(0.88 0.2 35), oklch(0.72 0.22 25)); color: #1a0a04; box-shadow: 0 0 16px oklch(0.82 0.2 35 / 0.55);">{{ $this->unreadSupportCount }}</span>
       @endif
     </button>
-    </div>
 
     <form method="POST" action="{{ route('logout') }}" class="coin-sidebar-logout">
       @csrf
@@ -70,6 +69,7 @@
         <span>{{ __('coin.nav.logout') }}</span>
       </button>
     </form>
+    </div>
 
     <div class="coin-sidebar-footer">
       @include('livewire.partials.sidebar-active-investments')

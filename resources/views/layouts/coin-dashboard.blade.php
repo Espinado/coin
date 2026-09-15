@@ -13,7 +13,15 @@
     <style>
       body { margin: 0; background: #04101c; -webkit-font-smoothing: antialiased; }
       @media (min-width: 769px) {
-        .coin-sidebar { position: fixed !important; top: 0; bottom: 0; left: max(0px, calc((100vw - min(1440px, 100vw)) / 2)); z-index: 40; }
+        .coin-sidebar {
+          position: fixed !important;
+          top: 0;
+          bottom: 0;
+          left: max(0px, calc((100vw - min(1440px, 100vw)) / 2));
+          z-index: 40;
+          display: flex !important;
+          flex-direction: column !important;
+        }
         .coin-shell { padding-left: 248px; }
       }
       a { color: oklch(0.86 0.11 195); text-decoration: none; }

@@ -152,11 +152,10 @@ html.coin-nav-open .coin-nav-mobile {
 }
 
 .coin-sidebar-nav {
-  position: relative;
-  z-index: 3;
   display: flex;
   flex-direction: column;
   gap: 3px;
+  flex-shrink: 0;
 }
 
 .coin-nav-item {
@@ -193,7 +192,8 @@ html.coin-nav-open .coin-nav-mobile {
 
 .coin-sidebar-footer {
   flex-shrink: 0;
-  margin-top: 20px;
+  margin-top: auto;
+  padding-top: 20px;
 }
 
 .coin-sidebar-investments {
@@ -208,7 +208,6 @@ html.coin-nav-open .coin-nav-mobile {
 
 .coin-nav-support {
   position: relative;
-  z-index: 4;
 }
 
 .coin-nav-support--unread {
@@ -276,18 +275,9 @@ html.coin-nav-open .coin-nav-mobile {
     z-index: 40;
     height: 100vh;
     height: 100dvh;
+    overflow-x: hidden;
     overflow-y: auto;
     overscroll-behavior: contain;
-  }
-
-  .coin-sidebar-nav {
-    flex: 1;
-    min-height: 0;
-  }
-
-  .coin-sidebar-footer {
-    margin-top: auto;
-    padding-top: 20px;
   }
 }
 
