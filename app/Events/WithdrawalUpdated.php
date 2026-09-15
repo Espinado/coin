@@ -20,9 +20,15 @@ class WithdrawalUpdated implements ShouldBroadcastNow
     /** @return array<int, \Illuminate\Broadcasting\PrivateChannel> */
     public function broadcastOn(): array
     {
-        return [
+        $channels = [
             new PrivateChannel('admin.withdrawals'),
         ];
+
+        if ($this->withdrawal->user_id) {
+            $channels[] = new PrivateChannel('wallet.user.'.$this->withdrawal->user_id);
+        }
+
+        return $channels;
     }
 
     public function broadcastAs(): string
@@ -33,14 +39,24 @@ class WithdrawalUpdated implements ShouldBroadcastNow
     /** @return array<string, mixed> */
     public function broadcastWith(): array
     {
+        $this->withdrawal->loadMissing('user.wallet');
+        $wallet = $this->withdrawal->user?->wallet;
+
         return [
             'withdrawal' => [
                 'id' => $this->withdrawal->id,
                 'reference' => $this->withdrawal->reference,
                 'status' => $this->withdrawal->status,
                 'status_label' => $this->withdrawal->statusLabel(),
+                'amount' => $this->withdrawal->formattedAmount(),
             ],
             'pending_withdrawals_count' => Withdrawal::pendingCountForAdmin(),
+            'wallet' => $wallet ? [
+                'balance' => $wallet->formattedBalance(),
+                'available' => $wallet->formattedAvailable(),
+                'pending' => $wallet->formattedPending(),
+                'locked' => $wallet->formattedLocked(),
+            ] : null,
         ];
     }
 }

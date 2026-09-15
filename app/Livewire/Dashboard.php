@@ -969,6 +969,12 @@ class Dashboard extends Component
         $this->dispatch('support-message-sent', message: 'Message sent');
     }
 
+    #[On('echo-private:wallet.user.{user.id},.WithdrawalUpdated')]
+    public function onWithdrawalUpdated(): void
+    {
+        $this->reloadPortfolioData();
+    }
+
     #[On('echo-private:support.user.{user.id},.SupportTicketMessageSent')]
     #[On('echo-private:support.user.{user.id},.SupportTicketUpdated')]
     public function onSupportTicketRealtime(mixed $payload = null): void
