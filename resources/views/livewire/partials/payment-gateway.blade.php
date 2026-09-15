@@ -4,9 +4,7 @@
   $amount = number_format((float) ($pendingTopUpAmount ?? $depositAmount), 2, '.', ',');
   $canDismiss = ! in_array($paymentModalStep, ['processing', 'redirect'], true);
 @endphp
-@teleport('body')
 <div
-  wire:key="topup-gateway-{{ $paymentModalStep }}"
   class="coin-payment-overlay"
   style="position: fixed; inset: 0; z-index: 9999; overflow-y: auto;"
   @if($canDismiss && ! in_array($paymentModalStep, ['bank'], true)) wire:click="closePaymentModal" wire:keydown.escape.window="closePaymentModal" @endif
@@ -77,8 +75,8 @@
           <div style="display: flex; justify-content: space-between; gap: 12px;"><span style="color: #6b829c;">{{ __('coin.bank_gateway.description') }}</span><span style="text-align: right;">{{ __('coin.bank_gateway.top_up_purpose') }}</span></div>
         </div>
         <div style="padding: 18px 22px 22px; display: flex; gap: 10px; background: #f8fafc; border-top: 1px solid #e8eef5;">
-          <button type="button" wire:click="closePaymentModal" style="flex: 1; padding: 12px; border-radius: 8px; border: 1px solid #c8d6e6; background: #fff; color: #334862; font-family: inherit; font-size: 14px; cursor: pointer;">{{ __('coin.bank_gateway.cancel') }}</button>
-          <button type="button" wire:click="confirmTopUpBankPayment" wire:loading.attr="disabled" wire:target="confirmTopUpBankPayment" style="flex: 1.4; padding: 12px; border-radius: 8px; border: 0; background: linear-gradient(90deg, #1f4f8a, #2563a8); color: #fff; font-family: inherit; font-size: 14px; font-weight: 600; cursor: pointer;">
+          <button type="button" wire:click.stop="closePaymentModal" style="flex: 1; padding: 12px; border-radius: 8px; border: 1px solid #c8d6e6; background: #fff; color: #334862; font-family: inherit; font-size: 14px; cursor: pointer;">{{ __('coin.bank_gateway.cancel') }}</button>
+          <button type="button" wire:click.stop="confirmTopUpBankPayment" wire:loading.attr="disabled" wire:target="confirmTopUpBankPayment" style="flex: 1.4; padding: 12px; border-radius: 8px; border: 0; background: linear-gradient(90deg, #1f4f8a, #2563a8); color: #fff; font-family: inherit; font-size: 14px; font-weight: 600; cursor: pointer; position: relative; z-index: 1;">
             <span wire:loading.remove wire:target="confirmTopUpBankPayment">{{ __('coin.bank_gateway.confirm_payment') }}</span>
             <span wire:loading wire:target="confirmTopUpBankPayment">{{ __('coin.bank_gateway.processing_short') }}</span>
           </button>
@@ -140,5 +138,4 @@
     to { transform: rotate(360deg); }
   }
 </style>
-@endteleport
 @endif

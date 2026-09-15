@@ -21,9 +21,7 @@
     ? __('coin.payment_modal.from_balance')
     : __('coin.payment_modal.to_wallet');
 @endphp
-@teleport('body')
 <div
-  wire:key="payment-modal-{{ $paymentModal }}-{{ $paymentModalStep }}"
   class="coin-payment-overlay"
   style="position: fixed; inset: 0; z-index: 9999; display: flex; align-items: safe center; justify-content: center; padding: 24px; background: rgba(2, 8, 16, 0.82); backdrop-filter: blur(8px); overflow-y: auto;"
   @if($paymentModalStep !== 'processing') wire:click="closePaymentModal" wire:keydown.escape.window="closePaymentModal" @endif
@@ -145,5 +143,4 @@
     to { transform: rotate(360deg); }
   }
 </style>
-@endteleport
 @endif
