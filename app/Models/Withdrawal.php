@@ -70,4 +70,9 @@ class Withdrawal extends Model
     {
         return number_format((float) $this->amount, 2, '.', ',');
     }
+
+    public static function pendingCountForAdmin(): int
+    {
+        return self::query()->where('status', self::STATUS_PENDING)->count();
+    }
 }

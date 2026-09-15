@@ -2,11 +2,13 @@
 
 namespace Tests\Feature;
 
+use App\Events\WithdrawalUpdated;
 use App\Models\Admin;
 use App\Models\Plan;
 use App\Models\User;
 use App\Models\WalletTransaction;
 use App\Models\Withdrawal;
+use Illuminate\Support\Facades\Event;
 use App\Services\DepositService;
 use App\Services\PlanPurchaseService;
 use App\Services\PlatformSettingsService;
@@ -66,12 +68,18 @@ class AdminModuleTest extends TestCase
 
     public function test_admin_withdrawal_status_update(): void
     {
+        Event::fake([WithdrawalUpdated::class]);
+
         $user = User::query()->where('email', 'test@test.lv')->firstOrFail();
 
         app(DepositService::class)->createPending($user, 200);
         $user->refresh();
 
         $withdrawal = app(\App\Services\WithdrawalService::class)->createForUser($user, 50);
+
+        Event::assertDispatched(WithdrawalUpdated::class, function (WithdrawalUpdated $event) use ($withdrawal): bool {
+            return $event->withdrawal->is($withdrawal);
+        });
 
         $this->actingAs($this->admin, 'admin')
             ->patch('http://admin.coin.test/withdrawals/'.$withdrawal->id.'/status', [
@@ -82,6 +90,11 @@ class AdminModuleTest extends TestCase
 
         $withdrawal->refresh();
         $this->assertSame(Withdrawal::STATUS_APPROVED, $withdrawal->status);
+
+        Event::assertDispatched(WithdrawalUpdated::class, function (WithdrawalUpdated $event) use ($withdrawal): bool {
+            return $event->withdrawal->is($withdrawal)
+                && $event->withdrawal->status === Withdrawal::STATUS_APPROVED;
+        });
     }
 
     public function test_admin_plan_crud(): void

@@ -5,6 +5,7 @@ import { showIncomingMessageToast } from './support-toast';
 import { appendSupportMessage } from './support-chat';
 
 const badgeStyle = 'margin-left:6px;padding:3px 8px;border-radius:999px;background:linear-gradient(140deg,#ffb454,#e8872e);color:#1a1208;font-family:\'JetBrains Mono\',monospace;font-size:10px;font-weight:700;box-shadow:0 0 14px rgba(255,180,84,0.45);';
+const withdrawalsBadgeStyle = 'margin-left:6px;padding:2px 7px;border-radius:999px;background:rgba(255,143,143,0.18);color:#ff8f8f;font-family:\'JetBrains Mono\',monospace;font-size:10px;';
 const rowBadgeStyle = 'flex-shrink:0;font-family:\'JetBrains Mono\',monospace;font-size:11px;font-weight:700;min-width:22px;text-align:center;padding:4px 9px;border-radius:999px;background:linear-gradient(140deg,#ffb454,#e8872e);color:#1a1208;box-shadow:0 0 14px rgba(255,180,84,0.45);';
 
 function updateTicketMeta(ticket) {
@@ -64,6 +65,67 @@ function renderAdminNavBadge(total) {
     }
 
     badge.textContent = String(total);
+}
+
+function readInitialAdminWithdrawalsNavCount() {
+    const badge = document.querySelector('[data-admin-withdrawals-nav-badge]');
+
+    return badge ? Number(badge.textContent) : 0;
+}
+
+function renderAdminWithdrawalsNavBadge(total) {
+    const link = document.querySelector('[data-admin-withdrawals-nav]');
+
+    if (! link) {
+        return;
+    }
+
+    let badge = link.querySelector('[data-admin-withdrawals-nav-badge]');
+
+    if (! total || total <= 0) {
+        badge?.remove();
+
+        return;
+    }
+
+    if (! badge) {
+        badge = document.createElement('span');
+        badge.dataset.adminWithdrawalsNavBadge = '';
+        badge.style.cssText = withdrawalsBadgeStyle;
+        link.appendChild(badge);
+    }
+
+    badge.textContent = String(total);
+}
+
+function updateWithdrawalsNavBadge(total) {
+    const count = Number(total);
+
+    if (! Number.isFinite(count)) {
+        return;
+    }
+
+    renderAdminWithdrawalsNavBadge(count);
+}
+
+function updateWithdrawalRow(payload) {
+    const withdrawalId = payload.withdrawal?.id;
+
+    if (! withdrawalId) {
+        return;
+    }
+
+    const row = document.querySelector(`tr[data-withdrawal-id="${withdrawalId}"]`);
+
+    if (! row) {
+        return;
+    }
+
+    const statusCell = row.querySelector('[data-withdrawal-status-cell]');
+
+    if (statusCell && payload.withdrawal?.status_label) {
+        statusCell.textContent = payload.withdrawal.status_label;
+    }
 }
 
 function updateNavBadge(total) {
@@ -192,6 +254,20 @@ function bootAdminSupportRealtime() {
 
     const ticketId = window.supportChatConfig?.ticketId;
 
+    echo.private('admin.withdrawals')
+        .listen('.WithdrawalUpdated', (payload) => {
+            reverbLog('info', 'admin channel: WithdrawalUpdated', {
+                withdrawalId: payload?.withdrawal?.id ?? null,
+                pendingCount: payload?.pending_withdrawals_count ?? null,
+            });
+
+            if (payload.pending_withdrawals_count !== undefined && payload.pending_withdrawals_count !== null) {
+                updateWithdrawalsNavBadge(Number(payload.pending_withdrawals_count));
+            }
+
+            updateWithdrawalRow(payload);
+        });
+
     echo.private('support.admin')
         .listen('.SupportTicketMessageSent', (payload) => {
             reverbLog('info', 'admin channel: SupportTicketMessageSent', {
@@ -229,6 +305,7 @@ function bootAdminSupportRealtime() {
 function bootAdminSupportNavBadge() {
     adminNavUnreadCount = readInitialAdminNavUnread();
     renderAdminNavBadge(adminNavUnreadCount);
+    renderAdminWithdrawalsNavBadge(readInitialAdminWithdrawalsNavCount());
 }
 
 if (document.readyState === 'loading') {

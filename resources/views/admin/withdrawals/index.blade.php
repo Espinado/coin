@@ -36,11 +36,11 @@
             </thead>
             <tbody>
                 @forelse($withdrawals as $withdrawal)
-                    <tr style="border-bottom:1px solid rgba(255,255,255,0.06);">
+                    <tr data-withdrawal-id="{{ $withdrawal->id }}" style="border-bottom:1px solid rgba(255,255,255,0.06);">
                         <td style="padding:14px 18px;"><a href="{{ route('admin.withdrawals.show', $withdrawal) }}">{{ $withdrawal->reference }}</a></td>
                         <td style="padding:14px 18px;">{{ $withdrawal->user->accountLabel() }}</td>
                         <td style="padding:14px 18px;font-family:'JetBrains Mono',monospace;">{{ $withdrawal->formattedAmount() }}</td>
-                        <td style="padding:14px 18px;">{{ $withdrawal->statusLabel() }}</td>
+                        <td data-withdrawal-status-cell style="padding:14px 18px;">{{ $withdrawal->statusLabel() }}</td>
                         <td style="padding:14px 18px;">{{ $withdrawal->created_at?->format('M j, Y H:i') }}</td>
                     </tr>
                 @empty

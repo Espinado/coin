@@ -2,8 +2,8 @@
 
 namespace App\Services;
 
+use App\Events\WithdrawalUpdated;
 use App\Support\PlatformTerms;
-
 use App\Models\Admin;
 use App\Models\User;
 use App\Models\Wallet;
@@ -45,7 +45,7 @@ class WithdrawalService
             $wallet->decrement('available', $amount);
             $wallet->increment('pending', $amount);
 
-            return Withdrawal::query()->create([
+            $withdrawal = Withdrawal::query()->create([
                 'user_id' => $user->id,
                 'reference' => 'WD-'.Str::upper(Str::random(8)),
                 'amount' => $amount,
@@ -55,6 +55,10 @@ class WithdrawalService
                 'network_label' => $wallet->network_label,
                 'status' => Withdrawal::STATUS_PENDING,
             ]);
+
+            WithdrawalUpdated::dispatch($withdrawal);
+
+            return $withdrawal;
         });
     }
 
@@ -89,7 +93,11 @@ class WithdrawalService
                 'processed_at' => in_array($status, [Withdrawal::STATUS_PAID, Withdrawal::STATUS_REJECTED], true) ? now() : $withdrawal->processed_at,
             ]);
 
-            return $withdrawal->fresh(['user.wallet', 'processedByAdmin']);
+            $withdrawal = $withdrawal->fresh(['user.wallet', 'processedByAdmin']);
+
+            WithdrawalUpdated::dispatch($withdrawal);
+
+            return $withdrawal;
         });
     }
 

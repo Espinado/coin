@@ -48,6 +48,13 @@ Broadcast::channel('support.admin', function ($user) {
     return $allowed;
 });
 
+Broadcast::channel('admin.withdrawals', function ($user) {
+    $allowed = $user instanceof Admin;
+    logSupportChannelAuth('admin.withdrawals', $user, $allowed, 'admin_only');
+
+    return $allowed;
+});
+
 Broadcast::channel('support.guest.{ticketId}', function ($user, int $ticketId) {
     $allowed = SupportGuestSession::canAccessTicket($ticketId);
     logSupportChannelAuth('support.guest.'.$ticketId, $user, $allowed, 'guest_session');

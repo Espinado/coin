@@ -7,10 +7,10 @@
             <span style="margin-left:6px;padding:2px 7px;border-radius:999px;background:rgba(255,180,84,0.18);color:#ffb454;font-family:'JetBrains Mono',monospace;font-size:10px;">{{ $pendingDepositsCount }}</span>
         @endif
     </a>
-    <a href="{{ route('admin.withdrawals.index') }}" class="admin-btn">
+    <a href="{{ route('admin.withdrawals.index') }}" class="admin-btn" data-admin-withdrawals-nav>
         {{ __('coin.admin.payouts') }}
         @if(($pendingWithdrawalsCount ?? 0) > 0)
-            <span style="margin-left:6px;padding:2px 7px;border-radius:999px;background:rgba(255,143,143,0.18);color:#ff8f8f;font-family:'JetBrains Mono',monospace;font-size:10px;">{{ $pendingWithdrawalsCount }}</span>
+            <span data-admin-withdrawals-nav-badge style="margin-left:6px;padding:2px 7px;border-radius:999px;background:rgba(255,143,143,0.18);color:#ff8f8f;font-family:'JetBrains Mono',monospace;font-size:10px;">{{ $pendingWithdrawalsCount }}</span>
         @endif
     </a>
     <a href="{{ route('admin.plans.index') }}" class="admin-btn">{{ __('coin.admin.plans') }}</a>
