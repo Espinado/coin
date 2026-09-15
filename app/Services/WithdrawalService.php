@@ -17,6 +17,7 @@ class WithdrawalService
 {
     public function __construct(
         private PlatformSettingsService $settings,
+        private UserNotificationService $notifications,
     ) {}
 
     public function createForUser(User $user, float $amount, ?string $payoutAddress = null): Withdrawal
@@ -104,6 +105,19 @@ class WithdrawalService
             ]);
 
             $withdrawal = $withdrawal->fresh(['user.wallet', 'processedByAdmin']);
+
+            if ($status === Withdrawal::STATUS_PAID && $previous !== Withdrawal::STATUS_PAID) {
+                $fee = $this->settings->getFloat('network_fee');
+                $net = max(0, $amount - $fee);
+                $currency = $withdrawal->currency ?: $this->settings->tokenSymbol();
+
+                $this->notifications->notifyWithdrawalPaid(
+                    $withdrawal->user,
+                    $withdrawal,
+                    $net,
+                    $currency,
+                );
+            }
 
             WithdrawalUpdated::dispatch($withdrawal);
 

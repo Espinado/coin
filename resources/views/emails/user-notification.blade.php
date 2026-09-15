@@ -26,7 +26,7 @@
           </tr>
           <tr>
             <td style="padding:0 28px 28px;font-size:13px;line-height:1.6;color:rgba(214,238,248,0.72);">
-              <p style="margin:0;">{{ __('coin.notifications.mail.footer') }}</p>
+              <p style="margin:0;">{{ $footer ?? __('coin.notifications.mail.footer') }}</p>
             </td>
           </tr>
         </table>

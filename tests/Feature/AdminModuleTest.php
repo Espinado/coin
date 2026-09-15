@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Events\WithdrawalUpdated;
+use App\Mail\UserEventNotificationMail;
 use App\Models\Admin;
 use App\Models\Plan;
 use App\Models\User;
@@ -18,6 +19,7 @@ use Database\Seeders\CoinDemoSeeder;
 use Database\Seeders\PlanSeeder;
 use Database\Seeders\PlatformSettingsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Mail;
 use Tests\TestCase;
 
 class AdminModuleTest extends TestCase
@@ -101,6 +103,30 @@ class AdminModuleTest extends TestCase
         Event::assertDispatched(WithdrawalUpdated::class, function (WithdrawalUpdated $event) use ($withdrawal): bool {
             return $event->withdrawal->is($withdrawal)
                 && $event->withdrawal->status === Withdrawal::STATUS_APPROVED;
+        });
+    }
+
+    public function test_admin_marks_withdrawal_paid_and_emails_user(): void
+    {
+        Mail::fake();
+
+        $user = User::query()->where('email', 'test@test.lv')->firstOrFail();
+
+        app(DepositService::class)->createPending($user, 200);
+        $user->refresh();
+
+        $withdrawal = app(\App\Services\WithdrawalService::class)->createForUser($user, 50);
+
+        $this->actingAs($this->admin, 'admin')
+            ->patch('http://admin.coin.test/withdrawals/'.$withdrawal->id.'/status', [
+                'status' => Withdrawal::STATUS_PAID,
+                'admin_note' => 'Sent on-chain.',
+            ])
+            ->assertRedirect();
+
+        Mail::assertSent(UserEventNotificationMail::class, function (UserEventNotificationMail $mail) use ($user): bool {
+            return $mail->hasTo($user->email)
+                && $mail->subjectLine === __('coin.notifications.mail.payout_subject');
         });
     }
 

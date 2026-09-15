@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Mail\UserEventNotificationMail;
 use App\Models\Contract;
 use App\Models\User;
+use App\Models\Withdrawal;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Mail;
 
@@ -18,7 +19,9 @@ class UserNotificationService
 
     public const TYPE_REFERRAL_ACTIVITY = 'referral_activity';
 
-    public function send(User $user, string $type, string $subject, string $intro, array $lines = []): void
+    public const TYPE_PAYOUT_COMPLETED = 'payout_completed';
+
+    public function send(User $user, string $type, string $subject, string $intro, array $lines = [], ?string $footer = null): void
     {
         if (! $user->wantsNotification($type)) {
             return;
@@ -30,6 +33,7 @@ class UserNotificationService
                 subjectLine: $subject,
                 intro: $intro,
                 lines: $lines,
+                footer: $footer,
             ));
         } catch (\Throwable $exception) {
             report($exception);
@@ -88,6 +92,38 @@ class UserNotificationService
                     'currency' => $currency,
                 ]),
             ],
+        );
+    }
+
+    public function notifyWithdrawalPaid(User $user, Withdrawal $withdrawal, float $netAmount, string $currency): void
+    {
+        $lines = [
+            __('coin.notifications.mail.payout_reference', ['reference' => $withdrawal->reference]),
+            __('coin.notifications.mail.payout_amount', [
+                'amount' => $withdrawal->formattedAmount(),
+                'currency' => $currency,
+            ]),
+            __('coin.notifications.mail.payout_net', [
+                'amount' => number_format($netAmount, 2, '.', ','),
+                'currency' => $currency,
+            ]),
+        ];
+
+        if ($withdrawal->payout_address) {
+            $lines[] = __('coin.notifications.mail.payout_address', ['address' => $withdrawal->payout_address]);
+        }
+
+        if ($withdrawal->network_label) {
+            $lines[] = __('coin.notifications.mail.payout_network', ['network' => $withdrawal->network_label]);
+        }
+
+        $this->send(
+            $user,
+            self::TYPE_PAYOUT_COMPLETED,
+            __('coin.notifications.mail.payout_subject'),
+            __('coin.notifications.mail.payout_intro', ['name' => $user->name]),
+            $lines,
+            __('coin.notifications.mail.payout_footer'),
         );
     }
 

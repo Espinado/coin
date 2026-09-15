@@ -19,6 +19,7 @@ class UserEventNotificationMail extends Mailable
         public string $subjectLine,
         public string $intro,
         public array $lines = [],
+        public ?string $footer = null,
     ) {}
 
     public function envelope(): Envelope
