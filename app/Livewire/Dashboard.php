@@ -240,7 +240,7 @@ class Dashboard extends Component
     public function setWithdrawMax(): void
     {
         $this->wallet = $this->user->fresh(['wallet'])->wallet;
-        $this->withdrawAmount = $this->availableBalanceFormatted;
+        $this->withdrawAmount = number_format(max(0, $this->walletAvailableAmount()), 2, '.', '');
     }
 
     public function getAvailableBalanceFormattedProperty(): string
