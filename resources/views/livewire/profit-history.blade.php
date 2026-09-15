@@ -45,9 +45,11 @@
         <div style="padding: 24px 0; font-size: 13px; color: rgba(214,238,248,0.68);">{{ __('coin.stats.no_profit_yet') }}</div>
         @endforelse
 
-        @if($transactions->hasPages())
-          @include('livewire.partials.coin-pagination', ['paginator' => $transactions])
-        @endif
+        @include('livewire.partials.coin-pagination', [
+          'paginator' => $transactions,
+          'perPageProperty' => 'profitPerPage',
+          'perPageOptions' => [10, 20, 50],
+        ])
       </div>
     </section>
   </main>
