@@ -262,26 +262,7 @@
             @endforeach
           </div>
 
-          <div style="padding: 22px; border-radius: 16px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.035);">
-            <div style="font-size: 15px; font-weight: 600;">{{ __('coin.overview.plan_breakdown') }}</div>
-            <div style="margin-top: 4px; font-size: 12.5px; color: rgba(214,238,248,0.7);">{{ __('coin.overview.plan_breakdown_sub') }}</div>
-            <div style="margin-top: 20px; display: flex; flex-direction: column; gap: 12px;">
-              <div style="padding: 14px 16px; border-radius: 12px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.04);">
-                <div style="display: flex; align-items: center; justify-content: space-between; font-size: 13px;"><span>Frankfurt · FRA-02</span><span style="display: flex; align-items: center; gap: 7px; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: oklch(0.86 0.14 160);"><span style="width: 6px; height: 6px; border-radius: 50%; background: oklch(0.85 0.15 160);"></span>{{ mb_strtoupper(__('coin.overview.online')) }}</span></div>
-                <div style="margin-top: 11px; height: 4px; border-radius: 3px; background: rgba(150,235,250,0.12);"><div style="width: {{ $referral?->level1BarPercent() }}%; height: 100%; border-radius: 3px; background: oklch(0.86 0.12 192);"></div></div>
-                <div style="margin-top: 8px; font-family: 'JetBrains Mono', monospace; font-size: 10.5px; color: rgba(214,238,248,0.68);">{{ mb_strtoupper(__('coin.overview.locked_usdt', ['amount' => '768'])) }}</div>
-              </div>
-              <div style="padding: 14px 16px; border-radius: 12px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.04);">
-                <div style="display: flex; align-items: center; justify-content: space-between; font-size: 13px;"><span>Ashburn · IAD-01</span><span style="display: flex; align-items: center; gap: 7px; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: oklch(0.86 0.14 160);"><span style="width: 6px; height: 6px; border-radius: 50%; background: oklch(0.85 0.15 160);"></span>{{ mb_strtoupper(__('coin.overview.online')) }}</span></div>
-                <div style="margin-top: 11px; height: 4px; border-radius: 3px; background: rgba(150,235,250,0.12);"><div style="width: {{ $referral?->level2BarPercent() }}%; height: 100%; border-radius: 3px; background: oklch(0.72 0.11 215);"></div></div>
-                <div style="margin-top: 8px; font-family: 'JetBrains Mono', monospace; font-size: 10.5px; color: rgba(214,238,248,0.68);">{{ mb_strtoupper(__('coin.overview.locked_usdt', ['amount' => '432'])) }}</div>
-              </div>
-              <div style="padding: 14px 16px; border-radius: 12px; border: 1px solid rgba(180,180,255,0.16); background: rgba(150,140,255,0.07);">
-                <div style="display: flex; align-items: center; justify-content: space-between; font-size: 13px;"><span>São Paulo · GRU-01</span><span style="display: flex; align-items: center; gap: 7px; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: oklch(0.88 0.15 90);"><span style="width: 6px; height: 6px; border-radius: 50%; background: oklch(0.88 0.15 90);"></span>{{ mb_strtoupper(__('coin.overview.expanding')) }}</span></div>
-                <div style="margin-top: 11px; font-family: 'JetBrains Mono', monospace; font-size: 10.5px; color: rgba(214,238,248,0.68);">{{ mb_strtoupper(__('coin.overview.capacity_soon')) }}</div>
-              </div>
-            </div>
-          </div>
+          @include('livewire.partials.overview-plan-breakdown')
         </div>
       </section>
     @endif
