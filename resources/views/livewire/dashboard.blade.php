@@ -98,7 +98,7 @@
       </div>
     </header>
 
-    @if($actionMessage)
+    @if($actionMessage && ! filled($paymentModal))
       <div style="margin: 0 32px 0; padding: 12px 16px; border-radius: 10px; border: 1px solid oklch(0.86 0.11 195 / 0.35); background: oklch(0.6 0.13 200 / 0.18); font-size: 13px; color: #eafcff;">{{ $actionMessage }}</div>
     @endif
 
@@ -768,6 +768,7 @@
 
 </div>
 
+@include('livewire.partials.payment-gateway')
 @include('livewire.partials.payment-modal')
 
 @script

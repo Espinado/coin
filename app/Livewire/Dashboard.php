@@ -2,7 +2,6 @@
 
 namespace App\Livewire;
 
-use App\Models\Deposit;
 use App\Models\Plan;
 use App\Models\SupportTicket;
 use App\Models\SupportTicketMessage;
@@ -97,6 +96,8 @@ class Dashboard extends Component
     public ?string $paymentModalError = null;
 
     public ?string $paymentModalReference = null;
+
+    public ?float $pendingTopUpAmount = null;
 
     public ?string $actionMessage = null;
 
@@ -452,19 +453,34 @@ class Dashboard extends Component
         ]);
 
         $this->paymentModal = 'topup';
-        $this->paymentModalStep = 'review';
+        $this->paymentModalStep = 'gateway';
+        $this->pendingTopUpAmount = (float) $this->depositAmount;
     }
 
-    public function confirmTopUpPayment(DepositService $deposits): void
+    public function proceedToTopUpBank(): void
     {
-        if ($this->paymentModal !== 'topup' || $this->paymentModalStep !== 'review') {
+        if ($this->paymentModal !== 'topup' || $this->paymentModalStep !== 'gateway') {
+            return;
+        }
+
+        $this->paymentModalError = null;
+        $this->paymentModalStep = 'redirect';
+
+        sleep(1);
+
+        $this->paymentModalStep = 'bank';
+    }
+
+    public function confirmTopUpBankPayment(DepositService $deposits): void
+    {
+        if ($this->paymentModal !== 'topup' || $this->paymentModalStep !== 'bank') {
             return;
         }
 
         $this->paymentModalError = null;
         $this->paymentModalStep = 'processing';
 
-        $amount = (float) $this->depositAmount;
+        $amount = $this->pendingTopUpAmount ?? (float) $this->depositAmount;
 
         try {
             sleep(2);
@@ -472,12 +488,10 @@ class Dashboard extends Component
             $deposit = $deposits->createPending($this->user, $amount);
 
             $this->depositAmount = '';
+            $this->pendingTopUpAmount = null;
             $this->reloadPortfolioData();
             $this->paymentModalReference = 'TOP-'.$deposit->id;
             $this->paymentModalStep = 'success';
-            $this->actionMessage = $deposit->fresh()->status === Deposit::STATUS_CONFIRMED
-                ? __('coin.messages.top_up_credited')
-                : __('coin.messages.top_up_pending');
         } catch (\RuntimeException $exception) {
             $this->paymentModalStep = 'error';
             $this->paymentModalError = $exception->getMessage();
@@ -602,7 +616,6 @@ class Dashboard extends Component
             $this->selectedPlanId = $plan->id;
             $this->paymentModalReference = $contract->code;
             $this->paymentModalStep = 'success';
-            $this->actionMessage = __('coin.messages.plan_activated');
         } catch (\RuntimeException $exception) {
             $this->paymentModalStep = 'error';
             $this->paymentModalError = $exception->getMessage();
@@ -618,7 +631,7 @@ class Dashboard extends Component
 
     public function closePaymentModal(): void
     {
-        if ($this->paymentModalStep === 'processing') {
+        if (in_array($this->paymentModalStep, ['processing', 'redirect'], true)) {
             return;
         }
 
@@ -628,6 +641,7 @@ class Dashboard extends Component
 
         if ($wasTopUp) {
             $this->depositAmount = '';
+            $this->pendingTopUpAmount = null;
         }
     }
 
@@ -849,6 +863,7 @@ class Dashboard extends Component
         $this->paymentModalStep = 'review';
         $this->paymentModalError = null;
         $this->paymentModalReference = null;
+        $this->pendingTopUpAmount = null;
     }
 
     private function formatAmount(float $value, int $decimals): string
