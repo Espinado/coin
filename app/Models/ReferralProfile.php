@@ -31,6 +31,14 @@ class ReferralProfile extends Model
         return $this->belongsTo(User::class);
     }
 
+    /** Investments (contracts) purchased by direct referrals. */
+    public function referralInvestmentsCount(): int
+    {
+        return Contract::query()
+            ->whereHas('user', fn ($query) => $query->where('referred_by_user_id', $this->user_id))
+            ->count();
+    }
+
     public function formattedTotalRewards(): string
     {
         return '+'.number_format((float) $this->total_rewards, 2, '.', ',');

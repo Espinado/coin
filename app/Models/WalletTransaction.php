@@ -9,6 +9,17 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class WalletTransaction extends Model
 {
+    /** @return list<string> */
+    public static function profitHistoryTypes(): array
+    {
+        return ['Daily profit', 'Referral credit', 'Principal release'];
+    }
+
+    public function scopeProfitHistory($query)
+    {
+        return $query->whereIn('type', self::profitHistoryTypes());
+    }
+
     protected $fillable = [
         'user_id',
         'occurred_label',

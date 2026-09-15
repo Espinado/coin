@@ -137,6 +137,12 @@ class Dashboard extends Component
             ?? $this->plans->first(fn (Plan $plan) => ! $plan->isEnterprise())?->id;
         $this->power = (int) ($this->primaryPlan?->min_deposit ?? $this->selectedPlan?->calculatorMinAmount() ?? 1200);
         $this->syncPowerToSelectedPlan();
+
+        $requestedSection = request()->integer('section');
+        if ($requestedSection >= 0 && $requestedSection <= 7) {
+            $this->section = $requestedSection;
+        }
+
         $this->tickets = $this->user->supportTickets()
             ->with('messages')
             ->orderByDesc('updated_at')
@@ -182,30 +188,17 @@ class Dashboard extends Component
             return;
         }
 
-        $this->selectedPlanId = $plan->id;
-        $this->power = max(
-            $plan->calculatorMinAmount(),
-            min($plan->calculatorMaxAmount(), (int) $this->power)
-        );
-    }
-
-    public function selectPlanAndScroll(int $planId): void
-    {
-        $plan = $this->plans->firstWhere('id', $planId);
-
-        if (! $plan instanceof Plan) {
-            return;
-        }
-
         if ($plan->isCurrentFor($this->primaryPlan)) {
             $this->section = 2;
 
             return;
         }
 
-        $this->section = 1;
-        $this->selectPlan($planId);
-        $this->dispatch('scroll-to-calculator');
+        $this->selectedPlanId = $plan->id;
+        $this->power = max(
+            $plan->calculatorMinAmount(),
+            min($plan->calculatorMaxAmount(), (int) $this->power)
+        );
     }
 
     public function updatedPower(): void

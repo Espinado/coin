@@ -502,7 +502,7 @@
               <div style="padding: 11px 0; font-size: 13px; color: rgba(214,238,248,0.68);">{{ __('coin.stats.no_profit_yet') }}</div>
               @endforelse
             </div>
-            <button style="width: 100%; margin-top: 18px; padding: 10px; border-radius: 10px; border: 1px solid rgba(150,235,250,0.2); background: rgba(150,235,250,0.06); color: #e6f4fa; font-family: inherit; font-size: 13px; cursor: pointer;">{{ __('coin.stats.full_history') }}</button>
+            <a href="{{ route('dashboard.profit-history') }}" wire:navigate style="display: block; width: 100%; margin-top: 18px; padding: 10px; border-radius: 10px; border: 1px solid rgba(150,235,250,0.2); background: rgba(150,235,250,0.06); color: #e6f4fa; font-family: inherit; font-size: 13px; text-align: center; text-decoration: none; cursor: pointer;">{{ __('coin.stats.full_history') }}</a>
           </div>
         </div>
       </section>
@@ -624,7 +624,8 @@
           </div>
           <div style="padding: 20px; border-radius: 16px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.04);">
             <div style="font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.14em; color: rgba(214,238,248,0.7);">{{ mb_strtoupper(__('coin.invest.active_investments')) }}</div>
-            <div style="margin-top: 12px; font-family: 'JetBrains Mono', monospace; font-size: 24px; color: #f0fbff;">{{ $referral?->active_contracts ?? 0 }}</div>
+            <div style="margin-top: 12px; font-family: 'JetBrains Mono', monospace; font-size: 24px; color: #f0fbff;">{{ $referral?->referralInvestmentsCount() ?? 0 }}</div>
+            <div style="margin-top: 7px; font-size: 12px; color: rgba(214,238,248,0.7);">{{ __('coin.referrals.referral_investments_hint') }}</div>
           </div>
           <div style="padding: 20px; border-radius: 16px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.04);">
             <div style="font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.14em; color: rgba(214,238,248,0.7);">{{ mb_strtoupper(__('coin.referrals.referral_rewards')) }}</div>
@@ -791,12 +792,6 @@
 
 @script
 <script>
-  $wire.on('scroll-to-calculator', () => {
-    requestAnimationFrame(() => {
-      document.getElementById('coin-plan-calculator')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-    });
-  });
-
   $wire.on('support-thread-scroll', () => {
     requestAnimationFrame(() => {
       window.scrollSupportThreadToBottom?.('smooth');

@@ -5,6 +5,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReferralInviteController;
 use App\Http\Controllers\ReverbDebugLogController;
 use App\Livewire\Dashboard;
+use App\Livewire\ProfitHistory;
 use Illuminate\Support\Facades\Broadcast;
 use Illuminate\Support\Facades\Route;
 
@@ -19,6 +20,7 @@ Route::domain(config('coin.user_domain'))
             ->middleware('web')
             ->name('guest.broadcasting.auth');
 
+        Route::get('/dashboard/profit-history', ProfitHistory::class)->middleware(['auth'])->name('dashboard.profit-history');
         Route::get('/dashboard', Dashboard::class)->middleware(['auth'])->name('dashboard');
 
         Broadcast::routes(['middleware' => ['web', 'broadcast.auth:web']]);

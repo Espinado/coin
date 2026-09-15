@@ -91,9 +91,9 @@
     <div style="display: flex; justify-content: space-between; gap: 14px;"><span style="color: rgba(214,238,248,0.72); min-width: 0;">{{ __('coin.invest.infrastructure') }}</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">{{ $plan->displayInfra() }}</span></div>
   </div>
   <div style="margin-top: 20px; height: 5px; border-radius: 3px; background: rgba(150,235,250,0.12);"><div style="width: {{ $plan->capacity_percent ?? 0 }}%; height: 100%; border-radius: 3px; background: {{ $isCluster ? 'oklch(0.8 0.12 198)' : 'oklch(0.7 0.11 205)' }};"></div></div>
-  <button type="button" wire:click="selectPlanAndScroll({{ $plan->id }})" wire:loading.attr="disabled" wire:target="selectPlanAndScroll" style="margin-top: 22px; padding: 11px; border-radius: 10px; border: 1px solid {{ $isSelected ? 'oklch(0.86 0.11 195 / 0.5)' : 'rgba(150,235,250,0.2)' }}; background: {{ $isSelected ? 'linear-gradient(140deg, oklch(0.86 0.12 192), oklch(0.66 0.13 205))' : 'rgba(150,235,250,0.06)' }}; color: {{ $isSelected ? '#04121f' : '#e6f4fa' }}; font-family: inherit; font-size: 13.5px; font-weight: {{ $isSelected ? '600' : '500' }}; cursor: pointer;">
-    <span wire:loading.remove wire:target="selectPlanAndScroll">{{ $actionLabel }}</span>
-    <span wire:loading wire:target="selectPlanAndScroll">{{ __('coin.actions.selecting') }}</span>
+  <button type="button" wire:click="selectPlan({{ $plan->id }})" wire:loading.attr="disabled" wire:target="selectPlan" style="margin-top: 22px; padding: 11px; border-radius: 10px; border: 1px solid {{ $isSelected ? 'oklch(0.86 0.11 195 / 0.5)' : 'rgba(150,235,250,0.2)' }}; background: {{ $isSelected ? 'linear-gradient(140deg, oklch(0.86 0.12 192), oklch(0.66 0.13 205))' : 'rgba(150,235,250,0.06)' }}; color: {{ $isSelected ? '#04121f' : '#e6f4fa' }}; font-family: inherit; font-size: 13.5px; font-weight: {{ $isSelected ? '600' : '500' }}; cursor: pointer;">
+    <span wire:loading.remove wire:target="selectPlan">{{ $actionLabel }}</span>
+    <span wire:loading wire:target="selectPlan">{{ __('coin.actions.selecting') }}</span>
   </button>
 </div>
 @endif

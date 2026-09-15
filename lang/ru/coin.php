@@ -268,6 +268,15 @@ return [
         'profit_history' => 'История прибыли',
         'no_profit_yet' => 'Начислений прибыли пока нет. Запустите дневное начисление или купите план.',
         'full_history' => 'Полная история',
+        'profit_history_sub' => 'Все начисления прибыли, реферальные бонусы и возврат вложений',
+        'back_to_stats' => 'Назад к статистике',
+        'total_entries' => 'Всего записей: :count',
+    ],
+
+    'pagination' => [
+        'previous' => 'Назад',
+        'next' => 'Далее',
+        'showing' => ':from–:to из :total',
     ],
 
     'referrals' => [
@@ -276,6 +285,7 @@ return [
         'copy_link' => 'Копировать ссылку',
         'invite_email' => 'Пригласить по e-mail',
         'invited' => 'Приглашено',
+        'referral_investments_hint' => 'Покупок планов вашими рефералами',
         'accrual_history' => 'История начислений',
         'no_commissions' => 'Реферальных комиссий пока нет.',
         'network' => 'Реферальная сеть',

@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Contract;
 use App\Models\Plan;
 use App\Models\User;
+use App\Models\WalletTransaction;
 use Illuminate\Support\Collection;
 
 class DashboardDataService
@@ -43,7 +44,7 @@ class DashboardDataService
             'referralAccruals' => $user->referralAccruals->sortBy('sort_order')->values(),
             'referralCommissions' => $user->referralCommissionsEarned->sortByDesc('created_at')->values(),
             'profitTransactions' => $user->walletTransactions
-                ->filter(fn ($tx) => in_array($tx->type, ['Daily profit', 'Referral credit', 'Principal release'], true))
+                ->filter(fn ($tx) => in_array($tx->type, WalletTransaction::profitHistoryTypes(), true))
                 ->sortByDesc(fn ($tx) => $tx->occurred_at ?? $tx->sort_order)
                 ->values(),
             'primaryContract' => $primaryContract,
