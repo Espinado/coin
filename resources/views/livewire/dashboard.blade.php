@@ -97,16 +97,7 @@
       </div>
     </header>
 
-    @if($actionMessage && ! filled($paymentModal))
-      @php
-        $feedbackStyle = match ($actionMessageTone ?? 'info') {
-            'success' => 'border: 1px solid oklch(0.7 0.14 160 / 0.5); background: oklch(0.58 0.14 160 / 0.22); color: oklch(0.93 0.1 160);',
-            'error' => 'border: 1px solid oklch(0.62 0.18 25 / 0.5); background: oklch(0.52 0.16 25 / 0.22); color: oklch(0.94 0.08 25);',
-            default => 'border: 1px solid oklch(0.86 0.11 195 / 0.35); background: oklch(0.6 0.13 200 / 0.18); color: #eafcff;',
-        };
-      @endphp
-      <div style="margin: 0 32px 0; padding: 12px 16px; border-radius: 10px; font-size: 13px; {{ $feedbackStyle }}">{{ $actionMessage }}</div>
-    @endif
+    @include('livewire.partials.action-feedback-toast')
 
     @if($section === 0)
       <section data-screen-label="{{ __('coin.nav.overview') }}" style="padding: 28px 32px 40px; display: flex; flex-direction: column; gap: 16px;">
