@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
+use App\Services\LoginTwoFactorService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -14,20 +15,34 @@ class AuthenticatedSessionController extends Controller
     /**
      * Display the login view.
      */
-    public function create(): View
+    public function create(Request $request, LoginTwoFactorService $twoFactor): View|RedirectResponse
     {
+        if ($request->boolean('cancel')) {
+            $twoFactor->clearChallenge($request);
+        }
+
+        if ($twoFactor->hasPendingChallenge($request)) {
+            return redirect()->route('login.two-factor');
+        }
+
         return view('auth.login');
     }
 
     /**
      * Handle an incoming authentication request.
      */
-    public function store(LoginRequest $request): RedirectResponse
+    public function store(LoginRequest $request, LoginTwoFactorService $twoFactor): RedirectResponse
     {
-        $request->authenticate();
+        $user = $request->validateCredentials();
 
-        $request->user()?->update(['last_login_at' => now()]);
+        if ($user->hasEmailTwoFactorEnabled()) {
+            $twoFactor->beginChallenge($user, $request->boolean('remember'), $request);
 
+            return redirect()->route('login.two-factor');
+        }
+
+        Auth::login($user, $request->boolean('remember'));
+        $user->update(['last_login_at' => now()]);
         $request->session()->regenerate();
 
         return redirect()->intended(route('dashboard', absolute: false));

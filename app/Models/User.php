@@ -45,6 +45,11 @@ class User extends Authenticatable
         'load_label',
         'next_expiry_label',
         'email_verified_at',
+        'email_two_factor_enabled',
+        'notify_profit_credit',
+        'notify_contract_expiry',
+        'notify_maturity_alerts',
+        'notify_referral_activity',
     ];
 
     protected $hidden = [
@@ -60,7 +65,28 @@ class User extends Authenticatable
             'password' => 'hashed',
             'expected_daily_reward' => 'decimal:2',
             'is_blocked' => 'boolean',
+            'email_two_factor_enabled' => 'boolean',
+            'notify_profit_credit' => 'boolean',
+            'notify_contract_expiry' => 'boolean',
+            'notify_maturity_alerts' => 'boolean',
+            'notify_referral_activity' => 'boolean',
         ];
+    }
+
+    public function hasEmailTwoFactorEnabled(): bool
+    {
+        return (bool) $this->email_two_factor_enabled;
+    }
+
+    public function wantsNotification(string $type): bool
+    {
+        return match ($type) {
+            'profit_credit' => (bool) $this->notify_profit_credit,
+            'contract_expiry' => (bool) $this->notify_contract_expiry,
+            'maturity_alert' => (bool) $this->notify_maturity_alerts,
+            'referral_activity' => (bool) $this->notify_referral_activity,
+            default => false,
+        };
     }
 
     /** @return array<string, string> */

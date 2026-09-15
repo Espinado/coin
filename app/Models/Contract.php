@@ -9,6 +9,15 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Contract extends Model
 {
+    public const STATUS_ACTIVE = 'active';
+
+    public const STATUS_COMPLETED = 'completed';
+
+    public const STATUS_CANCELLED = 'cancelled';
+
+    /** Demo/seed purge only — production contracts are archived, not deleted. */
+    public static bool $allowDeletion = false;
+
     protected $fillable = [
         'user_id',
         'plan_id',
@@ -43,6 +52,40 @@ class Contract extends Model
         ];
     }
 
+    protected static function booted(): void
+    {
+        static::deleting(function () {
+            if (! static::$allowDeletion) {
+                throw new \RuntimeException('Contracts cannot be deleted. Archive them with status "completed" instead.');
+            }
+        });
+    }
+
+    public function scopeActive($query)
+    {
+        return $query->where('status', self::STATUS_ACTIVE);
+    }
+
+    public function scopeCompleted($query)
+    {
+        return $query->where('status', self::STATUS_COMPLETED);
+    }
+
+    public function scopeArchived($query)
+    {
+        return $query->whereIn('status', [self::STATUS_COMPLETED, self::STATUS_CANCELLED]);
+    }
+
+    public function isActive(): bool
+    {
+        return $this->status === self::STATUS_ACTIVE;
+    }
+
+    public function isCompleted(): bool
+    {
+        return $this->status === self::STATUS_COMPLETED;
+    }
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
@@ -68,7 +111,7 @@ class Contract extends Model
             return (int) $this->days_elapsed;
         }
 
-        if ($this->status === 'completed') {
+        if ($this->isCompleted()) {
             return $term;
         }
 

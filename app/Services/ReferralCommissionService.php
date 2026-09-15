@@ -14,6 +14,7 @@ class ReferralCommissionService
         private PlatformSettingsService $settings,
         private WalletService $wallets,
         private ReferralService $referrals,
+        private UserNotificationService $notifications,
     ) {}
 
     public function onContractPurchased(Contract $contract): ?ReferralCommission
@@ -81,6 +82,8 @@ class ReferralCommissionService
                 'COMPLETED',
                 $commission,
             );
+
+            $this->notifications->notifyReferralCommission($referrer, $buyer, $commissionAmount, $currency);
 
             return $commission;
         });

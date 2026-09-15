@@ -89,7 +89,9 @@ class CoinDemoSeeder extends Seeder
         ReferralCommission::query()->delete();
         ReferralAccrual::query()->delete();
         RewardPeriodTotal::query()->delete();
+        Contract::$allowDeletion = true;
         Contract::query()->delete();
+        Contract::$allowDeletion = false;
         ReferralProfile::query()->delete();
         Wallet::query()->delete();
         User::query()->delete();

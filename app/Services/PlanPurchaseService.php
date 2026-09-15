@@ -60,7 +60,7 @@ class PlanPurchaseService
                 'user_id' => $user->id,
                 'plan_id' => $plan->id,
                 'code' => $this->generateCode(),
-                'status' => 'active',
+                'status' => Contract::STATUS_ACTIVE,
                 'principal_amount' => $amount,
                 'currency' => $currency,
                 'annual_profit_percent' => $apr,
@@ -106,7 +106,7 @@ class PlanPurchaseService
     private function refreshUserDailyProfitExpectation(User $user): void
     {
         $daily = $user->contracts()
-            ->where('status', 'active')
+            ->active()
             ->get()
             ->sum(fn (Contract $contract) => $this->dailyProfitFor($contract));
 

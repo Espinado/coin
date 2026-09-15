@@ -1,0 +1,136 @@
+<?php
+
+namespace App\Services;
+
+use App\Mail\UserEventNotificationMail;
+use App\Models\Contract;
+use App\Models\User;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Mail;
+
+class UserNotificationService
+{
+    public const TYPE_PROFIT_CREDIT = 'profit_credit';
+
+    public const TYPE_CONTRACT_EXPIRY = 'contract_expiry';
+
+    public const TYPE_MATURITY_ALERT = 'maturity_alert';
+
+    public const TYPE_REFERRAL_ACTIVITY = 'referral_activity';
+
+    public function send(User $user, string $type, string $subject, string $intro, array $lines = []): void
+    {
+        if (! $user->wantsNotification($type)) {
+            return;
+        }
+
+        try {
+            Mail::to($user->email)->send(new UserEventNotificationMail(
+                user: $user,
+                subjectLine: $subject,
+                intro: $intro,
+                lines: $lines,
+            ));
+        } catch (\Throwable $exception) {
+            report($exception);
+        }
+    }
+
+    public function notifyDailyProfit(User $user, Contract $contract, float $amount, string $currency): void
+    {
+        $this->send(
+            $user,
+            self::TYPE_PROFIT_CREDIT,
+            __('coin.notifications.mail.profit_subject'),
+            __('coin.notifications.mail.profit_intro', ['name' => $user->name]),
+            [
+                __('coin.notifications.mail.profit_plan', ['plan' => $contract->plan?->displayName() ?? $contract->code]),
+                __('coin.notifications.mail.profit_amount', [
+                    'amount' => number_format($amount, 2, '.', ','),
+                    'currency' => $currency,
+                ]),
+            ],
+        );
+    }
+
+    public function notifyContractExpiryReminder(User $user, Contract $contract, int $daysLeft): void
+    {
+        $this->send(
+            $user,
+            self::TYPE_CONTRACT_EXPIRY,
+            __('coin.notifications.mail.expiry_subject'),
+            __('coin.notifications.mail.expiry_intro', ['name' => $user->name]),
+            [
+                __('coin.notifications.mail.expiry_plan', ['plan' => $contract->plan?->displayName() ?? $contract->code]),
+                $daysLeft === 0
+                    ? __('coin.notifications.mail.expiry_today')
+                    : __('coin.notifications.mail.expiry_days', ['days' => $daysLeft]),
+                __('coin.notifications.mail.expiry_date', ['date' => $contract->formattedEndsAt()]),
+            ],
+        );
+    }
+
+    public function notifyContractMatured(User $user, Contract $contract, float $principal, string $currency): void
+    {
+        $this->send(
+            $user,
+            self::TYPE_MATURITY_ALERT,
+            __('coin.notifications.mail.maturity_subject'),
+            __('coin.notifications.mail.maturity_intro', ['name' => $user->name]),
+            [
+                __('coin.notifications.mail.maturity_plan', ['plan' => $contract->plan?->displayName() ?? $contract->code]),
+                __('coin.notifications.mail.maturity_principal', [
+                    'amount' => number_format($principal, 2, '.', ','),
+                    'currency' => $currency,
+                ]),
+                __('coin.notifications.mail.maturity_profit', [
+                    'amount' => number_format((float) $contract->accrued_amount, 2, '.', ','),
+                    'currency' => $currency,
+                ]),
+            ],
+        );
+    }
+
+    public function notifyReferralCommission(User $referrer, User $referral, float $commission, string $currency): void
+    {
+        $this->send(
+            $referrer,
+            self::TYPE_REFERRAL_ACTIVITY,
+            __('coin.notifications.mail.referral_subject'),
+            __('coin.notifications.mail.referral_intro', ['name' => $referrer->name]),
+            [
+                __('coin.notifications.mail.referral_user', ['user' => $referral->accountLabel()]),
+                __('coin.notifications.mail.referral_amount', [
+                    'amount' => number_format($commission, 2, '.', ','),
+                    'currency' => $currency,
+                ]),
+            ],
+        );
+    }
+
+    public function maybeSendContractExpiryReminder(Contract $contract): void
+    {
+        $contract->loadMissing('user', 'plan');
+
+        $user = $contract->user;
+
+        if (! $user instanceof User || ! $contract->ends_at || ! $contract->isActive()) {
+            return;
+        }
+
+        $daysLeft = (int) now()->startOfDay()->diffInDays($contract->ends_at->copy()->startOfDay(), false);
+
+        if (! in_array($daysLeft, [7, 3, 1, 0], true)) {
+            return;
+        }
+
+        $cacheKey = sprintf('contract-expiry-notice:%d:%d:%s', $contract->id, $daysLeft, now()->toDateString());
+
+        if (Cache::has($cacheKey)) {
+            return;
+        }
+
+        $this->notifyContractExpiryReminder($user, $contract, $daysLeft);
+        Cache::put($cacheKey, true, now()->addDay());
+    }
+}

@@ -23,21 +23,25 @@ class DashboardDataService
             'rewardPeriodTotals',
             'referralProfile',
             'referralAccruals',
-            'referralCommissionsEarned.referral',
-            'referralCommissionsEarned.contract.plan',
+            'referralCommissionsEarned' => fn ($query) => $query
+                ->whereHas('contract')
+                ->with(['referral', 'contract.plan']),
             'supportTickets',
         ]);
 
         $wallet = $user->wallet;
-        $primaryContract = $user->contracts->firstWhere('status', 'active');
+        $primaryContract = $user->contracts->firstWhere('status', Contract::STATUS_ACTIVE);
         $plans = Plan::query()->where('is_active', true)->orderBy('sort_order')->get();
 
         return [
             'wallet' => $wallet,
             'plans' => $plans,
             'contracts' => $user->contracts,
-            'activeContracts' => $user->contracts->where('status', 'active')->values(),
-            'completedContracts' => $user->contracts->where('status', 'completed')->values(),
+            'activeContracts' => $user->contracts->where('status', Contract::STATUS_ACTIVE)->values(),
+            'completedContracts' => $user->contracts
+                ->where('status', Contract::STATUS_COMPLETED)
+                ->sortByDesc(fn (Contract $contract) => $contract->ends_at ?? $contract->updated_at)
+                ->values(),
             'transactions' => $user->walletTransactions->sortBy('sort_order')->values(),
             'periodTotals' => $user->rewardPeriodTotals->keyBy('period_key'),
             'referral' => $user->referralProfile,

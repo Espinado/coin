@@ -3,7 +3,7 @@ set -euo pipefail
 
 cd "$(dirname "$0")"
 
-chmod +x deploy-prod.sh start-reverb.sh setup-reverb-cron.sh 2>/dev/null || true
+chmod +x deploy-prod.sh start-reverb.sh setup-reverb-cron.sh setup-scheduler-cron.sh 2>/dev/null || true
 
 BRANCH="${DEPLOY_BRANCH:-main}"
 REMOTE="${DEPLOY_REMOTE:-origin}"
@@ -44,6 +44,13 @@ if [ -x ./setup-reverb-cron.sh ]; then
   ./setup-reverb-cron.sh
 else
   bash ./setup-reverb-cron.sh
+fi
+
+echo "==> scheduler cron"
+if [ -x ./setup-scheduler-cron.sh ]; then
+  ./setup-scheduler-cron.sh
+else
+  bash ./setup-scheduler-cron.sh
 fi
 
 echo "DEPLOY_OK"

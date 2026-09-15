@@ -11,6 +11,7 @@ class ProfitAccrualService
     public function __construct(
         private WalletService $wallets,
         private PlanPurchaseService $purchases,
+        private UserNotificationService $notifications,
     ) {}
 
     /** @return array{contracts_processed: int, total_profit: float, contracts_matured: int} */
@@ -18,7 +19,7 @@ class ProfitAccrualService
     {
         return DB::transaction(function () {
             $contractIds = Contract::query()
-                ->where('status', 'active')
+                ->active()
                 ->orderBy('id')
                 ->pluck('id');
 
@@ -36,6 +37,8 @@ class ProfitAccrualService
                 if (! $contract) {
                     continue;
                 }
+
+                $this->notifications->maybeSendContractExpiryReminder($contract);
 
                 $profit = $this->accrueContract($contract);
 
@@ -59,7 +62,7 @@ class ProfitAccrualService
 
     public function accrueContract(Contract $contract): float
     {
-        if ($contract->status !== 'active') {
+        if (! $contract->isActive()) {
             return 0.0;
         }
 
@@ -109,13 +112,14 @@ class ProfitAccrualService
         );
 
         $this->refreshUserDailyProfitExpectation($user);
+        $this->notifications->notifyDailyProfit($user, $contract->fresh(['plan']), $profit, $currency);
 
         return $profit;
     }
 
     public function completeIfMature(Contract $contract): bool
     {
-        if ($contract->status !== 'active') {
+        if (! $contract->isActive()) {
             return false;
         }
 
@@ -131,15 +135,23 @@ class ProfitAccrualService
             return false;
         }
 
+        $principal = (float) ($contract->principal_amount ?? 0);
+        $currency = $contract->currency ?: $this->wallets->currencyFor($this->wallets->ensureWallet($contract->user));
+
         $this->releasePrincipal($contract);
 
         $contract->update([
-            'status' => 'completed',
+            'status' => Contract::STATUS_COMPLETED,
+            'ends_at' => $contract->ends_at ?? now(),
             'progress_percent' => 100,
-            'completed_summary' => 'Matured · '.number_format((float) $contract->accrued_amount, 2, '.', ',').' profit accrued',
+            'days_elapsed' => max((int) $contract->days_elapsed, $contract->termDays()),
+            'completed_summary' => __('coin.invest.matured_summary', [
+                'amount' => number_format((float) $contract->accrued_amount, 2, '.', ','),
+            ]),
         ]);
 
         $this->refreshUserDailyProfitExpectation($contract->user);
+        $this->notifications->notifyContractMatured($contract->user, $contract->fresh(['plan']), $principal, $currency);
 
         return true;
     }
@@ -174,7 +186,7 @@ class ProfitAccrualService
     private function refreshUserDailyProfitExpectation(User $user): void
     {
         $daily = $user->contracts()
-            ->where('status', 'active')
+            ->active()
             ->get()
             ->sum(fn (Contract $contract) => $this->purchases->dailyProfitFor($contract));
 

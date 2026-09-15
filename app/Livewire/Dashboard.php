@@ -5,19 +5,25 @@ namespace App\Livewire;
 use App\Models\Plan;
 use App\Models\SupportTicket;
 use App\Models\SupportTicketMessage;
+use App\Models\WalletTransaction;
 use App\Services\DashboardDataService;
 use App\Services\DepositService;
 use App\Services\PlanPurchaseService;
 use App\Services\PlatformSettingsService;
+use App\Services\ReferralService;
 use App\Services\SupportTicketService;
 use App\Services\WithdrawalService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Collection;
+use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Password;
 use Livewire\Attributes\On;
 use Livewire\Component;
+use Livewire\WithPagination;
 
 class Dashboard extends Component
 {
+    use WithPagination;
     public int $section = 0;
 
     public int $power = 1200;
@@ -103,6 +109,20 @@ class Dashboard extends Component
 
     public ?string $actionMessage = null;
 
+    public ?string $actionMessageTone = null;
+
+    public string $referralInviteEmail = '';
+
+    public string $profileEmail = '';
+
+    public string $profileCurrentPassword = '';
+
+    public string $profileNewPassword = '';
+
+    public string $profileNewPasswordConfirmation = '';
+
+    public string $profileTwoFactorPassword = '';
+
     public string $profilePhone = '';
 
     public string $profileTelegram = '';
@@ -129,6 +149,7 @@ class Dashboard extends Component
         $this->profitTransactions = $payload['profitTransactions'];
         $this->primaryContract = $payload['primaryContract'];
         $this->primaryPlan = $payload['primaryPlan'];
+        $this->profileEmail = (string) $this->user->email;
         $this->profilePhone = (string) ($this->user->phone ?? '');
         $this->profileTelegram = (string) ($this->user->telegram ?? '');
         $this->profileCountry = (string) ($this->user->country_code ?? '');
@@ -153,7 +174,12 @@ class Dashboard extends Component
     {
         $this->section = $section;
         $this->menuOpen = false;
-        $this->actionMessage = null;
+        $this->resetActionFeedback();
+
+        if ($section === 4) {
+            $this->wallet = $this->user->fresh(['wallet'])->wallet;
+            $this->resetPage('walletPage');
+        }
 
         if ($section === 7) {
             $this->prepareSupportChat();
@@ -206,15 +232,33 @@ class Dashboard extends Component
         $this->syncPowerToSelectedPlan();
     }
 
-    public function setDepositPreset(int $amount): void
+    public function setDepositPreset(int|string $amount): void
     {
-        $this->depositAmount = (string) $amount;
+        $this->depositAmount = number_format(max(0, (float) $amount), 2, '.', '');
     }
 
     public function setWithdrawMax(): void
     {
-        $available = (float) ($this->wallet->available ?? 0);
-        $this->withdrawAmount = number_format(max(0, $available), 2, '.', '');
+        $this->wallet = $this->user->fresh(['wallet'])->wallet;
+        $this->withdrawAmount = $this->availableBalanceFormatted;
+    }
+
+    public function getAvailableBalanceFormattedProperty(): string
+    {
+        $available = (float) ($this->walletAvailableAmount());
+
+        return number_format(max(0, $available), 2, '.', '');
+    }
+
+    private function walletAvailableAmount(): float
+    {
+        $wallet = $this->wallet;
+
+        if (is_array($wallet)) {
+            return (float) ($wallet['available'] ?? 0);
+        }
+
+        return (float) ($wallet?->available ?? 0);
     }
 
     public function toggleMenu(): void
@@ -578,6 +622,130 @@ class Dashboard extends Component
         }
     }
 
+    public function enableEmailTwoFactor(): void
+    {
+        $this->resetActionFeedback();
+
+        if ($this->user->hasEmailTwoFactorEnabled()) {
+            return;
+        }
+
+        $this->user->update(['email_two_factor_enabled' => true]);
+        $this->reloadPortfolioData();
+        $this->setActionFeedback(__('coin.messages.two_factor_enabled'), 'success');
+    }
+
+    public function toggleNotifyProfitCredit(): void
+    {
+        $this->toggleNotificationPreference(
+            'notify_profit_credit',
+            'coin.messages.notify_profit_credit_enabled',
+            'coin.messages.notify_profit_credit_disabled',
+        );
+    }
+
+    public function toggleNotifyContractExpiry(): void
+    {
+        $this->toggleNotificationPreference(
+            'notify_contract_expiry',
+            'coin.messages.notify_contract_expiry_enabled',
+            'coin.messages.notify_contract_expiry_disabled',
+        );
+    }
+
+    public function toggleNotifyMaturityAlerts(): void
+    {
+        $this->toggleNotificationPreference(
+            'notify_maturity_alerts',
+            'coin.messages.notify_maturity_alerts_enabled',
+            'coin.messages.notify_maturity_alerts_disabled',
+        );
+    }
+
+    public function toggleNotifyReferralActivity(): void
+    {
+        $this->toggleNotificationPreference(
+            'notify_referral_activity',
+            'coin.messages.notify_referral_activity_enabled',
+            'coin.messages.notify_referral_activity_disabled',
+        );
+    }
+
+    public function disableEmailTwoFactor(): void
+    {
+        $this->resetActionFeedback();
+
+        if (! $this->user->hasEmailTwoFactorEnabled()) {
+            return;
+        }
+
+        $this->validate([
+            'profileTwoFactorPassword' => ['required', 'current_password'],
+        ], [], [
+            'profileTwoFactorPassword' => __('coin.profile.two_factor_password'),
+        ]);
+
+        $this->user->update(['email_two_factor_enabled' => false]);
+        $this->profileTwoFactorPassword = '';
+        $this->reloadPortfolioData();
+        $this->setActionFeedback(__('coin.messages.two_factor_disabled'), 'error');
+    }
+
+    public function saveProfileEmail(): void
+    {
+        $this->resetActionFeedback();
+
+        $validated = $this->validate([
+            'profileEmail' => [
+                'required',
+                'string',
+                'lowercase',
+                'email',
+                'max:255',
+                Rule::unique('users', 'email')->ignore($this->user->id),
+            ],
+        ], [], [
+            'profileEmail' => __('coin.auth.email'),
+        ]);
+
+        $newEmail = $validated['profileEmail'];
+
+        if ($newEmail === $this->user->email) {
+            return;
+        }
+
+        $this->user->update([
+            'email' => $newEmail,
+            'email_verified_at' => null,
+        ]);
+
+        $this->reloadPortfolioData();
+        $this->profileEmail = (string) $this->user->email;
+        $this->actionMessage = __('coin.messages.email_updated');
+    }
+
+    public function saveProfilePassword(): void
+    {
+        $this->resetActionFeedback();
+
+        $this->validate([
+            'profileCurrentPassword' => ['required', 'current_password'],
+            'profileNewPassword' => ['required', 'string', Password::defaults()],
+            'profileNewPasswordConfirmation' => ['required', 'same:profileNewPassword'],
+        ], [], [
+            'profileCurrentPassword' => __('coin.profile.current_password'),
+            'profileNewPassword' => __('coin.profile.new_password'),
+            'profileNewPasswordConfirmation' => __('coin.auth.password_confirm'),
+        ]);
+
+        $this->user->update([
+            'password' => $this->profileNewPassword,
+        ]);
+
+        $this->reset(['profileCurrentPassword', 'profileNewPassword', 'profileNewPasswordConfirmation']);
+        $this->actionMessage = __('coin.messages.password_updated');
+    }
+
     public function saveProfile(): void
     {
         $this->resetActionFeedback();
@@ -700,8 +868,39 @@ class Dashboard extends Component
         $this->js(sprintf(
             'navigator.clipboard.writeText(%s).then(() => window.showSupportToast?.(%s)).catch(() => window.showSupportToast?.(%s, "error"))',
             json_encode($url, JSON_THROW_ON_ERROR),
-            json_encode('Link copied'),
-            json_encode('Could not copy link'),
+            json_encode(__('coin.referrals.link_copied')),
+            json_encode(__('coin.referrals.link_copy_failed')),
+        ));
+    }
+
+    public function sendReferralInvite(ReferralService $referrals): void
+    {
+        $this->validate([
+            'referralInviteEmail' => ['required', 'email'],
+        ], [], [
+            'referralInviteEmail' => __('coin.referrals.invite_email'),
+        ]);
+
+        if (strcasecmp($this->referralInviteEmail, (string) $this->user->email) === 0) {
+            $this->addError('referralInviteEmail', __('coin.referrals.invite_self_error'));
+
+            return;
+        }
+
+        try {
+            $referrals->sendInvitation($this->user, $this->referralInviteEmail);
+        } catch (\Throwable) {
+            $this->addError('referralInviteEmail', __('coin.referrals.invite_failed'));
+
+            return;
+        }
+
+        $this->referralInviteEmail = '';
+        $this->resetErrorBag();
+        $this->actionMessage = __('coin.referrals.invite_sent');
+        $this->js(sprintf(
+            'window.showSupportToast?.(%s)',
+            json_encode(__('coin.referrals.invite_sent'), JSON_THROW_ON_ERROR),
         ));
     }
 
@@ -836,8 +1035,13 @@ class Dashboard extends Component
 
     public function render(): View
     {
-        return view('livewire.dashboard')
-            ->layout('layouts.coin-dashboard', ['title' => 'Coin — '.__('coin.nav.portal')]);
+        return view('livewire.dashboard', [
+            'walletTransactions' => WalletTransaction::query()
+                ->where('user_id', auth()->id())
+                ->orderByDesc('sort_order')
+                ->orderByDesc('id')
+                ->paginate(20, pageName: 'walletPage'),
+        ])->layout('layouts.coin-dashboard', ['title' => 'Coin — '.__('coin.nav.portal')]);
     }
 
     private function dailyAmount(): float
@@ -868,6 +1072,7 @@ class Dashboard extends Component
         $this->activeContracts = $payload['activeContracts'];
         $this->completedContracts = $payload['completedContracts'];
         $this->transactions = $payload['transactions'];
+        $this->resetPage('walletPage');
         $this->periodTotals = $payload['periodTotals'];
         $this->referral = $payload['referral'];
         $this->referralAccruals = $payload['referralAccruals'];
@@ -875,6 +1080,7 @@ class Dashboard extends Component
         $this->profitTransactions = $payload['profitTransactions'];
         $this->primaryContract = $payload['primaryContract'];
         $this->primaryPlan = $payload['primaryPlan'];
+        $this->profileEmail = (string) $this->user->email;
         $this->profilePhone = (string) ($this->user->phone ?? '');
         $this->profileTelegram = (string) ($this->user->telegram ?? '');
         $this->profileCountry = (string) ($this->user->country_code ?? '');
@@ -897,9 +1103,45 @@ class Dashboard extends Component
             ->sum(fn ($transaction) => max(0, (float) ($transaction->amount ?? 0)));
     }
 
+    private function toggleNotificationPreference(string $column, string $enabledMessageKey, string $disabledMessageKey): void
+    {
+        $allowed = [
+            'notify_profit_credit',
+            'notify_contract_expiry',
+            'notify_maturity_alerts',
+            'notify_referral_activity',
+        ];
+
+        if (! in_array($column, $allowed, true)) {
+            return;
+        }
+
+        $this->resetActionFeedback();
+
+        $enabled = ! (bool) $this->user->{$column};
+
+        $this->user->update([
+            $column => $enabled,
+        ]);
+
+        $this->reloadPortfolioData();
+
+        $this->setActionFeedback(
+            __($enabled ? $enabledMessageKey : $disabledMessageKey),
+            $enabled ? 'success' : 'error',
+        );
+    }
+
+    private function setActionFeedback(string $message, string $tone = 'info'): void
+    {
+        $this->actionMessage = $message;
+        $this->actionMessageTone = $tone;
+    }
+
     private function resetActionFeedback(): void
     {
         $this->actionMessage = null;
+        $this->actionMessageTone = null;
         $this->resetErrorBag();
     }
 

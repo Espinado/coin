@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
+use App\Http\Controllers\Auth\TwoFactorLoginController;
 use App\Http\Controllers\Auth\ConfirmablePasswordController;
 use App\Http\Controllers\Auth\EmailVerificationNotificationController;
 use App\Http\Controllers\Auth\EmailVerificationPromptController;
@@ -21,6 +22,16 @@ Route::middleware('guest')->group(function () {
         ->name('login');
 
     Route::post('login', [AuthenticatedSessionController::class, 'store']);
+
+    Route::get('login/two-factor', [TwoFactorLoginController::class, 'create'])
+        ->name('login.two-factor');
+
+    Route::post('login/two-factor', [TwoFactorLoginController::class, 'store'])
+        ->middleware('throttle:6,1');
+
+    Route::post('login/two-factor/resend', [TwoFactorLoginController::class, 'resend'])
+        ->middleware('throttle:3,1')
+        ->name('login.two-factor.resend');
 
     Route::get('forgot-password', [PasswordResetLinkController::class, 'create'])
         ->name('password.request');

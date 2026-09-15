@@ -2,10 +2,12 @@
 
 namespace App\Services;
 
+use App\Mail\ReferralInvitationMail;
 use App\Models\ReferralProfile;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cookie;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 
 class ReferralService
@@ -102,6 +104,13 @@ class ReferralService
     {
         session()->forget(self::SESSION_KEY);
         Cookie::queue(Cookie::forget(self::COOKIE_NAME));
+    }
+
+    public function sendInvitation(User $referrer, string $email): void
+    {
+        $profile = $this->ensureReferralProfile($referrer);
+
+        Mail::to($email)->send(new ReferralInvitationMail($referrer, $profile));
     }
 
     private function normalizeCode(string $code): string
