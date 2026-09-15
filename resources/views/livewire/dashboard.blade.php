@@ -2,8 +2,8 @@
 <div class="coin-dashboard" style="display: flex; min-height: 100vh; width: 1440px; margin: 0 auto; background: #061423; color: #e6f4fa; font-family: 'Sora', 'Helvetica Neue', Helvetica, sans-serif;">
 
   <div class="coin-nav-overlay" wire:click="closeMenu"></div>
-  <aside class="coin-sidebar" style="width: 248px; flex: none; border-right: 1px solid rgba(150,235,250,0.1); background: rgba(4,16,28,0.6); padding: 22px 16px; display: flex; flex-direction: column; gap: 3px;">
-    <div class="coin-sidebar-nav" style="display: flex; flex-direction: column; gap: 3px;">
+  <aside class="coin-sidebar">
+    <div class="coin-sidebar-nav">
     <a href="{{ route('home') }}" style="display: flex; align-items: center; gap: 11px; padding: 4px 10px 24px; color: inherit;">
       <div style="width: 28px; height: 28px; border-radius: 9px; background: linear-gradient(145deg, oklch(0.86 0.12 192), oklch(0.6 0.13 210)); display: grid; place-items: center; box-shadow: 0 8px 22px -8px oklch(0.78 0.13 192 / 0.8);">
         <div style="width: 10px; height: 10px; border-radius: 3px; background: #061423;"></div>
@@ -64,13 +64,13 @@
     </button>
     </div>
 
-    <div class="coin-sidebar-footer" style="margin-top: auto; flex-shrink: 0; display: flex; flex-direction: column; gap: 8px; padding-top: 12px;">
-      @include('livewire.partials.sidebar-active-investments')
+    <form method="POST" action="{{ route('logout') }}" class="coin-sidebar-logout">
+      @csrf
+      <button type="submit">{{ __('coin.nav.logout') }}</button>
+    </form>
 
-      <form method="POST" action="{{ route('logout') }}">
-        @csrf
-        <button type="submit" style="width: 100%; padding: 10px 12px; border-radius: 10px; border: 1px solid rgba(150,235,250,0.16); background: rgba(150,235,250,0.04); color: rgba(230,244,250,0.78); font-family: inherit; font-size: 13px; cursor: pointer;">{{ __('coin.nav.logout') }}</button>
-      </form>
+    <div class="coin-sidebar-footer">
+      @include('livewire.partials.sidebar-active-investments')
     </div>
   </aside>
 

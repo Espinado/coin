@@ -121,33 +121,70 @@ html.coin-nav-open .coin-nav-mobile {
 }
 
 .coin-sidebar {
+  width: 248px;
+  flex: none;
+  border-right: 1px solid rgba(150, 235, 250, 0.1);
+  background: rgba(4, 16, 28, 0.96);
+  padding: 22px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  box-sizing: border-box;
   transition: transform 0.25s ease;
 }
 
 @media (min-width: 769px) {
+  .coin-dashboard {
+    padding-left: 248px;
+    box-sizing: border-box;
+  }
+
   .coin-sidebar {
-    position: sticky;
+    position: fixed;
     top: 0;
-    align-self: flex-start;
+    left: max(0px, calc((100vw - min(1440px, 100vw)) / 2));
+    z-index: 40;
     height: 100vh;
     height: 100dvh;
     overflow-y: auto;
     overscroll-behavior: contain;
-    box-sizing: border-box;
+  }
+
+  .coin-sidebar-nav {
+    flex: 1;
+    min-height: 0;
   }
 
   .coin-sidebar-footer {
-    position: sticky;
-    bottom: 0;
-    z-index: 2;
-    padding-bottom: 2px;
-    background: linear-gradient(180deg, rgba(4, 16, 28, 0) 0%, rgba(4, 16, 28, 0.92) 18%, rgba(4, 16, 28, 0.98) 100%);
+    margin-top: auto;
+    flex-shrink: 0;
+    padding-top: 12px;
   }
 }
 
 .coin-sidebar-nav {
   position: relative;
   z-index: 3;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.coin-sidebar-logout {
+  flex-shrink: 0;
+  margin: 10px 0 0;
+}
+
+.coin-sidebar-logout button {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(150, 235, 250, 0.16);
+  background: rgba(150, 235, 250, 0.04);
+  color: rgba(230, 244, 250, 0.78);
+  font-family: inherit;
+  font-size: 13px;
+  cursor: pointer;
 }
 
 .coin-sidebar-investments {
@@ -379,6 +416,10 @@ html.coin-nav-open .coin-nav-mobile {
   /* Dashboard mobile layout */
   .coin-dashboard {
     flex-direction: column !important;
+  }
+
+  .coin-dashboard {
+    padding-left: 0 !important;
   }
 
   .coin-sidebar {
