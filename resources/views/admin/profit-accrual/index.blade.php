@@ -10,18 +10,11 @@
     @endif
 
     <div class="admin-card">
-        <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;">
-            <div>
-                <h1 style="margin:0;font-size:24px;font-weight:600;">{{ __('coin.admin.profit_accrual') }}</h1>
-                <p style="margin:8px 0 0;font-size:14px;color:rgba(232,237,245,0.72);">
-                    {!! __('coin.admin.profit_accrual_sub', ['command' => '<code style="font-family:\'JetBrains Mono\',monospace;">coin:accrue-daily-profits</code>']) !!}
-                </p>
-            </div>
-            <form method="POST" action="{{ route('admin.profit-accrual.run') }}" onsubmit="return confirm(@json(__('coin.admin.run_accrual_confirm')));">
-                @csrf
-                <button type="submit" class="admin-btn admin-btn-primary">{{ __('coin.admin.run_accrual_now') }}</button>
-            </form>
-        </div>
+        <h1 style="margin:0;font-size:24px;font-weight:600;">{{ __('coin.admin.profit_accrual') }}</h1>
+        <p style="margin:8px 0 0;font-size:14px;color:rgba(232,237,245,0.72);">
+            {!! __('coin.admin.profit_accrual_sub', ['command' => '<code style="font-family:\'JetBrains Mono\',monospace;">coin:accrue-daily-profits</code>']) !!}
+        </p>
+        <p style="margin:8px 0 0;font-size:13px;color:rgba(232,237,245,0.58);">{{ __('coin.admin.profit_accrual_auto_only') }}</p>
     </div>
 
     <div class="admin-card" style="margin-top:16px;padding:0;overflow:hidden;">

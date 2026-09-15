@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Admin\Concerns\RedirectsWithAdminFlash;
 use App\Http\Controllers\Controller;
 use App\Models\SupportTicket;
 use App\Services\SupportTicketService;
@@ -12,6 +13,8 @@ use Illuminate\View\View;
 
 class SupportTicketController extends Controller
 {
+    use RedirectsWithAdminFlash;
+
     public function unreadCount(): JsonResponse
     {
         return response()->json([
@@ -97,9 +100,7 @@ class SupportTicketController extends Controller
             ]);
         }
 
-        return redirect()
-            ->route('admin.support.show', $ticket)
-            ->with('status', 'Reply sent.');
+        return $this->adminSuccess('coin.admin.flash.reply_sent', 'admin.support.index');
     }
 
     public function updateStatus(Request $request, SupportTicket $ticket, SupportTicketService $support): RedirectResponse
@@ -110,8 +111,6 @@ class SupportTicketController extends Controller
 
         $support->updateStatus($ticket, $validated['status'], $request->user('admin'));
 
-        return redirect()
-            ->route('admin.support.show', $ticket)
-            ->with('status', 'Ticket status updated.');
+        return $this->adminSuccess('coin.admin.flash.ticket_status_updated', 'admin.support.index');
     }
 }

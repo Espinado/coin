@@ -22,6 +22,7 @@ class Contract extends Model
         'tflops',
         'duration_days',
         'days_elapsed',
+        'last_accrued_on',
         'accrued_amount',
         'progress_percent',
         'started_label',
@@ -37,6 +38,7 @@ class Contract extends Model
             'annual_profit_percent' => 'decimal:2',
             'started_at' => 'datetime',
             'ends_at' => 'datetime',
+            'last_accrued_on' => 'date',
             'accrued_amount' => 'decimal:2',
         ];
     }
@@ -53,7 +55,43 @@ class Contract extends Model
 
     public function formattedAccrued(): string
     {
-        return number_format((float) $this->accrued_amount, 2, '.', ',');
+        $currency = $this->currency ?? $this->plan?->currency ?? 'USDT';
+
+        return number_format((float) $this->accrued_amount, 2, '.', ',').' '.$currency;
+    }
+
+    public function activeDays(): int
+    {
+        $term = $this->termDays();
+
+        if ($term <= 0) {
+            return (int) $this->days_elapsed;
+        }
+
+        if ($this->status === 'completed') {
+            return $term;
+        }
+
+        $accrualDays = (int) $this->days_elapsed;
+
+        if (! $this->started_at) {
+            return min($term, $accrualDays);
+        }
+
+        $calendarDays = (int) $this->started_at->copy()->startOfDay()->diffInDays(now()->startOfDay());
+
+        return min($term, max($accrualDays, $calendarDays));
+    }
+
+    public function computedProgressPercent(): int
+    {
+        $term = $this->termDays();
+
+        if ($term <= 0) {
+            return min(100, (int) $this->progress_percent);
+        }
+
+        return min(100, (int) round($this->activeDays() / $term * 100));
     }
 
     public function formattedTflops(): string

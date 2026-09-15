@@ -10,17 +10,12 @@
     @endif
 
     <div class="admin-card">
-        <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;">
-            <div>
-                <h1 style="margin:0;font-size:24px;font-weight:600;">Epoch engine</h1>
-                <p style="margin:8px 0 0;font-size:14px;color:rgba(232,237,245,0.72);">
-                    Current epoch {{ $currentEpoch ?: '—' }} · next #{{ $nextEpoch }} · rate {{ $settings['reward_rate'] }} · {{ $settings['epochs_per_day'] }}/day
-                </p>
-            </div>
-            <form method="POST" action="{{ route('admin.epochs.run') }}" onsubmit="return confirm('Run settlement for all active contracts?');">
-                @csrf
-                <button type="submit" class="admin-btn admin-btn-primary">Run settlement now</button>
-            </form>
+        <div>
+            <h1 style="margin:0;font-size:24px;font-weight:600;">Epoch engine</h1>
+            <p style="margin:8px 0 0;font-size:14px;color:rgba(232,237,245,0.72);">
+                Current epoch {{ $currentEpoch ?: '—' }} · next #{{ $nextEpoch }} · rate {{ $settings['reward_rate'] }} · {{ $settings['epochs_per_day'] }}/day
+            </p>
+            <p style="margin:8px 0 0;font-size:13px;color:rgba(232,237,245,0.58);">Manual settlement is disabled. Daily profit runs via cron only.</p>
         </div>
     </div>
 

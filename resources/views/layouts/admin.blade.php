@@ -57,6 +57,7 @@
                 @endauth
             </header>
         @endif
+        @include('admin.partials.flash-toast')
         <main class="admin-content">
             @yield('content')
         </main>

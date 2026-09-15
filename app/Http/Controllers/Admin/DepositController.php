@@ -2,15 +2,19 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Admin\Concerns\RedirectsWithAdminFlash;
 use App\Http\Controllers\Controller;
 use App\Models\Deposit;
 use App\Services\DepositService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
+use RuntimeException;
 
 class DepositController extends Controller
 {
+    use RedirectsWithAdminFlash;
+
     public function index(Request $request): View
     {
         $status = $request->string('status')->toString();
@@ -44,19 +48,29 @@ class DepositController extends Controller
 
     public function confirm(Deposit $deposit, DepositService $deposits): RedirectResponse
     {
-        $deposits->confirm($deposit, auth('admin')->user());
+        try {
+            $deposits->confirm($deposit, auth('admin')->user());
+        } catch (RuntimeException $exception) {
+            return redirect()
+                ->route('admin.deposits.index')
+                ->with('status', $exception->getMessage())
+                ->with('status_type', 'error');
+        }
 
-        return redirect()
-            ->route('admin.deposits.show', $deposit)
-            ->with('status', 'Top-up confirmed and credited.');
+        return $this->adminSuccess('coin.admin.top_up_confirmed', 'admin.deposits.index');
     }
 
     public function reject(Deposit $deposit, DepositService $deposits): RedirectResponse
     {
-        $deposits->reject($deposit, auth('admin')->user());
+        try {
+            $deposits->reject($deposit, auth('admin')->user());
+        } catch (RuntimeException $exception) {
+            return redirect()
+                ->route('admin.deposits.index')
+                ->with('status', $exception->getMessage())
+                ->with('status_type', 'error');
+        }
 
-        return redirect()
-            ->route('admin.deposits.show', $deposit)
-            ->with('status', 'Top-up rejected.');
+        return $this->adminSuccess('coin.admin.top_up_rejected', 'admin.deposits.index');
     }
 }

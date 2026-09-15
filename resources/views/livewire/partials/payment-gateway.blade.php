@@ -1,6 +1,6 @@
 @if($paymentModal === 'topup')
 @php
-  $currency = $wallet?->currency ?? 'USDT';
+  $currency = $depositCurrency ?: ($wallet?->currency ?? 'USDT');
   $amount = number_format((float) ($pendingTopUpAmount ?? $depositAmount), 2, '.', ',');
   $canDismiss = ! in_array($paymentModalStep, ['processing', 'redirect'], true);
 @endphp

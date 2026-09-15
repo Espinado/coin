@@ -46,7 +46,7 @@
             <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.12em;color:rgba(232,237,245,0.62);">{{ strtoupper(__('coin.admin.quick_links')) }}</div>
             <div style="margin-top:14px;display:flex;flex-direction:column;gap:8px;font-size:13px;">
                 <a href="{{ route('admin.withdrawals.index', ['status' => 'pending']) }}">{{ __('coin.admin.review_pending_payouts') }}</a>
-                <a href="{{ route('admin.profit-accrual.index') }}">{{ __('coin.admin.run_profit') }}</a>
+                <a href="{{ route('admin.profit-accrual.index') }}">{{ __('coin.admin.view_profit_accruals') }}</a>
                 <a href="{{ route('admin.deposits.index') }}">{{ __('coin.admin.review_top_ups') }}</a>
                 <a href="{{ route('admin.plans.index') }}">{{ __('coin.admin.manage_plans') }}</a>
                 <a href="{{ route('admin.settings.edit') }}">{{ __('coin.admin.platform_settings') }}</a>

@@ -72,8 +72,8 @@
       <div style="font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: 0.14em; color: rgba(214,238,248,0.7);">{{ mb_strtoupper(__('coin.invest.active')) }}</div>
       <div style="margin-top: 9px; font-size: 15px; font-weight: 600;">{{ $primaryPlan?->displayName() ?? '—' }}</div>
       <div style="margin-top: 4px; font-family: 'JetBrains Mono', monospace; font-size: 11.5px; color: rgba(214,238,248,0.78);">{{ $primaryContract?->formattedPrincipal() ?? '0.00 USDT' }} · {{ $primaryContract?->termDays() ?? 0 }} {{ __('coin.invest.days_suffix') }}</div>
-      <div style="margin-top: 14px; height: 4px; border-radius: 3px; background: rgba(150,235,250,0.14);"><div style="width: {{ $primaryContract?->progress_percent ?? 0 }}%; height: 100%; border-radius: 3px; background: linear-gradient(90deg, oklch(0.72 0.11 215), oklch(0.88 0.12 192));"></div></div>
-      <div style="margin-top: 8px; font-size: 11.5px; color: rgba(214,238,248,0.7);">{{ __('coin.invest.elapsed', ['elapsed' => $primaryContract?->days_elapsed ?? 0, 'total' => $primaryContract?->termDays() ?? 0]) }}</div>
+      <div style="margin-top: 14px; height: 4px; border-radius: 3px; background: rgba(150,235,250,0.14);"><div style="width: {{ $primaryContract?->computedProgressPercent() ?? 0 }}%; height: 100%; border-radius: 3px; background: linear-gradient(90deg, oklch(0.72 0.11 215), oklch(0.88 0.12 192));"></div></div>
+      <div style="margin-top: 8px; font-size: 11.5px; color: rgba(214,238,248,0.7);">{{ __('coin.invest.elapsed', ['elapsed' => $primaryContract?->activeDays() ?? 0, 'total' => $primaryContract?->termDays() ?? 0]) }}</div>
       <button wire:click="setSection(1)" style="width: 100%; margin-top: 16px; padding: 10px; border-radius: 10px; border: 1px solid oklch(0.86 0.11 195 / 0.5); background: linear-gradient(140deg, oklch(0.86 0.12 192), oklch(0.66 0.13 205)); color: #04121f; font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer;">{{ __('coin.actions.new_investment') }}</button>
     </div>
   </aside>
@@ -203,8 +203,8 @@
             <div style="margin-top: 18px; display: flex; flex-direction: column; gap: 14px;">
               @foreach($activeContracts as $contract)
               <div>
-                <div style="display: flex; align-items: baseline; justify-content: space-between; font-size: 13px;"><span>{{ $contract->plan?->displayName() }} · {{ $contract->formattedPrincipal() }}</span><span style="font-family: 'JetBrains Mono', monospace; color: rgba(214,238,248,0.78);">{{ $contract->progress_percent }}%</span></div>
-                <div style="margin-top: 9px; height: 4px; border-radius: 3px; background: rgba(150,235,250,0.12);"><div style="width: {{ $contract->progress_percent }}%; height: 100%; border-radius: 3px; background: linear-gradient(90deg, oklch(0.72 0.11 215), oklch(0.88 0.12 192));"></div></div>
+                <div style="display: flex; align-items: baseline; justify-content: space-between; font-size: 13px;"><span>{{ $contract->plan?->displayName() }} · {{ $contract->formattedPrincipal() }}</span><span style="font-family: 'JetBrains Mono', monospace; color: rgba(214,238,248,0.78);">{{ $contract->computedProgressPercent() }}%</span></div>
+                <div style="margin-top: 9px; height: 4px; border-radius: 3px; background: rgba(150,235,250,0.12);"><div style="width: {{ $contract->computedProgressPercent() }}%; height: 100%; border-radius: 3px; background: linear-gradient(90deg, oklch(0.72 0.11 215), oklch(0.88 0.12 192));"></div></div>
               </div>
               @endforeach
               <div style="display: flex; justify-content: space-between; font-size: 12.5px; color: rgba(214,238,248,0.7); padding-top: 4px;"><span>{{ __('coin.overview.next_accrual') }}</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">00:05 UTC</span></div>
@@ -297,8 +297,19 @@
               <span style="font-size: 13.5px; color: rgba(214,238,248,0.74);">{{ __('coin.invest.investment_amount') }}</span>
               <span style="font-family: 'JetBrains Mono', monospace; font-size: 19px; color: #f0fbff;">{{ $this->powerLabel }} <span style="font-size: 12px; color: rgba(214,238,248,0.7);">USDT</span></span>
             </div>
-            <input type="range" min="100" max="10000" step="100" wire:model.live="power" style="width: 100%; margin-top: 16px; height: 4px; cursor: pointer;" />
-            <div style="display: flex; justify-content: space-between; margin-top: 8px; font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.1em; color: rgba(214,238,248,0.62);"><span>100</span><span>2 500</span><span>5 000</span><span>10 000</span></div>
+            @php
+              $calcMin = $this->calculatorMin;
+              $calcMax = $this->calculatorMax;
+              $calcMid = (int) round(($calcMin + $calcMax) / 2);
+              $calcUpperMid = (int) round($calcMin + (($calcMax - $calcMin) * 0.66));
+            @endphp
+            <input type="range" min="{{ $calcMin }}" max="{{ $calcMax }}" step="{{ $this->calculatorStep }}" wire:model.live="power" wire:key="calc-slider-{{ $selectedPlanId }}" style="width: 100%; margin-top: 16px; height: 4px; cursor: pointer;" />
+            <div style="display: flex; justify-content: space-between; margin-top: 8px; font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.1em; color: rgba(214,238,248,0.62);">
+              <span>{{ number_format($calcMin, 0, '.', ' ') }}</span>
+              <span>{{ number_format($calcMid, 0, '.', ' ') }}</span>
+              <span>{{ number_format($calcUpperMid, 0, '.', ' ') }}</span>
+              <span>{{ number_format($calcMax, 0, '.', ' ') }}</span>
+            </div>
             <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-top: 26px;">
               <div style="padding: 16px; border-radius: 13px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.04);">
                 <div style="font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.12em; color: rgba(214,238,248,0.68);">{{ mb_strtoupper(__('coin.invest.per_day')) }}</div>
@@ -315,7 +326,7 @@
             </div>
           </div>
           <div style="padding: 24px; border-radius: 16px; border: 1px solid rgba(150,235,250,0.14); background: linear-gradient(170deg, rgba(20,55,80,0.7), rgba(6,20,35,0.85));">
-            <div style="font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.14em; color: rgba(214,238,248,0.7);">{{ mb_strtoupper(__('coin.invest.matching_plan')) }}</div>
+            <div style="font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.14em; color: rgba(214,238,248,0.7);">{{ mb_strtoupper(__('coin.invest.selected_plan')) }}</div>
             <div style="margin-top: 12px; font-size: 22px; font-weight: 600; letter-spacing: -0.02em;">{{ $this->planName }}</div>
             <div style="height: 1px; background: rgba(150,235,250,0.14); margin: 20px 0;"></div>
             <div style="display: flex; flex-direction: column; gap: 12px; font-size: 13px;">
@@ -349,7 +360,8 @@
           </div>
           <div style="padding: 20px; border-radius: 16px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.04);">
             <div style="font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.14em; color: rgba(214,238,248,0.7);">{{ mb_strtoupper(__('coin.invest.lifetime_profit')) }}</div>
-            <div style="margin-top: 12px; font-family: 'JetBrains Mono', monospace; font-size: 24px; color: oklch(0.9 0.12 192);">{{ $this->lifetimeRewards }}</div>
+            <div style="margin-top: 12px; font-family: 'JetBrains Mono', monospace; font-size: 24px; color: oklch(0.9 0.12 192);">{{ $this->lifetimeProfit }}</div>
+            <div style="margin-top: 7px; font-size: 12px; color: rgba(214,238,248,0.7);">{{ __('coin.invest.lifetime_profit_hint') }}</div>
           </div>
           <div style="padding: 20px; border-radius: 16px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.04);">
             <div style="font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.14em; color: rgba(214,238,248,0.7);">{{ mb_strtoupper(__('coin.invest.next_expiry')) }}</div>
@@ -473,7 +485,7 @@
               @forelse($activeContracts as $contract)
               <div>
                 <div style="display: flex; justify-content: space-between; font-size: 13px;"><span style="color: rgba(214,238,248,0.78);">{{ $contract->plan?->displayName() }} · {{ $contract->code }}</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">{{ $contract->formattedPrincipal() }}</span></div>
-                <div style="margin-top: 9px; height: 4px; border-radius: 3px; background: rgba(150,235,250,0.12);"><div style="width: {{ $contract->progress_percent }}%; height: 100%; border-radius: 3px; background: oklch(0.86 0.12 192);"></div></div>
+                <div style="margin-top: 9px; height: 4px; border-radius: 3px; background: rgba(150,235,250,0.12);"><div style="width: {{ $contract->computedProgressPercent() }}%; height: 100%; border-radius: 3px; background: oklch(0.86 0.12 192);"></div></div>
               </div>
               @empty
               <div style="font-size: 13px; color: rgba(214,238,248,0.68);">{{ __('coin.stats.no_active') }}</div>
@@ -525,16 +537,22 @@
           <div style="padding: 24px; border-radius: 16px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.035);">
             <div style="font-size: 15px; font-weight: 600;">{{ __('coin.wallet.top_up_title') }}</div>
             <div style="margin-top: 5px; font-size: 12.5px; color: rgba(214,238,248,0.7);">{{ __('coin.wallet.top_up_sub') }}</div>
-            <div style="margin-top: 20px; font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.12em; color: rgba(214,238,248,0.68);">{{ mb_strtoupper(__('coin.amount')) }}</div>
+            <div style="margin-top: 20px; font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.12em; color: rgba(214,238,248,0.68);">{{ mb_strtoupper(__('coin.wallet.deposit_currency')) }}</div>
+            <div style="margin-top: 9px; display: flex; gap: 8px; flex-wrap: wrap;">
+              @foreach($this->depositCurrencies as $currencyOption)
+              <button type="button" wire:click="$set('depositCurrency', '{{ $currencyOption }}')" style="padding: 8px 12px; border-radius: 8px; border: 1px solid {{ $depositCurrency === $currencyOption ? 'oklch(0.86 0.11 195 / 0.55)' : 'rgba(150,235,250,0.16)' }}; background: {{ $depositCurrency === $currencyOption ? 'oklch(0.6 0.13 200 / 0.22)' : 'transparent' }}; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: rgba(214,238,248,0.88); cursor: pointer;">{{ $currencyOption }}</button>
+              @endforeach
+            </div>
+            <div style="margin-top: 16px; font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.12em; color: rgba(214,238,248,0.68);">{{ mb_strtoupper(__('coin.amount')) }}</div>
             <div style="margin-top: 9px; padding: 13px 15px; border-radius: 11px; border: 1px solid rgba(150,235,250,0.16); background: rgba(4,16,28,0.6); display: flex; justify-content: space-between; font-family: 'JetBrains Mono', monospace; font-size: 15px;">
-              <input type="number" min="1" step="0.01" wire:model="depositAmount" placeholder="0.00" style="flex:1;border:0;background:transparent;color:#f0fbff;outline:none;font-family:inherit;font-size:15px;" />
-              <span style="color: rgba(214,238,248,0.78);">{{ $wallet?->currency ?? 'USDT' }}</span>
+              <input type="number" min="1" step="0.01" wire:model.live="depositAmount" placeholder="0.00" style="flex:1;border:0;background:transparent;color:#f0fbff;outline:none;font-family:inherit;font-size:15px;" />
+              <span style="color: rgba(214,238,248,0.78);">{{ $depositCurrency }}</span>
             </div>
             @error('depositAmount')<p style="margin-top:8px;font-size:12px;color:#ff8f8f;">{{ $message }}</p>@enderror
             <div style="display: flex; gap: 7px; margin-top: 12px;">
-              <button type="button" wire:click="$set('depositAmount', '100')" style="padding: 6px 12px; border-radius: 8px; border: 1px solid rgba(150,235,250,0.16); background: transparent; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: rgba(214,238,248,0.78); cursor: pointer;">100</button>
-              <button type="button" wire:click="$set('depositAmount', '500')" style="padding: 6px 12px; border-radius: 8px; border: 1px solid rgba(150,235,250,0.16); background: transparent; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: rgba(214,238,248,0.78); cursor: pointer;">500</button>
-              <button type="button" wire:click="$set('depositAmount', '1000')" style="padding: 6px 12px; border-radius: 8px; border: 1px solid rgba(150,235,250,0.16); background: transparent; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: rgba(214,238,248,0.78); cursor: pointer;">1 000</button>
+              <button type="button" wire:click="setDepositPreset(100)" style="padding: 6px 12px; border-radius: 8px; border: 1px solid rgba(150,235,250,0.16); background: transparent; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: rgba(214,238,248,0.78); cursor: pointer;">100</button>
+              <button type="button" wire:click="setDepositPreset(500)" style="padding: 6px 12px; border-radius: 8px; border: 1px solid rgba(150,235,250,0.16); background: transparent; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: rgba(214,238,248,0.78); cursor: pointer;">500</button>
+              <button type="button" wire:click="setDepositPreset(1000)" style="padding: 6px 12px; border-radius: 8px; border: 1px solid rgba(150,235,250,0.16); background: transparent; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: rgba(214,238,248,0.78); cursor: pointer;">1 000</button>
             </div>
             <button type="button" wire:click="openTopUpPaymentModal" wire:loading.attr="disabled" wire:target="openTopUpPaymentModal" style="width: 100%; margin-top: 20px; padding: 12px; border-radius: 10px; border: 1px solid oklch(0.86 0.11 195 / 0.5); background: linear-gradient(140deg, oklch(0.86 0.12 192), oklch(0.66 0.13 205)); color: #04121f; font-family: inherit; font-size: 13.5px; font-weight: 600; cursor: pointer;">
               <span wire:loading.remove wire:target="openTopUpPaymentModal">{{ __('coin.wallet.add_funds') }}</span>
@@ -548,7 +566,7 @@
             <div style="margin-top: 20px; font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.12em; color: rgba(214,238,248,0.68);">{{ mb_strtoupper(__('coin.amount')) }}</div>
             <div style="margin-top: 9px; padding: 13px 15px; border-radius: 11px; border: 1px solid rgba(150,235,250,0.16); background: rgba(4,16,28,0.6); display: flex; justify-content: space-between; font-family: 'JetBrains Mono', monospace; font-size: 15px; gap: 12px;">
               <input type="number" min="1" step="0.01" wire:model="withdrawAmount" placeholder="0.00" style="flex:1;border:0;background:transparent;color:#f0fbff;outline:none;font-family:inherit;font-size:15px;" />
-              <button type="button" wire:click="$set('withdrawAmount', '{{ $wallet?->available ?? 0 }}')" style="border:0;background:transparent;color:oklch(0.88 0.11 195);font-family:inherit;font-size:13px;cursor:pointer;">{{ __('coin.wallet.max') }}</button>
+              <button type="button" wire:click="setWithdrawMax" style="border:0;background:transparent;color:oklch(0.88 0.11 195);font-family:inherit;font-size:13px;cursor:pointer;">{{ __('coin.wallet.max') }}</button>
             </div>
             @error('withdrawAmount')<p style="margin-top:8px;font-size:12px;color:#ff8f8f;">{{ $message }}</p>@enderror
             <div style="margin-top: 16px; display: flex; flex-direction: column; gap: 11px; font-size: 12.5px;">

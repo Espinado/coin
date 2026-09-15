@@ -60,11 +60,9 @@ Route::middleware(['admin.domain', 'reject.web.on.admin'])->group(function () {
         Route::delete('plans/{plan}', [PlanController::class, 'destroy'])->name('admin.plans.destroy');
 
         Route::get('profit-accrual', [ProfitAccrualController::class, 'index'])->name('admin.profit-accrual.index');
-        Route::post('profit-accrual/run', [ProfitAccrualController::class, 'run'])->name('admin.profit-accrual.run');
 
         Route::redirect('epochs', '/profit-accrual')->name('admin.epochs.index');
         Route::get('epochs/{epoch}', [EpochController::class, 'show'])->name('admin.epochs.show');
-        Route::post('epochs/run', [ProfitAccrualController::class, 'run'])->name('admin.epochs.run');
 
         Route::get('settings', [SettingsController::class, 'edit'])->name('admin.settings.edit');
         Route::patch('settings', [SettingsController::class, 'update'])->name('admin.settings.update');

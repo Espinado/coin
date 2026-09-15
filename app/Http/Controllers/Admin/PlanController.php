@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Admin\Concerns\RedirectsWithAdminFlash;
 use App\Http\Controllers\Controller;
 use App\Models\Plan;
 use Illuminate\Http\RedirectResponse;
@@ -11,6 +12,8 @@ use Illuminate\View\View;
 
 class PlanController extends Controller
 {
+    use RedirectsWithAdminFlash;
+
     public function index(): View
     {
         return view('admin.plans.index', [
@@ -28,11 +31,9 @@ class PlanController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
-        $plan = Plan::query()->create($this->validated($request));
+        Plan::query()->create($this->validated($request));
 
-        return redirect()
-            ->route('admin.plans.edit', $plan)
-            ->with('status', 'Plan created.');
+        return $this->adminSuccess('coin.admin.flash.plan_created', 'admin.plans.index');
     }
 
     public function edit(Plan $plan): View
@@ -47,24 +48,18 @@ class PlanController extends Controller
     {
         $plan->update($this->validated($request, $plan));
 
-        return redirect()
-            ->route('admin.plans.edit', $plan)
-            ->with('status', 'Plan saved.');
+        return $this->adminSuccess('coin.admin.flash.plan_saved', 'admin.plans.index');
     }
 
     public function destroy(Plan $plan): RedirectResponse
     {
         if ($plan->contracts()->exists()) {
-            return redirect()
-                ->route('admin.plans.index')
-                ->with('status', 'Cannot delete a plan with contracts. Deactivate it instead.');
+            return $this->adminError('coin.admin.flash.plan_delete_blocked', 'admin.plans.index');
         }
 
         $plan->delete();
 
-        return redirect()
-            ->route('admin.plans.index')
-            ->with('status', 'Plan deleted.');
+        return $this->adminSuccess('coin.admin.flash.plan_deleted', 'admin.plans.index');
     }
 
     /** @return array<string, mixed> */

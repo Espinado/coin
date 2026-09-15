@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Admin\Concerns\RedirectsWithAdminFlash;
 use App\Http\Controllers\Controller;
 use App\Services\PlatformSettingsService;
 use Illuminate\Http\RedirectResponse;
@@ -10,6 +11,8 @@ use Illuminate\View\View;
 
 class SettingsController extends Controller
 {
+    use RedirectsWithAdminFlash;
+
     public function edit(PlatformSettingsService $settings): View
     {
         return view('admin.settings.edit', [
@@ -45,8 +48,6 @@ class SettingsController extends Controller
 
         $settings->setMany($validated);
 
-        return redirect()
-            ->route('admin.settings.edit')
-            ->with('status', 'Platform settings saved.');
+        return $this->adminSuccess('coin.admin.flash.settings_saved', 'admin.settings.edit');
     }
 }

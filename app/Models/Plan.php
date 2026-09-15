@@ -159,4 +159,39 @@ class Plan extends Model
 
         return number_format((float) $this->min_deposit, 0, '.', ',').' '.($this->currency ?? 'USDT');
     }
+
+    public function calculatorMinAmount(): int
+    {
+        if ($this->isEnterprise()) {
+            return 10_000;
+        }
+
+        return (int) max(1, $this->min_deposit ?? $this->tflops ?? 100);
+    }
+
+    public function calculatorMaxAmount(): int
+    {
+        if ($this->isEnterprise()) {
+            return 50_000;
+        }
+
+        $min = $this->calculatorMinAmount();
+
+        return (int) max($min, $this->max_tflops ?? ($min * 4));
+    }
+
+    public function calculatorStep(): int
+    {
+        $range = $this->calculatorMaxAmount() - $this->calculatorMinAmount();
+
+        if ($range <= 500) {
+            return 10;
+        }
+
+        if ($range <= 2_500) {
+            return 50;
+        }
+
+        return 100;
+    }
 }

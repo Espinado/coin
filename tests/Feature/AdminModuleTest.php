@@ -148,7 +148,7 @@ class AdminModuleTest extends TestCase
 
         $before = WalletTransaction::query()->where('type', 'Daily profit')->count();
 
-        $result = app(ProfitAccrualService::class)->accrueDaily($this->admin);
+        $result = app(ProfitAccrualService::class)->accrueDaily();
 
         $this->assertGreaterThan(0, $result['contracts_processed']);
         $this->assertGreaterThan($before, WalletTransaction::query()->where('type', 'Daily profit')->count());

@@ -2,15 +2,19 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Admin\Concerns\RedirectsWithAdminFlash;
 use App\Http\Controllers\Controller;
 use App\Models\Withdrawal;
 use App\Services\WithdrawalService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
+use RuntimeException;
 
 class WithdrawalController extends Controller
 {
+    use RedirectsWithAdminFlash;
+
     public function index(Request $request): View
     {
         $status = $request->string('status')->toString();
@@ -46,15 +50,20 @@ class WithdrawalController extends Controller
             'admin_note' => ['nullable', 'string', 'max:2000'],
         ]);
 
-        $withdrawals->updateStatus(
-            $withdrawal,
-            $validated['status'],
-            $request->user('admin'),
-            $validated['admin_note'] ?? null,
-        );
+        try {
+            $withdrawals->updateStatus(
+                $withdrawal,
+                $validated['status'],
+                $request->user('admin'),
+                $validated['admin_note'] ?? null,
+            );
+        } catch (RuntimeException $exception) {
+            return redirect()
+                ->route('admin.withdrawals.index')
+                ->with('status', $exception->getMessage())
+                ->with('status_type', 'error');
+        }
 
-        return redirect()
-            ->route('admin.withdrawals.show', $withdrawal)
-            ->with('status', 'Payout status updated.');
+        return $this->adminSuccess('coin.admin.payout_status_updated', 'admin.withdrawals.index');
     }
 }

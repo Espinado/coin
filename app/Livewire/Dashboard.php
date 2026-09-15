@@ -87,6 +87,8 @@ class Dashboard extends Component
 
     public string $depositAmount = '';
 
+    public string $depositCurrency = 'USDT';
+
     public string $withdrawAmount = '';
 
     public ?string $paymentModal = null;
@@ -130,9 +132,11 @@ class Dashboard extends Component
         $this->profilePhone = (string) ($this->user->phone ?? '');
         $this->profileTelegram = (string) ($this->user->telegram ?? '');
         $this->profileCountry = (string) ($this->user->country_code ?? '');
-        $this->power = (int) ($this->user->active_tflops ?: 1200);
+        $this->depositCurrency = (string) ($this->wallet?->currency ?? 'USDT');
         $this->selectedPlanId = $this->primaryPlan?->id
-            ?? $data->planForPower($this->power)?->id;
+            ?? $this->plans->first(fn (Plan $plan) => ! $plan->isEnterprise())?->id;
+        $this->power = (int) ($this->primaryPlan?->min_deposit ?? $this->selectedPlan?->calculatorMinAmount() ?? 1200);
+        $this->syncPowerToSelectedPlan();
         $this->tickets = $this->user->supportTickets()
             ->with('messages')
             ->orderByDesc('updated_at')
@@ -179,7 +183,10 @@ class Dashboard extends Component
         }
 
         $this->selectedPlanId = $plan->id;
-        $this->power = (int) $plan->tflops;
+        $this->power = max(
+            $plan->calculatorMinAmount(),
+            min($plan->calculatorMaxAmount(), (int) $this->power)
+        );
     }
 
     public function selectPlanAndScroll(int $planId): void
@@ -203,11 +210,18 @@ class Dashboard extends Component
 
     public function updatedPower(): void
     {
-        $plan = app(DashboardDataService::class)->planForPower($this->power);
+        $this->syncPowerToSelectedPlan();
+    }
 
-        if ($plan instanceof Plan) {
-            $this->selectedPlanId = $plan->id;
-        }
+    public function setDepositPreset(int $amount): void
+    {
+        $this->depositAmount = (string) $amount;
+    }
+
+    public function setWithdrawMax(): void
+    {
+        $available = (float) ($this->wallet->available ?? 0);
+        $this->withdrawAmount = number_format(max(0, $available), 2, '.', '');
     }
 
     public function toggleMenu(): void
@@ -308,11 +322,19 @@ class Dashboard extends Component
         ];
     }
 
+    public function getLifetimeProfitProperty(): string
+    {
+        $total = (float) $this->activeContracts
+            ->merge($this->completedContracts)
+            ->sum(fn ($contract) => (float) $contract->accrued_amount);
+
+        return number_format($total, 2, '.', ',').' '.$this->walletCurrency;
+    }
+
+    /** @deprecated Use lifetimeProfit */
     public function getLifetimeRewardsProperty(): string
     {
-        $total = $this->activeContracts->merge($this->completedContracts)->sum('accrued_amount');
-
-        return number_format((float) $total, 2, '.', ',');
+        return $this->lifetimeProfit;
     }
 
     public function getNextExpiryLabelProperty(): string
@@ -342,7 +364,28 @@ class Dashboard extends Component
             }
         }
 
-        return app(DashboardDataService::class)->planForPower($this->power);
+        return $this->plans->first(fn (Plan $plan) => ! $plan->isEnterprise());
+    }
+
+    public function getCalculatorMinProperty(): int
+    {
+        return $this->selectedPlan?->calculatorMinAmount() ?? 100;
+    }
+
+    public function getCalculatorMaxProperty(): int
+    {
+        return $this->selectedPlan?->calculatorMaxAmount() ?? 10_000;
+    }
+
+    public function getCalculatorStepProperty(): int
+    {
+        return $this->selectedPlan?->calculatorStep() ?? 100;
+    }
+
+    /** @return list<string> */
+    public function getDepositCurrenciesProperty(): array
+    {
+        return config('coin.deposits.currencies', ['USDT']);
     }
 
     public function getPlanNameProperty(): string
@@ -485,7 +528,7 @@ class Dashboard extends Component
         try {
             sleep(2);
 
-            $deposit = $deposits->createPending($this->user, $amount);
+            $deposit = $deposits->createPending($this->user, $amount, $this->depositCurrency);
 
             $this->depositAmount = '';
             $this->pendingTopUpAmount = null;
@@ -581,6 +624,16 @@ class Dashboard extends Component
 
         if ($plan->isEnterprise() && $plan->min_deposit === null) {
             $this->addError('purchase', __('coin.invest.contact_sales'));
+
+            return;
+        }
+
+        $minDeposit = (float) ($plan->min_deposit ?? 0);
+
+        if ($minDeposit > 0 && (float) $this->power < $minDeposit) {
+            $this->addError('purchase', __('coin.messages.min_investment', [
+                'amount' => number_format($minDeposit, 0, '.', ' ').' '.($plan->currency ?? 'USDT'),
+            ]));
 
             return;
         }
@@ -869,6 +922,25 @@ class Dashboard extends Component
     private function formatAmount(float $value, int $decimals): string
     {
         return number_format($value, $decimals, '.', ',');
+    }
+
+    private function syncPowerToSelectedPlan(): void
+    {
+        $this->power = $this->clampPowerToSelectedPlan((int) $this->power);
+    }
+
+    private function clampPowerToSelectedPlan(int $value): int
+    {
+        $plan = $this->selectedPlan;
+
+        if (! $plan instanceof Plan) {
+            return max(1, $value);
+        }
+
+        return max(
+            $plan->calculatorMinAmount(),
+            min($plan->calculatorMaxAmount(), $value)
+        );
     }
 
     private function reloadTickets(): void

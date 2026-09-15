@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Models\Epoch;
 use App\Services\EpochService;
 use App\Services\PlatformSettingsService;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 
 class EpochController extends Controller
@@ -32,14 +31,5 @@ class EpochController extends Controller
         return view('admin.epochs.show', [
             'epoch' => $epoch,
         ]);
-    }
-
-    public function run(EpochService $epochs): RedirectResponse
-    {
-        $epoch = $epochs->runSettlement(auth('admin')->user());
-
-        return redirect()
-            ->route('admin.epochs.show', $epoch)
-            ->with('status', 'Epoch '.$epoch->number.' settlement completed.');
     }
 }

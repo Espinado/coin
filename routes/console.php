@@ -8,4 +8,7 @@ Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote');
 
-Schedule::command('coin:accrue-daily-profits')->dailyAt('00:05');
+Schedule::command('coin:accrue-daily-profits')
+    ->dailyAt(config('coin.profit_accrual.schedule_time', '00:00'))
+    ->timezone(config('coin.profit_accrual.schedule_timezone', 'Europe/Riga'))
+    ->withoutOverlapping();

@@ -19,6 +19,12 @@ return [
 
     'deposits' => [
         'auto_confirm_mock' => env('COIN_DEPOSITS_AUTO_CONFIRM_MOCK', true),
+        'currencies' => ['USDT', 'EUR', 'USD'],
+    ],
+
+    'profit_accrual' => [
+        'schedule_time' => env('COIN_PROFIT_ACCRUAL_TIME', '00:00'),
+        'schedule_timezone' => env('COIN_PROFIT_ACCRUAL_TZ', 'Europe/Riga'),
     ],
 
 ];

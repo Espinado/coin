@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Admin\Concerns\RedirectsWithAdminFlash;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
@@ -10,6 +11,8 @@ use Illuminate\View\View;
 
 class UserController extends Controller
 {
+    use RedirectsWithAdminFlash;
+
     public function index(Request $request): View
     {
         $search = trim($request->string('q')->toString());
@@ -72,8 +75,6 @@ class UserController extends Controller
 
         $user->update($validated);
 
-        return redirect()
-            ->route('admin.users.show', $user)
-            ->with('status', 'User updated.');
+        return $this->adminSuccess('coin.admin.flash.user_updated', 'admin.users.index');
     }
 }

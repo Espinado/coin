@@ -2,7 +2,6 @@
 
 namespace App\Services;
 
-use App\Models\Admin;
 use App\Models\Contract;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
@@ -15,19 +14,29 @@ class ProfitAccrualService
     ) {}
 
     /** @return array{contracts_processed: int, total_profit: float, contracts_matured: int} */
-    public function accrueDaily(?Admin $admin = null): array
+    public function accrueDaily(): array
     {
         return DB::transaction(function () {
-            $contracts = Contract::query()
-                ->with(['user.wallet', 'plan'])
+            $contractIds = Contract::query()
                 ->where('status', 'active')
-                ->get();
+                ->orderBy('id')
+                ->pluck('id');
 
             $totalProfit = 0.0;
             $processed = 0;
             $matured = 0;
 
-            foreach ($contracts as $contract) {
+            foreach ($contractIds as $contractId) {
+                $contract = Contract::query()
+                    ->with(['user.wallet', 'plan'])
+                    ->whereKey($contractId)
+                    ->lockForUpdate()
+                    ->first();
+
+                if (! $contract) {
+                    continue;
+                }
+
                 $profit = $this->accrueContract($contract);
 
                 if ($profit > 0) {
@@ -54,6 +63,12 @@ class ProfitAccrualService
             return 0.0;
         }
 
+        $today = now()->toDateString();
+
+        if ($contract->last_accrued_on?->toDateString() === $today) {
+            return 0.0;
+        }
+
         $profit = $this->purchases->dailyProfitFor($contract);
 
         if ($profit <= 0) {
@@ -69,11 +84,17 @@ class ProfitAccrualService
 
         $contract->increment('accrued_amount', $profit);
 
-        if ($contract->duration_days > 0) {
+        $contract->refresh();
+
+        if ($contract->termDays() > 0) {
             $contract->increment('days_elapsed');
+            $contract->refresh();
             $contract->update([
-                'progress_percent' => min(100, (int) round(($contract->days_elapsed / $contract->duration_days) * 100)),
+                'progress_percent' => $contract->computedProgressPercent(),
+                'last_accrued_on' => $today,
             ]);
+        } else {
+            $contract->update(['last_accrued_on' => $today]);
         }
 
         $this->wallets->record(

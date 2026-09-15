@@ -74,5 +74,8 @@ class InvestmentFlowTest extends TestCase
 
         $buyer->refresh();
         $this->assertGreaterThan(900, (float) $buyer->wallet->available);
+
+        $repeat = app(ProfitAccrualService::class)->accrueDaily();
+        $this->assertSame(0, $repeat['contracts_processed']);
     }
 }
