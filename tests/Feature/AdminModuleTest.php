@@ -81,6 +81,10 @@ class AdminModuleTest extends TestCase
             return $event->withdrawal->is($withdrawal);
         });
 
+        $user->refresh();
+        $wallet = $user->wallet;
+        $balanceBeforeApproval = (float) $wallet->balance;
+
         $this->actingAs($this->admin, 'admin')
             ->patch('http://admin.coin.test/withdrawals/'.$withdrawal->id.'/status', [
                 'status' => Withdrawal::STATUS_APPROVED,
@@ -89,7 +93,10 @@ class AdminModuleTest extends TestCase
             ->assertRedirect();
 
         $withdrawal->refresh();
+        $wallet->refresh();
         $this->assertSame(Withdrawal::STATUS_APPROVED, $withdrawal->status);
+        $this->assertSame($balanceBeforeApproval - 50, (float) $wallet->balance);
+        $this->assertSame(0.0, (float) $wallet->pending);
 
         Event::assertDispatched(WithdrawalUpdated::class, function (WithdrawalUpdated $event) use ($withdrawal): bool {
             return $event->withdrawal->is($withdrawal)

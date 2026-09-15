@@ -51,6 +51,16 @@ class Withdrawal extends Model
         ];
     }
 
+    /** @return array<int, string> */
+    public static function committedStatuses(): array
+    {
+        return [
+            self::STATUS_APPROVED,
+            self::STATUS_PROCESSING,
+            self::STATUS_PAID,
+        ];
+    }
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);

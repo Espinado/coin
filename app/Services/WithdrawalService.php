@@ -77,13 +77,23 @@ class WithdrawalService
             }
 
             $wallet = $withdrawal->user->wallet ?? throw new RuntimeException('User has no wallet.');
+            $amount = (float) $withdrawal->amount;
+            $wasPending = $previous === Withdrawal::STATUS_PENDING;
+            $wasCommitted = in_array($previous, Withdrawal::committedStatuses(), true);
+            $willCommit = in_array($status, Withdrawal::committedStatuses(), true);
 
-            if ($status === Withdrawal::STATUS_REJECTED && in_array($previous, [Withdrawal::STATUS_PENDING, Withdrawal::STATUS_APPROVED, Withdrawal::STATUS_PROCESSING], true)) {
-                $this->releasePending($wallet, (float) $withdrawal->amount);
+            if ($status === Withdrawal::STATUS_REJECTED) {
+                if ($wasPending) {
+                    $this->releasePending($wallet, $amount);
+                } elseif ($wasCommitted) {
+                    $this->restoreCommittedFunds($wallet, $amount);
+                }
+            } elseif ($willCommit && $wasPending) {
+                $this->commitWithdrawalFunds($wallet, $amount);
             }
 
             if ($status === Withdrawal::STATUS_PAID && $previous !== Withdrawal::STATUS_PAID) {
-                $this->finalizePaid($withdrawal, $wallet, $admin);
+                $this->recordPayoutTransaction($withdrawal, $wallet);
             }
 
             $withdrawal->update([
@@ -107,15 +117,31 @@ class WithdrawalService
         $wallet->increment('available', $amount);
     }
 
-    private function finalizePaid(Withdrawal $withdrawal, Wallet $wallet, Admin $admin): void
+    private function commitWithdrawalFunds(Wallet $wallet, float $amount): void
     {
+        $wallet->decrement('pending', min($amount, (float) $wallet->pending));
+        $wallet->decrement('balance', $amount);
+    }
+
+    private function restoreCommittedFunds(Wallet $wallet, float $amount): void
+    {
+        $wallet->increment('balance', $amount);
+        $wallet->increment('available', $amount);
+    }
+
+    private function recordPayoutTransaction(Withdrawal $withdrawal, Wallet $wallet): void
+    {
+        if (WalletTransaction::query()
+            ->where('user_id', $withdrawal->user_id)
+            ->where('source', $withdrawal->reference)
+            ->where('type', PlatformTerms::TX_PAYOUT)
+            ->exists()) {
+            return;
+        }
+
         $amount = (float) $withdrawal->amount;
         $fee = $this->settings->getFloat('network_fee');
         $net = max(0, $amount - $fee);
-
-        $wallet->decrement('pending', min($amount, (float) $wallet->pending));
-        $wallet->decrement('balance', $amount);
-
         $symbol = $this->settings->tokenSymbol();
         $sortOrder = (int) WalletTransaction::query()->where('user_id', $withdrawal->user_id)->max('sort_order') + 1;
 
