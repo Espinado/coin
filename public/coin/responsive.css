@@ -312,10 +312,6 @@ html.coin-nav-open .coin-nav-mobile {
   .coin-dashboard [style*="grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.1fr)"] {
     grid-template-columns: minmax(0, 1fr) !important;
   }
-
-  .coin-overview-duo {
-    grid-template-columns: minmax(0, 1fr) !important;
-  }
 }
 
 @media (max-width: 768px) {

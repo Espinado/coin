@@ -110,7 +110,7 @@
 
     @if($section === 0)
       <section data-screen-label="{{ __('coin.nav.overview') }}" style="padding: 28px 32px 40px; display: flex; flex-direction: column; gap: 16px;">
-        <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px;">
+        <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px;">
           <div style="padding: 22px; border-radius: 16px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.04);">
             <div style="font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.14em; color: rgba(214,238,248,0.7);">{{ mb_strtoupper(__('coin.wallet.total_balance')) }}</div>
             <div style="margin-top: 14px; font-family: 'JetBrains Mono', monospace; font-size: 26px; color: #f0fbff;">{{ $wallet?->formattedBalance() }}</div>
@@ -120,11 +120,6 @@
             <div style="font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.14em; color: rgba(214,238,248,0.7);">{{ mb_strtoupper(__('coin.wallet.locked_in_investments')) }}</div>
             <div style="margin-top: 14px; font-family: 'JetBrains Mono', monospace; font-size: 26px; color: #f0fbff;">{{ $wallet?->formattedLocked() ?? '0.00' }}</div>
             <div style="margin-top: 7px; font-size: 12.5px; color: rgba(214,238,248,0.7);">{{ __('coin.invest.active_count_line', ['count' => $this->activeContractCount]) }} · {{ $wallet?->currency ?? 'USDT' }}</div>
-          </div>
-          <div style="padding: 22px; border-radius: 16px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.04);">
-            <div style="font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.14em; color: rgba(214,238,248,0.7);">{{ mb_strtoupper(__('coin.invest.active')) }}</div>
-            <div style="margin-top: 14px; font-size: 24px; font-weight: 600; letter-spacing: -0.02em; color: #f0fbff;">{{ $primaryPlan?->name ?? '—' }}</div>
-            <div style="margin-top: 7px; font-size: 12.5px; color: rgba(214,238,248,0.7);">{{ __('coin.invest.days_apr', ['days' => $primaryContract?->termDays() ?? 0, 'apr' => $primaryPlan?->formattedAnnualProfit() ?? '—']) }}</div>
           </div>
           <div style="padding: 22px; border-radius: 16px; border: 1px solid oklch(0.86 0.11 195 / 0.26); background: linear-gradient(170deg, oklch(0.6 0.13 200 / 0.2), rgba(150,235,250,0.03));">
             <div style="font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.14em; color: rgba(214,238,248,0.75);">{{ mb_strtoupper(__('coin.invest.daily_profit')) }}</div>
@@ -200,8 +195,24 @@
           </div>
         </div>
 
-        <div class="coin-overview-duo" style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; align-items: stretch;">
-          <div style="padding: 22px; border-radius: 16px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.035); display: flex; flex-direction: column;">
+        <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px;">
+          <div style="padding: 22px; border-radius: 16px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.035);">
+            <div style="display: flex; align-items: baseline; justify-content: space-between;">
+              <span style="font-size: 15px; font-weight: 600;">{{ __('coin.invest.active_investments') }}</span>
+              <button wire:click="setSection(2)" style="background: none; border: 0; padding: 0; font-family: 'JetBrains Mono', monospace; font-size: 10.5px; letter-spacing: 0.1em; color: oklch(0.88 0.11 195); cursor: pointer;">{{ mb_strtoupper(__('coin.actions.all_investments')) }}</button>
+            </div>
+            <div style="margin-top: 18px; display: flex; flex-direction: column; gap: 14px;">
+              @foreach($activeContracts as $contract)
+              <div>
+                <div style="display: flex; align-items: baseline; justify-content: space-between; font-size: 13px;"><span>{{ $contract->plan?->displayName() }} · {{ $contract->formattedPrincipal() }}</span><span style="font-family: 'JetBrains Mono', monospace; color: rgba(214,238,248,0.78);">{{ $contract->computedProgressPercent() }}%</span></div>
+                <div style="margin-top: 9px; height: 4px; border-radius: 3px; background: rgba(150,235,250,0.12);"><div style="width: {{ $contract->computedProgressPercent() }}%; height: 100%; border-radius: 3px; background: linear-gradient(90deg, oklch(0.72 0.11 215), oklch(0.88 0.12 192));"></div></div>
+              </div>
+              @endforeach
+              <div style="display: flex; justify-content: space-between; font-size: 12.5px; color: rgba(214,238,248,0.7); padding-top: 4px;"><span>{{ __('coin.overview.next_accrual') }}</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">00:05 UTC</span></div>
+            </div>
+          </div>
+
+          <div style="padding: 22px; border-radius: 16px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.035);">
             <div style="display: flex; align-items: baseline; justify-content: space-between;">
               <span style="font-size: 15px; font-weight: 600;">{{ __('coin.nav.wallet') }}</span>
               <button wire:click="setSection(4)" style="background: none; border: 0; padding: 0; font-family: 'JetBrains Mono', monospace; font-size: 10.5px; letter-spacing: 0.1em; color: oklch(0.88 0.11 195); cursor: pointer;">{{ mb_strtoupper(__('coin.actions.open')) }}</button>
@@ -211,13 +222,13 @@
               <div style="display: flex; justify-content: space-between; gap: 14px;"><span style="color: rgba(214,238,248,0.72); min-width: 0;">{{ __('coin.wallet.pending_settlement') }}</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">{{ $wallet?->formattedPending() }} {{ $this->walletCurrency }}</span></div>
               <div style="display: flex; justify-content: space-between; gap: 14px;"><span style="color: rgba(214,238,248,0.72); min-width: 0;">{{ __('coin.wallet.payout_address') }}</span><span style="font-family: 'JetBrains Mono', monospace; color: rgba(214,238,248,0.8);">{{ $wallet?->payout_address }}</span></div>
             </div>
-            <div style="display: flex; gap: 8px; margin-top: auto; padding-top: 20px;">
+            <div style="display: flex; gap: 8px; margin-top: 20px;">
               <button wire:click="setSection(4)" style="flex: 1; padding: 10px; border-radius: 10px; border: 1px solid oklch(0.86 0.11 195 / 0.45); background: oklch(0.6 0.13 200 / 0.22); color: #eafcff; font-family: inherit; font-size: 13px; font-weight: 500; cursor: pointer;">{{ __('coin.actions.top_up') }}</button>
               <button wire:click="setSection(4)" style="flex: 1; padding: 10px; border-radius: 10px; border: 1px solid rgba(150,235,250,0.2); background: rgba(150,235,250,0.06); color: #e6f4fa; font-family: inherit; font-size: 13px; font-weight: 500; cursor: pointer;">{{ __('coin.actions.payout') }}</button>
             </div>
           </div>
 
-          <div style="padding: 22px; border-radius: 16px; border: 1px solid rgba(180,180,255,0.16); background: linear-gradient(170deg, rgba(120,110,220,0.13), rgba(150,235,250,0.02)); display: flex; flex-direction: column;">
+          <div style="padding: 22px; border-radius: 16px; border: 1px solid rgba(180,180,255,0.16); background: linear-gradient(170deg, rgba(120,110,220,0.13), rgba(150,235,250,0.02));">
             <div style="display: flex; align-items: baseline; justify-content: space-between;">
               <span style="font-size: 15px; font-weight: 600;">{{ __('coin.nav.referrals') }}</span>
               <button wire:click="setSection(5)" style="background: none; border: 0; padding: 0; font-family: 'JetBrains Mono', monospace; font-size: 10.5px; letter-spacing: 0.1em; color: oklch(0.88 0.11 195); cursor: pointer;">{{ mb_strtoupper(__('coin.actions.open')) }}</button>
@@ -230,7 +241,7 @@
               <div style="display: flex; justify-content: space-between; gap: 14px;"><span style="color: rgba(214,238,248,0.72); min-width: 0;">{{ __('coin.overview.referral_rewards') }}</span><span style="font-family: 'JetBrains Mono', monospace; color: oklch(0.88 0.12 192);">{{ $referral?->formattedTotalRewards() }}</span></div>
               <div style="display: flex; justify-content: space-between; gap: 14px;"><span style="color: rgba(214,238,248,0.72); min-width: 0;">{{ __('coin.overview.commission_share') }}</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">{{ $referral?->commissionLabel() }}</span></div>
             </div>
-            <button wire:click="setSection(5)" style="width: 100%; margin-top: auto; padding: 10px; border-radius: 10px; border: 1px solid rgba(180,180,255,0.3); background: rgba(150,140,255,0.12); color: #eafcff; font-family: inherit; font-size: 13px; font-weight: 500; cursor: pointer;">{{ __('coin.overview.invite_friends') }}</button>
+            <button wire:click="setSection(5)" style="width: 100%; margin-top: 20px; padding: 10px; border-radius: 10px; border: 1px solid rgba(180,180,255,0.3); background: rgba(150,140,255,0.12); color: #eafcff; font-family: inherit; font-size: 13px; font-weight: 500; cursor: pointer;">{{ __('coin.overview.invite_friends') }}</button>
           </div>
         </div>
 
