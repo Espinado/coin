@@ -766,10 +766,10 @@
   </main>
 </div>
 
-</div>
-
 @include('livewire.partials.payment-gateway')
 @include('livewire.partials.payment-modal')
+
+</div>
 
 @script
 <script>

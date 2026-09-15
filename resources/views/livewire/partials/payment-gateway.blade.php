@@ -6,6 +6,7 @@
 @endphp
 @teleport('body')
 <div
+  wire:key="topup-gateway-{{ $paymentModalStep }}"
   class="coin-payment-overlay"
   style="position: fixed; inset: 0; z-index: 9999; overflow-y: auto;"
   @if($canDismiss && ! in_array($paymentModalStep, ['bank'], true)) wire:click="closePaymentModal" wire:keydown.escape.window="closePaymentModal" @endif
