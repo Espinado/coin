@@ -1,4 +1,4 @@
-<div class="coin-sidebar-investments" style="flex-shrink: 0; margin-top: 12px; padding: 16px; border-radius: 14px; border: 1px solid oklch(0.86 0.11 195 / 0.26); background: linear-gradient(170deg, oklch(0.6 0.13 200 / 0.22), rgba(6,20,35,0.6));">
+<div class="coin-sidebar-investments">
   <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
     <div style="font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: 0.14em; color: rgba(214,238,248,0.7);">
       {{ mb_strtoupper($activeContracts->count() > 1 ? __('coin.invest.active_plural') : __('coin.invest.active')) }}

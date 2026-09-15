@@ -1,6 +1,5 @@
 <div x-data x-effect="document.documentElement.classList.toggle('coin-nav-open', @js($menuOpen)); document.documentElement.classList.toggle('coin-modal-open', @js(filled($paymentModal)))">
-<div class="coin-dashboard" style="display: flex; min-height: 100vh; width: 1440px; margin: 0 auto; background: #061423; color: #e6f4fa; font-family: 'Sora', 'Helvetica Neue', Helvetica, sans-serif;">
-
+<div class="coin-shell">
   <div class="coin-nav-overlay" wire:click="closeMenu"></div>
   <aside class="coin-sidebar">
     <div class="coin-sidebar-nav">
@@ -66,7 +65,10 @@
 
     <form method="POST" action="{{ route('logout') }}" class="coin-sidebar-logout">
       @csrf
-      <button type="submit">{{ __('coin.nav.logout') }}</button>
+      <button type="submit" class="coin-nav-item coin-nav-item--logout">
+        <span class="coin-nav-dot"></span>
+        <span>{{ __('coin.nav.logout') }}</span>
+      </button>
     </form>
 
     <div class="coin-sidebar-footer">
@@ -74,7 +76,8 @@
     </div>
   </aside>
 
-  <main style="flex: 1; min-width: 0; display: flex; flex-direction: column;">
+  <div class="coin-dashboard">
+  <main class="coin-main">
     <header class="coin-dash-header" style="display: flex; align-items: center; gap: 20px; padding: 20px 32px; border-bottom: 1px solid rgba(150,235,250,0.1); background: rgba(4,16,28,0.4);">
       <button type="button" class="coin-burger" wire:click="toggleMenu" aria-label="{{ __('coin.nav.open_menu') }}"><span></span><span></span><span></span></button>
       <div style="min-width: 0; flex: 1;">
@@ -691,6 +694,7 @@
       @include('livewire.partials.support-section')
     @endif
   </main>
+  </div>
 </div>
 
 @include('livewire.partials.payment-gateway')
