@@ -1,6 +1,6 @@
 <header class="admin-topbar">
     <a href="{{ route('admin.login') }}" class="admin-topbar-brand">
-        <x-brand-logo variant="horizontal" fluid class="admin-topbar-brand__logo" />
+        <x-brand-logo variant="horizontal" :height="44" class="admin-topbar-brand__logo" />
         <span class="admin-badge">{{ __('coin.admin.staff_only') }}</span>
     </a>
 </header>

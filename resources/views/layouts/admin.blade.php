@@ -9,7 +9,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{{ asset('admin/responsive.css') }}">
+    <link rel="stylesheet" href="{{ asset('admin/responsive.css') }}?v={{ file_exists(public_path('admin/responsive.css')) ? filemtime(public_path('admin/responsive.css')) : 1 }}">
     <style>
         body { margin: 0; font-family: 'Sora', sans-serif; background: #0c0f14; color: #e8edf5; -webkit-font-smoothing: antialiased; }
         a { color: #9db4ff; text-decoration: none; }
@@ -49,7 +49,7 @@
         @else
             <header class="admin-topbar">
                 <a href="{{ route('admin.dashboard') }}" class="admin-topbar-brand">
-                    <x-brand-logo variant="horizontal" fluid class="admin-topbar-brand__logo" />
+                    <x-brand-logo variant="horizontal" :height="44" class="admin-topbar-brand__logo" />
                     <span class="admin-badge">STAFF ONLY</span>
                 </a>
                 @auth('admin')
