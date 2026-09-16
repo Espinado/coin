@@ -275,7 +275,7 @@ upgrade_commission = topUp × referral_level1_percent / 100
 **Код:**
 - Покупка: `ReferralCommissionService::onContractPurchased()`
 - Доплата при смене: `ReferralCommissionService::onContractUpgradeTopUp()` ← вызывается из `PlanPurchaseService::changePlan()` при `topUp > 0`
-- Зачисление: `referrer.wallet.available` и `balance` ↑; запись `wallet_transactions` тип «Referral credit»; **e-mail всегда** (`notifyReferralCommission`, отдельный текст для purchase/upgrade); **realtime** toast + обновление кошелька/рефералов через `ReferralCommissionPaid` → `wallet.user.{referrer_id}` (после commit транзакции).
+- Зачисление: `referrer.wallet.available` и `balance` ↑; запись `wallet_transactions` тип «Referral credit»; **e-mail и realtime** только если у реферера включено «Реферальная активность» (`notify_referral_activity`) — отдельный текст для purchase/upgrade; toast + обновление кошелька/рефералов через `ReferralCommissionPaid` → `wallet.user.{referrer_id}` (после commit транзакции).
 
 ```
 GET /r/{code} → cookie coin_referral_code (30d) + session

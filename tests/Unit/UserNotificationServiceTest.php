@@ -13,12 +13,35 @@ class UserNotificationServiceTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_referral_commission_email_is_sent_even_when_referral_activity_toggle_is_off(): void
+    public function test_referral_commission_email_is_not_sent_when_referral_activity_toggle_is_off(): void
     {
         Mail::fake();
 
         $referrer = User::factory()->create([
             'notify_referral_activity' => false,
+        ]);
+
+        $referral = User::factory()->create([
+            'referred_by_user_id' => $referrer->id,
+        ]);
+
+        app(UserNotificationService::class)->notifyReferralCommission(
+            $referrer,
+            $referral,
+            120.0,
+            'USDT',
+            'purchase',
+        );
+
+        Mail::assertNothingSent();
+    }
+
+    public function test_referral_commission_email_is_sent_when_referral_activity_toggle_is_on(): void
+    {
+        Mail::fake();
+
+        $referrer = User::factory()->create([
+            'notify_referral_activity' => true,
         ]);
 
         $referral = User::factory()->create([

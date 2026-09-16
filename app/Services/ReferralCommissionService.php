@@ -197,13 +197,20 @@ class ReferralCommissionService
         string $source,
     ): void {
         $callback = function () use ($commission, $referrer, $buyer, $payoutAmount, $currency, $source): void {
+            $referrerFresh = $referrer->fresh();
+
+            if (! $referrerFresh instanceof User
+                || ! $referrerFresh->wantsNotification(UserNotificationService::TYPE_REFERRAL_ACTIVITY)) {
+                return;
+            }
+
             $fresh = $commission->fresh(['referrer.wallet', 'referral', 'contract.plan']);
 
             if (! $fresh instanceof ReferralCommission) {
                 return;
             }
 
-            $this->notifications->notifyReferralCommission($referrer, $buyer, $payoutAmount, $currency, $source);
+            $this->notifications->notifyReferralCommission($referrerFresh, $buyer, $payoutAmount, $currency, $source);
             event(new ReferralCommissionPaid($fresh, $source, $payoutAmount));
         };
 
