@@ -1186,8 +1186,9 @@ class Dashboard extends Component
     /** @return array{0: array<int, float>, 1: array<int, string>} */
     private function profitTrendHourlyBuckets(Collection $transactions): array
     {
-        $values = array_fill(0, 24, 0.0);
-        $labels = array_map(fn (int $hour) => sprintf('%02d', $hour), range(0, 23));
+        $currentHour = (int) now()->format('G');
+        $values = array_fill(0, $currentHour + 1, 0.0);
+        $labels = array_map(fn (int $hour) => sprintf('%02d', $hour), range(0, $currentHour));
 
         foreach ($transactions as $transaction) {
             $at = $transaction->occurred_at ?? $transaction->created_at;
@@ -1195,7 +1196,12 @@ class Dashboard extends Component
                 continue;
             }
 
-            $values[(int) $at->format('G')] += max(0, (float) ($transaction->amount ?? 0));
+            $hour = (int) $at->format('G');
+            if ($hour > $currentHour) {
+                continue;
+            }
+
+            $values[$hour] += max(0, (float) ($transaction->amount ?? 0));
         }
 
         return [$values, $labels];
@@ -1205,10 +1211,11 @@ class Dashboard extends Component
     private function profitTrendDailyWeekBuckets(Collection $transactions): array
     {
         $start = now()->startOfWeek()->startOfDay();
-        $values = array_fill(0, 7, 0.0);
+        $dayCount = (int) $start->diffInDays(now()->startOfDay()) + 1;
+        $values = array_fill(0, $dayCount, 0.0);
         $labels = [];
 
-        for ($day = 0; $day < 7; $day++) {
+        for ($day = 0; $day < $dayCount; $day++) {
             $labels[] = $start->copy()->addDays($day)->isoFormat('dd');
         }
 
@@ -1219,7 +1226,7 @@ class Dashboard extends Component
             }
 
             $dayIndex = (int) $start->diffInDays($at->copy()->startOfDay());
-            if ($dayIndex < 0 || $dayIndex > 6) {
+            if ($dayIndex < 0 || $dayIndex >= $dayCount) {
                 continue;
             }
 
@@ -1260,58 +1267,90 @@ class Dashboard extends Component
         $hasData = $max > 0;
         $lastIndex = count($values) - 1;
         $currency = $this->walletCurrency;
+        $width = 1000;
+        $height = 210;
+        $paddingX = 8;
+        $paddingY = 18;
+        $baseline = $height - $paddingY;
+        $count = count($values);
 
-        $bars = [];
+        $points = [];
         foreach ($values as $index => $value) {
-            $height = $hasData
-                ? ($value > 0 ? max(8, (int) round($value / $max * 100)) : 4)
-                : 4;
-            $highlight = $index === $lastIndex;
+            $ratio = $hasData && $max > 0 ? ($value / $max) : 0;
+            $normalized = $value > 0 ? max(0.08, $ratio) : 0.04;
+            $x = $count > 1
+                ? $paddingX + ($index / ($count - 1)) * ($width - (2 * $paddingX))
+                : $width / 2;
 
-            $bars[] = [
-                'height' => $height,
-                'highlight' => $highlight,
-                'gradient' => $this->profitTrendBarGradient($height, $highlight),
+            $points[] = [
+                'x' => round($x, 2),
+                'y' => round($baseline - ($normalized * ($height - (2 * $paddingY))), 2),
                 'tooltip' => number_format($value, 2, '.', ',').' '.$currency,
+                'highlight' => $index === $lastIndex,
             ];
         }
 
+        $linePath = $this->profitTrendSmoothPath($points);
+        $areaPath = $linePath !== ''
+            ? $linePath.' L '.($width - $paddingX).' '.$baseline.' L '.$paddingX.' '.$baseline.' Z'
+            : '';
+
         return [
-            'bars' => $bars,
+            'linePath' => $linePath,
+            'areaPath' => $areaPath,
+            'points' => $points,
             'axis' => $this->profitTrendAxisLabels($labels),
             'hasData' => $hasData,
         ];
     }
 
-    private function profitTrendBarGradient(int $height, bool $highlight): string
+    /** @param  array<int, array{x: float, y: float}>  $points */
+    private function profitTrendSmoothPath(array $points): string
     {
-        if ($highlight) {
-            return 'linear-gradient(180deg, #eafcff, oklch(0.88 0.12 192 / 0.22))';
+        $count = count($points);
+        if ($count === 0) {
+            return '';
         }
 
-        if ($height >= 90) {
-            return 'linear-gradient(180deg, oklch(0.9 0.12 192), oklch(0.9 0.12 192 / 0.2))';
-        }
-        if ($height >= 74) {
-            return 'linear-gradient(180deg, oklch(0.88 0.12 192), oklch(0.88 0.12 192 / 0.18))';
-        }
-        if ($height >= 61) {
-            return 'linear-gradient(180deg, oklch(0.86 0.12 193), oklch(0.86 0.12 193 / 0.16))';
-        }
-        if ($height >= 52) {
-            return 'linear-gradient(180deg, oklch(0.84 0.12 195), oklch(0.84 0.12 195 / 0.14))';
-        }
-        if ($height >= 44) {
-            return 'linear-gradient(180deg, oklch(0.8 0.12 198 / 0.9), oklch(0.8 0.12 198 / 0.12))';
-        }
-        if ($height >= 36) {
-            return 'linear-gradient(180deg, oklch(0.78 0.12 200 / 0.85), oklch(0.78 0.12 200 / 0.12))';
-        }
-        if ($height >= 31) {
-            return 'linear-gradient(180deg, oklch(0.74 0.11 206 / 0.8), oklch(0.74 0.11 206 / 0.1))';
+        if ($count === 1) {
+            return sprintf('M %.2f %.2f', $points[0]['x'], $points[0]['y']);
         }
 
-        return 'linear-gradient(180deg, oklch(0.72 0.11 210 / 0.75), oklch(0.72 0.11 210 / 0.1))';
+        if ($count === 2) {
+            return sprintf(
+                'M %.2f %.2f L %.2f %.2f',
+                $points[0]['x'],
+                $points[0]['y'],
+                $points[1]['x'],
+                $points[1]['y'],
+            );
+        }
+
+        $path = sprintf('M %.2f %.2f', $points[0]['x'], $points[0]['y']);
+
+        for ($index = 0; $index < $count - 1; $index++) {
+            $previous = $points[max(0, $index - 1)];
+            $current = $points[$index];
+            $next = $points[$index + 1];
+            $following = $points[min($count - 1, $index + 2)];
+
+            $control1X = $current['x'] + ($next['x'] - $previous['x']) / 6;
+            $control1Y = $current['y'] + ($next['y'] - $previous['y']) / 6;
+            $control2X = $next['x'] - ($following['x'] - $current['x']) / 6;
+            $control2Y = $next['y'] - ($following['y'] - $current['y']) / 6;
+
+            $path .= sprintf(
+                ' C %.2f %.2f, %.2f %.2f, %.2f %.2f',
+                $control1X,
+                $control1Y,
+                $control2X,
+                $control2Y,
+                $next['x'],
+                $next['y'],
+            );
+        }
+
+        return $path;
     }
 
     /** @param  array<int, string>  $labels */

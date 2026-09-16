@@ -406,10 +406,26 @@
           </div>
           @php $profitTrend = $this->profitTrendChart; @endphp
           @if($profitTrend['hasData'])
-          <div style="display: flex; align-items: flex-end; gap: 6px; height: 210px; margin-top: 26px;">
-            @foreach($profitTrend['bars'] as $bar)
-            <div style="flex: 1; height: {{ $bar['height'] }}%; border-radius: 4px 4px 2px 2px; background: {{ $bar['gradient'] }};@if($bar['highlight']) box-shadow: 0 0 26px oklch(0.88 0.12 192 / 0.45);@endif" title="{{ $bar['tooltip'] }}"></div>
-            @endforeach
+          <div style="height: 210px; margin-top: 26px;">
+            <svg viewBox="0 0 1000 210" preserveAspectRatio="none" style="width: 100%; height: 100%; overflow: visible; display: block;">
+              <defs>
+                <linearGradient id="profitTrendArea" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="oklch(0.88 0.12 192)" stop-opacity="0.38"></stop>
+                  <stop offset="100%" stop-color="oklch(0.72 0.11 210)" stop-opacity="0.03"></stop>
+                </linearGradient>
+                <linearGradient id="profitTrendLine" x1="0" y1="0" x2="1" y2="0">
+                  <stop offset="0%" stop-color="oklch(0.72 0.11 210)"></stop>
+                  <stop offset="100%" stop-color="#eafcff"></stop>
+                </linearGradient>
+              </defs>
+              <path d="{{ $profitTrend['areaPath'] }}" fill="url(#profitTrendArea)"></path>
+              <path d="{{ $profitTrend['linePath'] }}" fill="none" stroke="url(#profitTrendLine)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke" style="filter: drop-shadow(0 0 10px oklch(0.88 0.12 192 / 0.55));"></path>
+              @foreach($profitTrend['points'] as $point)
+              <circle cx="{{ $point['x'] }}" cy="{{ $point['y'] }}" r="{{ $point['highlight'] ? 5 : 3 }}" fill="{{ $point['highlight'] ? '#eafcff' : 'oklch(0.84 0.12 195)' }}" opacity="{{ $point['highlight'] ? 1 : 0.55 }}" vector-effect="non-scaling-stroke" style="@if($point['highlight']) filter: drop-shadow(0 0 12px oklch(0.88 0.12 192 / 0.85)); @endif">
+                <title>{{ $point['tooltip'] }}</title>
+              </circle>
+              @endforeach
+            </svg>
           </div>
           <div style="display: flex; justify-content: space-between; margin-top: 14px; font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.1em; color: rgba(214,238,248,0.62);">
             @foreach($profitTrend['axis'] as $label)
