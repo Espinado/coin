@@ -1,6 +1,9 @@
 <?php
 
+use App\Http\Controllers\Admin\AdminStaffController;
+use App\Http\Controllers\Admin\Auth\AcceptInvitationController;
 use App\Http\Controllers\Admin\Auth\AuthenticatedSessionController;
+use App\Http\Controllers\Admin\Auth\RequestPasswordResetController;
 use App\Http\Controllers\ReverbDebugLogController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\DepositController;
@@ -17,10 +20,7 @@ use Illuminate\Support\Facades\Route;
 Route::middleware(['admin.domain', 'reject.web.on.admin'])->group(function () {
     Route::redirect('/', '/login');
 
-    foreach (['register', 'forgot-password'] as $path) {
-        Route::any($path, fn () => abort(404));
-    }
-
+    Route::any('register', fn () => abort(404));
     Route::any('reset-password/{token?}', fn () => abort(404));
 
     Route::middleware('guest:admin')->group(function () {
@@ -29,6 +29,19 @@ Route::middleware(['admin.domain', 'reject.web.on.admin'])->group(function () {
 
         Route::post('login', [AuthenticatedSessionController::class, 'store'])
             ->name('admin.login.store');
+
+        Route::get('forgot-password', [RequestPasswordResetController::class, 'create'])
+            ->name('admin.password.request');
+
+        Route::post('forgot-password', [RequestPasswordResetController::class, 'store'])
+            ->middleware('throttle:5,1')
+            ->name('admin.password.request.store');
+
+        Route::get('invite/{token}', [AcceptInvitationController::class, 'create'])
+            ->name('admin.invite.show');
+
+        Route::post('invite/{token}', [AcceptInvitationController::class, 'store'])
+            ->name('admin.invite.store');
     });
 
     Route::middleware('auth:admin')->group(function () {
@@ -66,6 +79,14 @@ Route::middleware(['admin.domain', 'reject.web.on.admin'])->group(function () {
 
         Route::get('settings', [SettingsController::class, 'edit'])->name('admin.settings.edit');
         Route::patch('settings', [SettingsController::class, 'update'])->name('admin.settings.update');
+
+        Route::get('admins', [AdminStaffController::class, 'index'])->name('admin.admins.index');
+        Route::get('admins/invite', [AdminStaffController::class, 'create'])->name('admin.admins.invite');
+        Route::post('admins/invite', [AdminStaffController::class, 'store'])->name('admin.admins.invite.store');
+        Route::delete('admins/{admin}', [AdminStaffController::class, 'destroy'])->name('admin.admins.destroy');
+        Route::post('admins/{admin}/reset-password', [AdminStaffController::class, 'resetPassword'])->name('admin.admins.reset-password');
+        Route::delete('admins/invitations/{invitation}', [AdminStaffController::class, 'destroyInvitation'])->name('admin.admins.invitations.destroy');
+        Route::post('admins/invitations/{invitation}/resend', [AdminStaffController::class, 'resendInvitation'])->name('admin.admins.invitations.resend');
 
         Route::get('support', [SupportTicketController::class, 'index'])
             ->name('admin.support.index');

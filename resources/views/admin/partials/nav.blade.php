@@ -15,6 +15,7 @@
     </a>
     <a href="{{ route('admin.plans.index') }}" class="admin-btn">{{ __('coin.admin.plans') }}</a>
     <a href="{{ route('admin.profit-accrual.index') }}" class="admin-btn">{{ __('coin.admin.profit_accrual') }}</a>
+    <a href="{{ route('admin.admins.index') }}" class="admin-btn">{{ __('coin.admin.admins.title') }}</a>
     <a href="{{ route('admin.settings.edit') }}" class="admin-btn">{{ __('coin.admin.settings') }}</a>
     <a href="{{ route('admin.support.index') }}" class="admin-btn" data-admin-support-nav>
         {{ __('coin.admin.support') }}

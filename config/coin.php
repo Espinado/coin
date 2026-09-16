@@ -27,4 +27,8 @@ return [
         'schedule_timezone' => env('COIN_PROFIT_ACCRUAL_TZ', 'Europe/Riga'),
     ],
 
+    'admin' => [
+        'invitation_ttl_hours' => (int) env('COIN_ADMIN_INVITATION_TTL_HOURS', 72),
+    ],
+
 ];

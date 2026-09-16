@@ -42,11 +42,11 @@ class AdminAccessTest extends TestCase
         ])->assertNotFound();
 
         $this->get('http://admin.coin.test/forgot-password')
-            ->assertNotFound();
+            ->assertOk();
 
         $this->post('http://admin.coin.test/forgot-password', [
-            'email' => 'staff@coin.test',
-        ])->assertNotFound();
+            'email' => 'unknown@coin.test',
+        ])->assertRedirect('http://admin.coin.test/login');
 
         $this->get('http://admin.coin.test/reset-password/fake-token')
             ->assertNotFound();

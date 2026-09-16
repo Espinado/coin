@@ -38,7 +38,10 @@
                 </div>
 
                 <div>
-                    <label for="password" style="display:block;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.12em;color:rgba(232,237,245,0.65);">{{ strtoupper(__('coin.auth.password')) }}</label>
+                    <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;">
+                        <label for="password" style="display:block;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.12em;color:rgba(232,237,245,0.65);">{{ strtoupper(__('coin.auth.password')) }}</label>
+                        <a href="{{ route('admin.password.request') }}" style="font-size:12px;">{{ __('coin.auth.forgot') }}</a>
+                    </div>
                     <input id="password" type="password" name="password" required autocomplete="current-password"
                         style="width:100%;box-sizing:border-box;margin-top:8px;padding:12px 14px;border-radius:10px;border:1px solid rgba(255,255,255,0.12);background:#070a10;color:#e8edf5;font-size:14px;">
                     @error('password')
