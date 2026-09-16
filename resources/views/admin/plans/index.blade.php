@@ -27,7 +27,7 @@
         ])
     </div>
 
-    <div class="admin-card" style="margin-top:16px;padding:0;overflow:hidden;">
+    <div class="admin-card admin-card--table" style="margin-top:16px;"><div class="admin-table-scroll">
         <table style="width:100%;border-collapse:collapse;font-size:13px;">
             <thead>
                 <tr style="text-align:left;border-bottom:1px solid rgba(255,255,255,0.08);">
@@ -56,6 +56,7 @@
                 @endforelse
             </tbody>
         </table>
+        </div>
     </div>
 
     @include('admin.partials.list-pagination', ['paginator' => $plans])

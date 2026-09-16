@@ -2,10 +2,12 @@
 
 namespace Tests\Feature;
 
+use App\Mail\AdminLoginVerificationMail;
 use App\Models\Admin;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use Tests\TestCase;
 
 class AdminAccessTest extends TestCase
@@ -83,6 +85,8 @@ class AdminAccessTest extends TestCase
 
     public function test_admin_can_sign_in_and_access_dashboard(): void
     {
+        Mail::fake();
+
         Admin::query()->create([
             'name' => 'Staff',
             'email' => 'staff@coin.test',
@@ -92,6 +96,18 @@ class AdminAccessTest extends TestCase
         $this->post('http://admin.coin.test/login', [
             'email' => 'Staff@Coin.test',
             'password' => 'secret1234',
+        ])->assertRedirect('http://admin.coin.test/login/two-factor');
+
+        $code = null;
+
+        Mail::assertSent(AdminLoginVerificationMail::class, function (AdminLoginVerificationMail $mail) use (&$code) {
+            $code = $mail->code;
+
+            return $mail->hasTo('staff@coin.test');
+        });
+
+        $this->post('http://admin.coin.test/login/two-factor', [
+            'code' => $code,
         ])->assertRedirect('http://admin.coin.test/dashboard');
 
         $this->get('http://admin.coin.test/dashboard')

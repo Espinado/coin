@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Mail\AdminInvitationMail;
+use App\Mail\AdminLoginVerificationMail;
 use App\Models\Admin;
 use App\Models\AdminInvitation;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -67,6 +68,8 @@ class AdminInvitationTest extends TestCase
 
     public function test_invited_admin_can_accept_invitation_and_sign_in(): void
     {
+        Mail::fake();
+
         $inviter = Admin::query()->create([
             'name' => 'Owner',
             'email' => 'owner@coin.test',
@@ -93,12 +96,24 @@ class AdminInvitationTest extends TestCase
             'password_confirmation' => 'password1234',
         ]);
 
-        $response->assertRedirect('http://admin.coin.test/dashboard');
+        $response->assertRedirect('http://admin.coin.test/login/two-factor');
 
         $this->assertDatabaseHas('admins', [
             'email' => 'staff@coin.test',
             'name' => 'Staff Admin',
         ]);
+
+        $code = null;
+
+        Mail::assertSent(AdminLoginVerificationMail::class, function (AdminLoginVerificationMail $mail) use (&$code) {
+            $code = $mail->code;
+
+            return $mail->hasTo('staff@coin.test');
+        });
+
+        $this->post('http://admin.coin.test/login/two-factor', [
+            'code' => $code,
+        ])->assertRedirect('http://admin.coin.test/dashboard');
 
         $this->assertAuthenticatedAs(
             Admin::query()->where('email', 'staff@coin.test')->first(),
@@ -188,6 +203,8 @@ class AdminInvitationTest extends TestCase
 
     public function test_password_reset_invitation_updates_password(): void
     {
+        Mail::fake();
+
         $admin = Admin::query()->create([
             'name' => 'Staff',
             'email' => 'staff@coin.test',
@@ -209,6 +226,18 @@ class AdminInvitationTest extends TestCase
             'name' => 'Staff Updated',
             'password' => 'new-password1234',
             'password_confirmation' => 'new-password1234',
+        ])->assertRedirect('http://admin.coin.test/login/two-factor');
+
+        $code = null;
+
+        Mail::assertSent(AdminLoginVerificationMail::class, function (AdminLoginVerificationMail $mail) use (&$code) {
+            $code = $mail->code;
+
+            return $mail->hasTo('staff@coin.test');
+        });
+
+        $this->post('http://admin.coin.test/login/two-factor', [
+            'code' => $code,
         ])->assertRedirect('http://admin.coin.test/dashboard');
 
         $admin->refresh();

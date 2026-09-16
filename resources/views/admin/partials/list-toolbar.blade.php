@@ -10,14 +10,13 @@
   $searchPlaceholder = $searchPlaceholder ?? __('coin.admin.search_placeholder');
 @endphp
 
-<form method="GET" action="{{ $action }}" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+<form method="GET" action="{{ $action }}" class="admin-list-toolbar">
   @if($showSearch)
-    <input type="search" name="q" value="{{ $search }}" placeholder="{{ $searchPlaceholder }}"
-      style="padding:10px 12px;border-radius:10px;border:1px solid rgba(255,255,255,0.12);background:#070a10;color:#e8edf5;min-width:220px;">
+    <input type="search" name="q" value="{{ $search }}" placeholder="{{ $searchPlaceholder }}">
   @endif
 
   @if($showStatus && is_array($statuses))
-    <select name="status" style="padding:10px 12px;border-radius:10px;border:1px solid rgba(255,255,255,0.12);background:#070a10;color:#e8edf5;">
+    <select name="status">
       <option value="">{{ __('coin.admin.all_statuses') }}</option>
       @foreach($statuses as $value => $label)
         <option value="{{ $value }}" @selected($status === (string) $value)>{{ $label }}</option>
@@ -32,9 +31,9 @@
     <input type="hidden" name="dir" value="{{ $dir }}">
   @endif
 
-  <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:rgba(232,237,245,0.72);">
+  <label>
     <span>{{ __('coin.pagination.per_page') }}</span>
-    <select name="per_page" style="padding:10px 12px;border-radius:10px;border:1px solid rgba(255,255,255,0.12);background:#070a10;color:#e8edf5;">
+    <select name="per_page">
       @foreach([10, 20, 50, 100] as $option)
         <option value="{{ $option }}" @selected((int) $perPage === $option)>{{ $option }}</option>
       @endforeach

@@ -8,6 +8,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ asset('admin/responsive.css') }}">
     <style>
         body { margin: 0; font-family: 'Sora', sans-serif; background: #0c0f14; color: #e8edf5; -webkit-font-smoothing: antialiased; }
         a { color: #9db4ff; text-decoration: none; }
@@ -15,7 +16,7 @@
         .admin-shell { min-height: 100vh; }
         .admin-topbar { display: flex; align-items: center; justify-content: space-between; padding: 16px 28px; border-bottom: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.02); }
         .admin-badge { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.14em; color: #ffb454; border: 1px solid rgba(255,180,84,0.35); padding: 4px 8px; border-radius: 6px; }
-        .admin-content { padding: 28px; max-width: 1200px; }
+        .admin-content { padding: 28px; max-width: 1200px; margin: 0 auto; }
         .admin-card { padding: 24px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.03); }
         button, .admin-btn { cursor: pointer; font-family: inherit; }
         .admin-btn { padding: 10px 16px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.14); background: rgba(255,255,255,0.06); color: #e8edf5; font-size: 13px; }
@@ -45,15 +46,17 @@
             @yield('topbar')
         @else
             <header class="admin-topbar">
-                <div style="display:flex;align-items:center;gap:12px;">
+                <div class="admin-topbar-brand">
                     <span style="font-weight:600;">Coin Admin</span>
                     <span class="admin-badge">STAFF ONLY</span>
                 </div>
                 @auth('admin')
-                    <form method="POST" action="{{ route('admin.logout') }}">
-                        @csrf
-                        <button type="submit" class="admin-btn">Log out</button>
-                    </form>
+                    <div class="admin-topbar-actions">
+                        <form method="POST" action="{{ route('admin.logout') }}">
+                            @csrf
+                            <button type="submit" class="admin-btn">Log out</button>
+                        </form>
+                    </div>
                 @endauth
             </header>
         @endif

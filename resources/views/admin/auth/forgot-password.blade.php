@@ -12,7 +12,7 @@
 @endsection
 
 @section('content')
-    <div style="max-width:420px;margin:80px auto 0;">
+    <div class="admin-auth-wrap">
         <div class="admin-card">
             <h1 style="margin:0;font-size:22px;font-weight:600;">{{ __('coin.admin.admins.forgot_password') }}</h1>
             <p style="margin:10px 0 0;font-size:13.5px;line-height:1.55;color:rgba(232,237,245,0.72);">

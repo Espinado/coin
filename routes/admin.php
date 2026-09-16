@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\AdminStaffController;
 use App\Http\Controllers\Admin\Auth\AcceptInvitationController;
 use App\Http\Controllers\Admin\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Admin\Auth\RequestPasswordResetController;
+use App\Http\Controllers\Admin\Auth\TwoFactorLoginController;
 use App\Http\Controllers\ReverbDebugLogController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\DepositController;
@@ -29,6 +30,16 @@ Route::middleware(['admin.domain', 'reject.web.on.admin'])->group(function () {
 
         Route::post('login', [AuthenticatedSessionController::class, 'store'])
             ->name('admin.login.store');
+
+        Route::get('login/two-factor', [TwoFactorLoginController::class, 'create'])
+            ->name('admin.login.two-factor');
+
+        Route::post('login/two-factor', [TwoFactorLoginController::class, 'store'])
+            ->name('admin.login.two-factor.store');
+
+        Route::post('login/two-factor/resend', [TwoFactorLoginController::class, 'resend'])
+            ->middleware('throttle:3,1')
+            ->name('admin.login.two-factor.resend');
 
         Route::get('forgot-password', [RequestPasswordResetController::class, 'create'])
             ->name('admin.password.request');

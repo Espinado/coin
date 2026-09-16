@@ -42,7 +42,7 @@ class LoginRequest extends FormRequest
     /**
      * @throws ValidationException
      */
-    public function authenticate(): void
+    public function validateCredentials(): Admin
     {
         $this->ensureIsNotRateLimited();
 
@@ -59,9 +59,19 @@ class LoginRequest extends FormRequest
             ]);
         }
 
-        Auth::guard('admin')->login($admin, $this->boolean('remember'));
-
         RateLimiter::clear($this->throttleKey());
+
+        return $admin;
+    }
+
+    /**
+     * @throws ValidationException
+     */
+    public function authenticate(): void
+    {
+        $admin = $this->validateCredentials();
+
+        Auth::guard('admin')->login($admin, $this->boolean('remember'));
     }
 
     /**

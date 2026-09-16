@@ -15,7 +15,7 @@
         @endif
     </div>
 
-    <div class="admin-card" style="margin-top:16px;padding:0;overflow:hidden;">
+    <div class="admin-card admin-card--table" style="margin-top:16px;"><div class="admin-table-scroll">
         <table style="width:100%;border-collapse:collapse;font-size:13px;">
             <thead>
                 <tr style="text-align:left;border-bottom:1px solid rgba(255,255,255,0.08);color:rgba(232,237,245,0.62);font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.1em;">
@@ -36,5 +36,6 @@
                 @endforelse
             </tbody>
         </table>
+        </div>
     </div>
 @endsection

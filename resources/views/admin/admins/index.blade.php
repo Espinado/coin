@@ -6,7 +6,7 @@
     @include('admin.partials.nav')
 
     <div class="admin-card">
-        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:16px;">
+        <div class="admin-page-head">
             <div>
                 <h1 style="margin:0;font-size:24px;font-weight:600;">{{ __('coin.admin.admins.title') }}</h1>
                 <p style="margin:8px 0 0;font-size:14px;color:rgba(232,237,245,0.72);">{{ __('coin.admin.admins.sub') }}</p>
@@ -24,7 +24,7 @@
     </div>
 
     @if($pendingInvitations->isNotEmpty())
-        <div class="admin-card" style="margin-top:16px;padding:0;overflow:hidden;">
+        <div class="admin-card admin-card--table" style="margin-top:16px;"><div class="admin-table-scroll">
             <div style="padding:16px 18px;border-bottom:1px solid rgba(255,255,255,0.08);">
                 <h2 style="margin:0;font-size:16px;font-weight:600;">{{ __('coin.admin.admins.pending_invitations') }}</h2>
             </div>
@@ -68,7 +68,7 @@
         </div>
     @endif
 
-    <div class="admin-card" style="margin-top:16px;padding:0;overflow:hidden;">
+    <div class="admin-card admin-card--table" style="margin-top:16px;"><div class="admin-table-scroll">
         <table style="width:100%;border-collapse:collapse;font-size:13px;">
             <thead>
                 <tr style="text-align:left;border-bottom:1px solid rgba(255,255,255,0.08);">
@@ -115,6 +115,7 @@
                 @endforelse
             </tbody>
         </table>
+        </div>
     </div>
 
     @include('admin.partials.list-pagination', ['paginator' => $admins])

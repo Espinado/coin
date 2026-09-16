@@ -4,9 +4,9 @@ namespace App\Http\Controllers\Admin\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Services\AdminInvitationService;
+use App\Services\AdminLoginTwoFactorService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rules;
 use Illuminate\View\View;
 use RuntimeException;
@@ -31,7 +31,7 @@ class AcceptInvitationController extends Controller
         ]);
     }
 
-    public function store(string $token, Request $request, AdminInvitationService $invitations): RedirectResponse
+    public function store(string $token, Request $request, AdminInvitationService $invitations, AdminLoginTwoFactorService $twoFactor): RedirectResponse
     {
         $invitation = $invitations->findPendingByToken($token);
 
@@ -57,16 +57,12 @@ class AcceptInvitationController extends Controller
                 ->with('status_type', 'error');
         }
 
-        Auth::guard('admin')->login($admin);
-        $request->session()->regenerate();
-
         $messageKey = $invitation->isPasswordReset()
             ? 'coin.admin.admins.password_reset_completed'
             : 'coin.admin.admins.invite_accepted';
 
-        return redirect()
-            ->route('admin.dashboard')
-            ->with('status', __($messageKey))
-            ->with('status_type', 'success');
+        $twoFactor->beginChallenge($admin, false, $request, $messageKey);
+
+        return redirect()->route('admin.login.two-factor');
     }
 }

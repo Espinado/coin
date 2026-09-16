@@ -12,7 +12,7 @@
 @endsection
 
 @section('content')
-    <div style="max-width:420px;margin:80px auto 0;">
+    <div class="admin-auth-wrap">
         <div class="admin-card">
             <h1 style="margin:0;font-size:22px;font-weight:600;">
                 {{ $isPasswordReset ? __('coin.admin.admins.reset_title') : __('coin.admin.admins.accept_title') }}

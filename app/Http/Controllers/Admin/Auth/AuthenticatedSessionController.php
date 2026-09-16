@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\LoginRequest;
+use App\Services\AdminLoginTwoFactorService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -11,18 +12,26 @@ use Illuminate\View\View;
 
 class AuthenticatedSessionController extends Controller
 {
-    public function create(): View
+    public function create(Request $request, AdminLoginTwoFactorService $twoFactor): View|RedirectResponse
     {
+        if ($request->boolean('cancel')) {
+            $twoFactor->clearChallenge($request);
+        }
+
+        if ($twoFactor->hasPendingChallenge($request)) {
+            return redirect()->route('admin.login.two-factor');
+        }
+
         return view('admin.auth.login');
     }
 
-    public function store(LoginRequest $request): RedirectResponse
+    public function store(LoginRequest $request, AdminLoginTwoFactorService $twoFactor): RedirectResponse
     {
-        $request->authenticate();
+        $admin = $request->validateCredentials();
 
-        $request->session()->regenerate();
+        $twoFactor->beginChallenge($admin, $request->boolean('remember'), $request);
 
-        return redirect()->intended(route('admin.dashboard', absolute: false));
+        return redirect()->route('admin.login.two-factor');
     }
 
     public function destroy(Request $request): RedirectResponse
