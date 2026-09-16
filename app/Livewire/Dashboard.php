@@ -406,7 +406,16 @@ class Dashboard extends Component
 
     public function getNextExpiryLabelProperty(): string
     {
-        return $this->user->next_expiry_label ?? '—';
+        $nearest = $this->activeContracts
+            ->filter(fn ($contract) => $contract->ends_at !== null)
+            ->sortBy(fn ($contract) => $contract->ends_at)
+            ->first();
+
+        if (! $nearest) {
+            return '—';
+        }
+
+        return $nearest->formattedEndsAt();
     }
 
     public function getNextSettlementLabelProperty(): string
