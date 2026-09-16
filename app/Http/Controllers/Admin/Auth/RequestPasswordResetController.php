@@ -18,7 +18,7 @@ class RequestPasswordResetController extends Controller
     public function store(Request $request, AdminInvitationService $invitations): RedirectResponse
     {
         $validated = $request->validate([
-            'email' => ['required', 'string', 'lowercase', 'email', 'max:255'],
+            'email' => ['required', 'string', 'email', 'max:255'],
         ]);
 
         $invitations->requestPasswordResetByEmail($validated['email']);

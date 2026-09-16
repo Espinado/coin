@@ -68,12 +68,29 @@ class AuthenticationTest extends TestCase
     {
         $user = User::factory()->create();
 
-        $this->post('/login', [
+        $response = $this->post('/login', [
             'email' => $user->email,
             'password' => 'wrong-password',
         ]);
 
         $this->assertGuest();
+        $response->assertSessionHasErrors('email');
+        $response->assertSee(__('coin.auth.login_failed'), false);
+    }
+
+    public function test_users_can_authenticate_with_mixed_case_email(): void
+    {
+        $user = User::factory()->create([
+            'email' => 'mixedcase@example.com',
+        ]);
+
+        $response = $this->post('/login', [
+            'email' => 'MixedCase@Example.com',
+            'password' => 'password',
+        ]);
+
+        $this->assertAuthenticatedAs($user);
+        $response->assertRedirect(route('dashboard', absolute: false));
     }
 
     public function test_users_can_logout(): void

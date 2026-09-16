@@ -72,10 +72,13 @@ class AdminAccessTest extends TestCase
             'password' => Hash::make('password'),
         ]);
 
-        $this->post('http://admin.coin.test/login', [
+        $response = $this->post('http://admin.coin.test/login', [
             'email' => 'user@coin.test',
             'password' => 'password',
-        ])->assertSessionHasErrors('email');
+        ]);
+
+        $response->assertSessionHasErrors('email');
+        $response->assertSee(__('coin.auth.login_failed'), false);
     }
 
     public function test_admin_can_sign_in_and_access_dashboard(): void
@@ -87,7 +90,7 @@ class AdminAccessTest extends TestCase
         ]);
 
         $this->post('http://admin.coin.test/login', [
-            'email' => 'staff@coin.test',
+            'email' => 'Staff@Coin.test',
             'password' => 'secret1234',
         ])->assertRedirect('http://admin.coin.test/dashboard');
 

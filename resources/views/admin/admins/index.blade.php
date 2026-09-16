@@ -95,7 +95,14 @@
                                     @csrf
                                     <button type="submit" class="admin-btn">{{ __('coin.admin.admins.reset_password') }}</button>
                                 </form>
-                                <form method="POST" action="{{ route('admin.admins.destroy', $admin) }}" style="display:inline;margin-left:8px;" onsubmit="return confirm(@json(__('coin.admin.admins.delete_confirm')));">
+                                <form method="POST"
+                                    action="{{ route('admin.admins.destroy', $admin) }}"
+                                    class="js-swal-confirm-form"
+                                    style="display:inline;margin-left:8px;"
+                                    data-swal-title="{{ __('coin.admin.admins.delete_confirm_title') }}"
+                                    data-swal-text="{{ __('coin.admin.admins.delete_confirm', ['name' => $admin->name, 'email' => $admin->email]) }}"
+                                    data-swal-confirm="{{ __('coin.delete') }}"
+                                    data-swal-cancel="{{ __('coin.cancel') }}">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="admin-btn" style="border-color:rgba(255,143,143,0.35);color:#ff8f8f;">{{ __('coin.delete') }}</button>

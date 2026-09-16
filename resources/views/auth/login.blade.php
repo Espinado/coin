@@ -12,7 +12,11 @@
         <div class="coin-auth-card" style="position: relative; width: 420px; padding: 36px 36px 30px; border-radius: 22px; border: 1px solid rgba(150,235,250,0.16); background: linear-gradient(170deg, rgba(13,38,58,0.92), rgba(5,16,27,0.96)); box-shadow: 0 50px 110px -50px #000;">
             <div style="font-size: 22px; font-weight: 600; letter-spacing: -0.025em; color: #f0fbff;">{{ __('coin.auth.sign_in') }}</div>
 
-            <x-auth-session-status class="coin-auth-status" :status="session('status')" />
+            @if (session('status') && ! $errors->any())
+                <x-auth-session-status class="coin-auth-status" :status="session('status')" />
+            @endif
+
+            @include('partials.login-errors')
 
             <form method="POST" action="{{ route('login') }}" x-data="{ visible: false }">
                 @csrf

@@ -19,11 +19,13 @@
                 {{ __('coin.auth.admin_login_hint', ['domain' => config('coin.admin_domain')]) }}
             </p>
 
-            @if (session('status'))
+            @if (session('status') && ! $errors->any())
                 <div style="margin-top:16px;padding:12px 14px;border-radius:10px;border:1px solid rgba(255,180,84,0.35);background:rgba(255,180,84,0.08);font-size:13px;">
                     {{ session('status') }}
                 </div>
             @endif
+
+            @include('partials.login-errors')
 
             <form method="POST" action="{{ route('admin.login.store') }}" style="margin-top:24px;display:flex;flex-direction:column;gap:16px;">
                 @csrf

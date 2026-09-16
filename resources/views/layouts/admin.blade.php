@@ -62,6 +62,7 @@
             @yield('content')
         </main>
     </div>
+    @include('admin.partials.sweetalert')
     @stack('scripts')
     @auth('admin')
         @vite(['resources/js/admin-support-realtime.js'])

@@ -2,10 +2,12 @@
 
 namespace App\Http\Requests\Admin;
 
+use App\Models\Admin;
 use Illuminate\Auth\Events\Lockout;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -15,6 +17,15 @@ class LoginRequest extends FormRequest
     public function authorize(): bool
     {
         return true;
+    }
+
+    protected function prepareForValidation(): void
+    {
+        if ($this->has('email')) {
+            $this->merge([
+                'email' => Str::lower(trim($this->string('email')->toString())),
+            ]);
+        }
     }
 
     /**
@@ -35,13 +46,20 @@ class LoginRequest extends FormRequest
     {
         $this->ensureIsNotRateLimited();
 
-        if (! Auth::guard('admin')->attempt($this->only('email', 'password'), $this->boolean('remember'))) {
+        $email = $this->string('email')->toString();
+        $admin = Admin::query()
+            ->whereRaw('LOWER(email) = ?', [$email])
+            ->first();
+
+        if (! $admin || ! Hash::check($this->string('password')->toString(), (string) $admin->password)) {
             RateLimiter::hit($this->throttleKey());
 
             throw ValidationException::withMessages([
-                'email' => trans('auth.failed'),
+                'email' => __('coin.auth.login_failed'),
             ]);
         }
+
+        Auth::guard('admin')->login($admin, $this->boolean('remember'));
 
         RateLimiter::clear($this->throttleKey());
     }
@@ -60,7 +78,7 @@ class LoginRequest extends FormRequest
         $seconds = RateLimiter::availableIn($this->throttleKey());
 
         throw ValidationException::withMessages([
-            'email' => trans('auth.throttle', [
+            'email' => __('coin.auth.login_throttle', [
                 'seconds' => $seconds,
                 'minutes' => ceil($seconds / 60),
             ]),

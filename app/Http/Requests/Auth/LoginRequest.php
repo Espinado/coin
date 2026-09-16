@@ -27,6 +27,15 @@ class LoginRequest extends FormRequest
      *
      * @return array<string, ValidationRule|array<mixed>|string>
      */
+    protected function prepareForValidation(): void
+    {
+        if ($this->has('email')) {
+            $this->merge([
+                'email' => Str::lower(trim($this->string('email')->toString())),
+            ]);
+        }
+    }
+
     public function rules(): array
     {
         return [
@@ -44,13 +53,16 @@ class LoginRequest extends FormRequest
     {
         $this->ensureIsNotRateLimited();
 
-        $user = User::query()->where('email', $this->string('email'))->first();
+        $email = $this->string('email')->toString();
+        $user = User::query()
+            ->whereRaw('LOWER(email) = ?', [$email])
+            ->first();
 
-        if (! $user || ! Hash::check($this->string('password'), (string) $user->password)) {
+        if (! $user || ! Hash::check($this->string('password')->toString(), (string) $user->password)) {
             RateLimiter::hit($this->throttleKey());
 
             throw ValidationException::withMessages([
-                'email' => trans('auth.failed'),
+                'email' => __('coin.auth.login_failed'),
             ]);
         }
 
@@ -78,7 +90,7 @@ class LoginRequest extends FormRequest
 
         if (! Auth::loginUsingId($user->id, $this->boolean('remember'))) {
             throw ValidationException::withMessages([
-                'email' => trans('auth.failed'),
+                'email' => __('coin.auth.login_failed'),
             ]);
         }
     }
@@ -99,7 +111,7 @@ class LoginRequest extends FormRequest
         $seconds = RateLimiter::availableIn($this->throttleKey());
 
         throw ValidationException::withMessages([
-            'email' => trans('auth.throttle', [
+            'email' => __('coin.auth.login_throttle', [
                 'seconds' => $seconds,
                 'minutes' => ceil($seconds / 60),
             ]),
