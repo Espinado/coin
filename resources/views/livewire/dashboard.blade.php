@@ -136,28 +136,45 @@
                 <div style="margin-top: 4px; font-size: 12.5px; color: rgba(214,238,248,0.7);">{{ __('coin.overview.accruals_sub') }}</div>
               </div>
               <div style="display: flex; gap: 7px;">
-                <span style="padding: 7px 12px; border-radius: 9px; border: 1px solid rgba(150,235,250,0.16); font-family: 'JetBrains Mono', monospace; font-size: 10.5px; color: rgba(214,238,248,0.7);">30D</span>
-                <span style="padding: 7px 12px; border-radius: 9px; border: 1px solid oklch(0.86 0.11 195 / 0.4); background: oklch(0.6 0.13 200 / 0.22); font-family: 'JetBrains Mono', monospace; font-size: 10.5px; color: #f0fbff;">14D</span>
-                <span style="padding: 7px 12px; border-radius: 9px; border: 1px solid rgba(150,235,250,0.16); font-family: 'JetBrains Mono', monospace; font-size: 10.5px; color: rgba(214,238,248,0.7);">24H</span>
+                @foreach([2 => '30D', 1 => '14D', 0 => '24H'] as $chartPeriod => $chartLabel)
+                <button type="button" wire:click="setAccrualChartPeriod({{ $chartPeriod }})" style="position: relative; padding: 7px 12px; border-radius: 9px; border: 1px solid rgba(150,235,250,0.16); background: transparent; font-family: 'JetBrains Mono', monospace; font-size: 10.5px; color: rgba(214,238,248,0.7); cursor: pointer;">
+                  @if($accrualChartPeriod === $chartPeriod)<span style="position: absolute; inset: -1px; border-radius: 9px; border: 1px solid oklch(0.86 0.11 195 / 0.4); background: oklch(0.6 0.13 200 / 0.22); pointer-events: none;"></span>@endif
+                  <span style="position: relative; color: {{ $accrualChartPeriod === $chartPeriod ? '#f0fbff' : 'rgba(214,238,248,0.7)' }};">{{ $chartLabel }}</span>
+                </button>
+                @endforeach
               </div>
             </div>
-            <div style="display: flex; align-items: flex-end; gap: 8px; height: 176px; margin-top: 24px;">
-              <div style="flex: 1; height: 34%; border-radius: 4px 4px 2px 2px; background: linear-gradient(180deg, oklch(0.72 0.11 210 / 0.8), oklch(0.72 0.11 210 / 0.12));"></div>
-              <div style="flex: 1; height: 46%; border-radius: 4px 4px 2px 2px; background: linear-gradient(180deg, oklch(0.72 0.11 210 / 0.8), oklch(0.72 0.11 210 / 0.12));"></div>
-              <div style="flex: 1; height: 39%; border-radius: 4px 4px 2px 2px; background: linear-gradient(180deg, oklch(0.72 0.11 210 / 0.8), oklch(0.72 0.11 210 / 0.12));"></div>
-              <div style="flex: 1; height: 58%; border-radius: 4px 4px 2px 2px; background: linear-gradient(180deg, oklch(0.72 0.11 210 / 0.8), oklch(0.72 0.11 210 / 0.12));"></div>
-              <div style="flex: 1; height: 52%; border-radius: 4px 4px 2px 2px; background: linear-gradient(180deg, oklch(0.76 0.12 202 / 0.85), oklch(0.76 0.12 202 / 0.12));"></div>
-              <div style="flex: 1; height: 67%; border-radius: 4px 4px 2px 2px; background: linear-gradient(180deg, oklch(0.76 0.12 202 / 0.85), oklch(0.76 0.12 202 / 0.12));"></div>
-              <div style="flex: 1; height: 61%; border-radius: 4px 4px 2px 2px; background: linear-gradient(180deg, oklch(0.76 0.12 202 / 0.85), oklch(0.76 0.12 202 / 0.12));"></div>
-              <div style="flex: 1; height: 74%; border-radius: 4px 4px 2px 2px; background: linear-gradient(180deg, oklch(0.8 0.12 198), oklch(0.8 0.12 198 / 0.14));"></div>
-              <div style="flex: 1; height: 69%; border-radius: 4px 4px 2px 2px; background: linear-gradient(180deg, oklch(0.8 0.12 198), oklch(0.8 0.12 198 / 0.14));"></div>
-              <div style="flex: 1; height: 83%; border-radius: 4px 4px 2px 2px; background: linear-gradient(180deg, oklch(0.84 0.12 195), oklch(0.84 0.12 195 / 0.16));"></div>
-              <div style="flex: 1; height: 78%; border-radius: 4px 4px 2px 2px; background: linear-gradient(180deg, oklch(0.84 0.12 195), oklch(0.84 0.12 195 / 0.16));"></div>
-              <div style="flex: 1; height: 91%; border-radius: 4px 4px 2px 2px; background: linear-gradient(180deg, oklch(0.88 0.12 192), oklch(0.88 0.12 192 / 0.18));"></div>
-              <div style="flex: 1; height: 86%; border-radius: 4px 4px 2px 2px; background: linear-gradient(180deg, oklch(0.88 0.12 192), oklch(0.88 0.12 192 / 0.18));"></div>
-              <div style="flex: 1; height: 100%; border-radius: 4px 4px 2px 2px; background: linear-gradient(180deg, #eafcff, oklch(0.88 0.12 192 / 0.22)); box-shadow: 0 0 26px oklch(0.88 0.12 192 / 0.45);"></div>
+            @php $accrualsChart = $this->accrualsChart; @endphp
+            @if($accrualsChart['hasData'])
+            <div style="height: 176px; margin-top: 24px;">
+              <svg viewBox="0 0 1000 210" preserveAspectRatio="none" style="width: 100%; height: 100%; overflow: visible; display: block;">
+                <defs>
+                  <linearGradient id="overviewAccrualsArea" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="oklch(0.88 0.12 192)" stop-opacity="0.38"></stop>
+                    <stop offset="100%" stop-color="oklch(0.72 0.11 210)" stop-opacity="0.03"></stop>
+                  </linearGradient>
+                  <linearGradient id="overviewAccrualsLine" x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="0%" stop-color="oklch(0.72 0.11 210)"></stop>
+                    <stop offset="100%" stop-color="#eafcff"></stop>
+                  </linearGradient>
+                </defs>
+                <path d="{{ $accrualsChart['areaPath'] }}" fill="url(#overviewAccrualsArea)"></path>
+                <path d="{{ $accrualsChart['linePath'] }}" fill="none" stroke="url(#overviewAccrualsLine)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke" style="filter: drop-shadow(0 0 10px oklch(0.88 0.12 192 / 0.55));"></path>
+                @foreach($accrualsChart['points'] as $point)
+                <circle cx="{{ $point['x'] }}" cy="{{ $point['y'] }}" r="{{ $point['highlight'] ? 5 : 3 }}" fill="{{ $point['highlight'] ? '#eafcff' : 'oklch(0.84 0.12 195)' }}" opacity="{{ $point['highlight'] ? 1 : 0.55 }}" vector-effect="non-scaling-stroke" style="@if($point['highlight']) filter: drop-shadow(0 0 12px oklch(0.88 0.12 192 / 0.85)); @endif">
+                  <title>{{ $point['tooltip'] }}</title>
+                </circle>
+                @endforeach
+              </svg>
             </div>
-            <div style="display: flex; justify-content: space-between; margin-top: 14px; font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.1em; color: rgba(214,238,248,0.62);"><span>AUG 26</span><span>SEP 1</span><span>SEP 8</span></div>
+            <div style="display: flex; justify-content: space-between; margin-top: 14px; font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.1em; color: rgba(214,238,248,0.62);">
+              @foreach($accrualsChart['axis'] as $label)
+              <span>{{ $label }}</span>
+              @endforeach
+            </div>
+            @else
+            <div style="margin-top: 24px; padding: 40px 16px; text-align: center; font-size: 13px; color: rgba(214,238,248,0.66);">{{ __('coin.stats.no_profit_yet') }}</div>
+            @endif
           </div>
 
           @php $allocation = $this->planAllocation; @endphp

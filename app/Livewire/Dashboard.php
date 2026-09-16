@@ -33,6 +33,9 @@ class Dashboard extends Component
 
     public int $period = 1;
 
+    /** 0 = 24H, 1 = 14D, 2 = 30D */
+    public int $accrualChartPeriod = 1;
+
     public bool $menuOpen = false;
 
     public string $symbol = 'COIN';
@@ -235,6 +238,16 @@ class Dashboard extends Component
     public function setPeriod(int $period): void
     {
         $this->period = $period;
+    }
+
+    public function setAccrualChartPeriod(int $period): void
+    {
+        $this->accrualChartPeriod = $period;
+    }
+
+    public function getAccrualsChartProperty(): array
+    {
+        return $this->buildAccrualsChart($this->accrualChartPeriod);
     }
 
     public function selectPlan(int $planId): void
@@ -1167,6 +1180,66 @@ class Dashboard extends Component
 
             return $at && $at >= $since;
         });
+    }
+
+    private function buildAccrualsChart(int $period): array
+    {
+        $transactions = $this->dailyProfitTransactions();
+
+        [$values, $labels] = match ($period) {
+            0 => $this->profitTrendHourlyBuckets(
+                $transactions->filter(function ($transaction) {
+                    $at = $transaction->occurred_at ?? $transaction->created_at;
+
+                    return $at && $at >= now()->startOfDay();
+                })
+            ),
+            2 => $this->accrualDailyBuckets($transactions, 30),
+            default => $this->accrualDailyBuckets($transactions, 14),
+        };
+
+        return $this->formatProfitTrendChart($values, $labels);
+    }
+
+    /** @return Collection<int, WalletTransaction> */
+    private function dailyProfitTransactions(): Collection
+    {
+        return $this->profitTransactions->filter(
+            fn ($transaction) => $transaction->type === 'Daily profit'
+        );
+    }
+
+    /** @return array{0: array<int, float>, 1: array<int, string>} */
+    private function accrualDailyBuckets(Collection $transactions, int $days): array
+    {
+        $start = now()->startOfDay()->subDays($days - 1);
+        $end = now()->startOfDay();
+        $values = array_fill(0, $days, 0.0);
+        $labels = [];
+
+        for ($index = 0; $index < $days; $index++) {
+            $day = $start->copy()->addDays($index);
+            $labels[] = strtoupper($day->locale('en')->isoFormat('MMM D'));
+        }
+
+        foreach ($transactions as $transaction) {
+            $at = $transaction->occurred_at ?? $transaction->created_at;
+            if (! $at) {
+                continue;
+            }
+
+            $atDay = $at->copy()->startOfDay();
+            if ($atDay->lt($start) || $atDay->gt($end)) {
+                continue;
+            }
+
+            $dayIndex = (int) $start->diffInDays($atDay);
+            if ($dayIndex >= 0 && $dayIndex < $days) {
+                $values[$dayIndex] += max(0, (float) ($transaction->amount ?? 0));
+            }
+        }
+
+        return [$values, $labels];
     }
 
     private function buildProfitTrendChart(int $period): array
