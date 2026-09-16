@@ -242,7 +242,7 @@
     @endif
 
     @if($section === 1)
-      <section data-screen-label="{{ __('coin.nav.investment_plans') }}" style="padding: 28px 32px 40px; display: flex; flex-direction: column; gap: 16px;">
+      <section data-screen-label="{{ __('coin.nav.investment_plans') }}" style="padding: 28px 32px 40px; display: flex; flex-direction: column; gap: 24px;">
         @if($changingContract = $this->changingContract)
         <div style="padding: 18px 22px; border-radius: 16px; border: 1px solid oklch(0.86 0.11 195 / 0.28); background: linear-gradient(170deg, oklch(0.6 0.13 200 / 0.14), rgba(150,235,250,0.03)); display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; flex-wrap: wrap;">
           <div>
@@ -257,15 +257,8 @@
           $visiblePlans = $changingContract
             ? $plans->filter(fn ($plan) => (int) $plan->id !== (int) $changingContract->plan_id)
             : $plans;
-          $visiblePlanCount = $visiblePlans->count();
-          $planGridCols = match (true) {
-            $visiblePlanCount <= 1 => 'minmax(0, 1fr)',
-            $visiblePlanCount === 2 => 'repeat(2, minmax(0, 1fr))',
-            $visiblePlanCount === 3 => 'repeat(3, minmax(0, 1fr))',
-            default => 'repeat(4, minmax(0, 1fr))',
-          };
         @endphp
-        <div class="coin-plan-grid" style="grid-template-columns: {{ $planGridCols }};">
+        <div class="coin-plan-grid">
           @foreach($visiblePlans as $plan)
             @include('livewire.partials.plan-card', [
               'plan' => $plan,
@@ -275,7 +268,7 @@
             ])
           @endforeach
         </div>
-        <div id="coin-plan-calculator" style="padding: 26px 28px; border-radius: 18px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.035); display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 340px); gap: 40px; align-items: center; scroll-margin-top: 96px;">
+        <div id="coin-plan-calculator" class="coin-plan-calculator" style="padding: 26px 28px; border-radius: 18px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.035); display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 340px); gap: 40px; align-items: start; scroll-margin-top: 96px;">
           <div>
             <div style="display: flex; align-items: baseline; gap: 12px;">
               <span style="font-size: 17px; font-weight: 600;">{{ __('coin.invest.calculator') }}</span>
@@ -313,23 +306,23 @@
               </div>
             </div>
           </div>
-          <div style="padding: 24px; border-radius: 16px; border: 1px solid rgba(150,235,250,0.14); background: linear-gradient(170deg, rgba(20,55,80,0.7), rgba(6,20,35,0.85));">
+          <div class="coin-plan-calculator__summary" style="padding: 24px; border-radius: 16px; border: 1px solid rgba(150,235,250,0.14); background: linear-gradient(170deg, rgba(20,55,80,0.7), rgba(6,20,35,0.85));">
             <div style="font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.14em; color: rgba(214,238,248,0.7);">{{ mb_strtoupper(__('coin.invest.selected_plan')) }}</div>
             <div style="margin-top: 12px; font-size: 22px; font-weight: 600; letter-spacing: -0.02em;">{{ $this->planName }}</div>
             <div style="height: 1px; background: rgba(150,235,250,0.14); margin: 20px 0;"></div>
-            <div style="display: flex; flex-direction: column; gap: 12px; font-size: 13px;">
-              <div style="display: flex; justify-content: space-between; gap: 14px;"><span style="color: rgba(214,238,248,0.72); min-width: 0;">{{ __('coin.invest.min_investment') }}</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">{{ $this->planCompute }}</span></div>
-              <div style="display: flex; justify-content: space-between; gap: 14px;"><span style="color: rgba(214,238,248,0.72); min-width: 0;">{{ __('coin.invest.term') }}</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">{{ $this->planTerm }}</span></div>
-              <div style="display: flex; justify-content: space-between; gap: 14px;"><span style="color: rgba(214,238,248,0.72); min-width: 0;">{{ __('coin.invest.infrastructure') }}</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">{{ $this->planInfra }}</span></div>
-              <div style="display: flex; justify-content: space-between; gap: 14px;"><span style="color: rgba(214,238,248,0.72); min-width: 0;">{{ __('coin.invest.estimated_price') }}</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">{{ $this->planPrice }}</span></div>
-              <div style="display: flex; justify-content: space-between; gap: 14px;"><span style="color: rgba(214,238,248,0.72); min-width: 0;">{{ __('coin.invest.currency') }}</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">{{ $wallet?->currency ?? 'USDT' }}</span></div>
+            <div class="coin-kv-list" style="display: flex; flex-direction: column; gap: 12px; font-size: 13px;">
+              <div class="coin-kv-row"><span>{{ __('coin.invest.min_investment') }}</span><span>{{ $this->planCompute }}</span></div>
+              <div class="coin-kv-row"><span>{{ __('coin.invest.term') }}</span><span>{{ $this->planTerm }}</span></div>
+              <div class="coin-kv-row"><span>{{ __('coin.invest.infrastructure') }}</span><span>{{ $this->planInfra }}</span></div>
+              <div class="coin-kv-row"><span>{{ __('coin.invest.estimated_price') }}</span><span>{{ $this->planPrice }}</span></div>
+              <div class="coin-kv-row"><span>{{ __('coin.invest.currency') }}</span><span>{{ $wallet?->currency ?? 'USDT' }}</span></div>
             </div>
             @if($changingContract)
-            <div style="margin-top: 14px; padding: 14px; border-radius: 12px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.04); display: flex; flex-direction: column; gap: 10px; font-size: 13px;">
-              <div style="display: flex; justify-content: space-between; gap: 12px;"><span style="color: rgba(214,238,248,0.72);">{{ __('coin.invest.change_plan_from') }}</span><span style="text-align: right;">{{ $changingContract->plan?->displayName() }}</span></div>
-              <div style="display: flex; justify-content: space-between; gap: 12px;"><span style="color: rgba(214,238,248,0.72);">{{ __('coin.invest.change_plan_to') }}</span><span style="text-align: right; font-weight: 500;">{{ $this->planName }}</span></div>
-              <div style="display: flex; justify-content: space-between; gap: 12px;"><span style="color: rgba(214,238,248,0.72);">{{ __('coin.invest.change_plan_top_up') }}</span><span style="font-family: 'JetBrains Mono', monospace; text-align: right;">@if($this->planChangeTopUp > 0){{ number_format($this->planChangeTopUp, 2, '.', ',') }} {{ $this->walletCurrency }}@else{{ __('coin.invest.change_plan_no_top_up') }}@endif</span></div>
-              <div style="display: flex; justify-content: space-between; gap: 12px;"><span style="color: rgba(214,238,248,0.72);">{{ __('coin.invest.change_plan_principal_after') }}</span><span style="font-family: 'JetBrains Mono', monospace; text-align: right;">{{ number_format($this->planChangePrincipalAfter, 2, '.', ',') }} {{ $this->walletCurrency }}</span></div>
+            <div class="coin-plan-change-summary" style="margin-top: 14px; padding: 14px; border-radius: 12px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.04); display: flex; flex-direction: column; gap: 10px; font-size: 13px;">
+              <div class="coin-kv-row"><span>{{ __('coin.invest.change_plan_from') }}</span><span>{{ $changingContract->plan?->displayName() }}</span></div>
+              <div class="coin-kv-row"><span>{{ __('coin.invest.change_plan_to') }}</span><span style="font-weight: 500;">{{ $this->planName }}</span></div>
+              <div class="coin-kv-row"><span>{{ __('coin.invest.change_plan_top_up') }}</span><span>@if($this->planChangeTopUp > 0){{ number_format($this->planChangeTopUp, 2, '.', ',') }} {{ $this->walletCurrency }}@else{{ __('coin.invest.change_plan_no_top_up') }}@endif</span></div>
+              <div class="coin-kv-row"><span>{{ __('coin.invest.change_plan_principal_after') }}</span><span>{{ number_format($this->planChangePrincipalAfter, 2, '.', ',') }} {{ $this->walletCurrency }}</span></div>
             </div>
             @if($this->planChangeHasInsufficientFunds && (int) ($selectedPlanId ?? 0) !== (int) $changingContract->plan_id)
             <p style="margin: 16px 0 0; font-size: 13px; line-height: 1.55; color: #ffb454;">

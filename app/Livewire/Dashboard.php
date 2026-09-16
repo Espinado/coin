@@ -284,12 +284,6 @@ class Dashboard extends Component
             return;
         }
 
-        if ($plan->isCurrentFor($this->primaryPlan)) {
-            $this->section = 2;
-
-            return;
-        }
-
         $this->selectedPlanId = $plan->id;
         $this->power = max(
             $plan->calculatorMinAmount(),
