@@ -404,29 +404,21 @@
             <span style="font-size: 15px; font-weight: 600;">{{ __('coin.stats.profit_trend') }}</span>
             <span style="font-family: 'JetBrains Mono', monospace; font-size: 10.5px; color: rgba(214,238,248,0.66);">{{ $this->walletCurrency }} · {{ $this->periodLabel }}</span>
           </div>
+          @php $profitTrend = $this->profitTrendChart; @endphp
+          @if($profitTrend['hasData'])
           <div style="display: flex; align-items: flex-end; gap: 6px; height: 210px; margin-top: 26px;">
-            <div style="flex: 1; height: 28%; border-radius: 4px 4px 2px 2px; background: linear-gradient(180deg, oklch(0.72 0.11 210 / 0.75), oklch(0.72 0.11 210 / 0.1));"></div>
-            <div style="flex: 1; height: 36%; border-radius: 4px 4px 2px 2px; background: linear-gradient(180deg, oklch(0.72 0.11 210 / 0.75), oklch(0.72 0.11 210 / 0.1));"></div>
-            <div style="flex: 1; height: 31%; border-radius: 4px 4px 2px 2px; background: linear-gradient(180deg, oklch(0.72 0.11 210 / 0.75), oklch(0.72 0.11 210 / 0.1));"></div>
-            <div style="flex: 1; height: 44%; border-radius: 4px 4px 2px 2px; background: linear-gradient(180deg, oklch(0.72 0.11 210 / 0.75), oklch(0.72 0.11 210 / 0.1));"></div>
-            <div style="flex: 1; height: 39%; border-radius: 4px 4px 2px 2px; background: linear-gradient(180deg, oklch(0.74 0.11 206 / 0.8), oklch(0.74 0.11 206 / 0.1));"></div>
-            <div style="flex: 1; height: 52%; border-radius: 4px 4px 2px 2px; background: linear-gradient(180deg, oklch(0.74 0.11 206 / 0.8), oklch(0.74 0.11 206 / 0.1));"></div>
-            <div style="flex: 1; height: 47%; border-radius: 4px 4px 2px 2px; background: linear-gradient(180deg, oklch(0.74 0.11 206 / 0.8), oklch(0.74 0.11 206 / 0.1));"></div>
-            <div style="flex: 1; height: 61%; border-radius: 4px 4px 2px 2px; background: linear-gradient(180deg, oklch(0.78 0.12 200 / 0.85), oklch(0.78 0.12 200 / 0.12));"></div>
-            <div style="flex: 1; height: 56%; border-radius: 4px 4px 2px 2px; background: linear-gradient(180deg, oklch(0.78 0.12 200 / 0.85), oklch(0.78 0.12 200 / 0.12));"></div>
-            <div style="flex: 1; height: 68%; border-radius: 4px 4px 2px 2px; background: linear-gradient(180deg, oklch(0.8 0.12 198 / 0.9), oklch(0.8 0.12 198 / 0.12));"></div>
-            <div style="flex: 1; height: 63%; border-radius: 4px 4px 2px 2px; background: linear-gradient(180deg, oklch(0.8 0.12 198 / 0.9), oklch(0.8 0.12 198 / 0.12));"></div>
-            <div style="flex: 1; height: 74%; border-radius: 4px 4px 2px 2px; background: linear-gradient(180deg, oklch(0.84 0.12 195), oklch(0.84 0.12 195 / 0.14));"></div>
-            <div style="flex: 1; height: 71%; border-radius: 4px 4px 2px 2px; background: linear-gradient(180deg, oklch(0.84 0.12 195), oklch(0.84 0.12 195 / 0.14));"></div>
-            <div style="flex: 1; height: 82%; border-radius: 4px 4px 2px 2px; background: linear-gradient(180deg, oklch(0.86 0.12 193), oklch(0.86 0.12 193 / 0.16));"></div>
-            <div style="flex: 1; height: 78%; border-radius: 4px 4px 2px 2px; background: linear-gradient(180deg, oklch(0.86 0.12 193), oklch(0.86 0.12 193 / 0.16));"></div>
-            <div style="flex: 1; height: 88%; border-radius: 4px 4px 2px 2px; background: linear-gradient(180deg, oklch(0.88 0.12 192), oklch(0.88 0.12 192 / 0.18));"></div>
-            <div style="flex: 1; height: 84%; border-radius: 4px 4px 2px 2px; background: linear-gradient(180deg, oklch(0.88 0.12 192), oklch(0.88 0.12 192 / 0.18));"></div>
-            <div style="flex: 1; height: 94%; border-radius: 4px 4px 2px 2px; background: linear-gradient(180deg, oklch(0.9 0.12 192), oklch(0.9 0.12 192 / 0.2));"></div>
-            <div style="flex: 1; height: 89%; border-radius: 4px 4px 2px 2px; background: linear-gradient(180deg, oklch(0.9 0.12 192), oklch(0.9 0.12 192 / 0.2));"></div>
-            <div style="flex: 1; height: 100%; border-radius: 4px 4px 2px 2px; background: linear-gradient(180deg, #eafcff, oklch(0.88 0.12 192 / 0.22)); box-shadow: 0 0 26px oklch(0.88 0.12 192 / 0.45);"></div>
+            @foreach($profitTrend['bars'] as $bar)
+            <div style="flex: 1; height: {{ $bar['height'] }}%; border-radius: 4px 4px 2px 2px; background: {{ $bar['gradient'] }};@if($bar['highlight']) box-shadow: 0 0 26px oklch(0.88 0.12 192 / 0.45);@endif" title="{{ $bar['tooltip'] }}"></div>
+            @endforeach
           </div>
-          <div style="display: flex; justify-content: space-between; margin-top: 14px; font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.1em; color: rgba(214,238,248,0.62);"><span>W1</span><span>W5</span><span>W10</span><span>W15</span><span>W20</span></div>
+          <div style="display: flex; justify-content: space-between; margin-top: 14px; font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.1em; color: rgba(214,238,248,0.62);">
+            @foreach($profitTrend['axis'] as $label)
+            <span>{{ $label }}</span>
+            @endforeach
+          </div>
+          @else
+          <div style="margin-top: 26px; padding: 48px 16px; text-align: center; font-size: 13px; color: rgba(214,238,248,0.66);">{{ __('coin.stats.no_profit_yet') }}</div>
+          @endif
         </div>
 
         @php $statsAllocation = $this->planAllocation; @endphp

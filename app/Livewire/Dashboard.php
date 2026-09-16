@@ -13,6 +13,7 @@ use App\Services\PlatformSettingsService;
 use App\Services\ReferralService;
 use App\Services\SupportTicketService;
 use App\Services\WithdrawalService;
+use Carbon\Carbon;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Collection;
 use Illuminate\Validation\Rule;
@@ -539,6 +540,11 @@ class Dashboard extends Component
     public function getPeriodTotalProperty(): string
     {
         return number_format($this->profitTotalForPeriod($this->period), 2, '.', ',');
+    }
+
+    public function getProfitTrendChartProperty(): array
+    {
+        return $this->buildProfitTrendChart($this->period);
     }
 
     public function getSelectedTicketProperty(): ?SupportTicket
@@ -1138,19 +1144,195 @@ class Dashboard extends Component
 
     private function profitTotalForPeriod(int $period): float
     {
-        $since = match ($period) {
+        $since = $this->profitPeriodStart($period);
+
+        return (float) $this->profitTransactionsInPeriod($since)
+            ->sum(fn ($transaction) => max(0, (float) ($transaction->amount ?? 0)));
+    }
+
+    private function profitPeriodStart(int $period): Carbon
+    {
+        return match ($period) {
             0 => now()->startOfDay(),
             2 => now()->startOfMonth(),
             default => now()->startOfWeek(),
         };
+    }
 
-        return (float) $this->profitTransactions
-            ->filter(function ($transaction) use ($since) {
-                $at = $transaction->occurred_at ?? $transaction->created_at;
+    /** @return Collection<int, WalletTransaction> */
+    private function profitTransactionsInPeriod(Carbon $since): Collection
+    {
+        return $this->profitTransactions->filter(function ($transaction) use ($since) {
+            $at = $transaction->occurred_at ?? $transaction->created_at;
 
-                return $at && $at >= $since;
-            })
-            ->sum(fn ($transaction) => max(0, (float) ($transaction->amount ?? 0)));
+            return $at && $at >= $since;
+        });
+    }
+
+    private function buildProfitTrendChart(int $period): array
+    {
+        $since = $this->profitPeriodStart($period);
+        $transactions = $this->profitTransactionsInPeriod($since);
+
+        [$values, $labels] = match ($period) {
+            0 => $this->profitTrendHourlyBuckets($transactions),
+            2 => $this->profitTrendDailyMonthBuckets($transactions),
+            default => $this->profitTrendDailyWeekBuckets($transactions),
+        };
+
+        return $this->formatProfitTrendChart($values, $labels);
+    }
+
+    /** @return array{0: array<int, float>, 1: array<int, string>} */
+    private function profitTrendHourlyBuckets(Collection $transactions): array
+    {
+        $values = array_fill(0, 24, 0.0);
+        $labels = array_map(fn (int $hour) => sprintf('%02d', $hour), range(0, 23));
+
+        foreach ($transactions as $transaction) {
+            $at = $transaction->occurred_at ?? $transaction->created_at;
+            if (! $at) {
+                continue;
+            }
+
+            $values[(int) $at->format('G')] += max(0, (float) ($transaction->amount ?? 0));
+        }
+
+        return [$values, $labels];
+    }
+
+    /** @return array{0: array<int, float>, 1: array<int, string>} */
+    private function profitTrendDailyWeekBuckets(Collection $transactions): array
+    {
+        $start = now()->startOfWeek()->startOfDay();
+        $values = array_fill(0, 7, 0.0);
+        $labels = [];
+
+        for ($day = 0; $day < 7; $day++) {
+            $labels[] = $start->copy()->addDays($day)->isoFormat('dd');
+        }
+
+        foreach ($transactions as $transaction) {
+            $at = $transaction->occurred_at ?? $transaction->created_at;
+            if (! $at) {
+                continue;
+            }
+
+            $dayIndex = (int) $start->diffInDays($at->copy()->startOfDay());
+            if ($dayIndex < 0 || $dayIndex > 6) {
+                continue;
+            }
+
+            $values[$dayIndex] += max(0, (float) ($transaction->amount ?? 0));
+        }
+
+        return [$values, $labels];
+    }
+
+    /** @return array{0: array<int, float>, 1: array<int, string>} */
+    private function profitTrendDailyMonthBuckets(Collection $transactions): array
+    {
+        $daysInPeriod = now()->day;
+        $values = array_fill(0, $daysInPeriod, 0.0);
+        $labels = array_map(fn (int $day) => (string) $day, range(1, $daysInPeriod));
+
+        foreach ($transactions as $transaction) {
+            $at = $transaction->occurred_at ?? $transaction->created_at;
+            if (! $at || ! $at->isSameMonth(now())) {
+                continue;
+            }
+
+            $dayIndex = $at->day - 1;
+            if ($dayIndex >= 0 && $dayIndex < $daysInPeriod) {
+                $values[$dayIndex] += max(0, (float) ($transaction->amount ?? 0));
+            }
+        }
+
+        return [$values, $labels];
+    }
+
+    /** @param  array<int, float>  $values
+     * @param  array<int, string>  $labels
+     */
+    private function formatProfitTrendChart(array $values, array $labels): array
+    {
+        $max = max($values ?: [0]);
+        $hasData = $max > 0;
+        $lastIndex = count($values) - 1;
+        $currency = $this->walletCurrency;
+
+        $bars = [];
+        foreach ($values as $index => $value) {
+            $height = $hasData
+                ? ($value > 0 ? max(8, (int) round($value / $max * 100)) : 4)
+                : 4;
+            $highlight = $index === $lastIndex;
+
+            $bars[] = [
+                'height' => $height,
+                'highlight' => $highlight,
+                'gradient' => $this->profitTrendBarGradient($height, $highlight),
+                'tooltip' => number_format($value, 2, '.', ',').' '.$currency,
+            ];
+        }
+
+        return [
+            'bars' => $bars,
+            'axis' => $this->profitTrendAxisLabels($labels),
+            'hasData' => $hasData,
+        ];
+    }
+
+    private function profitTrendBarGradient(int $height, bool $highlight): string
+    {
+        if ($highlight) {
+            return 'linear-gradient(180deg, #eafcff, oklch(0.88 0.12 192 / 0.22))';
+        }
+
+        if ($height >= 90) {
+            return 'linear-gradient(180deg, oklch(0.9 0.12 192), oklch(0.9 0.12 192 / 0.2))';
+        }
+        if ($height >= 74) {
+            return 'linear-gradient(180deg, oklch(0.88 0.12 192), oklch(0.88 0.12 192 / 0.18))';
+        }
+        if ($height >= 61) {
+            return 'linear-gradient(180deg, oklch(0.86 0.12 193), oklch(0.86 0.12 193 / 0.16))';
+        }
+        if ($height >= 52) {
+            return 'linear-gradient(180deg, oklch(0.84 0.12 195), oklch(0.84 0.12 195 / 0.14))';
+        }
+        if ($height >= 44) {
+            return 'linear-gradient(180deg, oklch(0.8 0.12 198 / 0.9), oklch(0.8 0.12 198 / 0.12))';
+        }
+        if ($height >= 36) {
+            return 'linear-gradient(180deg, oklch(0.78 0.12 200 / 0.85), oklch(0.78 0.12 200 / 0.12))';
+        }
+        if ($height >= 31) {
+            return 'linear-gradient(180deg, oklch(0.74 0.11 206 / 0.8), oklch(0.74 0.11 206 / 0.1))';
+        }
+
+        return 'linear-gradient(180deg, oklch(0.72 0.11 210 / 0.75), oklch(0.72 0.11 210 / 0.1))';
+    }
+
+    /** @param  array<int, string>  $labels */
+    private function profitTrendAxisLabels(array $labels, int $tickCount = 5): array
+    {
+        $count = count($labels);
+        if ($count === 0) {
+            return [];
+        }
+
+        if ($count <= $tickCount) {
+            return array_values($labels);
+        }
+
+        $ticks = [];
+        for ($index = 0; $index < $tickCount; $index++) {
+            $labelIndex = (int) round($index * ($count - 1) / max($tickCount - 1, 1));
+            $ticks[] = $labels[$labelIndex];
+        }
+
+        return $ticks;
     }
 
     private function toggleNotificationPreference(string $column, string $enabledMessageKey, string $disabledMessageKey): void
