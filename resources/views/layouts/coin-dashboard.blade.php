@@ -31,12 +31,14 @@
     </style>
 </head>
 <body>
+    @include('partials.page-loading-overlay')
     {{ $slot }}
     @auth
         @include('partials.coin-reverb-config')
     @endauth
     @vite(['resources/js/app.js'])
     @livewireScripts
+    <script src="{{ asset('coin/page-navigate.js') }}" defer></script>
     <script src="{{ asset('coin/mobile.js') }}" defer></script>
 </body>
 </html>

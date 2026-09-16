@@ -41,6 +41,7 @@
     @endauth
 </head>
 <body class="admin-shell">
+    @include('partials.page-loading-overlay')
     <div class="admin-shell">
         @hasSection('topbar')
             @yield('topbar')
@@ -70,5 +71,6 @@
     @auth('admin')
         @vite(['resources/js/admin-support-realtime.js'])
     @endauth
+    <script src="{{ asset('coin/page-navigate.js') }}" defer></script>
 </body>
 </html>

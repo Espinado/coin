@@ -1184,21 +1184,11 @@ class Dashboard extends Component
 
     private function buildAccrualsChart(int $period): array
     {
-        $transactions = $this->dailyProfitTransactions();
-
-        [$values, $labels] = match ($period) {
-            0 => $this->profitTrendHourlyBuckets(
-                $transactions->filter(function ($transaction) {
-                    $at = $transaction->occurred_at ?? $transaction->created_at;
-
-                    return $at && $at >= now()->startOfDay();
-                })
-            ),
-            2 => $this->accrualDailyBuckets($transactions, 30),
-            default => $this->accrualDailyBuckets($transactions, 14),
-        };
-
-        return $this->formatProfitTrendChart($values, $labels);
+        return $this->buildDailyProfitChart(match ($period) {
+            0 => ['mode' => 'hourly'],
+            2 => ['mode' => 'daily', 'days' => 30, 'labelFormat' => 'date'],
+            default => ['mode' => 'daily', 'days' => 14, 'labelFormat' => 'date'],
+        });
     }
 
     /** @return Collection<int, WalletTransaction> */
@@ -1209,8 +1199,31 @@ class Dashboard extends Component
         );
     }
 
+    /** @param  array{mode: string, days?: int, labelFormat?: string}  $config */
+    private function buildDailyProfitChart(array $config): array
+    {
+        $transactions = $this->dailyProfitTransactions();
+
+        [$values, $labels] = match ($config['mode']) {
+            'hourly' => $this->profitTrendHourlyBuckets(
+                $transactions->filter(function ($transaction) {
+                    $at = $transaction->occurred_at ?? $transaction->created_at;
+
+                    return $at && $at >= now()->startOfDay();
+                })
+            ),
+            default => $this->accrualDailyBuckets(
+                $transactions,
+                (int) ($config['days'] ?? 7),
+                (string) ($config['labelFormat'] ?? 'date'),
+            ),
+        };
+
+        return $this->formatProfitTrendChart($values, $labels);
+    }
+
     /** @return array{0: array<int, float>, 1: array<int, string>} */
-    private function accrualDailyBuckets(Collection $transactions, int $days): array
+    private function accrualDailyBuckets(Collection $transactions, int $days, string $labelFormat = 'date'): array
     {
         $start = now()->startOfDay()->subDays($days - 1);
         $end = now()->startOfDay();
@@ -1219,7 +1232,11 @@ class Dashboard extends Component
 
         for ($index = 0; $index < $days; $index++) {
             $day = $start->copy()->addDays($index);
-            $labels[] = strtoupper($day->locale('en')->isoFormat('MMM D'));
+            $labels[] = match ($labelFormat) {
+                'weekday' => $day->isoFormat('dd'),
+                'day' => (string) $day->day,
+                default => strtoupper($day->locale('en')->isoFormat('MMM D')),
+            };
         }
 
         foreach ($transactions as $transaction) {
@@ -1244,16 +1261,11 @@ class Dashboard extends Component
 
     private function buildProfitTrendChart(int $period): array
     {
-        $since = $this->profitPeriodStart($period);
-        $transactions = $this->profitTransactionsInPeriod($since);
-
-        [$values, $labels] = match ($period) {
-            0 => $this->profitTrendHourlyBuckets($transactions),
-            2 => $this->profitTrendDailyMonthBuckets($transactions),
-            default => $this->profitTrendDailyWeekBuckets($transactions),
-        };
-
-        return $this->formatProfitTrendChart($values, $labels);
+        return $this->buildDailyProfitChart(match ($period) {
+            0 => ['mode' => 'hourly'],
+            2 => ['mode' => 'daily', 'days' => now()->day, 'labelFormat' => 'day'],
+            default => ['mode' => 'daily', 'days' => 7, 'labelFormat' => 'weekday'],
+        });
     }
 
     /** @return array{0: array<int, float>, 1: array<int, string>} */
@@ -1275,57 +1287,6 @@ class Dashboard extends Component
             }
 
             $values[$hour] += max(0, (float) ($transaction->amount ?? 0));
-        }
-
-        return [$values, $labels];
-    }
-
-    /** @return array{0: array<int, float>, 1: array<int, string>} */
-    private function profitTrendDailyWeekBuckets(Collection $transactions): array
-    {
-        $start = now()->startOfWeek()->startOfDay();
-        $dayCount = (int) $start->diffInDays(now()->startOfDay()) + 1;
-        $values = array_fill(0, $dayCount, 0.0);
-        $labels = [];
-
-        for ($day = 0; $day < $dayCount; $day++) {
-            $labels[] = $start->copy()->addDays($day)->isoFormat('dd');
-        }
-
-        foreach ($transactions as $transaction) {
-            $at = $transaction->occurred_at ?? $transaction->created_at;
-            if (! $at) {
-                continue;
-            }
-
-            $dayIndex = (int) $start->diffInDays($at->copy()->startOfDay());
-            if ($dayIndex < 0 || $dayIndex >= $dayCount) {
-                continue;
-            }
-
-            $values[$dayIndex] += max(0, (float) ($transaction->amount ?? 0));
-        }
-
-        return [$values, $labels];
-    }
-
-    /** @return array{0: array<int, float>, 1: array<int, string>} */
-    private function profitTrendDailyMonthBuckets(Collection $transactions): array
-    {
-        $daysInPeriod = now()->day;
-        $values = array_fill(0, $daysInPeriod, 0.0);
-        $labels = array_map(fn (int $day) => (string) $day, range(1, $daysInPeriod));
-
-        foreach ($transactions as $transaction) {
-            $at = $transaction->occurred_at ?? $transaction->created_at;
-            if (! $at || ! $at->isSameMonth(now())) {
-                continue;
-            }
-
-            $dayIndex = $at->day - 1;
-            if ($dayIndex >= 0 && $dayIndex < $daysInPeriod) {
-                $values[$dayIndex] += max(0, (float) ($transaction->amount ?? 0));
-            }
         }
 
         return [$values, $labels];
@@ -1355,15 +1316,22 @@ class Dashboard extends Component
                 ? $paddingX + ($index / ($count - 1)) * ($width - (2 * $paddingX))
                 : $width / 2;
 
+            $y = round($baseline - ($normalized * ($height - (2 * $paddingY))), 2);
+
             $points[] = [
                 'x' => round($x, 2),
-                'y' => round($baseline - ($normalized * ($height - (2 * $paddingY))), 2),
+                'y' => $y,
+                'value' => $value,
+                'valueLabel' => number_format($value, 2, '.', ''),
+                'showLabel' => $value > 0,
+                'xPct' => round(($x / $width) * 100, 2),
+                'yPct' => round(($y / $height) * 100, 2),
                 'tooltip' => number_format($value, 2, '.', ',').' '.$currency,
                 'highlight' => $index === $lastIndex,
             ];
         }
 
-        $linePath = $this->profitTrendSmoothPath($points);
+        $linePath = $this->profitTrendLinearPath($points);
         $areaPath = $linePath !== ''
             ? $linePath.' L '.($width - $paddingX).' '.$baseline.' L '.$paddingX.' '.$baseline.' Z'
             : '';
@@ -1373,54 +1341,24 @@ class Dashboard extends Component
             'areaPath' => $areaPath,
             'points' => $points,
             'axis' => $this->profitTrendAxisLabels($labels),
+            'yMaxLabel' => number_format($max, 2, '.', '').' '.$currency,
+            'yMidLabel' => number_format($max / 2, 2, '.', '').' '.$currency,
             'hasData' => $hasData,
         ];
     }
 
     /** @param  array<int, array{x: float, y: float}>  $points */
-    private function profitTrendSmoothPath(array $points): string
+    private function profitTrendLinearPath(array $points): string
     {
         $count = count($points);
         if ($count === 0) {
             return '';
         }
 
-        if ($count === 1) {
-            return sprintf('M %.2f %.2f', $points[0]['x'], $points[0]['y']);
-        }
-
-        if ($count === 2) {
-            return sprintf(
-                'M %.2f %.2f L %.2f %.2f',
-                $points[0]['x'],
-                $points[0]['y'],
-                $points[1]['x'],
-                $points[1]['y'],
-            );
-        }
-
         $path = sprintf('M %.2f %.2f', $points[0]['x'], $points[0]['y']);
 
-        for ($index = 0; $index < $count - 1; $index++) {
-            $previous = $points[max(0, $index - 1)];
-            $current = $points[$index];
-            $next = $points[$index + 1];
-            $following = $points[min($count - 1, $index + 2)];
-
-            $control1X = $current['x'] + ($next['x'] - $previous['x']) / 6;
-            $control1Y = $current['y'] + ($next['y'] - $previous['y']) / 6;
-            $control2X = $next['x'] - ($following['x'] - $current['x']) / 6;
-            $control2Y = $next['y'] - ($following['y'] - $current['y']) / 6;
-
-            $path .= sprintf(
-                ' C %.2f %.2f, %.2f %.2f, %.2f %.2f',
-                $control1X,
-                $control1Y,
-                $control2X,
-                $control2Y,
-                $next['x'],
-                $next['y'],
-            );
+        for ($index = 1; $index < $count; $index++) {
+            $path .= sprintf(' L %.2f %.2f', $points[$index]['x'], $points[$index]['y']);
         }
 
         return $path;

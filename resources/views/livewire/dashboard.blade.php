@@ -146,31 +146,8 @@
             </div>
             @php $accrualsChart = $this->accrualsChart; @endphp
             @if($accrualsChart['hasData'])
-            <div style="height: 176px; margin-top: 24px;">
-              <svg viewBox="0 0 1000 210" preserveAspectRatio="none" style="width: 100%; height: 100%; overflow: visible; display: block;">
-                <defs>
-                  <linearGradient id="overviewAccrualsArea" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stop-color="oklch(0.88 0.12 192)" stop-opacity="0.38"></stop>
-                    <stop offset="100%" stop-color="oklch(0.72 0.11 210)" stop-opacity="0.03"></stop>
-                  </linearGradient>
-                  <linearGradient id="overviewAccrualsLine" x1="0" y1="0" x2="1" y2="0">
-                    <stop offset="0%" stop-color="oklch(0.72 0.11 210)"></stop>
-                    <stop offset="100%" stop-color="#eafcff"></stop>
-                  </linearGradient>
-                </defs>
-                <path d="{{ $accrualsChart['areaPath'] }}" fill="url(#overviewAccrualsArea)"></path>
-                <path d="{{ $accrualsChart['linePath'] }}" fill="none" stroke="url(#overviewAccrualsLine)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke" style="filter: drop-shadow(0 0 10px oklch(0.88 0.12 192 / 0.55));"></path>
-                @foreach($accrualsChart['points'] as $point)
-                <circle cx="{{ $point['x'] }}" cy="{{ $point['y'] }}" r="{{ $point['highlight'] ? 5 : 3 }}" fill="{{ $point['highlight'] ? '#eafcff' : 'oklch(0.84 0.12 195)' }}" opacity="{{ $point['highlight'] ? 1 : 0.55 }}" vector-effect="non-scaling-stroke" style="@if($point['highlight']) filter: drop-shadow(0 0 12px oklch(0.88 0.12 192 / 0.85)); @endif">
-                  <title>{{ $point['tooltip'] }}</title>
-                </circle>
-                @endforeach
-              </svg>
-            </div>
-            <div style="display: flex; justify-content: space-between; margin-top: 14px; font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.1em; color: rgba(214,238,248,0.62);">
-              @foreach($accrualsChart['axis'] as $label)
-              <span>{{ $label }}</span>
-              @endforeach
+            <div style="margin-top: 24px;">
+              <x-profit-line-chart :chart="$accrualsChart" :height="176" area-id="overviewAccrualsArea" line-id="overviewAccrualsLine" />
             </div>
             @else
             <div style="margin-top: 24px; padding: 40px 16px; text-align: center; font-size: 13px; color: rgba(214,238,248,0.66);">{{ __('coin.stats.no_profit_yet') }}</div>
@@ -398,6 +375,7 @@
             <div style="font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.14em; color: rgba(214,238,248,0.7);">{{ mb_strtoupper(__('coin.stats.profit')) }} {{ $this->periodLabel }}</div>
             <div style="margin-top: 12px; font-family: 'JetBrains Mono', monospace; font-size: 24px; color: #f0fbff;">{{ $this->periodTotal }}</div>
             <div style="margin-top: 7px; font-size: 12px; color: rgba(214,238,248,0.7);">{{ $this->walletCurrency }} · {{ __('coin.stats.accrued') }}</div>
+            <div style="margin-top: 4px; font-size: 11px; color: rgba(214,238,248,0.55);">{{ __('coin.stats.profit_card_all_types_hint') }}</div>
           </div>
           <div style="padding: 20px; border-radius: 16px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.04);">
             <div style="font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.14em; color: rgba(214,238,248,0.7);">{{ mb_strtoupper(__('coin.stats.avg_daily')) }}</div>
@@ -417,37 +395,17 @@
         </div>
 
         <div style="padding: 24px; border-radius: 16px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.035);">
-          <div style="display: flex; align-items: baseline; justify-content: space-between;">
-            <span style="font-size: 15px; font-weight: 600;">{{ __('coin.stats.profit_trend') }}</span>
+          <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap;">
+            <div>
+              <span style="font-size: 15px; font-weight: 600;">{{ __('coin.stats.profit_trend') }}</span>
+              <div style="margin-top: 4px; font-size: 12px; color: rgba(214,238,248,0.66);">{{ __('coin.stats.daily_profit_chart_hint') }}</div>
+            </div>
             <span style="font-family: 'JetBrains Mono', monospace; font-size: 10.5px; color: rgba(214,238,248,0.66);">{{ $this->walletCurrency }} · {{ $this->periodLabel }}</span>
           </div>
           @php $profitTrend = $this->profitTrendChart; @endphp
           @if($profitTrend['hasData'])
-          <div style="height: 210px; margin-top: 26px;">
-            <svg viewBox="0 0 1000 210" preserveAspectRatio="none" style="width: 100%; height: 100%; overflow: visible; display: block;">
-              <defs>
-                <linearGradient id="profitTrendArea" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stop-color="oklch(0.88 0.12 192)" stop-opacity="0.38"></stop>
-                  <stop offset="100%" stop-color="oklch(0.72 0.11 210)" stop-opacity="0.03"></stop>
-                </linearGradient>
-                <linearGradient id="profitTrendLine" x1="0" y1="0" x2="1" y2="0">
-                  <stop offset="0%" stop-color="oklch(0.72 0.11 210)"></stop>
-                  <stop offset="100%" stop-color="#eafcff"></stop>
-                </linearGradient>
-              </defs>
-              <path d="{{ $profitTrend['areaPath'] }}" fill="url(#profitTrendArea)"></path>
-              <path d="{{ $profitTrend['linePath'] }}" fill="none" stroke="url(#profitTrendLine)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke" style="filter: drop-shadow(0 0 10px oklch(0.88 0.12 192 / 0.55));"></path>
-              @foreach($profitTrend['points'] as $point)
-              <circle cx="{{ $point['x'] }}" cy="{{ $point['y'] }}" r="{{ $point['highlight'] ? 5 : 3 }}" fill="{{ $point['highlight'] ? '#eafcff' : 'oklch(0.84 0.12 195)' }}" opacity="{{ $point['highlight'] ? 1 : 0.55 }}" vector-effect="non-scaling-stroke" style="@if($point['highlight']) filter: drop-shadow(0 0 12px oklch(0.88 0.12 192 / 0.85)); @endif">
-                <title>{{ $point['tooltip'] }}</title>
-              </circle>
-              @endforeach
-            </svg>
-          </div>
-          <div style="display: flex; justify-content: space-between; margin-top: 14px; font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.1em; color: rgba(214,238,248,0.62);">
-            @foreach($profitTrend['axis'] as $label)
-            <span>{{ $label }}</span>
-            @endforeach
+          <div style="margin-top: 26px;">
+            <x-profit-line-chart :chart="$profitTrend" :height="210" area-id="profitTrendArea" line-id="profitTrendLine" />
           </div>
           @else
           <div style="margin-top: 26px; padding: 48px 16px; text-align: center; font-size: 13px; color: rgba(214,238,248,0.66);">{{ __('coin.stats.no_profit_yet') }}</div>

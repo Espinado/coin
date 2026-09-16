@@ -11,6 +11,8 @@
     <script src="{{ asset('coin/support.js') }}"></script>
 </head>
 <body>
+@include('partials.page-loading-overlay')
+<script src="{{ asset('coin/page-navigate.js') }}" defer></script>
 @verbatim
 <x-dc>
 <helmet>

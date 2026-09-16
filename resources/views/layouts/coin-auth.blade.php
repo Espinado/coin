@@ -19,6 +19,7 @@
     </style>
 </head>
 <body>
+    @include('partials.page-loading-overlay')
     {{ $slot }}
     <script>
         document.addEventListener('click', function (event) {
@@ -48,5 +49,6 @@
                 : button.dataset.showLabel;
         });
     </script>
+    <script src="{{ asset('coin/page-navigate.js') }}" defer></script>
 </body>
 </html>
