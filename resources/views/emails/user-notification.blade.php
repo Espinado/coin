@@ -10,12 +10,7 @@
     <tr>
       <td align="center">
         <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:560px;background:#0b1a28;border:1px solid rgba(150,235,250,0.18);border-radius:16px;overflow:hidden;">
-          <tr>
-            <td style="padding:28px 28px 18px;">
-              <div style="font-size:12px;letter-spacing:0.14em;text-transform:uppercase;color:rgba(214,238,248,0.65);">Coin</div>
-              <h1 style="margin:14px 0 0;font-size:24px;line-height:1.3;color:#f0fbff;">{{ $subjectLine }}</h1>
-            </td>
-          </tr>
+          @include('emails.partials.brand-header', ['title' => $subjectLine])
           <tr>
             <td style="padding:0 28px 18px;font-size:15px;line-height:1.65;color:rgba(214,238,248,0.86);">
               <p style="margin:0 0 14px;">{{ $intro }}</p>

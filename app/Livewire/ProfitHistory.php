@@ -51,7 +51,7 @@ class ProfitHistory extends Component
                 ->applyListSort($this->profitSort, $this->profitDir, 'occurred_at')
                 ->paginate($this->pageSize(), pageName: 'profitPage'),
         ])->layout('layouts.coin-dashboard', [
-            'title' => 'Coin — '.__('coin.stats.profit_history'),
+            'title' => \App\Support\PlatformBrand::pageTitle(__('coin.stats.profit_history')),
         ]);
     }
 

@@ -1,9 +1,10 @@
 @php
+    $isChangeMode = ! empty($changingContract);
     $isCurrent = $plan->isCurrentFor($primaryPlan);
     $isSelected = (int) ($selectedPlanId ?? 0) === $plan->id;
     $isEnterprise = $plan->isEnterprise();
     $isCluster = $plan->slug === 'cluster';
-    $actionLabel = $plan->actionLabel($primaryPlan);
+    $actionLabel = $isChangeMode ? $plan->changePlanActionLabel($primaryPlan) : $plan->actionLabel($primaryPlan);
     $anotherPlanSelected = $primaryPlan && (int) ($selectedPlanId ?? 0) !== (int) $primaryPlan->id;
     $currentMuted = $isCurrent && $anotherPlanSelected && ! $isSelected;
     $selectedStyle = $isSelected && ! $isCurrent
@@ -91,9 +92,13 @@
     <div style="display: flex; justify-content: space-between; gap: 14px;"><span style="color: rgba(214,238,248,0.72); min-width: 0;">{{ __('coin.invest.infrastructure') }}</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">{{ $plan->displayInfra() }}</span></div>
   </div>
   <div style="margin-top: 20px; height: 5px; border-radius: 3px; background: rgba(150,235,250,0.12);"><div style="width: {{ $plan->capacity_percent ?? 0 }}%; height: 100%; border-radius: 3px; background: {{ $isCluster ? 'oklch(0.8 0.12 198)' : 'oklch(0.7 0.11 205)' }};"></div></div>
+  @if($isChangeMode && $isCurrent)
+  <button type="button" disabled style="margin-top: 22px; padding: 11px; border-radius: 10px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.04); color: rgba(214,238,248,0.55); font-family: inherit; font-size: 13.5px; font-weight: 500; cursor: not-allowed;">{{ $actionLabel }}</button>
+  @else
   <button type="button" wire:click="selectPlan({{ $plan->id }})" wire:loading.attr="disabled" wire:target="selectPlan" style="margin-top: 22px; padding: 11px; border-radius: 10px; border: 1px solid {{ $isSelected ? 'oklch(0.86 0.11 195 / 0.5)' : 'rgba(150,235,250,0.2)' }}; background: {{ $isSelected ? 'linear-gradient(140deg, oklch(0.86 0.12 192), oklch(0.66 0.13 205))' : 'rgba(150,235,250,0.06)' }}; color: {{ $isSelected ? '#04121f' : '#e6f4fa' }}; font-family: inherit; font-size: 13.5px; font-weight: {{ $isSelected ? '600' : '500' }}; cursor: pointer;">
     <span wire:loading.remove wire:target="selectPlan">{{ $actionLabel }}</span>
     <span wire:loading wire:target="selectPlan">{{ __('coin.actions.selecting') }}</span>
   </button>
+  @endif
 </div>
 @endif

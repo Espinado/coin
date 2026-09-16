@@ -10,6 +10,9 @@ final class PlatformTerms
     /** Plan purchase — principal locked in an active contract. */
     public const TX_INVESTMENT = 'Investment';
 
+    /** Top-up when upgrading an active contract to a higher plan. */
+    public const TX_PLAN_UPGRADE = 'Plan upgrade';
+
     /** Outbound transfer to user's external wallet. */
     public const TX_PAYOUT = 'Payout';
 
@@ -19,6 +22,7 @@ final class PlatformTerms
             'Deposit', self::TX_TOP_UP => self::TX_TOP_UP,
             'Withdrawal', self::TX_PAYOUT => self::TX_PAYOUT,
             'Plan purchase', self::TX_INVESTMENT => self::TX_INVESTMENT,
+            'Plan upgrade', self::TX_PLAN_UPGRADE => self::TX_PLAN_UPGRADE,
             default => $type,
         };
 

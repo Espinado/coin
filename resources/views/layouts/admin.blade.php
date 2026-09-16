@@ -4,7 +4,8 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'Coin Admin')</title>
+    <title>@yield('title', \App\Support\PlatformBrand::adminName())</title>
+    <link rel="icon" href="{{ asset('cloudflops/logo-mark.png') }}" type="image/png" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -47,8 +48,8 @@
             @yield('topbar')
         @else
             <header class="admin-topbar">
-                <div class="admin-topbar-brand">
-                    <span style="font-weight:600;">Coin Admin</span>
+                <div class="admin-topbar-brand" style="display:flex;align-items:center;gap:12px;">
+                    <x-brand-logo variant="horizontal" :height="28" />
                     <span class="admin-badge">STAFF ONLY</span>
                 </div>
                 @auth('admin')

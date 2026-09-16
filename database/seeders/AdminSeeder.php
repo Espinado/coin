@@ -13,7 +13,7 @@ class AdminSeeder extends Seeder
         Admin::query()->updateOrCreate(
             ['email' => 'admin@coin.local'],
             [
-                'name' => 'Coin Admin',
+                'name' => 'CloudFlops Admin',
                 'password' => Hash::make('admin1234'),
             ]
         );

@@ -88,4 +88,78 @@ class ReferralCommissionService
             return $commission;
         });
     }
+
+    public function onContractUpgradeTopUp(Contract $contract, float $topUpAmount): ?ReferralCommission
+    {
+        if ($topUpAmount <= 0.009) {
+            return null;
+        }
+
+        $contract->loadMissing('user');
+        $buyer = $contract->user;
+
+        if (! $buyer instanceof User || ! $buyer->referred_by_user_id) {
+            return null;
+        }
+
+        return DB::transaction(function () use ($contract, $buyer, $topUpAmount) {
+            $referrer = User::query()->find($buyer->referred_by_user_id);
+
+            if (! $referrer instanceof User) {
+                return null;
+            }
+
+            $profile = $this->referrals->ensureReferralProfile($referrer);
+            $percent = (float) ($profile->level1_percent ?: $this->settings->getFloat('referral_level1_percent'));
+            $commissionAmount = round($topUpAmount * ($percent / 100), 2);
+
+            if ($commissionAmount <= 0) {
+                return null;
+            }
+
+            $wallet = $this->wallets->ensureWallet($referrer);
+            $currency = $contract->currency ?: $this->wallets->currencyFor($wallet);
+
+            $wallet->increment('available', $commissionAmount);
+            $wallet->increment('balance', $commissionAmount);
+
+            $commission = ReferralCommission::query()->where('contract_id', $contract->id)->first();
+
+            if ($commission) {
+                $commission->update([
+                    'purchase_amount' => round((float) $commission->purchase_amount + $topUpAmount, 2),
+                    'commission_amount' => round((float) $commission->commission_amount + $commissionAmount, 2),
+                ]);
+            } else {
+                $commission = ReferralCommission::query()->create([
+                    'referrer_user_id' => $referrer->id,
+                    'referral_user_id' => $buyer->id,
+                    'contract_id' => $contract->id,
+                    'purchase_amount' => $topUpAmount,
+                    'commission_percent' => $percent,
+                    'commission_amount' => $commissionAmount,
+                    'currency' => $currency,
+                ]);
+            }
+
+            ReferralProfile::query()
+                ->whereKey($profile->id)
+                ->increment('total_rewards', $commissionAmount);
+
+            $this->wallets->record(
+                $referrer,
+                'Referral credit',
+                $buyer->accountLabel(),
+                $commissionAmount,
+                $currency,
+                'positive',
+                'COMPLETED',
+                $commission,
+            );
+
+            $this->notifications->notifyReferralCommission($referrer, $buyer, $commissionAmount, $currency);
+
+            return $commission;
+        });
+    }
 }

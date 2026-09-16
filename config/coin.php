@@ -17,6 +17,17 @@ return [
 
     'admin_domain' => env('COIN_ADMIN_DOMAIN', 'admin.coin.test'),
 
+    'brand' => [
+        'name' => env('COIN_BRAND_NAME', env('APP_NAME', 'CloudFlops')),
+        'admin_name' => env('COIN_ADMIN_BRAND_NAME', 'CloudFlops Admin'),
+        'legal_name' => env('COIN_LEGAL_NAME', 'CloudFlops SIA'),
+        'logos' => [
+            'horizontal' => 'cloudflops/logo-horizontal.png',
+            'mark' => 'cloudflops/logo-mark.png',
+            'stacked' => 'cloudflops/logo-stacked.png',
+        ],
+    ],
+
     'wallet' => [
         'base_currency' => env('COIN_WALLET_BASE_CURRENCY', 'USDT'),
     ],

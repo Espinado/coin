@@ -31,7 +31,7 @@
       </div>
       <div style="padding: 22px;">
         <div style="font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.12em; color: rgba(214,238,248,0.66);">{{ __('coin.bank_gateway.merchant') }}</div>
-        <div style="margin-top: 8px; font-size: 18px; font-weight: 600; color: #f0fbff;">Coin Platform</div>
+        <div style="margin-top: 8px; font-size: 18px; font-weight: 600; color: #f0fbff;">{{ \App\Support\PlatformBrand::name() }}</div>
         <div style="margin-top: 18px; padding: 16px; border-radius: 14px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.04); display: flex; flex-direction: column; gap: 12px; font-size: 13px;">
           <div style="display: flex; justify-content: space-between; gap: 12px;"><span style="color: rgba(214,238,248,0.72);">{{ __('coin.bank_gateway.purpose') }}</span><span>{{ __('coin.bank_gateway.top_up_purpose') }}</span></div>
           <div style="display: flex; justify-content: space-between; gap: 12px;"><span style="color: rgba(214,238,248,0.72);">{{ __('coin.bank_gateway.method') }}</span><span>{{ __('coin.bank_gateway.internet_bank') }}</span></div>
@@ -83,7 +83,7 @@
         </div>
         <div style="padding: 20px 22px; display: flex; flex-direction: column; gap: 14px; font-size: 14px; color: #334862;">
           <div style="display: flex; justify-content: space-between; gap: 12px;"><span style="color: #6b829c;">{{ __('coin.bank_gateway.from_account') }}</span><span style="font-family: 'JetBrains Mono', monospace;">LV** **** **** 4821</span></div>
-          <div style="display: flex; justify-content: space-between; gap: 12px;"><span style="color: #6b829c;">{{ __('coin.bank_gateway.recipient') }}</span><span style="text-align: right;">Coin Platform SIA</span></div>
+          <div style="display: flex; justify-content: space-between; gap: 12px;"><span style="color: #6b829c;">{{ __('coin.bank_gateway.recipient') }}</span><span style="text-align: right;">{{ \App\Support\PlatformBrand::legalName() }}</span></div>
           <div style="display: flex; justify-content: space-between; gap: 12px;"><span style="color: #6b829c;">{{ __('coin.bank_gateway.reference') }}</span><span style="font-family: 'JetBrains Mono', monospace; font-size: 12px;">COIN-TOP-{{ str_pad((string) ($user->id ?? 0), 5, '0', STR_PAD_LEFT) }}</span></div>
           <div style="display: flex; justify-content: space-between; gap: 12px;"><span style="color: #6b829c;">{{ __('coin.bank_gateway.description') }}</span><span style="text-align: right;">{{ __('coin.bank_gateway.top_up_purpose') }}</span></div>
         </div>

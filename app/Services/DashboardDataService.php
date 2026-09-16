@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Contract;
 use App\Models\Plan;
+use App\Models\PlanChangeRequest;
 use App\Models\User;
 use App\Models\WalletTransaction;
 use Illuminate\Support\Collection;
@@ -56,6 +57,12 @@ class DashboardDataService
                 ->values(),
             'primaryContract' => $primaryContract,
             'primaryPlan' => $primaryContract?->plan,
+            'pendingPlanChanges' => PlanChangeRequest::query()
+                ->where('user_id', $user->id)
+                ->where('status', PlanChangeRequest::STATUS_PENDING)
+                ->with(['fromPlan', 'toPlan'])
+                ->get()
+                ->keyBy('contract_id'),
         ];
     }
 

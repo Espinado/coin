@@ -1,6 +1,6 @@
 @extends('layouts.admin')
 
-@section('title', 'Coin Admin — Epochs')
+@section('title', \App\Support\PlatformBrand::adminPageTitle('Epochs'))
 
 @section('content')
     @include('admin.partials.nav')

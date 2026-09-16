@@ -10,6 +10,7 @@ use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\DepositController;
 use App\Http\Controllers\Admin\EpochController;
 use App\Http\Controllers\Admin\ProfitAccrualController;
+use App\Http\Controllers\Admin\PlanChangeRequestController;
 use App\Http\Controllers\Admin\PlanController;
 use App\Http\Controllers\Admin\SettingsController;
 use App\Http\Controllers\Admin\SupportTicketController;
@@ -75,6 +76,11 @@ Route::middleware(['admin.domain', 'reject.web.on.admin'])->group(function () {
         Route::get('withdrawals', [WithdrawalController::class, 'index'])->name('admin.withdrawals.index');
         Route::get('withdrawals/{withdrawal}', [WithdrawalController::class, 'show'])->name('admin.withdrawals.show');
         Route::patch('withdrawals/{withdrawal}/status', [WithdrawalController::class, 'updateStatus'])->name('admin.withdrawals.status');
+
+        Route::get('plan-changes', [PlanChangeRequestController::class, 'index'])->name('admin.plan-changes.index');
+        Route::get('plan-changes/{planChange}', [PlanChangeRequestController::class, 'show'])->name('admin.plan-changes.show');
+        Route::post('plan-changes/{planChange}/approve', [PlanChangeRequestController::class, 'approve'])->name('admin.plan-changes.approve');
+        Route::post('plan-changes/{planChange}/reject', [PlanChangeRequestController::class, 'reject'])->name('admin.plan-changes.reject');
 
         Route::get('plans', [PlanController::class, 'index'])->name('admin.plans.index');
         Route::get('plans/create', [PlanController::class, 'create'])->name('admin.plans.create');

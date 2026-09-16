@@ -113,6 +113,24 @@ class Plan extends Model
         return __('coin.actions.select');
     }
 
+    public function requiredDepositAmount(): float
+    {
+        return (float) ($this->min_deposit ?? $this->price_amount ?? 0);
+    }
+
+    public function changePlanActionLabel(?Plan $currentPlan): string
+    {
+        if ($this->isCurrentFor($currentPlan)) {
+            return __('coin.invest.current_plan_short');
+        }
+
+        if ($this->isEnterprise() && $this->min_deposit === null) {
+            return __('coin.invest.contact_sales');
+        }
+
+        return __('coin.invest.switch_to_plan');
+    }
+
     public function calculatorTermLabel(): string
     {
         if ($this->duration_days === null) {

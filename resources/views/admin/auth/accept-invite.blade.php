@@ -3,12 +3,7 @@
 @section('title', __('coin.admin.page_title', ['section' => __('coin.admin.admins.accept_title')]))
 
 @section('topbar')
-    <header class="admin-topbar">
-        <div style="display:flex;align-items:center;gap:12px;">
-            <span style="font-weight:600;">{{ __('coin.admin.brand') }}</span>
-            <span class="admin-badge">{{ __('coin.admin.staff_only') }}</span>
-        </div>
-    </header>
+    @include('partials.admin-auth-topbar')
 @endsection
 
 @section('content')

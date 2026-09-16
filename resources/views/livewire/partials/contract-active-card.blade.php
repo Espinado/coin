@@ -10,13 +10,18 @@
         <div style="display: flex; align-items: center; gap: 10px;">
           <span style="font-size: 16.5px; font-weight: 600;">{{ $contract->title() }}</span>
           <span style="padding: 3px 9px; border-radius: 6px; background: oklch(0.6 0.14 160 / 0.2); border: 1px solid oklch(0.7 0.14 160 / 0.4); font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.1em; color: oklch(0.88 0.14 160);">{{ $contract->statusLabel() }}</span>
+          @if(! empty($pendingPlanChange))
+          <span style="padding: 3px 9px; border-radius: 6px; background: rgba(255,180,84,0.16); border: 1px solid rgba(255,180,84,0.35); font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.08em; color: #ffb454;">{{ __('coin.invest.plan_change_pending_badge', ['plan' => $pendingPlanChange->toPlan?->displayName()]) }}</span>
+          @endif
         </div>
         <div style="margin-top: 5px; font-family: 'JetBrains Mono', monospace; font-size: 11.5px; color: rgba(214,238,248,0.7);">{{ $contract->code }} · {{ $contract->displayLocationLabel() }}</div>
       </div>
     </div>
     <div style="display: flex; gap: 8px;">
-      <button style="padding: 10px 16px; border-radius: 10px; border: 1px solid rgba(150,235,250,0.2); background: rgba(150,235,250,0.06); color: #e6f4fa; font-family: inherit; font-size: 13px; font-weight: 500; cursor: pointer;">{{ __('coin.contract.details') }}</button>
-      <button wire:click="setSection(1)" style="padding: 10px 16px; border-radius: 10px; border: 1px solid {{ $isPrimary ? 'oklch(0.86 0.11 195 / 0.5)' : 'rgba(150,235,250,0.2)' }}; background: {{ $isPrimary ? 'linear-gradient(140deg, oklch(0.86 0.12 192), oklch(0.66 0.13 205))' : 'rgba(150,235,250,0.06)' }}; color: {{ $isPrimary ? '#04121f' : '#e6f4fa' }}; font-family: inherit; font-size: 13px; font-weight: {{ $isPrimary ? '600' : '500' }}; cursor: pointer;">{{ __('coin.invest.upgrade') }}</button>
+      <button type="button" wire:click="openContractDetails({{ $contract->id }})" style="padding: 10px 16px; border-radius: 10px; border: 1px solid rgba(150,235,250,0.2); background: rgba(150,235,250,0.06); color: #e6f4fa; font-family: inherit; font-size: 13px; font-weight: 500; cursor: pointer;">{{ __('coin.contract.details') }}</button>
+      @if(empty($pendingPlanChange))
+      <button type="button" wire:click="openChangePlan({{ $contract->id }})" style="padding: 10px 16px; border-radius: 10px; border: 1px solid {{ $isPrimary ? 'oklch(0.86 0.11 195 / 0.5)' : 'rgba(150,235,250,0.2)' }}; background: {{ $isPrimary ? 'linear-gradient(140deg, oklch(0.86 0.12 192), oklch(0.66 0.13 205))' : 'rgba(150,235,250,0.06)' }}; color: {{ $isPrimary ? '#04121f' : '#e6f4fa' }}; font-family: inherit; font-size: 13px; font-weight: {{ $isPrimary ? '600' : '500' }}; cursor: pointer;">{{ __('coin.invest.change_plan') }}</button>
+      @endif
     </div>
   </div>
   <div style="display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 20px; margin-top: 24px;">

@@ -1,6 +1,6 @@
 @extends('layouts.admin')
 
-@section('title', 'Coin Admin — '.($isEdit ? 'Edit '.$plan->name : 'New plan'))
+@section('title', \App\Support\PlatformBrand::adminPageTitle($isEdit ? 'Edit '.$plan->name : 'New plan'))
 
 @section('content')
     @include('admin.partials.nav')

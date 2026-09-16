@@ -1,16 +1,11 @@
-<div x-data x-effect="document.documentElement.classList.toggle('coin-nav-open', @js($menuOpen)); document.documentElement.classList.toggle('coin-modal-open', @js(filled($paymentModal)))">
+<div x-data x-effect="document.documentElement.classList.toggle('coin-nav-open', @js($menuOpen)); document.documentElement.classList.toggle('coin-modal-open', @js(filled($paymentModal) || filled($contractDetailsId)))">
 <div class="coin-shell">
   <div class="coin-nav-overlay" wire:click="closeMenu"></div>
   <aside class="coin-sidebar">
     <div class="coin-sidebar-nav">
-    <a href="{{ route('home') }}" style="display: flex; align-items: center; gap: 11px; padding: 4px 10px 24px; color: inherit;">
-      <div style="width: 28px; height: 28px; border-radius: 9px; background: linear-gradient(145deg, oklch(0.86 0.12 192), oklch(0.6 0.13 210)); display: grid; place-items: center; box-shadow: 0 8px 22px -8px oklch(0.78 0.13 192 / 0.8);">
-        <div style="width: 10px; height: 10px; border-radius: 3px; background: #061423;"></div>
-      </div>
-      <div>
-        <div style="font-size: 15px; font-weight: 600; letter-spacing: -0.015em;">Coin</div>
-        <div style="font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: 0.14em; color: rgba(214,238,248,0.6);">{{ mb_strtoupper(__('coin.nav.portal')) }}</div>
-      </div>
+    <a href="{{ route('home') }}" style="display: flex; flex-direction: column; align-items: flex-start; gap: 6px; padding: 4px 10px 24px; color: inherit; text-decoration: none;">
+      <x-brand-logo variant="horizontal" :height="30" />
+      <div style="font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: 0.14em; color: rgba(214,238,248,0.6);">{{ mb_strtoupper(__('coin.nav.portal')) }}</div>
     </a>
 
     <div style="font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: 0.16em; color: rgba(214,238,248,0.55); padding: 0 12px 10px;">{{ mb_strtoupper(__('coin.nav.main')) }}</div>
@@ -248,9 +243,24 @@
 
     @if($section === 1)
       <section data-screen-label="{{ __('coin.nav.investment_plans') }}" style="padding: 28px 32px 40px; display: flex; flex-direction: column; gap: 16px;">
+        @if($changingContract = $this->changingContract)
+        <div style="padding: 18px 22px; border-radius: 16px; border: 1px solid oklch(0.86 0.11 195 / 0.28); background: linear-gradient(170deg, oklch(0.6 0.13 200 / 0.14), rgba(150,235,250,0.03)); display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; flex-wrap: wrap;">
+          <div>
+            <div style="font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.14em; color: oklch(0.88 0.11 195);">{{ mb_strtoupper(__('coin.invest.change_plan_title')) }}</div>
+            <div style="margin-top: 8px; font-size: 15px; font-weight: 600; color: #f0fbff;">{{ $changingContract->plan?->displayName() }} · {{ $changingContract->formattedPrincipal() }}</div>
+            <div style="margin-top: 6px; max-width: 640px; font-size: 13px; line-height: 1.55; color: rgba(214,238,248,0.74);">{{ __('coin.invest.change_plan_sub', ['code' => $changingContract->code]) }}</div>
+          </div>
+          <button type="button" wire:click="cancelChangePlan" style="padding: 10px 16px; border-radius: 10px; border: 1px solid rgba(150,235,250,0.2); background: rgba(150,235,250,0.06); color: #e6f4fa; font-family: inherit; font-size: 13px; cursor: pointer;">{{ __('coin.invest.change_plan_cancel') }}</button>
+        </div>
+        @endif
         <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px;">
           @foreach($plans as $plan)
-            @include('livewire.partials.plan-card', ['plan' => $plan, 'primaryPlan' => $primaryPlan, 'selectedPlanId' => $selectedPlanId])
+            @include('livewire.partials.plan-card', [
+              'plan' => $plan,
+              'primaryPlan' => $changingContract?->plan ?? $primaryPlan,
+              'selectedPlanId' => $selectedPlanId,
+              'changingContract' => $changingContract ?? null,
+            ])
           @endforeach
         </div>
         <div id="coin-plan-calculator" style="padding: 26px 28px; border-radius: 18px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.035); display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 340px); gap: 40px; align-items: center; scroll-margin-top: 96px;">
@@ -302,12 +312,32 @@
               <div style="display: flex; justify-content: space-between; gap: 14px;"><span style="color: rgba(214,238,248,0.72); min-width: 0;">{{ __('coin.invest.estimated_price') }}</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">{{ $this->planPrice }}</span></div>
               <div style="display: flex; justify-content: space-between; gap: 14px;"><span style="color: rgba(214,238,248,0.72); min-width: 0;">{{ __('coin.invest.currency') }}</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">{{ $wallet?->currency ?? 'USDT' }}</span></div>
             </div>
+            @if($changingContract)
+            <div style="margin-top: 14px; padding: 14px; border-radius: 12px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.04); display: flex; flex-direction: column; gap: 10px; font-size: 13px;">
+              <div style="display: flex; justify-content: space-between; gap: 12px;"><span style="color: rgba(214,238,248,0.72);">{{ __('coin.invest.change_plan_from') }}</span><span style="text-align: right;">{{ $changingContract->plan?->displayName() }}</span></div>
+              <div style="display: flex; justify-content: space-between; gap: 12px;"><span style="color: rgba(214,238,248,0.72);">{{ __('coin.invest.change_plan_to') }}</span><span style="text-align: right; font-weight: 500;">{{ $this->planName }}</span></div>
+              <div style="display: flex; justify-content: space-between; gap: 12px;"><span style="color: rgba(214,238,248,0.72);">{{ __('coin.invest.change_plan_top_up') }}</span><span style="font-family: 'JetBrains Mono', monospace; text-align: right;">@if($this->planChangeTopUp > 0){{ number_format($this->planChangeTopUp, 2, '.', ',') }} {{ $this->walletCurrency }}@else{{ __('coin.invest.change_plan_no_top_up') }}@endif</span></div>
+              <div style="display: flex; justify-content: space-between; gap: 12px;"><span style="color: rgba(214,238,248,0.72);">{{ __('coin.invest.change_plan_principal_after') }}</span><span style="font-family: 'JetBrains Mono', monospace; text-align: right;">{{ number_format($this->planChangePrincipalAfter, 2, '.', ',') }} {{ $this->walletCurrency }}</span></div>
+            </div>
+            @if($this->planChangeHasInsufficientFunds && (int) ($selectedPlanId ?? 0) !== (int) $changingContract->plan_id)
+            <p style="margin: 16px 0 0; font-size: 13px; line-height: 1.55; color: #ffb454;">
+              {{ __('coin.payment_modal.insufficient_funds_short') }}
+              <button type="button" wire:click="goToWalletTopUp" style="margin-left: 4px; padding: 0; border: 0; background: none; color: oklch(0.88 0.12 192); font-family: inherit; font-size: 13px; font-weight: 600; text-decoration: underline; cursor: pointer;">{{ __('coin.payment_modal.top_up_balance') }}</button>
+            </p>
+            @endif
+            <button type="button" wire:click="openPlanChangeModal" wire:loading.attr="disabled" wire:target="openPlanChangeModal" @if((int) ($selectedPlanId ?? 0) === (int) $changingContract->plan_id || $this->planChangeHasInsufficientFunds) disabled @endif style="width: 100%; margin-top: 22px; padding: 12px; border-radius: 10px; border: 1px solid oklch(0.86 0.11 195 / 0.5); background: linear-gradient(140deg, oklch(0.86 0.12 192), oklch(0.66 0.13 205)); color: #04121f; font-family: inherit; font-size: 13.5px; font-weight: 600; cursor: pointer; opacity: {{ ((int) ($selectedPlanId ?? 0) === (int) $changingContract->plan_id || $this->planChangeHasInsufficientFunds) ? '0.45' : '1' }};">
+              <span wire:loading.remove wire:target="openPlanChangeModal">{{ __('coin.invest.change_plan') }}</span>
+              <span wire:loading wire:target="openPlanChangeModal">{{ __('coin.payment_modal.confirming') }}</span>
+            </button>
+            <p style="margin: 16px 0 0; font-size: 11.5px; line-height: 1.5; color: rgba(214,238,248,0.66);">{{ __('coin.invest.change_plan_admin_note') }} {{ __('coin.invest.change_plan_downgrade_note') }} {{ __('coin.invest.change_plan_time_note') }}</p>
+            @else
             <button type="button" wire:click="openInvestmentPaymentModal" wire:loading.attr="disabled" wire:target="openInvestmentPaymentModal" style="width: 100%; margin-top: 22px; padding: 12px; border-radius: 10px; border: 1px solid oklch(0.86 0.11 195 / 0.5); background: linear-gradient(140deg, oklch(0.86 0.12 192), oklch(0.66 0.13 205)); color: #04121f; font-family: inherit; font-size: 13.5px; font-weight: 600; cursor: pointer;">
               <span wire:loading.remove wire:target="openInvestmentPaymentModal">{{ __('coin.actions.invest') }}</span>
               <span wire:loading wire:target="openInvestmentPaymentModal">{{ __('coin.payment_modal.confirming') }}</span>
             </button>
-            @error('purchase')<p style="margin: 12px 0 0; font-size: 12px; color: #ff8f8f;">{{ $message }}</p>@enderror
             <p style="margin: 16px 0 0; font-size: 11.5px; line-height: 1.5; color: rgba(214,238,248,0.66);">{{ __('coin.invest.estimates_note') }}</p>
+            @endif
+            @error('purchase')<p style="margin: 12px 0 0; font-size: 12px; color: #ff8f8f;">{{ $message }}</p>@enderror
           </div>
         </div>
       </section>
@@ -337,7 +367,7 @@
 
         <div style="display: flex; flex-direction: column; gap: 14px;">
           @foreach($activeContracts as $contract)
-            @include('livewire.partials.contract-active-card', ['contract' => $contract, 'primaryContract' => $primaryContract])
+            @include('livewire.partials.contract-active-card', ['contract' => $contract, 'primaryContract' => $primaryContract, 'pendingPlanChange' => $pendingPlanChanges->get($contract->id)])
           @endforeach
 
           @if($completedContracts->isNotEmpty())
@@ -665,6 +695,7 @@
 
 @include('livewire.partials.payment-gateway')
 @include('livewire.partials.payment-modal')
+@include('livewire.partials.contract-details-modal')
 
 </div>
 
@@ -709,6 +740,15 @@
   $wire.watch('selectedTicketId', () => {
     if ($wire.section === 7) {
       requestAnimationFrame(() => window.scrollSupportThreadToBottom?.('auto'));
+    }
+  });
+
+  $wire.on('plan-change-toast', (payload) => {
+    const message = window.readLivewireEventPayload?.(payload, 'message') ?? payload?.message;
+    const variant = window.readLivewireEventPayload?.(payload, 'variant') ?? payload?.variant ?? 'incoming';
+
+    if (message) {
+      window.showSupportToast?.(message, variant);
     }
   });
 </script>

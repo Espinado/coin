@@ -1,13 +1,8 @@
-<x-coin-auth-layout :title="'Coin — '.__('coin.auth.sign_up')">
+<x-coin-auth-layout :title="\App\Support\PlatformBrand::pageTitle(__('coin.auth.sign_up'))">
     <div class="coin-auth" style="width: 1440px; min-height: 900px; margin: 0 auto; position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 36px; padding: 80px 72px; box-sizing: border-box; background: #061423; color: #e6f4fa; font-family: 'Sora', 'Helvetica Neue', Helvetica, sans-serif; overflow: hidden;">
         <div style="position: absolute; top: -300px; left: 50%; width: 900px; height: 680px; margin-left: -450px; border-radius: 50%; background: radial-gradient(closest-side, oklch(0.62 0.13 198 / 0.22), transparent 74%); filter: blur(30px); pointer-events: none;"></div>
 
-        <a href="{{ route('home') }}" class="coin-auth-brand" style="position: relative; display: flex; align-items: center; gap: 11px; color: inherit;">
-            <div style="width: 30px; height: 30px; border-radius: 9px; background: linear-gradient(145deg, oklch(0.86 0.12 192), oklch(0.6 0.13 210)); display: grid; place-items: center;">
-                <div style="width: 11px; height: 11px; border-radius: 3px; background: #061423;"></div>
-            </div>
-            <span style="font-size: 18px; font-weight: 600; letter-spacing: -0.02em;">Coin</span>
-        </a>
+        @include('partials.auth-brand', ['height' => 40])
 
         <div class="coin-auth-card" style="position: relative; width: 420px; padding: 36px 36px 30px; border-radius: 22px; border: 1px solid rgba(150,235,250,0.16); background: linear-gradient(170deg, rgba(13,38,58,0.92), rgba(5,16,27,0.96)); box-shadow: 0 50px 110px -50px #000;">
             <div style="font-size: 22px; font-weight: 600; letter-spacing: -0.025em; color: #f0fbff;">{{ __('coin.auth.create_account') }}</div>

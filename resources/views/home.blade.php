@@ -4,7 +4,8 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Coin — Инвестиционная платформа</title>
+    <title>{{ \App\Support\PlatformBrand::pageTitle('Инвестиционная платформа') }}</title>
+    <link rel="icon" href="{{ asset('cloudflops/logo-mark.png') }}" type="image/png" />
     @livewireStyles
     @vite(['resources/js/guest-support.js'])
     @include('partials.coin-reverb-config-guest')
@@ -35,11 +36,8 @@
 
   <div class="coin-nav-overlay" onClick="{{ closeMenu }}"></div>
   <header class="coin-header" data-screen-label="Header" style="position: relative; z-index: 20; display: flex; align-items: center; justify-content: space-between; padding: 22px 72px; border-bottom: 1px solid rgba(150,235,250,0.1); background: rgba(6,20,35,0.75); backdrop-filter: blur(14px);">
-    <div class="coin-header-brand" style="display: flex; align-items: center; gap: 11px;">
-      <div style="width: 28px; height: 28px; border-radius: 9px; background: linear-gradient(145deg, oklch(0.86 0.12 192), oklch(0.6 0.13 210)); display: grid; place-items: center;">
-        <div style="width: 10px; height: 10px; border-radius: 3px; background: #061423;"></div>
-      </div>
-      <span style="font-size: 17px; font-weight: 600; letter-spacing: -0.02em;">Coin</span>
+    <div class="coin-header-brand" style="display: flex; align-items: center;">
+      <img src="/cloudflops/logo-horizontal.png" alt="CloudFlops" height="32" style="height:32px;width:auto;display:block;" />
     </div>
     <button type="button" class="coin-burger" onClick="{{ toggleMenu }}" aria-label="Open menu"><span></span><span></span><span></span></button>
     <nav class="coin-nav coin-nav-desktop" style="display: flex; align-items: center; gap: 30px;">
@@ -297,7 +295,7 @@
   </section>
 
   <section id="product" data-screen-label="Benefits" style="position: relative; z-index: 5; padding: 100px 72px; border-top: 1px solid rgba(150,235,250,0.08);">
-    <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.16em; color: oklch(0.88 0.11 195);">WHY Coin</div>
+    <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.16em; color: oklch(0.88 0.11 195);">WHY CloudFlops</div>
     <h2 style="margin: 18px 0 0; max-width: 560px; font-size: 46px; line-height: 1.08; letter-spacing: -0.035em; font-weight: 600; color: #f0fbff;">A clear investment product</h2>
     <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 48px;">
       <div style="padding: 28px; border-radius: 18px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.04);">
@@ -410,9 +408,8 @@
     <div style="border-radius: 22px; border: 1px solid rgba(150,235,250,0.16); background: linear-gradient(180deg, rgba(11,32,49,0.96), rgba(5,16,27,0.98)); box-shadow: 0 60px 120px -60px #000; overflow: hidden;">
       <div style="display: grid; grid-template-columns: 216px 1fr;">
         <aside style="padding: 22px 14px; border-right: 1px solid rgba(150,235,250,0.1); display: flex; flex-direction: column; gap: 3px;">
-          <div style="display: flex; align-items: center; gap: 10px; padding: 0 10px 20px;">
-            <div style="width: 24px; height: 24px; border-radius: 8px; background: linear-gradient(145deg, oklch(0.86 0.12 192), oklch(0.6 0.13 210));"></div>
-            <span style="font-size: 14px; font-weight: 600; letter-spacing: -0.015em;">Coin</span>
+          <div style="display: flex; align-items: center; padding: 0 10px 20px;">
+            <img src="/cloudflops/logo-horizontal.png" alt="CloudFlops" height="24" style="height:24px;width:auto;display:block;" />
           </div>
           <div style="display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 10px; background: oklch(0.6 0.13 200 / 0.22); border: 1px solid oklch(0.86 0.11 195 / 0.3); font-size: 13px; color: #f0fbff;"><span style="width: 6px; height: 6px; border-radius: 2px; background: oklch(0.88 0.12 192);"></span>Overview</div>
           <div style="display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 10px; font-size: 13px; color: rgba(230,244,250,0.7);"><span style="width: 6px; height: 6px; border-radius: 2px; background: rgba(150,235,250,0.3);"></span>Plans</div>
@@ -532,7 +529,7 @@
       <div>
         <div style="border-top: 1px solid rgba(150,235,250,0.12);">
           <button onClick="{{ toggle0 }}" style="width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 22px 2px; background: none; border: 0; text-align: left; font-family: inherit; font-size: 17.5px; font-weight: 500; letter-spacing: -0.02em; color: #f0fbff; cursor: pointer;">
-            <span>What is Coin?</span>
+            <span>What is CloudFlops?</span>
             <sc-if value="{{ open0 }}" hint-placeholder-val="{{ true }}"><span style="font-family: 'JetBrains Mono', monospace; font-size: 18px; color: oklch(0.88 0.11 195); flex: none;">−</span></sc-if>
             <sc-if value="{{ closed0 }}" hint-placeholder-val="{{ false }}"><span style="font-family: 'JetBrains Mono', monospace; font-size: 18px; color: rgba(230,244,250,0.6); flex: none;">+</span></sc-if>
           </button>
@@ -609,9 +606,8 @@
   <footer data-screen-label="Footer" style="position: relative; z-index: 5; padding: 56px 72px 36px; border-top: 1px solid rgba(150,235,250,0.1); background: rgba(150,235,250,0.02);">
     <div style="display: grid; grid-template-columns: 1.6fr repeat(4, 1fr); gap: 40px;">
       <div>
-        <div style="display: flex; align-items: center; gap: 11px;">
-          <div style="width: 26px; height: 26px; border-radius: 8px; background: linear-gradient(145deg, oklch(0.86 0.12 192), oklch(0.6 0.13 210));"></div>
-          <span style="font-size: 16px; font-weight: 600; letter-spacing: -0.02em;">Coin</span>
+        <div style="display: flex; align-items: center;">
+          <img src="/cloudflops/logo-horizontal.png" alt="CloudFlops" height="28" style="height:28px;width:auto;display:block;" />
         </div>
         <p style="margin: 16px 0 0; max-width: 280px; font-size: 13px; line-height: 1.6; color: rgba(230,244,250,0.68);">USDT investment platform with daily profit accrual.</p>
       </div>
@@ -650,7 +646,7 @@
       </div>
     </div>
     <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 44px; padding-top: 22px; border-top: 1px solid rgba(150,235,250,0.1); font-size: 12.5px; color: rgba(230,244,250,0.62);">
-      <span>© 2026 Coin. Concept — all values are placeholders.</span>
+      <span>© 2026 CloudFlops. Concept — all values are placeholders.</span>
       <span style="font-family: 'JetBrains Mono', monospace; letter-spacing: 0.1em;">NETWORK ONLINE</span>
     </div>
   </footer>

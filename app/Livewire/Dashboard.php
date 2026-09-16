@@ -2,12 +2,14 @@
 
 namespace App\Livewire;
 
+use App\Models\Contract;
 use App\Models\Plan;
 use App\Models\SupportTicket;
 use App\Models\SupportTicketMessage;
 use App\Models\WalletTransaction;
 use App\Services\DashboardDataService;
 use App\Services\DepositService;
+use App\Services\PlanChangeRequestService;
 use App\Services\PlanPurchaseService;
 use App\Services\PlatformSettingsService;
 use App\Services\ReferralService;
@@ -71,6 +73,9 @@ class Dashboard extends Component
     public Collection $completedContracts;
 
     /** @var Collection<int, mixed> */
+    public Collection $pendingPlanChanges;
+
+    /** @var Collection<int, mixed> */
     public Collection $transactions;
 
     /** @var Collection<string, mixed> */
@@ -108,6 +113,10 @@ class Dashboard extends Component
     public ?string $paymentModalError = null;
 
     public ?string $paymentModalReference = null;
+
+    public ?int $contractDetailsId = null;
+
+    public ?int $changingContractId = null;
 
     public ?float $pendingTopUpAmount = null;
 
@@ -175,6 +184,7 @@ class Dashboard extends Component
         $this->plans = $payload['plans'];
         $this->activeContracts = $payload['activeContracts'];
         $this->completedContracts = $payload['completedContracts'];
+        $this->pendingPlanChanges = $payload['pendingPlanChanges'];
         $this->transactions = $payload['transactions'];
         $this->periodTotals = $payload['periodTotals'];
         $this->referral = $payload['referral'];
@@ -206,6 +216,10 @@ class Dashboard extends Component
 
     public function setSection(int $section): void
     {
+        if ($section !== 1) {
+            $this->changingContractId = null;
+        }
+
         $this->section = $section;
         $this->menuOpen = false;
         $this->resetActionFeedback();
@@ -258,6 +272,18 @@ class Dashboard extends Component
             return;
         }
 
+        if ($this->changingContractId) {
+            $changing = $this->changingContract;
+
+            if ($changing && (int) $plan->id === (int) $changing->plan_id) {
+                return;
+            }
+
+            $this->selectedPlanId = $plan->id;
+
+            return;
+        }
+
         if ($plan->isCurrentFor($this->primaryPlan)) {
             $this->section = 2;
 
@@ -269,6 +295,82 @@ class Dashboard extends Component
             $plan->calculatorMinAmount(),
             min($plan->calculatorMaxAmount(), (int) $this->power)
         );
+    }
+
+    public function openChangePlan(int $contractId): void
+    {
+        $contract = $this->findOwnedContract($contractId);
+
+        abort_unless($contract instanceof Contract && $contract->isActive(), 403);
+
+        if ($this->pendingPlanChanges->has($contract->id)) {
+            $this->actionMessage = __('coin.messages.plan_change_pending_exists');
+            $this->actionMessageTone = 'warning';
+            $this->section = 2;
+
+            return;
+        }
+
+        $this->changingContractId = $contract->id;
+        $this->selectedPlanId = $contract->plan_id;
+        $this->section = 1;
+        $this->resetActionFeedback();
+    }
+
+    public function cancelChangePlan(): void
+    {
+        $this->changingContractId = null;
+        $this->resetActionFeedback();
+    }
+
+    public function getChangingContractProperty(): ?Contract
+    {
+        if ($this->changingContractId === null) {
+            return null;
+        }
+
+        $contract = $this->findOwnedContract($this->changingContractId);
+
+        return $contract instanceof Contract && $contract->isActive() ? $contract : null;
+    }
+
+    public function getPlanChangeTopUpProperty(): float
+    {
+        $contract = $this->changingContract;
+        $plan = $this->selectedPlan;
+
+        if (! $contract instanceof Contract || ! $plan instanceof Plan) {
+            return 0.0;
+        }
+
+        if ((int) $contract->plan_id === (int) $plan->id) {
+            return 0.0;
+        }
+
+        return app(PlanPurchaseService::class)->topUpRequired($contract, $plan);
+    }
+
+    public function getPlanChangePrincipalAfterProperty(): float
+    {
+        $contract = $this->changingContract;
+
+        if (! $contract instanceof Contract) {
+            return 0.0;
+        }
+
+        return round((float) $contract->principal_amount + $this->planChangeTopUp, 2);
+    }
+
+    public function getPlanChangeHasInsufficientFundsProperty(): bool
+    {
+        return $this->planChangeTopUp > 0.009 && $this->walletAvailableAmount() < $this->planChangeTopUp;
+    }
+
+    public function goToWalletTopUp(): void
+    {
+        $this->closePaymentModal();
+        $this->changingContractId = null;
+        $this->section = 4;
     }
 
     public function updatedPower(): void
@@ -913,6 +1015,85 @@ class Dashboard extends Component
     public function finishInvestmentPayment(): void
     {
         $this->section = 2;
+        $this->changingContractId = null;
+        $this->closePaymentModal();
+    }
+
+    public function openPlanChangeModal(): void
+    {
+        $this->resetActionFeedback();
+        $this->resetPaymentModal();
+
+        $contract = $this->changingContract;
+        $plan = $this->selectedPlan;
+
+        if (! $contract instanceof Contract || ! $plan instanceof Plan) {
+            $this->addError('purchase', __('coin.messages.select_plan'));
+
+            return;
+        }
+
+        if ((int) $contract->plan_id === (int) $plan->id) {
+            $this->addError('purchase', __('coin.messages.plan_change_same_plan'));
+
+            return;
+        }
+
+        if ($plan->isEnterprise() && $plan->min_deposit === null) {
+            $this->addError('purchase', __('coin.invest.contact_sales'));
+
+            return;
+        }
+
+        if ($this->planChangeHasInsufficientFunds) {
+            $this->paymentModal = 'plan_change';
+            $this->paymentModalStep = 'insufficient_funds';
+
+            return;
+        }
+
+        $this->paymentModal = 'plan_change';
+        $this->paymentModalStep = 'review';
+    }
+
+    public function confirmPlanChange(PlanChangeRequestService $planChanges): void
+    {
+        if ($this->paymentModal !== 'plan_change' || $this->paymentModalStep !== 'review') {
+            return;
+        }
+
+        $contract = $this->changingContract;
+        $plan = $this->selectedPlan;
+
+        if (! $contract instanceof Contract || ! $plan instanceof Plan) {
+            $this->closePaymentModal();
+            $this->addError('purchase', __('coin.messages.select_plan'));
+
+            return;
+        }
+
+        $this->paymentModalError = null;
+        $this->paymentModalStep = 'processing';
+
+        try {
+            sleep(1);
+
+            $request = $planChanges->createRequest($this->user, $contract, $plan);
+
+            $this->reloadPortfolioData();
+            $this->paymentModalReference = $request->reference;
+            $this->paymentModalStep = 'pending_approval';
+        } catch (\RuntimeException $exception) {
+            $this->paymentModalStep = 'error';
+            $this->paymentModalError = $exception->getMessage();
+            $this->addError('purchase', $exception->getMessage());
+        }
+    }
+
+    public function finishPlanChange(): void
+    {
+        $this->section = 2;
+        $this->changingContractId = null;
         $this->closePaymentModal();
     }
 
@@ -930,6 +1111,29 @@ class Dashboard extends Component
             $this->depositAmount = '';
             $this->pendingTopUpAmount = null;
         }
+    }
+
+    public function openContractDetails(int $contractId): void
+    {
+        $contract = $this->findOwnedContract($contractId);
+
+        abort_unless($contract !== null, 403);
+
+        $this->contractDetailsId = $contract->id;
+    }
+
+    public function closeContractDetails(): void
+    {
+        $this->contractDetailsId = null;
+    }
+
+    public function getContractDetailsProperty(): ?Contract
+    {
+        if ($this->contractDetailsId === null) {
+            return null;
+        }
+
+        return $this->findOwnedContract($this->contractDetailsId);
     }
 
     public function copyReferralLink(): void
@@ -1048,6 +1252,27 @@ class Dashboard extends Component
         $this->reloadPortfolioData();
     }
 
+    #[On('echo-private:wallet.user.{user.id},.PlanChangeRequestUpdated')]
+    public function onPlanChangeRequestUpdated(mixed $payload = null): void
+    {
+        $status = is_array($payload) ? ($payload['request']['status'] ?? null) : null;
+
+        $this->reloadPortfolioData();
+
+        if ($status === 'approved') {
+            $this->changingContractId = null;
+            $this->closePaymentModal();
+            $this->section = 2;
+            $this->actionMessage = __('coin.messages.plan_change_confirmed');
+            $this->actionMessageTone = 'success';
+            $this->dispatch('plan-change-toast', message: __('coin.messages.plan_change_confirmed'));
+        } elseif ($status === 'rejected') {
+            $this->actionMessage = __('coin.messages.plan_change_rejected');
+            $this->actionMessageTone = 'error';
+            $this->dispatch('plan-change-toast', message: __('coin.messages.plan_change_rejected'), variant: 'error');
+        }
+    }
+
     #[On('echo-private:support.user.{user.id},.SupportTicketMessageSent')]
     #[On('echo-private:support.user.{user.id},.SupportTicketUpdated')]
     public function onSupportTicketRealtime(mixed $payload = null): void
@@ -1120,7 +1345,7 @@ class Dashboard extends Component
                 ->searchTerm($this->walletSearch)
                 ->applyListSort($this->walletSort, $this->walletDir, 'sort_order')
                 ->paginate($this->walletPageSize(), pageName: 'walletPage'),
-        ])->layout('layouts.coin-dashboard', ['title' => 'Coin — '.__('coin.nav.portal')]);
+        ])->layout('layouts.coin-dashboard', ['title' => \App\Support\PlatformBrand::pageTitle(__('coin.nav.portal'))]);
     }
 
     private function dailyAmount(): float
@@ -1155,6 +1380,7 @@ class Dashboard extends Component
         $this->plans = $payload['plans'];
         $this->activeContracts = $payload['activeContracts'];
         $this->completedContracts = $payload['completedContracts'];
+        $this->pendingPlanChanges = $payload['pendingPlanChanges'];
         $this->transactions = $payload['transactions'];
         $this->resetPage('walletPage');
         $this->periodTotals = $payload['periodTotals'];
@@ -1440,6 +1666,12 @@ class Dashboard extends Component
         $this->actionMessage = null;
         $this->actionMessageTone = null;
         $this->resetErrorBag();
+    }
+
+    private function findOwnedContract(int $contractId): ?Contract
+    {
+        return $this->activeContracts->firstWhere('id', $contractId)
+            ?? $this->completedContracts->firstWhere('id', $contractId);
     }
 
     private function resetPaymentModal(): void

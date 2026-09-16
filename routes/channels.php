@@ -55,6 +55,13 @@ Broadcast::channel('admin.withdrawals', function ($user) {
     return $allowed;
 });
 
+Broadcast::channel('admin.plan-changes', function ($user) {
+    $allowed = $user instanceof Admin;
+    logSupportChannelAuth('admin.plan-changes', $user, $allowed, 'admin_only');
+
+    return $allowed;
+});
+
 Broadcast::channel('wallet.user.{userId}', function ($user, int $userId) {
     $allowed = $user instanceof User && (int) $user->id === (int) $userId;
     logSupportChannelAuth('wallet.user.'.$userId, $user, $allowed, 'user_self');

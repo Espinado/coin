@@ -1,6 +1,6 @@
 @extends('layouts.admin')
 
-@section('title', 'Coin Admin — '.$ticket->reference)
+@section('title', \App\Support\PlatformBrand::adminPageTitle($ticket->reference))
 
 @push('head')
     <script>

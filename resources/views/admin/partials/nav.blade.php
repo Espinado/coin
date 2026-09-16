@@ -17,6 +17,12 @@
                 <span data-admin-withdrawals-nav-badge style="margin-left:6px;padding:2px 7px;border-radius:999px;background:rgba(255,143,143,0.18);color:#ff8f8f;font-family:'JetBrains Mono',monospace;font-size:10px;">{{ $pendingWithdrawalsCount }}</span>
             @endif
         </a>
+        <a href="{{ route('admin.plan-changes.index') }}" class="admin-btn" data-admin-plan-changes-nav>
+            {{ __('coin.admin.plan_changes') }}
+            @if(($pendingPlanChangesCount ?? 0) > 0)
+                <span data-admin-plan-changes-nav-badge style="margin-left:6px;padding:2px 7px;border-radius:999px;background:rgba(150,200,255,0.18);color:#9ecbff;font-family:'JetBrains Mono',monospace;font-size:10px;">{{ $pendingPlanChangesCount }}</span>
+            @endif
+        </a>
         <a href="{{ route('admin.plans.index') }}" class="admin-btn">{{ __('coin.admin.plans') }}</a>
         <a href="{{ route('admin.profit-accrual.index') }}" class="admin-btn">{{ __('coin.admin.profit_accrual') }}</a>
         <a href="{{ route('admin.admins.index') }}" class="admin-btn">{{ __('coin.admin.admins.title') }}</a>

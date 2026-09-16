@@ -10,12 +10,7 @@
     <tr>
       <td align="center">
         <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:560px;background:#0b1a28;border:1px solid rgba(255,180,84,0.22);border-radius:16px;overflow:hidden;">
-          <tr>
-            <td style="padding:28px 28px 18px;">
-              <div style="font-size:12px;letter-spacing:0.14em;text-transform:uppercase;color:rgba(255,180,84,0.85);">{{ __('coin.admin.brand') }}</div>
-              <h1 style="margin:14px 0 0;font-size:24px;line-height:1.3;color:#f0fbff;">{{ __('coin.admin.auth.two_factor_mail_title') }}</h1>
-            </td>
-          </tr>
+          @include('emails.partials.admin-brand-header', ['title' => __('coin.admin.auth.two_factor_mail_title')])
           <tr>
             <td style="padding:0 28px 18px;font-size:15px;line-height:1.65;color:rgba(214,238,248,0.86);">
               <p style="margin:0 0 14px;">{{ __('coin.admin.auth.two_factor_mail_intro', ['name' => $adminName]) }}</p>
