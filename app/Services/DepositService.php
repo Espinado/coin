@@ -14,12 +14,20 @@ class DepositService
 {
     public function __construct(
         private WalletService $wallets,
+        private ExchangeRateService $exchangeRates,
     ) {}
 
     public function createPending(User $user, float $amount, string $currency = 'USDT'): Deposit
     {
         if ($amount <= 0) {
             throw new RuntimeException('Top-up amount must be greater than zero.');
+        }
+
+        $currency = strtoupper(trim($currency));
+        $allowed = config('coin.deposits.currencies', ['USDT', 'BTC']);
+
+        if (! in_array($currency, $allowed, true)) {
+            throw new RuntimeException('Unsupported top-up currency.');
         }
 
         $deposit = DB::transaction(function () use ($user, $amount, $currency) {
@@ -49,24 +57,37 @@ class DepositService
             $deposit->refresh();
             $user = $deposit->user;
             $wallet = $this->wallets->ensureWallet($user);
-            $amount = (float) $deposit->amount;
-            $currency = $deposit->currency ?: $this->wallets->currencyFor($wallet);
+            $paymentAmount = (float) $deposit->amount;
+            $paymentCurrency = strtoupper((string) ($deposit->currency ?: 'USDT'));
+            $conversion = $this->exchangeRates->convertToBase($paymentAmount, $paymentCurrency);
+            $creditedAmount = $conversion['amount'];
+            $walletCurrency = $this->wallets->currencyFor($wallet);
 
-            $wallet->increment('available', $amount);
-            $wallet->increment('balance', $amount);
+            $wallet->increment('available', $creditedAmount);
+            $wallet->increment('balance', $creditedAmount);
+
+            $source = $paymentCurrency === $walletCurrency
+                ? __('coin.tx_sources.mock_top_up')
+                : __('coin.tx_sources.mock_top_up_converted', [
+                    'paid' => number_format($paymentAmount, 2, '.', '').' '.$paymentCurrency,
+                    'rate' => number_format((float) ($conversion['rate'] ?? 1), 4, '.', ''),
+                ]);
 
             $this->wallets->record(
                 $user,
                 PlatformTerms::TX_TOP_UP,
-                __('coin.tx_sources.mock_top_up'),
-                $amount,
-                $currency,
+                $source,
+                $creditedAmount,
+                $walletCurrency,
                 'positive',
                 'COMPLETED',
                 $deposit,
             );
 
             $deposit->update([
+                'credited_amount' => $creditedAmount,
+                'credited_currency' => $walletCurrency,
+                'exchange_rate' => $conversion['rate'],
                 'status' => Deposit::STATUS_CONFIRMED,
                 'confirmed_by' => $admin?->id,
                 'confirmed_at' => now(),

@@ -47,7 +47,7 @@ class PlanPurchaseService
         }
 
         return DB::transaction(function () use ($user, $plan, $amount, $wallet) {
-            $currency = $plan->currency ?: $this->wallets->currencyFor($wallet);
+            $currency = (string) config('coin.wallet.base_currency', 'USDT');
             $apr = $plan->annual_profit_percent;
             $durationDays = $plan->duration_days;
             $startedAt = now();

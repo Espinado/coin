@@ -1,7 +1,17 @@
 @if($paymentModal === 'topup')
 @php
-  $currency = $depositCurrency ?: ($wallet?->currency ?? 'USDT');
-  $amount = number_format((float) ($pendingTopUpAmount ?? $depositAmount), 2, '.', ',');
+  $currency = $depositCurrency ?: 'USDT';
+  $rawAmount = (float) ($pendingTopUpAmount ?? $depositAmount);
+  $amount = number_format($rawAmount, 2, '.', ',');
+  $walletCurrency = $wallet?->currency ?? config('coin.wallet.base_currency', 'USDT');
+  $creditPreview = null;
+  if ($rawAmount > 0 && strtoupper($currency) !== strtoupper($walletCurrency)) {
+      try {
+          $creditPreview = app(\App\Services\ExchangeRateService::class)->previewLabel($rawAmount, $currency);
+      } catch (\Throwable) {
+          $creditPreview = null;
+      }
+  }
   $canDismiss = ! in_array($paymentModalStep, ['processing', 'redirect'], true);
 @endphp
 <div
@@ -27,6 +37,9 @@
           <div style="display: flex; justify-content: space-between; gap: 12px;"><span style="color: rgba(214,238,248,0.72);">{{ __('coin.bank_gateway.method') }}</span><span>{{ __('coin.bank_gateway.internet_bank') }}</span></div>
           <div style="height: 1px; background: rgba(150,235,250,0.1);"></div>
           <div style="display: flex; justify-content: space-between; gap: 12px;"><span style="color: rgba(214,238,248,0.72);">{{ __('coin.payment_modal.total') }}</span><span style="font-family: 'JetBrains Mono', monospace; font-size: 16px; color: #f0fbff;">{{ $amount }} {{ $currency }}</span></div>
+          @if($creditPreview)
+          <div style="display: flex; justify-content: space-between; gap: 12px;"><span style="color: rgba(214,238,248,0.72);">{{ __('coin.wallet.credit_to_balance') }}</span><span style="font-family: 'JetBrains Mono', monospace; font-size: 14px; color: #f0fbff;">{{ $creditPreview }}</span></div>
+          @endif
         </div>
         <button type="button" wire:click="proceedToTopUpBank" wire:loading.attr="disabled" wire:target="proceedToTopUpBank" style="width: 100%; margin-top: 22px; padding: 13px; border-radius: 11px; border: 1px solid oklch(0.86 0.11 195 / 0.5); background: linear-gradient(140deg, oklch(0.86 0.12 192), oklch(0.66 0.13 205)); color: #04121f; font-family: inherit; font-size: 14px; font-weight: 600; cursor: pointer;">
           <span wire:loading.remove wire:target="proceedToTopUpBank">{{ __('coin.bank_gateway.continue_to_bank') }}</span>

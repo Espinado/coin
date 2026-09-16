@@ -13,7 +13,7 @@ class PlatformSettingsService
     private const DEFAULTS = [
         'reward_rate' => '0.0042',
         'epochs_per_day' => '3',
-        'token_symbol' => 'COIN',
+        'token_symbol' => 'USDT',
         'min_withdrawal' => '10.00',
         'network_fee' => '0.50',
         'withdrawal_processing_hours' => '24',
@@ -21,6 +21,7 @@ class PlatformSettingsService
         'referral_level2_percent' => '0',
         'kyc_required_for_withdrawal' => '0',
         'maintenance_mode' => '0',
+        'btc_per_usdt' => '2',
     ];
 
     public function get(string $key, ?string $default = null): string
@@ -92,6 +93,17 @@ class PlatformSettingsService
         return $this->getFloat('min_withdrawal');
     }
 
+    public function btcPerUsdt(): float
+    {
+        $rate = $this->getFloat('btc_per_usdt');
+
+        if ($rate <= 0) {
+            $rate = $this->getFloat('btc_per_usd');
+        }
+
+        return $rate > 0 ? $rate : 2.0;
+    }
+
     /** @return array<string, array{label: string, type: string, default: string}> */
     public function definitions(): array
     {
@@ -106,6 +118,7 @@ class PlatformSettingsService
             'referral_level2_percent' => ['label' => 'Реферальный % (уровень 2, не использ.)', 'type' => 'number', 'default' => self::DEFAULTS['referral_level2_percent']],
             'kyc_required_for_withdrawal' => ['label' => __('coin.settings.kyc_for_payout'), 'type' => 'boolean', 'default' => self::DEFAULTS['kyc_required_for_withdrawal']],
             'maintenance_mode' => ['label' => __('coin.settings.maintenance'), 'type' => 'boolean', 'default' => self::DEFAULTS['maintenance_mode']],
+            'btc_per_usdt' => ['label' => __('coin.settings.btc_per_usdt'), 'type' => 'number', 'default' => self::DEFAULTS['btc_per_usdt']],
         ];
     }
 

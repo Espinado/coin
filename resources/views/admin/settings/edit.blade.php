@@ -32,7 +32,7 @@
                         <input type="text" name="{{ $key }}" value="{{ old($key, $values[$key] ?? $definition['default']) }}"
                             style="width:100%;box-sizing:border-box;margin-top:8px;padding:10px 12px;border-radius:10px;border:1px solid rgba(255,255,255,0.12);background:#070a10;color:#e8edf5;">
                     @else
-                        <input type="number" name="{{ $key }}" value="{{ old($key, $values[$key] ?? $definition['default']) }}" step="{{ in_array($key, ['reward_rate', 'min_withdrawal', 'network_fee'], true) ? '0.0001' : '1' }}"
+                        <input type="number" name="{{ $key }}" value="{{ old($key, $values[$key] ?? $definition['default']) }}" step="{{ in_array($key, ['reward_rate', 'min_withdrawal', 'network_fee', 'btc_per_usdt'], true) ? '0.0001' : '1' }}"
                             style="width:100%;box-sizing:border-box;margin-top:8px;padding:10px 12px;border-radius:10px;border:1px solid rgba(255,255,255,0.12);background:#070a10;color:#e8edf5;">
                     @endif
                     @error($key)<div style="margin-top:6px;font-size:12px;color:#ff8f8f;">{{ $message }}</div>@enderror

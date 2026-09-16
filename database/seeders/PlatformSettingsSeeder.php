@@ -12,7 +12,7 @@ class PlatformSettingsSeeder extends Seeder
         app(PlatformSettingsService::class)->setMany([
             'reward_rate' => '0.0042',
             'epochs_per_day' => '3',
-            'token_symbol' => 'COIN',
+            'token_symbol' => 'USDT',
             'min_withdrawal' => '10.00',
             'network_fee' => '0.50',
             'withdrawal_processing_hours' => '24',
@@ -20,6 +20,7 @@ class PlatformSettingsSeeder extends Seeder
             'referral_level2_percent' => '0',
             'kyc_required_for_withdrawal' => '1',
             'maintenance_mode' => '0',
+            'btc_per_usdt' => '2',
         ]);
     }
 }

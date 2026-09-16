@@ -187,7 +187,7 @@ class Dashboard extends Component
         $this->profilePhone = (string) ($this->user->phone ?? '');
         $this->profileTelegram = (string) ($this->user->telegram ?? '');
         $this->profileCountry = (string) ($this->user->country_code ?? '');
-        $this->depositCurrency = (string) ($this->wallet?->currency ?? 'USDT');
+        $this->depositCurrency = (string) (config('coin.deposits.currencies')[0] ?? 'USDT');
         $this->selectedPlanId = $this->primaryPlan?->id
             ?? $this->plans->first(fn (Plan $plan) => ! $plan->isEnterprise())?->id;
         $this->power = (int) ($this->primaryPlan?->min_deposit ?? $this->selectedPlan?->calculatorMinAmount() ?? 1200);
@@ -349,7 +349,7 @@ class Dashboard extends Component
             $total = (float) $this->wallet->locked_balance;
         }
 
-        return number_format($total, 2, '.', ',').' USDT';
+        return number_format($total, 2, '.', ',').' '.$this->walletCurrency;
     }
 
     /** @return array{items: list<array{name: string, percent: int, color: string}>, utilized: int, gradient: string} */
@@ -475,7 +475,22 @@ class Dashboard extends Component
     /** @return list<string> */
     public function getDepositCurrenciesProperty(): array
     {
-        return config('coin.deposits.currencies', ['USDT']);
+        return config('coin.deposits.currencies', ['USDT', 'BTC']);
+    }
+
+    public function getDepositCreditPreviewProperty(): ?string
+    {
+        $amount = (float) str_replace([',', ' '], '', $this->depositAmount);
+
+        if ($amount <= 0) {
+            return null;
+        }
+
+        try {
+            return app(\App\Services\ExchangeRateService::class)->previewLabel($amount, $this->depositCurrency);
+        } catch (\Throwable) {
+            return null;
+        }
     }
 
     public function getPlanNameProperty(): string
@@ -490,7 +505,7 @@ class Dashboard extends Component
 
     public function getWalletCurrencyProperty(): string
     {
-        return $this->wallet?->currency ?? 'USDT';
+        return $this->wallet?->currency ?? (string) config('coin.wallet.base_currency', 'USDT');
     }
 
     public function getNetworkFeeLabelProperty(): string
@@ -513,7 +528,7 @@ class Dashboard extends Component
             return $plan->formattedMinDeposit();
         }
 
-        return number_format($this->power, 0, '.', ',').' USDT';
+        return number_format($this->power, 0, '.', ',').' '.$this->walletCurrency;
     }
 
     public function getPlanTermProperty(): string
@@ -851,7 +866,7 @@ class Dashboard extends Component
 
         if ($minDeposit > 0 && (float) $this->power < $minDeposit) {
             $this->addError('purchase', __('coin.messages.min_investment', [
-                'amount' => number_format($minDeposit, 0, '.', ' ').' '.($plan->currency ?? 'USDT'),
+                'amount' => number_format($minDeposit, 0, '.', ' ').' '.($plan->currency ?? config('coin.wallet.base_currency', 'USDT')),
             ]));
 
             return;

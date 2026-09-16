@@ -49,14 +49,14 @@ return [
             'section' => 'purchase',
             'type' => 'number',
             'step' => '0.01',
-            'help' => 'Минимальная сумма при нажатии «Купить план». Пусто у enterprise → «Связаться с менеджером».',
+            'help' => 'Минимальная сумма в долларах при нажатии «Купить план». Пусто у enterprise → «Связаться с менеджером».',
         ],
         'price_amount' => [
             'label' => 'Сумма покупки по умолчанию (USDT)',
             'section' => 'purchase',
             'type' => 'number',
             'step' => '0.01',
-            'help' => 'Используется, если пользователь не ввёл свою сумму.',
+            'help' => 'Сумма в USDT, если пользователь не ввёл свою.',
         ],
         'annual_profit_percent' => [
             'label' => 'Годовая доходность · APR (%)',
@@ -68,9 +68,9 @@ return [
         'currency' => [
             'label' => 'Валюта',
             'section' => 'purchase',
-            'type' => 'text',
+            'type' => 'hidden',
             'step' => null,
-            'help' => 'Обычно USDT.',
+            'help' => null,
         ],
         'duration_days' => [
             'label' => 'Срок блокировки (дней)',

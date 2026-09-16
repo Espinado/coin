@@ -98,7 +98,7 @@ class Contract extends Model
 
     public function formattedAccrued(): string
     {
-        $currency = $this->currency ?? $this->plan?->currency ?? 'USDT';
+        $currency = $this->currency ?? $this->plan?->currency ?? config('coin.wallet.base_currency', 'USDT');
 
         return number_format((float) $this->accrued_amount, 2, '.', ',').' '.$currency;
     }
@@ -145,7 +145,7 @@ class Contract extends Model
     public function formattedPrincipal(): string
     {
         $amount = (float) ($this->principal_amount ?? 0);
-        $currency = $this->currency ?? $this->plan?->currency ?? 'USDT';
+        $currency = $this->currency ?? $this->plan?->currency ?? config('coin.wallet.base_currency', 'USDT');
 
         return number_format($amount, 2, '.', ',').' '.$currency;
     }
@@ -212,7 +212,7 @@ class Contract extends Model
             return '—';
         }
 
-        $currency = $this->currency ?? $this->plan?->currency ?? 'USDT';
+        $currency = $this->currency ?? $this->plan?->currency ?? config('coin.wallet.base_currency', 'USDT');
 
         return number_format($daily, 2, '.', ',').' '.$currency;
     }

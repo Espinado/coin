@@ -129,17 +129,22 @@ class Plan extends Model
         return __('coin.invest.contract_n_days', ['days' => $this->duration_days]);
     }
 
+    public function displayCurrency(): string
+    {
+        return (string) config('coin.wallet.base_currency', 'USDT');
+    }
+
     public function formattedComputeLabel(): string
     {
         if ($this->min_deposit !== null) {
-            return number_format((float) $this->min_deposit, 0, '.', ',').' '.($this->currency ?? 'USDT');
+            return number_format((float) $this->min_deposit, 0, '.', ',').' '.$this->displayCurrency();
         }
 
         if ($this->isEnterprise()) {
             return __('coin.invest.by_agreement');
         }
 
-        return number_format((float) $this->tflops, 0, '.', ',').' '.($this->currency ?? 'USDT');
+        return number_format((float) $this->tflops, 0, '.', ',').' '.$this->displayCurrency();
     }
 
     public function formattedAnnualProfit(): ?string
@@ -157,7 +162,7 @@ class Plan extends Model
             return null;
         }
 
-        return number_format((float) $this->min_deposit, 0, '.', ',').' '.($this->currency ?? 'USDT');
+        return number_format((float) $this->min_deposit, 0, '.', ',').' '.$this->displayCurrency();
     }
 
     public function calculatorMinAmount(): int

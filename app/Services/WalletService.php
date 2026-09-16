@@ -24,7 +24,7 @@ class WalletService
 
         return Wallet::query()->create([
             'user_id' => $user->id,
-            'currency' => 'USDT',
+            'currency' => (string) config('coin.wallet.base_currency', 'USDT'),
             'balance' => 0,
             'available' => 0,
             'pending' => 0,
@@ -35,7 +35,7 @@ class WalletService
 
     public function currencyFor(Wallet $wallet): string
     {
-        return $wallet->currency ?: 'USDT';
+        return $wallet->currency ?: (string) config('coin.wallet.base_currency', 'USDT');
     }
 
     public function nextSortOrder(int $userId): int

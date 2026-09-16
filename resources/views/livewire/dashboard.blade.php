@@ -262,7 +262,7 @@
             </div>
             <div style="margin-top: 22px; display: flex; align-items: baseline; justify-content: space-between;">
               <span style="font-size: 13.5px; color: rgba(214,238,248,0.74);">{{ __('coin.invest.investment_amount') }}</span>
-              <span style="font-family: 'JetBrains Mono', monospace; font-size: 19px; color: #f0fbff;">{{ $this->powerLabel }} <span style="font-size: 12px; color: rgba(214,238,248,0.7);">USDT</span></span>
+              <span style="font-family: 'JetBrains Mono', monospace; font-size: 19px; color: #f0fbff;">{{ $this->powerLabel }} <span style="font-size: 12px; color: rgba(214,238,248,0.7);">{{ $this->walletCurrency }}</span></span>
             </div>
             @php
               $calcMin = $this->calculatorMin;
@@ -502,6 +502,9 @@
               <span style="color: rgba(214,238,248,0.78);">{{ $depositCurrency }}</span>
             </div>
             @error('depositAmount')<p style="margin-top:8px;font-size:12px;color:#ff8f8f;">{{ $message }}</p>@enderror
+            @if($this->depositCreditPreview && $depositCurrency !== $this->walletCurrency)
+            <p style="margin-top:10px;font-size:12px;line-height:1.5;color:rgba(214,238,248,0.72);">{{ __('coin.wallet.deposit_credit_preview', ['amount' => $this->depositCreditPreview]) }}</p>
+            @endif
             <div style="display: flex; gap: 7px; margin-top: 12px;">
               <button type="button" wire:click="setDepositPreset(100)" style="padding: 6px 12px; border-radius: 8px; border: 1px solid rgba(150,235,250,0.16); background: transparent; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: rgba(214,238,248,0.78); cursor: pointer;">100</button>
               <button type="button" wire:click="setDepositPreset(500)" style="padding: 6px 12px; border-radius: 8px; border: 1px solid rgba(150,235,250,0.16); background: transparent; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: rgba(214,238,248,0.78); cursor: pointer;">500</button>

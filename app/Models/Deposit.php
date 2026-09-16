@@ -17,6 +17,9 @@ class Deposit extends Model
         'user_id',
         'amount',
         'currency',
+        'credited_amount',
+        'credited_currency',
+        'exchange_rate',
         'status',
         'method',
         'external_reference',
@@ -28,6 +31,8 @@ class Deposit extends Model
     {
         return [
             'amount' => 'decimal:2',
+            'credited_amount' => 'decimal:2',
+            'exchange_rate' => 'decimal:8',
             'confirmed_at' => 'datetime',
         ];
     }
@@ -45,5 +50,14 @@ class Deposit extends Model
     public function formattedAmount(): string
     {
         return number_format((float) $this->amount, 2, '.', ',').' '.$this->currency;
+    }
+
+    public function formattedCreditedAmount(): ?string
+    {
+        if ($this->credited_amount === null) {
+            return null;
+        }
+
+        return number_format((float) $this->credited_amount, 2, '.', ',').' '.($this->credited_currency ?? 'USDT');
     }
 }

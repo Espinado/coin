@@ -17,6 +17,12 @@
                 <p style="margin:8px 0 0;font-size:13px;color:rgba(232,237,245,0.72);">{{ ucfirst($deposit->status) }} · {{ $deposit->created_at?->format('M j, Y H:i') }}</p>
                 <div style="margin-top:16px;font-size:13px;line-height:1.7;">
                     <div><strong>{{ __('coin.admin.method') }}:</strong> {{ $deposit->method }}</div>
+                    @if($deposit->formattedCreditedAmount())
+                    <div><strong>{{ __('coin.admin.credited_amount') }}:</strong> {{ $deposit->formattedCreditedAmount() }}</div>
+                    @endif
+                    @if($deposit->exchange_rate)
+                    <div><strong>{{ __('coin.admin.exchange_rate') }}:</strong> {{ rtrim(rtrim(number_format((float) $deposit->exchange_rate, 8, '.', ''), '0'), '.') }} BTC</div>
+                    @endif
                     @if($deposit->confirmed_at)<div><strong>{{ __('coin.admin.processed') }}:</strong> {{ $deposit->confirmed_at->format('M j, Y H:i') }}</div>@endif
                 </div>
             </div>

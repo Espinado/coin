@@ -105,4 +105,23 @@ class InvestmentFlowTest extends TestCase
         $this->assertSame('0.00', number_format((float) $buyer->wallet->locked_balance, 2, '.', ''));
         $this->assertSame('2000.00', number_format((float) $buyer->wallet->available, 2, '.', ''));
     }
+
+    public function test_btc_deposit_is_converted_to_usdt_balance(): void
+    {
+        $buyer = User::factory()->create();
+
+        app(DepositService::class)->createPending($buyer, 4, 'BTC');
+
+        $buyer->refresh();
+
+        $this->assertSame('USDT', $buyer->wallet->currency);
+        $this->assertSame('2.00', number_format((float) $buyer->wallet->available, 2, '.', ''));
+
+        $deposit = $buyer->deposits()->firstOrFail();
+        $this->assertSame('4.00', number_format((float) $deposit->amount, 2, '.', ''));
+        $this->assertSame('BTC', $deposit->currency);
+        $this->assertSame('2.00', number_format((float) $deposit->credited_amount, 2, '.', ''));
+        $this->assertSame('USDT', $deposit->credited_currency);
+        $this->assertSame('2.00000000', number_format((float) $deposit->exchange_rate, 8, '.', ''));
+    }
 }

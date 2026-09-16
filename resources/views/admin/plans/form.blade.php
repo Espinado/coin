@@ -39,6 +39,9 @@
                     @if(($meta['section'] ?? '') !== $sectionKey)
                         @continue
                     @endif
+                    @if(($meta['type'] ?? '') === 'hidden')
+                        <input type="hidden" name="{{ $field }}" value="{{ old($field, $plan->{$field} ?? config('coin.wallet.base_currency', 'USDT')) }}">
+                    @else
                     <div>
                         <label style="display:block;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.12em;color:rgba(232,237,245,0.65);">{{ strtoupper($meta['label']) }}</label>
                         <input type="{{ $meta['type'] }}" name="{{ $field }}" value="{{ old($field, $plan->{$field}) }}" @if(!empty($meta['step'])) step="{{ $meta['step'] }}" @endif
@@ -48,6 +51,7 @@
                         @endif
                         @error($field)<div style="margin-top:6px;font-size:12px;color:#ff8f8f;">{{ $message }}</div>@enderror
                     </div>
+                    @endif
                 @endforeach
             @endforeach
 

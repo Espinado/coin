@@ -23,7 +23,7 @@
         <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 16px; flex-wrap: wrap;">
           <span style="font-size: 15px; font-weight: 600;">{{ __('coin.stats.full_history') }}</span>
           <span style="font-family: 'JetBrains Mono', monospace; font-size: 10.5px; color: rgba(214,238,248,0.66);">
-            {{ __('coin.stats.total_entries', ['count' => $transactions->total()]) }} · {{ $wallet?->currency ?? 'USDT' }}
+            {{ __('coin.stats.total_entries', ['count' => $transactions->total()]) }} · {{ $wallet?->currency ?? config('coin.wallet.base_currency', 'USDT') }}
           </span>
         </div>
 

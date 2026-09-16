@@ -47,7 +47,12 @@ class PlanController extends Controller
     public function create(): View
     {
         return view('admin.plans.form', [
-            'plan' => new Plan(['is_active' => true, 'is_featured' => false, 'sort_order' => 99]),
+            'plan' => new Plan([
+                'is_active' => true,
+                'is_featured' => false,
+                'sort_order' => 99,
+                'currency' => config('coin.wallet.base_currency', 'USDT'),
+            ]),
             'isEdit' => false,
         ]);
     }
@@ -112,6 +117,7 @@ class PlanController extends Controller
         $validated['slug'] = Str::slug($validated['slug']);
         $validated['is_featured'] = $request->boolean('is_featured');
         $validated['is_active'] = $request->boolean('is_active');
+        $validated['currency'] = (string) config('coin.wallet.base_currency', 'USDT');
 
         return $validated;
     }

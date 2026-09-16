@@ -1,6 +1,6 @@
 @if($paymentModal && $paymentModal !== 'topup')
 @php
-  $currency = $wallet?->currency ?? 'USDT';
+  $currency = $wallet?->currency ?? config('coin.wallet.base_currency', 'USDT');
   $isInvestment = $paymentModal === 'investment';
   $isPayout = $paymentModal === 'payout';
   $amount = $isInvestment

@@ -17,9 +17,13 @@ return [
 
     'admin_domain' => env('COIN_ADMIN_DOMAIN', 'admin.coin.test'),
 
+    'wallet' => [
+        'base_currency' => env('COIN_WALLET_BASE_CURRENCY', 'USDT'),
+    ],
+
     'deposits' => [
         'auto_confirm_mock' => env('COIN_DEPOSITS_AUTO_CONFIRM_MOCK', true),
-        'currencies' => ['USDT', 'EUR', 'USD'],
+        'currencies' => ['USDT', 'BTC'],
     ],
 
     'profit_accrual' => [
