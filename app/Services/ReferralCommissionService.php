@@ -89,8 +89,14 @@ class ReferralCommissionService
                 $commission,
             );
 
-            $this->notifications->notifyReferralCommission($referrer, $buyer, $commissionAmount, $currency);
-            $this->broadcastReferralCommissionPaid($commission);
+            $this->dispatchReferralCommissionNotifications(
+                $commission,
+                $referrer,
+                $buyer,
+                $commissionAmount,
+                $currency,
+                ReferralCommissionPaid::SOURCE_PURCHASE,
+            );
 
             return $commission;
         });
@@ -169,15 +175,42 @@ class ReferralCommissionService
                 $commission,
             );
 
-            $this->notifications->notifyReferralCommission($referrer, $buyer, $commissionAmount, $currency);
-            $this->broadcastReferralCommissionPaid($commission);
+            $this->dispatchReferralCommissionNotifications(
+                $commission,
+                $referrer,
+                $buyer,
+                $commissionAmount,
+                $currency,
+                ReferralCommissionPaid::SOURCE_UPGRADE,
+            );
 
             return $commission;
         });
     }
 
-    private function broadcastReferralCommissionPaid(ReferralCommission $commission): void
-    {
-        event(new ReferralCommissionPaid($commission->fresh()));
+    private function dispatchReferralCommissionNotifications(
+        ReferralCommission $commission,
+        User $referrer,
+        User $buyer,
+        float $payoutAmount,
+        string $currency,
+        string $source,
+    ): void {
+        $callback = function () use ($commission, $referrer, $buyer, $payoutAmount, $currency, $source): void {
+            $fresh = $commission->fresh(['referrer.wallet', 'referral', 'contract.plan']);
+
+            if (! $fresh instanceof ReferralCommission) {
+                return;
+            }
+
+            $this->notifications->notifyReferralCommission($referrer, $buyer, $payoutAmount, $currency, $source);
+            event(new ReferralCommissionPaid($fresh, $source, $payoutAmount));
+        };
+
+        if (DB::transactionLevel() > 0) {
+            DB::afterCommit($callback);
+        } else {
+            $callback();
+        }
     }
 }

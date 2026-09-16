@@ -490,6 +490,8 @@ return [
             'maturity_profit' => 'Начислено прибыли за весь срок: :amount :currency',
             'referral_subject' => 'CloudFlops — реферальное вознаграждение',
             'referral_intro' => 'Здравствуйте, :name! Ваш реферал совершил покупку плана или доплату при смене на более дорогой план.',
+            'referral_intro_purchase' => 'Здравствуйте, :name! Ваш реферал купил инвестиционный план.',
+            'referral_intro_upgrade' => 'Здравствуйте, :name! Ваш реферал повысил инвестиционный план с доплатой.',
             'referral_user' => 'Реферал: :user',
             'referral_amount' => 'Комиссия: :amount :currency',
             'payout_subject' => 'CloudFlops — средства успешно выведены',
@@ -618,6 +620,8 @@ return [
         'plan_change_confirmed' => 'Изменение плана подтверждено. Условия инвестиции обновлены.',
         'plan_change_rejected' => 'Запрос на изменение плана отклонён. Зарезервированная доплата возвращена на баланс.',
         'referral_commission_received' => 'Реферальный бонус :amount :currency от :user зачислен на баланс.',
+        'referral_commission_received_purchase' => 'Реферальный бонус :amount :currency за покупку плана рефералом :user зачислен на баланс.',
+        'referral_commission_received_upgrade' => 'Реферальный бонус :amount :currency за доплату при смене плана рефералом :user зачислен на баланс.',
         'plan_changed' => 'План инвестиции изменён.',
     ],
 

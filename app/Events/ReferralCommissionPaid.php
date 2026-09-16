@@ -11,10 +11,16 @@ use Illuminate\Queue\SerializesModels;
 
 class ReferralCommissionPaid implements ShouldBroadcastNow
 {
+    public const SOURCE_PURCHASE = 'purchase';
+
+    public const SOURCE_UPGRADE = 'upgrade';
+
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
     public function __construct(
         public ReferralCommission $commission,
+        public string $source,
+        public float $payoutAmount,
     ) {}
 
     /** @return array<int, \Illuminate\Broadcasting\PrivateChannel> */
@@ -36,20 +42,26 @@ class ReferralCommissionPaid implements ShouldBroadcastNow
         $this->commission->loadMissing(['referrer.wallet', 'referral', 'contract.plan']);
         $wallet = $this->commission->referrer?->wallet;
         $currency = $this->commission->currency ?? 'USDT';
-        $amount = (float) $this->commission->commission_amount;
+        $amountLabel = number_format($this->payoutAmount, 2, '.', ',');
+        $referralLabel = $this->commission->referralLabel();
+
+        $toastKey = $this->source === self::SOURCE_UPGRADE
+            ? 'coin.messages.referral_commission_received_upgrade'
+            : 'coin.messages.referral_commission_received_purchase';
 
         return [
             'commission' => [
                 'id' => $this->commission->id,
-                'amount' => number_format($amount, 2, '.', ','),
+                'source' => $this->source,
+                'amount' => $amountLabel,
                 'currency' => $currency,
-                'referral_label' => $this->commission->referralLabel(),
+                'referral_label' => $referralLabel,
                 'plan_name' => $this->commission->planName(),
             ],
-            'user_toast' => __('coin.messages.referral_commission_received', [
-                'amount' => number_format($amount, 2, '.', ','),
+            'user_toast' => __($toastKey, [
+                'amount' => $amountLabel,
                 'currency' => $currency,
-                'user' => $this->commission->referralLabel(),
+                'user' => $referralLabel,
             ]),
             'wallet' => $wallet ? [
                 'balance' => $wallet->formattedBalance(),

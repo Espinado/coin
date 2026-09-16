@@ -158,13 +158,22 @@ class UserNotificationService
         );
     }
 
-    public function notifyReferralCommission(User $referrer, User $referral, float $commission, string $currency): void
-    {
+    public function notifyReferralCommission(
+        User $referrer,
+        User $referral,
+        float $commission,
+        string $currency,
+        string $source = 'purchase',
+    ): void {
+        $introKey = $source === 'upgrade'
+            ? 'coin.notifications.mail.referral_intro_upgrade'
+            : 'coin.notifications.mail.referral_intro_purchase';
+
         $this->send(
             $referrer,
             self::TYPE_REFERRAL_COMMISSION,
             __('coin.notifications.mail.referral_subject'),
-            __('coin.notifications.mail.referral_intro', ['name' => $referrer->name]),
+            __($introKey, ['name' => $referrer->name]),
             [
                 __('coin.notifications.mail.referral_user', ['user' => $referral->accountLabel()]),
                 __('coin.notifications.mail.referral_amount', [
