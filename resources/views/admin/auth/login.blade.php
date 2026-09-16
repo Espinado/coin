@@ -40,21 +40,13 @@
                 </div>
 
                 <div>
-                    <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;">
-                        <label for="password" style="display:block;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.12em;color:rgba(232,237,245,0.65);">{{ strtoupper(__('coin.auth.password')) }}</label>
-                        <a href="{{ route('admin.password.request') }}" style="font-size:12px;">{{ __('coin.auth.forgot') }}</a>
-                    </div>
+                    <label for="password" style="display:block;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.12em;color:rgba(232,237,245,0.65);">{{ strtoupper(__('coin.auth.password')) }}</label>
                     <input id="password" type="password" name="password" required autocomplete="current-password"
                         style="width:100%;box-sizing:border-box;margin-top:8px;padding:12px 14px;border-radius:10px;border:1px solid rgba(255,255,255,0.12);background:#070a10;color:#e8edf5;font-size:14px;">
                     @error('password')
                         <div style="margin-top:8px;font-size:12.5px;color:#ff8f8f;">{{ $message }}</div>
                     @enderror
                 </div>
-
-                <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:rgba(232,237,245,0.78);">
-                    <input type="checkbox" name="remember" style="accent-color:#ffb454;">
-                    {{ __('coin.auth.remember') }}
-                </label>
 
                 <button type="submit" class="admin-btn admin-btn-primary" style="width:100%;padding:12px;">{{ __('coin.auth.login') }}</button>
             </form>
