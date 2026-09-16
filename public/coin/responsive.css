@@ -132,6 +132,33 @@ html.coin-nav-open .coin-nav-mobile {
   background: #061423;
 }
 
+/* Modals render outside .coin-shell — set readable defaults explicitly */
+.coin-payment-overlay {
+  color: #e6f4fa;
+  font-family: 'Sora', 'Helvetica Neue', Helvetica, sans-serif;
+}
+
+.coin-payment-overlay .coin-modal-value {
+  color: #f0fbff;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.coin-plan-grid {
+  display: grid;
+  gap: 16px;
+  align-items: stretch;
+}
+
+.coin-plan-card {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.coin-plan-card__cta {
+  margin-top: auto;
+}
+
 .coin-main {
   flex: 1;
   min-width: 0;
@@ -156,6 +183,31 @@ html.coin-nav-open .coin-nav-mobile {
   flex-direction: column;
   gap: 3px;
   flex-shrink: 0;
+}
+
+.coin-sidebar-brand {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+  width: 100%;
+  padding: 6px 10px 26px;
+  box-sizing: border-box;
+  color: inherit;
+  text-decoration: none;
+}
+
+.coin-sidebar-brand__logo {
+  width: 100%;
+  height: auto;
+  max-width: 100%;
+}
+
+.coin-sidebar-brand__tagline {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  color: rgba(214, 238, 248, 0.6);
 }
 
 .coin-nav-item {
@@ -387,7 +439,9 @@ html.coin-nav-open .coin-nav-mobile {
   }
 
   .coin-dashboard [style*="grid-template-columns: repeat(4, minmax(0, 1fr))"],
-  .coin-dashboard [style*="grid-template-columns: repeat(5, minmax(0, 1fr))"] {
+  .coin-dashboard [style*="grid-template-columns: repeat(3, minmax(0, 1fr))"],
+  .coin-dashboard [style*="grid-template-columns: repeat(5, minmax(0, 1fr))"],
+  .coin-plan-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
   }
 }
@@ -403,7 +457,8 @@ html.coin-nav-open .coin-nav-mobile {
   .coin-dashboard [style*="grid-template-columns: repeat(3, minmax(0, 1fr))"],
   .coin-dashboard [style*="grid-template-columns: repeat(2, minmax(0, 1fr))"],
   .coin-dashboard [style*="grid-template-columns: repeat(5, minmax(0, 1fr))"],
-  .coin-dashboard [style*="grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.1fr)"] {
+  .coin-dashboard [style*="grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.1fr)"],
+  .coin-plan-grid {
     grid-template-columns: minmax(0, 1fr) !important;
   }
 }

@@ -114,8 +114,70 @@ function readLivewireEventPayload(payload, key = null) {
 
 window.readLivewireEventPayload = readLivewireEventPayload;
 
+function callLivewireDashboard(method, ...args) {
+    window.Livewire?.first?.()?.call(method, ...args);
+}
+
+const recentPlanChangeToasts = new Set();
+
+function maybeShowPlanChangeToast(payload) {
+    const requestId = payload?.request?.id;
+    const status = payload?.request?.status;
+    const message = payload?.user_toast;
+
+    if (! requestId || ! message || (status !== 'approved' && status !== 'rejected')) {
+        return;
+    }
+
+    const key = `${requestId}:${status}`;
+
+    if (recentPlanChangeToasts.has(key)) {
+        return;
+    }
+
+    recentPlanChangeToasts.add(key);
+    window.setTimeout(() => recentPlanChangeToasts.delete(key), 15000);
+
+    showSupportToast(message, status === 'rejected' ? 'error' : 'success');
+}
+
+let userWalletRealtimeBooted = false;
+
+function bootUserWalletRealtime() {
+    if (userWalletRealtimeBooted) {
+        return;
+    }
+
+    const echo = window.Echo ?? (hasEchoKey() ? initEcho() : null);
+    const userId = window.coinReverb?.supportUserId;
+
+    if (! echo || ! userId) {
+        return;
+    }
+
+    userWalletRealtimeBooted = true;
+
+    echo.private(`wallet.user.${userId}`)
+        .listen('.PlanChangeRequestUpdated', (payload) => {
+            reverbLog('info', 'user channel: PlanChangeRequestUpdated', {
+                requestId: payload?.request?.id ?? null,
+                status: payload?.request?.status ?? null,
+            });
+            maybeShowPlanChangeToast(payload);
+            callLivewireDashboard('onPlanChangeRequestUpdated', payload);
+        })
+        .listen('.WithdrawalUpdated', (payload) => {
+            reverbLog('info', 'user channel: WithdrawalUpdated', {
+                withdrawalId: payload?.withdrawal?.id ?? null,
+            });
+            callLivewireDashboard('onWithdrawalUpdated', payload);
+        });
+
+    reverbLog('info', 'user wallet realtime subscribed', { userId });
+}
+
 function bootUserSupportRealtime() {
-    const echo = initEcho();
+    const echo = window.Echo;
     const userId = window.coinReverb?.supportUserId;
 
     if (! echo || ! userId) {
@@ -160,7 +222,9 @@ if (hasEchoKey()) {
 
 syncUserSupportNavBadgeFromDom();
 
-document.addEventListener('livewire:init', () => {
+function onLivewireInit() {
+    bootUserWalletRealtime();
+
     Livewire.on('support-unread-updated', (payload) => {
         const count = readLivewireEventPayload(payload, 'count');
 
@@ -170,7 +234,13 @@ document.addEventListener('livewire:init', () => {
 
         updateUserSupportNavBadge(Number(count), { force: true });
     });
-});
+}
+
+if (window.Livewire) {
+    onLivewireInit();
+} else {
+    document.addEventListener('livewire:init', onLivewireInit);
+}
 
 // Livewire pages ship with wire:id and start Alpine themselves.
 if (! document.querySelector('[wire\\:id]')) {

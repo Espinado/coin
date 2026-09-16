@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Mail\UserEventNotificationMail;
 use App\Models\Admin;
 use App\Models\Plan;
 use App\Models\PlanChangeRequest;
@@ -12,6 +13,7 @@ use App\Services\PlanPurchaseService;
 use Database\Seeders\PlanSeeder;
 use Database\Seeders\PlatformSettingsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Mail;
 use Tests\TestCase;
 
 class PlanChangeRequestTest extends TestCase
@@ -52,6 +54,8 @@ class PlanChangeRequestTest extends TestCase
 
     public function test_admin_approval_applies_plan_change_and_releases_hold(): void
     {
+        Mail::fake();
+
         $admin = Admin::query()->create([
             'name' => 'Test Admin',
             'email' => 'admin@test.lv',
@@ -76,6 +80,12 @@ class PlanChangeRequestTest extends TestCase
         $this->assertSame('3400.00', number_format((float) $contract->principal_amount, 2, '.', ''));
         $this->assertSame('0.00', number_format((float) $user->wallet->pending, 2, '.', ''));
         $this->assertSame('1800.00', number_format((float) $user->wallet->available, 2, '.', ''));
+
+        Mail::assertSent(UserEventNotificationMail::class, function (UserEventNotificationMail $mail) use ($user, $approved): bool {
+            return $mail->hasTo($user->email)
+                && str_contains($mail->subjectLine, 'изменение плана')
+                && str_contains(implode("\n", $mail->lines), $approved->reference);
+        });
     }
 
     public function test_admin_rejection_returns_reserved_top_up(): void

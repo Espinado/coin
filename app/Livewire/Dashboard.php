@@ -312,7 +312,20 @@ class Dashboard extends Component
         }
 
         $this->changingContractId = $contract->id;
-        $this->selectedPlanId = $contract->plan_id;
+
+        $alternative = $this->plans->first(
+            fn (Plan $plan) => (int) $plan->id !== (int) $contract->plan_id
+        );
+
+        $this->selectedPlanId = $alternative?->id;
+
+        if ($alternative instanceof Plan) {
+            $this->power = max(
+                $alternative->calculatorMinAmount(),
+                min($alternative->calculatorMaxAmount(), (int) $this->power)
+            );
+        }
+
         $this->section = 1;
         $this->resetActionFeedback();
     }
@@ -1247,15 +1260,25 @@ class Dashboard extends Component
     }
 
     #[On('echo-private:wallet.user.{user.id},.WithdrawalUpdated')]
-    public function onWithdrawalUpdated(): void
+    public function onWithdrawalUpdated(mixed $payload = null): void
     {
         $this->reloadPortfolioData();
+    }
+
+    private function planChangePayloadStatus(mixed $payload): ?string
+    {
+        if (! is_array($payload)) {
+            return null;
+        }
+
+        return data_get($payload, 'request.status')
+            ?? data_get($payload, '0.request.status');
     }
 
     #[On('echo-private:wallet.user.{user.id},.PlanChangeRequestUpdated')]
     public function onPlanChangeRequestUpdated(mixed $payload = null): void
     {
-        $status = is_array($payload) ? ($payload['request']['status'] ?? null) : null;
+        $status = $this->planChangePayloadStatus($payload);
 
         $this->reloadPortfolioData();
 
@@ -1265,11 +1288,9 @@ class Dashboard extends Component
             $this->section = 2;
             $this->actionMessage = __('coin.messages.plan_change_confirmed');
             $this->actionMessageTone = 'success';
-            $this->dispatch('plan-change-toast', message: __('coin.messages.plan_change_confirmed'));
         } elseif ($status === 'rejected') {
             $this->actionMessage = __('coin.messages.plan_change_rejected');
             $this->actionMessageTone = 'error';
-            $this->dispatch('plan-change-toast', message: __('coin.messages.plan_change_rejected'), variant: 'error');
         }
     }
 

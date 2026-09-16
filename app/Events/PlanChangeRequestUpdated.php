@@ -57,7 +57,17 @@ class PlanChangeRequestUpdated implements ShouldBroadcastNow
             ],
             'pending_plan_changes_count' => PlanChangeRequest::pendingCountForAdmin(),
             'toast' => $this->toastMessage(),
+            'user_toast' => $this->userToastMessage(),
         ];
+    }
+
+    private function userToastMessage(): ?string
+    {
+        return match ($this->request->status) {
+            PlanChangeRequest::STATUS_APPROVED => __('coin.messages.plan_change_confirmed'),
+            PlanChangeRequest::STATUS_REJECTED => __('coin.messages.plan_change_rejected'),
+            default => null,
+        };
     }
 
     private function toastMessage(): ?string

@@ -3,9 +3,9 @@
   <div class="coin-nav-overlay" wire:click="closeMenu"></div>
   <aside class="coin-sidebar">
     <div class="coin-sidebar-nav">
-    <a href="{{ route('home') }}" style="display: flex; flex-direction: column; align-items: flex-start; gap: 6px; padding: 4px 10px 24px; color: inherit; text-decoration: none;">
-      <x-brand-logo variant="horizontal" :height="30" />
-      <div style="font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: 0.14em; color: rgba(214,238,248,0.6);">{{ mb_strtoupper(__('coin.nav.portal')) }}</div>
+    <a href="{{ route('home') }}" class="coin-sidebar-brand">
+      <x-brand-logo variant="horizontal" fluid class="coin-sidebar-brand__logo" />
+      <div class="coin-sidebar-brand__tagline">{{ mb_strtoupper(__('coin.nav.portal')) }}</div>
     </a>
 
     <div style="font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: 0.16em; color: rgba(214,238,248,0.55); padding: 0 12px 10px;">{{ mb_strtoupper(__('coin.nav.main')) }}</div>
@@ -253,8 +253,20 @@
           <button type="button" wire:click="cancelChangePlan" style="padding: 10px 16px; border-radius: 10px; border: 1px solid rgba(150,235,250,0.2); background: rgba(150,235,250,0.06); color: #e6f4fa; font-family: inherit; font-size: 13px; cursor: pointer;">{{ __('coin.invest.change_plan_cancel') }}</button>
         </div>
         @endif
-        <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px;">
-          @foreach($plans as $plan)
+        @php
+          $visiblePlans = $changingContract
+            ? $plans->filter(fn ($plan) => (int) $plan->id !== (int) $changingContract->plan_id)
+            : $plans;
+          $visiblePlanCount = $visiblePlans->count();
+          $planGridCols = match (true) {
+            $visiblePlanCount <= 1 => 'minmax(0, 1fr)',
+            $visiblePlanCount === 2 => 'repeat(2, minmax(0, 1fr))',
+            $visiblePlanCount === 3 => 'repeat(3, minmax(0, 1fr))',
+            default => 'repeat(4, minmax(0, 1fr))',
+          };
+        @endphp
+        <div class="coin-plan-grid" style="grid-template-columns: {{ $planGridCols }};">
+          @foreach($visiblePlans as $plan)
             @include('livewire.partials.plan-card', [
               'plan' => $plan,
               'primaryPlan' => $changingContract?->plan ?? $primaryPlan,
@@ -691,11 +703,11 @@
     @endif
   </main>
   </div>
-</div>
 
 @include('livewire.partials.payment-gateway')
 @include('livewire.partials.payment-modal')
 @include('livewire.partials.contract-details-modal')
+</div>
 
 </div>
 

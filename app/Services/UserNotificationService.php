@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Mail\UserEventNotificationMail;
 use App\Models\Contract;
+use App\Models\PlanChangeRequest;
 use App\Models\User;
 use App\Models\Withdrawal;
 use Illuminate\Support\Facades\Cache;
@@ -20,6 +21,8 @@ class UserNotificationService
     public const TYPE_REFERRAL_ACTIVITY = 'referral_activity';
 
     public const TYPE_PAYOUT_COMPLETED = 'payout_completed';
+
+    public const TYPE_PLAN_CHANGE_APPROVED = 'plan_change_approved';
 
     public function send(User $user, string $type, string $subject, string $intro, array $lines = [], ?string $footer = null): void
     {
@@ -124,6 +127,32 @@ class UserNotificationService
             __('coin.notifications.mail.payout_intro', ['name' => $user->name]),
             $lines,
             __('coin.notifications.mail.payout_footer'),
+        );
+    }
+
+    public function notifyPlanChangeApproved(User $user, PlanChangeRequest $request): void
+    {
+        $request->loadMissing(['contract', 'fromPlan', 'toPlan']);
+
+        $lines = [
+            __('coin.notifications.mail.plan_change_reference', ['reference' => $request->reference]),
+            __('coin.notifications.mail.plan_change_contract', ['contract' => $request->contract?->code ?? '—']),
+            __('coin.notifications.mail.plan_change_from', ['plan' => $request->fromPlan?->displayName() ?? '—']),
+            __('coin.notifications.mail.plan_change_to', ['plan' => $request->toPlan?->displayName() ?? '—']),
+            __('coin.notifications.mail.plan_change_principal', ['amount' => $request->formattedPrincipalAfter()]),
+        ];
+
+        if ((float) $request->top_up_amount > 0.009) {
+            $lines[] = __('coin.notifications.mail.plan_change_top_up', ['amount' => $request->formattedTopUp()]);
+        }
+
+        $this->send(
+            $user,
+            self::TYPE_PLAN_CHANGE_APPROVED,
+            __('coin.notifications.mail.plan_change_subject'),
+            __('coin.notifications.mail.plan_change_intro', ['name' => $user->name]),
+            $lines,
+            __('coin.notifications.mail.plan_change_footer'),
         );
     }
 

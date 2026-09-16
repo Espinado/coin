@@ -159,14 +159,28 @@ function updatePlanChangeRow(payload) {
 
     const row = document.querySelector(`tr[data-plan-change-id="${requestId}"]`);
 
-    if (! row) {
+    if (row) {
+        const statusCell = row.querySelector('[data-plan-change-status-cell]');
+
+        if (statusCell && payload.request?.status_label) {
+            statusCell.textContent = payload.request.status_label;
+        }
+    }
+
+    const detail = document.querySelector(`[data-plan-change-detail="${requestId}"]`);
+
+    if (! detail) {
         return;
     }
 
-    const statusCell = row.querySelector('[data-plan-change-status-cell]');
+    const statusEl = detail.querySelector('[data-plan-change-status]');
 
-    if (statusCell && payload.request?.status_label) {
-        statusCell.textContent = payload.request.status_label;
+    if (statusEl && payload.request?.status_label) {
+        statusEl.textContent = payload.request.status_label;
+    }
+
+    if (payload.request?.status && payload.request.status !== 'pending') {
+        detail.querySelector('[data-plan-change-actions]')?.remove();
     }
 }
 
@@ -333,6 +347,8 @@ function bootAdminSupportRealtime() {
                 showIncomingMessageToast({ body: payload.toast }, payload.toast);
             }
         });
+
+    reverbLog('info', 'admin plan-changes subscribed');
 
     echo.private('admin.withdrawals')
         .listen('.WithdrawalUpdated', (payload) => {

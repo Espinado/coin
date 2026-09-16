@@ -16,6 +16,7 @@ class PlanChangeRequestService
 {
     public function __construct(
         private PlanPurchaseService $purchases,
+        private UserNotificationService $notifications,
     ) {}
 
     public function createRequest(User $user, Contract $contract, Plan $newPlan): PlanChangeRequest
@@ -56,7 +57,7 @@ class PlanChangeRequestService
 
             $request = $request->fresh(['user', 'contract', 'fromPlan', 'toPlan']);
 
-            PlanChangeRequestUpdated::dispatch($request);
+            $this->broadcastPlanChangeRequestUpdated($request);
 
             return $request;
         });
@@ -99,7 +100,8 @@ class PlanChangeRequestService
 
             $request = $request->fresh(['user', 'contract.plan', 'fromPlan', 'toPlan', 'processedByAdmin']);
 
-            PlanChangeRequestUpdated::dispatch($request);
+            $this->broadcastPlanChangeRequestUpdated($request);
+            $this->notifyPlanChangeApproved($request);
 
             return $request;
         });
@@ -130,9 +132,49 @@ class PlanChangeRequestService
 
             $request = $request->fresh(['user', 'contract', 'fromPlan', 'toPlan', 'processedByAdmin']);
 
-            PlanChangeRequestUpdated::dispatch($request);
+            $this->broadcastPlanChangeRequestUpdated($request);
 
             return $request;
+        });
+    }
+
+    private function broadcastPlanChangeRequestUpdated(PlanChangeRequest $request): void
+    {
+        $requestId = $request->id;
+
+        DB::afterCommit(function () use ($requestId): void {
+            $fresh = PlanChangeRequest::query()
+                ->with(['user', 'contract.plan', 'fromPlan', 'toPlan', 'processedByAdmin'])
+                ->find($requestId);
+
+            if ($fresh instanceof PlanChangeRequest) {
+                PlanChangeRequestUpdated::dispatch($fresh);
+            }
+        });
+    }
+
+    private function notifyPlanChangeApproved(PlanChangeRequest $request): void
+    {
+        if ($request->status !== PlanChangeRequest::STATUS_APPROVED) {
+            return;
+        }
+
+        $requestId = $request->id;
+
+        DB::afterCommit(function () use ($requestId): void {
+            $fresh = PlanChangeRequest::query()
+                ->with(['user', 'contract', 'fromPlan', 'toPlan'])
+                ->find($requestId);
+
+            if (! $fresh instanceof PlanChangeRequest || $fresh->status !== PlanChangeRequest::STATUS_APPROVED) {
+                return;
+            }
+
+            $user = $fresh->user;
+
+            if ($user instanceof User) {
+                $this->notifications->notifyPlanChangeApproved($user, $fresh);
+            }
         });
     }
 
