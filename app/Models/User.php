@@ -86,6 +86,7 @@ class User extends Authenticatable
             'contract_expiry' => (bool) $this->notify_contract_expiry,
             'maturity_alert' => (bool) $this->notify_maturity_alerts,
             'referral_activity' => (bool) $this->notify_referral_activity,
+            'referral_commission' => true,
             'payout_completed' => true,
             'plan_change_approved' => true,
             default => false,

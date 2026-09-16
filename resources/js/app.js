@@ -119,6 +119,7 @@ function callLivewireDashboard(method, ...args) {
 }
 
 const recentPlanChangeToasts = new Set();
+const recentReferralCommissionToasts = new Set();
 
 function maybeShowPlanChangeToast(payload) {
     const requestId = payload?.request?.id;
@@ -139,6 +140,26 @@ function maybeShowPlanChangeToast(payload) {
     window.setTimeout(() => recentPlanChangeToasts.delete(key), 15000);
 
     showSupportToast(message, status === 'rejected' ? 'error' : 'success');
+}
+
+function maybeShowReferralCommissionToast(payload) {
+    const commissionId = payload?.commission?.id;
+    const message = payload?.user_toast;
+
+    if (! commissionId || ! message) {
+        return;
+    }
+
+    const key = String(commissionId);
+
+    if (recentReferralCommissionToasts.has(key)) {
+        return;
+    }
+
+    recentReferralCommissionToasts.add(key);
+    window.setTimeout(() => recentReferralCommissionToasts.delete(key), 15000);
+
+    showSupportToast(message, 'success');
 }
 
 let userWalletRealtimeBooted = false;
@@ -171,6 +192,13 @@ function bootUserWalletRealtime() {
                 withdrawalId: payload?.withdrawal?.id ?? null,
             });
             callLivewireDashboard('onWithdrawalUpdated', payload);
+        })
+        .listen('.ReferralCommissionPaid', (payload) => {
+            reverbLog('info', 'user channel: ReferralCommissionPaid', {
+                commissionId: payload?.commission?.id ?? null,
+            });
+            maybeShowReferralCommissionToast(payload);
+            callLivewireDashboard('onReferralCommissionPaid', payload);
         });
 
     reverbLog('info', 'user wallet realtime subscribed', { userId });

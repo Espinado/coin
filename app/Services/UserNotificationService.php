@@ -20,6 +20,8 @@ class UserNotificationService
 
     public const TYPE_REFERRAL_ACTIVITY = 'referral_activity';
 
+    public const TYPE_REFERRAL_COMMISSION = 'referral_commission';
+
     public const TYPE_PAYOUT_COMPLETED = 'payout_completed';
 
     public const TYPE_PLAN_CHANGE_APPROVED = 'plan_change_approved';
@@ -160,7 +162,7 @@ class UserNotificationService
     {
         $this->send(
             $referrer,
-            self::TYPE_REFERRAL_ACTIVITY,
+            self::TYPE_REFERRAL_COMMISSION,
             __('coin.notifications.mail.referral_subject'),
             __('coin.notifications.mail.referral_intro', ['name' => $referrer->name]),
             [

@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Events\ReferralCommissionPaid;
 use App\Models\Contract;
 use App\Models\ReferralCommission;
 use App\Models\ReferralProfile;
@@ -89,6 +90,7 @@ class ReferralCommissionService
             );
 
             $this->notifications->notifyReferralCommission($referrer, $buyer, $commissionAmount, $currency);
+            $this->broadcastReferralCommissionPaid($commission);
 
             return $commission;
         });
@@ -168,8 +170,14 @@ class ReferralCommissionService
             );
 
             $this->notifications->notifyReferralCommission($referrer, $buyer, $commissionAmount, $currency);
+            $this->broadcastReferralCommissionPaid($commission);
 
             return $commission;
         });
+    }
+
+    private function broadcastReferralCommissionPaid(ReferralCommission $commission): void
+    {
+        event(new ReferralCommissionPaid($commission->fresh()));
     }
 }

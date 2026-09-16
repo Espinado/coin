@@ -1259,6 +1259,21 @@ class Dashboard extends Component
         $this->reloadPortfolioData();
     }
 
+    #[On('echo-private:wallet.user.{user.id},.ReferralCommissionPaid')]
+    public function onReferralCommissionPaid(mixed $payload = null): void
+    {
+        $this->reloadPortfolioData();
+
+        $message = is_array($payload)
+            ? (data_get($payload, 'user_toast') ?? data_get($payload, '0.user_toast'))
+            : null;
+
+        if (is_string($message) && $message !== '') {
+            $this->actionMessage = $message;
+            $this->actionMessageTone = 'success';
+        }
+    }
+
     private function planChangePayloadStatus(mixed $payload): ?string
     {
         if (! is_array($payload)) {
