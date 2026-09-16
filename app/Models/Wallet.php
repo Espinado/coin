@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\MoneyFormat;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -36,23 +37,28 @@ class Wallet extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function currencyCode(): string
+    {
+        return MoneyFormat::currency($this->currency);
+    }
+
     public function formattedBalance(): string
     {
-        return number_format((float) $this->balance, 2, '.', ',');
+        return MoneyFormat::amount($this->balance, $this->currency);
     }
 
     public function formattedAvailable(): string
     {
-        return number_format((float) $this->available, 2, '.', ',');
+        return MoneyFormat::amount($this->available, $this->currency);
     }
 
     public function formattedPending(): string
     {
-        return number_format((float) $this->pending, 2, '.', ',');
+        return MoneyFormat::amount($this->pending, $this->currency);
     }
 
     public function formattedLocked(): string
     {
-        return number_format((float) ($this->locked_balance ?? 0), 2, '.', ',');
+        return MoneyFormat::amount($this->locked_balance ?? 0, $this->currency);
     }
 }

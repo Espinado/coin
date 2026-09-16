@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\MoneyFormat;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -51,9 +52,14 @@ class ReferralCommission extends Model
         return $this->contract?->plan?->name ?? '—';
     }
 
+    public function formattedPurchaseAmount(): string
+    {
+        return MoneyFormat::amount($this->purchase_amount, $this->currency, 0);
+    }
+
     public function formattedCommission(): string
     {
-        return '+'.number_format((float) $this->commission_amount, 2, '.', ',').' '.$this->currency;
+        return MoneyFormat::signedAmount($this->commission_amount, $this->currency);
     }
 
     public function occurredLabel(): string

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\MoneyFormat;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -78,7 +79,7 @@ class Withdrawal extends Model
 
     public function formattedAmount(): string
     {
-        return number_format((float) $this->amount, 2, '.', ',');
+        return MoneyFormat::amount($this->amount, $this->currency);
     }
 
     public static function pendingCountForAdmin(): int

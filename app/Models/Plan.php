@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\MoneyFormat;
 use App\Support\PlanLabels;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -58,7 +59,7 @@ class Plan extends Model
             return null;
         }
 
-        return '~'.number_format((float) $this->daily_estimate, 1, '.', '').' / day';
+        return '~'.MoneyFormat::amount($this->daily_estimate, $this->displayCurrency(), 1).' / day';
     }
 
     public function displayTierLabel(): string

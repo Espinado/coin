@@ -43,7 +43,7 @@
                     <tr style="border-bottom:1px solid rgba(255,255,255,0.06);">
                         <td style="padding:14px 18px;"><a href="{{ route('admin.epochs.show', $epoch) }}">#{{ $epoch->number }}</a></td>
                         <td style="padding:14px 18px;">{{ $epoch->contracts_settled }}</td>
-                        <td style="padding:14px 18px;font-family:'JetBrains Mono',monospace;">{{ $epoch->formattedTotalRewards() }} {{ $settings['token_symbol'] }}</td>
+                        <td style="padding:14px 18px;font-family:'JetBrains Mono',monospace;">{{ $epoch->formattedTotalRewards() }}</td>
                         <td style="padding:14px 18px;">{{ $epoch->reward_rate }}</td>
                         <td style="padding:14px 18px;">{{ $epoch->completed_at?->format('M j, Y H:i') }}</td>
                     </tr>

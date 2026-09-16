@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\MoneyFormat;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -42,12 +43,12 @@ class ReferralProfile extends Model
 
     public function formattedTotalRewards(): string
     {
-        return '+'.number_format((float) $this->total_rewards, 2, '.', ',');
+        return MoneyFormat::signedAmount($this->total_rewards);
     }
 
     public function formattedRewardsBalance(): string
     {
-        return number_format((float) $this->total_rewards, 2, '.', ',');
+        return MoneyFormat::amount($this->total_rewards);
     }
 
     public function level1BarPercent(): int

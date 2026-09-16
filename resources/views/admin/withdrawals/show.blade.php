@@ -13,7 +13,7 @@
         <div>
             <div class="admin-card">
                 <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.12em;color:rgba(232,237,245,0.62);">{{ $withdrawal->reference }}</div>
-                <h1 style="margin:10px 0 0;font-size:22px;font-weight:600;">{{ $withdrawal->formattedAmount() }} COIN</h1>
+                <h1 style="margin:10px 0 0;font-size:22px;font-weight:600;">{{ $withdrawal->formattedAmount() }}</h1>
                 <p style="margin:8px 0 0;font-size:13px;color:rgba(232,237,245,0.72);">{{ $withdrawal->statusLabel() }} · {{ $withdrawal->created_at?->format('M j, Y H:i') }}</p>
                 <div style="margin-top:16px;font-size:13px;line-height:1.7;">
                     <div><strong>{{ __('coin.admin.payout_address') }}:</strong> {{ $withdrawal->payout_address }}</div>

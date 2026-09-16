@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\MoneyFormat;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -202,8 +203,8 @@ class User extends Authenticatable
 
     public function formattedDailyReward(): string
     {
-        $value = (float) $this->expected_daily_reward;
+        $currency = $this->wallet?->currencyCode() ?? MoneyFormat::currency();
 
-        return ($value >= 0 ? '+' : '').number_format($value, 2, '.', '');
+        return MoneyFormat::signedAmount($this->expected_daily_reward, $currency);
     }
 }

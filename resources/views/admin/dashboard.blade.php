@@ -12,8 +12,7 @@
             {!! __('coin.admin.signed_in_as', [
                 'name' => '<strong>'.$admin->name.'</strong>',
                 'count' => $metrics['active_contracts'],
-                'locked' => number_format($metrics['total_locked'], 2),
-                'symbol' => $metrics['token_symbol'],
+                'locked' => \App\Support\MoneyFormat::amount($metrics['total_locked'], $metrics['token_symbol']),
             ]) !!}
         </p>
     </div>
@@ -26,18 +25,18 @@
         </div>
         <div class="admin-card">
             <div class="admin-kicker">{{ strtoupper(__('coin.admin.locked_principal')) }}</div>
-            <div class="admin-stat-value">{{ number_format($metrics['total_locked'], 0) }}</div>
-            <div style="margin-top:6px;font-size:12px;color:rgba(232,237,245,0.62);">{{ __('coin.admin.active_investments', ['count' => $metrics['active_contracts']]) }} · {{ $metrics['token_symbol'] }}</div>
+            <div class="admin-stat-value">{{ \App\Support\MoneyFormat::amount($metrics['total_locked'], $metrics['token_symbol'], 0) }}</div>
+            <div style="margin-top:6px;font-size:12px;color:rgba(232,237,245,0.62);">{{ __('coin.admin.active_investments', ['count' => $metrics['active_contracts']]) }}</div>
         </div>
         <div class="admin-card">
             <div class="admin-kicker">{{ strtoupper(__('coin.admin.pending_payouts')) }}</div>
             <div class="admin-stat-value">{{ $metrics['pending_withdrawals_count'] }}</div>
-            <div style="margin-top:6px;font-size:12px;color:rgba(232,237,245,0.62);">{{ number_format($metrics['pending_withdrawals_sum'], 2) }} {{ $metrics['token_symbol'] }}</div>
+            <div style="margin-top:6px;font-size:12px;color:rgba(232,237,245,0.62);">{{ \App\Support\MoneyFormat::amount($metrics['pending_withdrawals_sum'], $metrics['token_symbol']) }}</div>
         </div>
         <div class="admin-card">
             <div class="admin-kicker">{{ strtoupper(__('coin.admin.open_support')) }}</div>
             <div class="admin-stat-value">{{ $metrics['open_tickets'] }}</div>
-            <div style="margin-top:6px;font-size:12px;color:rgba(232,237,245,0.62);">{{ __('coin.admin.today_profit_accruals', ['amount' => number_format($metrics['today_profit'], 2), 'symbol' => $metrics['token_symbol']]) }}</div>
+            <div style="margin-top:6px;font-size:12px;color:rgba(232,237,245,0.62);">{{ __('coin.admin.today_profit_accruals', ['amount' => \App\Support\MoneyFormat::amount($metrics['today_profit'], $metrics['token_symbol'])]) }}</div>
         </div>
     </div>
 

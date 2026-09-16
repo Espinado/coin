@@ -17,7 +17,7 @@
       <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 8px;">
         <div style="min-width: 0;">
           <div style="font-size: 13.5px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ $contract->plan?->displayName() ?? '—' }}</div>
-          <div style="margin-top: 3px; font-family: 'JetBrains Mono', monospace; font-size: 10.5px; color: rgba(214,238,248,0.72); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ $contract->formattedPrincipal() }} · {{ $contract->termDays() }} {{ __('coin.invest.days_suffix') }}</div>
+          <div style="margin-top: 3px; font-family: 'JetBrains Mono', monospace; font-size: 10.5px; color: rgba(214,238,248,0.72); line-height: 1.35;">{{ $contract->formattedPrincipal() }} · {{ $contract->termDays() }} {{ __('coin.invest.days_suffix') }}</div>
         </div>
         <button type="button" wire:click="setSection(2)" style="flex: none; align-self: flex-start; border: 0; background: transparent; padding: 2px 0 0; font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: 0.08em; color: oklch(0.88 0.11 195); cursor: pointer; white-space: nowrap;">{{ mb_strtoupper(__('coin.actions.open')) }}</button>
       </div>

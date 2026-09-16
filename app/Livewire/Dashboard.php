@@ -567,7 +567,7 @@ class Dashboard extends Component
 
     public function getPeriodTotalProperty(): string
     {
-        return number_format($this->profitTotalForPeriod($this->period), 2, '.', ',');
+        return number_format($this->profitTotalForPeriod($this->period), 2, '.', ',').' '.$this->walletCurrency;
     }
 
     public function getProfitTrendChartProperty(): array
@@ -1453,7 +1453,7 @@ class Dashboard extends Component
 
     private function formatAmount(float $value, int $decimals): string
     {
-        return number_format($value, $decimals, '.', ',');
+        return number_format($value, $decimals, '.', ',').' '.$this->walletCurrency;
     }
 
     private function syncPowerToSelectedPlan(): void

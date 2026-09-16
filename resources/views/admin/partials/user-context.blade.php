@@ -18,10 +18,10 @@
         <div style="display:flex;justify-content:space-between;gap:12px;"><span style="color:rgba(232,237,245,0.62);">{{ __('coin.admin.investments') }}</span><span style="font-family:'JetBrains Mono',monospace;">{{ $user->contracts->count() }}</span></div>
         <div style="display:flex;justify-content:space-between;gap:12px;"><span style="color:rgba(232,237,245,0.62);">{{ __('coin.nav.referrals') }}</span><span style="font-family:'JetBrains Mono',monospace;">{{ $user->referralProfile?->invited_count ?? 0 }}</span></div>
         @isset($referralEarnings)
-        <div style="display:flex;justify-content:space-between;gap:12px;"><span style="color:rgba(232,237,245,0.62);">{{ __('coin.user_context.referral_earned') }}</span><span style="font-family:'JetBrains Mono',monospace;">{{ number_format($referralEarnings, 2, '.', ',') }}</span></div>
+        <div style="display:flex;justify-content:space-between;gap:12px;"><span style="color:rgba(232,237,245,0.62);">{{ __('coin.user_context.referral_earned') }}</span><span style="font-family:'JetBrains Mono',monospace;">{{ \App\Support\MoneyFormat::amount($referralEarnings) }}</span></div>
         @endisset
         @isset($referralVolume)
-        <div style="display:flex;justify-content:space-between;gap:12px;"><span style="color:rgba(232,237,245,0.62);">{{ __('coin.user_context.referral_volume') }}</span><span style="font-family:'JetBrains Mono',monospace;">{{ number_format($referralVolume, 2, '.', ',') }}</span></div>
+        <div style="display:flex;justify-content:space-between;gap:12px;"><span style="color:rgba(232,237,245,0.62);">{{ __('coin.user_context.referral_volume') }}</span><span style="font-family:'JetBrains Mono',monospace;">{{ \App\Support\MoneyFormat::amount($referralVolume) }}</span></div>
         @endisset
     </div>
     @if($user->relationLoaded('contracts') && $user->contracts->isNotEmpty())

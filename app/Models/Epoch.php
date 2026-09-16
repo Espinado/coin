@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\MoneyFormat;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -39,6 +40,6 @@ class Epoch extends Model
 
     public function formattedTotalRewards(): string
     {
-        return number_format((float) $this->total_rewards, 2, '.', ',');
+        return MoneyFormat::amount($this->total_rewards);
     }
 }

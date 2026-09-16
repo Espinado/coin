@@ -202,7 +202,7 @@ class ProfitAccrualService
             'progress_percent' => 100,
             'days_elapsed' => max((int) $contract->days_elapsed, $contract->termDays()),
             'completed_summary' => __('coin.invest.matured_summary', [
-                'amount' => number_format((float) $contract->accrued_amount, 2, '.', ','),
+                'amount' => \App\Support\MoneyFormat::amount($contract->accrued_amount, $currency),
             ]),
         ]);
 
