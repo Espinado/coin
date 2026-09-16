@@ -19,6 +19,40 @@ class ProfitAccrualService
         private UserNotificationService $notifications,
     ) {}
 
+    /** Settle active contracts whose term has ended — release locked principal to available balance. */
+    public function settleMatureContractsForUser(User $user): int
+    {
+        return DB::transaction(function () use ($user) {
+            $contractIds = Contract::query()
+                ->where('user_id', $user->id)
+                ->active()
+                ->orderBy('id')
+                ->pluck('id');
+
+            $matured = 0;
+
+            foreach ($contractIds as $contractId) {
+                $contract = Contract::query()
+                    ->with(['user.wallet', 'plan'])
+                    ->whereKey($contractId)
+                    ->lockForUpdate()
+                    ->first();
+
+                if (! $contract) {
+                    continue;
+                }
+
+                $this->accrueContract($contract);
+
+                if ($this->completeIfMature($contract->fresh(['user.wallet', 'plan']))) {
+                    $matured++;
+                }
+            }
+
+            return $matured;
+        });
+    }
+
     /** @return array{contracts_processed: int, total_profit: float, contracts_matured: int, users_credited: int} */
     public function accrueDaily(): array
     {

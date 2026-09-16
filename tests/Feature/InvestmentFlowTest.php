@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\Contract;
 use App\Models\Plan;
 use App\Models\ReferralProfile;
 use App\Models\User;
@@ -77,5 +78,31 @@ class InvestmentFlowTest extends TestCase
 
         $repeat = app(ProfitAccrualService::class)->accrueDaily();
         $this->assertSame(0, $repeat['contracts_processed']);
+    }
+
+    public function test_mature_contract_releases_principal_to_available_balance(): void
+    {
+        $buyer = User::factory()->create();
+        $core = Plan::query()->where('slug', 'core')->firstOrFail();
+
+        app(DepositService::class)->createPending($buyer, 2000);
+        $contract = app(PlanPurchaseService::class)->purchase($buyer, $core, 1100);
+
+        $buyer->refresh();
+        $this->assertSame('900.00', number_format((float) $buyer->wallet->available, 2, '.', ''));
+        $this->assertSame('1100.00', number_format((float) $buyer->wallet->locked_balance, 2, '.', ''));
+
+        $contract->update(['ends_at' => now()->subMinute()]);
+
+        $matured = app(ProfitAccrualService::class)->settleMatureContractsForUser($buyer);
+
+        $this->assertSame(1, $matured);
+
+        $buyer->refresh();
+        $contract->refresh();
+
+        $this->assertSame(Contract::STATUS_COMPLETED, $contract->status);
+        $this->assertSame('0.00', number_format((float) $buyer->wallet->locked_balance, 2, '.', ''));
+        $this->assertSame('2000.00', number_format((float) $buyer->wallet->available, 2, '.', ''));
     }
 }

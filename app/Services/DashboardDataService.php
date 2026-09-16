@@ -12,10 +12,13 @@ class DashboardDataService
 {
     public function __construct(
         private PlatformSettingsService $settings,
+        private ProfitAccrualService $profitAccrual,
     ) {}
 
     public function forUser(User $user): array
     {
+        $this->profitAccrual->settleMatureContractsForUser($user);
+
         $user->load([
             'wallet',
             'contracts.plan',
