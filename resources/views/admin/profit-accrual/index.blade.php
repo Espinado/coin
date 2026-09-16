@@ -13,9 +13,14 @@
         <div style="margin-bottom:16px;">
             <h1 style="margin:0;font-size:24px;font-weight:600;">{{ __('coin.admin.profit_accrual') }}</h1>
             <p style="margin:8px 0 0;font-size:14px;color:rgba(232,237,245,0.72);">
-                {!! __('coin.admin.profit_accrual_sub', ['command' => '<code style="font-family:\'JetBrains Mono\',monospace;">coin:accrue-daily-profits</code>']) !!}
+                {!! __('coin.admin.profit_accrual_sub', [
+                    'time' => config('coin.profit_accrual.schedule_time'),
+                    'timezone' => config('coin.profit_accrual.schedule_timezone'),
+                    'command' => '<code style="font-family:\'JetBrains Mono\',monospace;">coin:accrue-daily-profits</code>',
+                ]) !!}
             </p>
             <p style="margin:8px 0 0;font-size:13px;color:rgba(232,237,245,0.58);">{{ __('coin.admin.profit_accrual_auto_only') }}</p>
+            <p style="margin:8px 0 0;font-size:12.5px;color:rgba(232,237,245,0.52);font-family:'JetBrains Mono',monospace;">{{ __('coin.admin.profit_accrual_log_hint') }}</p>
         </div>
         @include('admin.partials.list-toolbar', [
             'action' => route('admin.profit-accrual.index'),

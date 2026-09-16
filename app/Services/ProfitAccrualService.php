@@ -4,20 +4,34 @@ namespace App\Services;
 
 use App\Models\Contract;
 use App\Models\User;
+use App\Models\Wallet;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class ProfitAccrualService
 {
+    /** @var array<int, array<string, mixed>> */
+    private array $userAccrualSnapshots = [];
+
     public function __construct(
         private WalletService $wallets,
         private PlanPurchaseService $purchases,
         private UserNotificationService $notifications,
     ) {}
 
-    /** @return array{contracts_processed: int, total_profit: float, contracts_matured: int} */
+    /** @return array{contracts_processed: int, total_profit: float, contracts_matured: int, users_credited: int} */
     public function accrueDaily(): array
     {
-        return DB::transaction(function () {
+        $this->userAccrualSnapshots = [];
+
+        Log::channel('profit_accrual')->info('Daily profit accrual run started', [
+            'accrual_date' => now()->toDateString(),
+            'schedule_time' => config('coin.profit_accrual.schedule_time'),
+            'timezone' => config('coin.profit_accrual.schedule_timezone'),
+            'started_at' => now()->toIso8601String(),
+        ]);
+
+        $result = DB::transaction(function () {
             $contractIds = Contract::query()
                 ->active()
                 ->orderBy('id')
@@ -56,8 +70,13 @@ class ProfitAccrualService
                 'contracts_processed' => $processed,
                 'total_profit' => round($totalProfit, 2),
                 'contracts_matured' => $matured,
+                'users_credited' => count($this->userAccrualSnapshots),
             ];
         });
+
+        $this->flushAccrualLogs($result);
+
+        return $result;
     }
 
     public function accrueContract(Contract $contract): float
@@ -80,6 +99,8 @@ class ProfitAccrualService
 
         $user = $contract->user;
         $wallet = $this->wallets->ensureWallet($user);
+        $balanceBefore = (float) $wallet->balance;
+        $availableBefore = (float) $wallet->available;
         $currency = $contract->currency ?: $this->wallets->currencyFor($wallet);
 
         $wallet->increment('available', $profit);
@@ -111,6 +132,7 @@ class ProfitAccrualService
             $contract,
         );
 
+        $this->trackUserAccrual($user, $profit, $balanceBefore, $availableBefore, $wallet->fresh(), $contract);
         $this->refreshUserDailyProfitExpectation($user);
         $this->notifications->notifyDailyProfit($user, $contract->fresh(['plan']), $profit, $currency);
 
@@ -181,6 +203,77 @@ class ProfitAccrualService
             'COMPLETED',
             $contract,
         );
+    }
+
+    private function trackUserAccrual(
+        User $user,
+        float $profit,
+        float $balanceBefore,
+        float $availableBefore,
+        Wallet $walletAfter,
+        Contract $contract,
+    ): void {
+        $userId = $user->id;
+
+        if (! isset($this->userAccrualSnapshots[$userId])) {
+            $this->userAccrualSnapshots[$userId] = [
+                'user_id' => $userId,
+                'email' => $user->email,
+                'account' => $user->account_slug,
+                'balance_before' => $balanceBefore,
+                'available_before' => $availableBefore,
+                'profit_total' => 0.0,
+                'contracts' => [],
+            ];
+        }
+
+        $this->userAccrualSnapshots[$userId]['profit_total'] += $profit;
+        $this->userAccrualSnapshots[$userId]['balance_after'] = (float) $walletAfter->balance;
+        $this->userAccrualSnapshots[$userId]['available_after'] = (float) $walletAfter->available;
+        $this->userAccrualSnapshots[$userId]['contracts'][] = [
+            'contract_id' => $contract->id,
+            'code' => $contract->code,
+            'plan' => $contract->plan?->name,
+            'profit' => round($profit, 2),
+        ];
+    }
+
+    /** @param  array{contracts_processed: int, total_profit: float, contracts_matured: int, users_credited: int}  $runSummary */
+    private function flushAccrualLogs(array $runSummary): void
+    {
+        $logger = Log::channel('profit_accrual');
+
+        foreach ($this->userAccrualSnapshots as $snapshot) {
+            $balanceAfter = (float) $snapshot['balance_after'];
+            $balanceBefore = (float) $snapshot['balance_before'];
+            $availableAfter = (float) $snapshot['available_after'];
+            $availableBefore = (float) $snapshot['available_before'];
+
+            $logger->info('User profit accrued', [
+                'user_id' => $snapshot['user_id'],
+                'email' => $snapshot['email'],
+                'account' => $snapshot['account'],
+                'profit_accrued' => round((float) $snapshot['profit_total'], 2),
+                'balance_before' => round($balanceBefore, 2),
+                'balance_after' => round($balanceAfter, 2),
+                'balance_delta' => round($balanceAfter - $balanceBefore, 2),
+                'available_before' => round($availableBefore, 2),
+                'available_after' => round($availableAfter, 2),
+                'available_delta' => round($availableAfter - $availableBefore, 2),
+                'contracts_count' => count($snapshot['contracts']),
+                'contracts' => $snapshot['contracts'],
+            ]);
+        }
+
+        $logger->info('Daily profit accrual run completed', [
+            'accrual_date' => now()->toDateString(),
+            'schedule_time' => config('coin.profit_accrual.schedule_time'),
+            'timezone' => config('coin.profit_accrual.schedule_timezone'),
+            'finished_at' => now()->toIso8601String(),
+            ...$runSummary,
+        ]);
+
+        $this->userAccrualSnapshots = [];
     }
 
     private function refreshUserDailyProfitExpectation(User $user): void

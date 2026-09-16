@@ -9,6 +9,6 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote');
 
 Schedule::command('coin:accrue-daily-profits')
-    ->dailyAt(config('coin.profit_accrual.schedule_time', '00:00'))
+    ->dailyAt(config('coin.profit_accrual.schedule_time', '09:00'))
     ->timezone(config('coin.profit_accrual.schedule_timezone', 'Europe/Riga'))
     ->withoutOverlapping();

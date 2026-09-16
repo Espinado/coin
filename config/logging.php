@@ -143,6 +143,14 @@ return [
             'replace_placeholders' => true,
         ],
 
+        'profit_accrual' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/profit-accrual.log'),
+            'level' => 'info',
+            'days' => 90,
+            'replace_placeholders' => true,
+        ],
+
     ],
 
 ];

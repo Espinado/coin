@@ -23,7 +23,7 @@ return [
     ],
 
     'profit_accrual' => [
-        'schedule_time' => env('COIN_PROFIT_ACCRUAL_TIME', '00:00'),
+        'schedule_time' => env('COIN_PROFIT_ACCRUAL_TIME', '09:00'),
         'schedule_timezone' => env('COIN_PROFIT_ACCRUAL_TZ', 'Europe/Riga'),
     ],
 
