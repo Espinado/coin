@@ -181,7 +181,10 @@
           @include('livewire.partials.notification-toggle', ['enabled' => $user->notify_maturity_alerts, 'target' => 'toggleNotifyMaturityAlerts'])
         </div>
         <div style="{{ $innerRow }}; display: flex; align-items: center; justify-content: space-between; gap: 16px;">
-          <span style="font-size: 13.5px;">{{ __('coin.profile.referral_activity') }}</span>
+          <div>
+            <span style="font-size: 13.5px;">{{ __('coin.profile.referral_activity') }}</span>
+            <p style="margin: 4px 0 0; font-size: 11.5px; color: oklch(0.72 0.02 250); max-width: 28rem;">{{ __('coin.profile.referral_activity_hint') }}</p>
+          </div>
           @include('livewire.partials.notification-toggle', ['enabled' => $user->notify_referral_activity, 'target' => 'toggleNotifyReferralActivity'])
         </div>
       </div>

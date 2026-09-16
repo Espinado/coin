@@ -24,10 +24,12 @@ echo "==> migrate"
 php artisan migrate --force
 
 echo "==> cache"
-php artisan config:clear
+php artisan optimize:clear
 php artisan config:cache
 php artisan route:cache
 php artisan view:cache
+php -r "if (function_exists('opcache_reset')) { opcache_reset(); echo 'OPCACHE_RESET_OK'; } else { echo 'OPCACHE_N/A'; }"
+echo
 
 echo "==> reverb"
 if [ -x ./start-reverb.sh ]; then

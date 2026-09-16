@@ -32,6 +32,12 @@ class UserNotificationService
             return;
         }
 
+        $this->sendAlways($user, $subject, $intro, $lines, $footer);
+    }
+
+    /** Sends regardless of user notification toggles (payouts, referral commissions, etc.). */
+    public function sendAlways(User $user, string $subject, string $intro, array $lines = [], ?string $footer = null): void
+    {
         try {
             Mail::to($user->email)->send(new UserEventNotificationMail(
                 user: $user,
@@ -169,9 +175,8 @@ class UserNotificationService
             ? 'coin.notifications.mail.referral_intro_upgrade'
             : 'coin.notifications.mail.referral_intro_purchase';
 
-        $this->send(
+        $this->sendAlways(
             $referrer,
-            self::TYPE_REFERRAL_COMMISSION,
             __('coin.notifications.mail.referral_subject'),
             __($introKey, ['name' => $referrer->name]),
             [
