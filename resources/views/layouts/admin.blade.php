@@ -48,10 +48,10 @@
             @yield('topbar')
         @else
             <header class="admin-topbar">
-                <div class="admin-topbar-brand" style="display:flex;align-items:center;gap:12px;">
-                    <x-brand-logo variant="horizontal" :height="28" />
+                <a href="{{ route('admin.dashboard') }}" class="admin-topbar-brand">
+                    <x-brand-logo variant="horizontal" fluid class="admin-topbar-brand__logo" />
                     <span class="admin-badge">STAFF ONLY</span>
-                </div>
+                </a>
                 @auth('admin')
                     <div class="admin-topbar-actions">
                         <form method="POST" action="{{ route('admin.logout') }}">

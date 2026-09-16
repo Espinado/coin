@@ -68,11 +68,35 @@ html.coin-nav-open .coin-nav-overlay {
   display: block;
 }
 
+/* ——— Brand logos ——— */
+
+.coin-brand-logo {
+  width: min(260px, 54vw);
+  height: auto;
+  max-height: 56px;
+  display: block;
+}
+
+.coin-footer-brand .coin-brand-logo {
+  width: min(220px, 48vw);
+  max-height: 48px;
+}
+
+.coin-preview-brand .coin-brand-logo {
+  width: min(190px, 100%);
+  max-height: 40px;
+}
+
 /* ——— Landing header ——— */
 
 .coin-header {
   flex-wrap: wrap;
   gap: 12px !important;
+}
+
+.coin-header-brand {
+  flex: 0 1 auto;
+  min-width: 0;
 }
 
 .coin-nav-desktop {

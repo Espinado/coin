@@ -18,7 +18,7 @@ return [
     'admin_domain' => env('COIN_ADMIN_DOMAIN', 'admin.coin.test'),
 
     'brand' => [
-        'name' => env('COIN_BRAND_NAME', env('APP_NAME', 'CloudFlops')),
+        'name' => env('COIN_BRAND_NAME', 'CloudFlops'),
         'admin_name' => env('COIN_ADMIN_BRAND_NAME', 'CloudFlops Admin'),
         'legal_name' => env('COIN_LEGAL_NAME', 'CloudFlops SIA'),
         'logos' => [

@@ -224,8 +224,18 @@
 .admin-topbar-brand {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 14px;
     flex-wrap: wrap;
+    min-width: 0;
+    color: inherit;
+    text-decoration: none;
+}
+
+.admin-topbar-brand__logo {
+    width: min(280px, 58vw);
+    height: auto;
+    max-height: 52px;
+    display: block;
 }
 
 .admin-topbar-actions {

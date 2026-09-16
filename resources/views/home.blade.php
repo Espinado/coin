@@ -37,7 +37,7 @@
   <div class="coin-nav-overlay" onClick="{{ closeMenu }}"></div>
   <header class="coin-header" data-screen-label="Header" style="position: relative; z-index: 20; display: flex; align-items: center; justify-content: space-between; padding: 22px 72px; border-bottom: 1px solid rgba(150,235,250,0.1); background: rgba(6,20,35,0.75); backdrop-filter: blur(14px);">
     <div class="coin-header-brand" style="display: flex; align-items: center;">
-      <img src="/cloudflops/logo-horizontal.png" alt="CloudFlops" height="32" style="height:32px;width:auto;display:block;" />
+      <img src="/cloudflops/logo-horizontal.png" alt="CloudFlops" class="coin-brand-logo" />
     </div>
     <button type="button" class="coin-burger" onClick="{{ toggleMenu }}" aria-label="Open menu"><span></span><span></span><span></span></button>
     <nav class="coin-nav coin-nav-desktop" style="display: flex; align-items: center; gap: 30px;">
@@ -408,8 +408,8 @@
     <div style="border-radius: 22px; border: 1px solid rgba(150,235,250,0.16); background: linear-gradient(180deg, rgba(11,32,49,0.96), rgba(5,16,27,0.98)); box-shadow: 0 60px 120px -60px #000; overflow: hidden;">
       <div style="display: grid; grid-template-columns: 216px 1fr;">
         <aside style="padding: 22px 14px; border-right: 1px solid rgba(150,235,250,0.1); display: flex; flex-direction: column; gap: 3px;">
-          <div style="display: flex; align-items: center; padding: 0 10px 20px;">
-            <img src="/cloudflops/logo-horizontal.png" alt="CloudFlops" height="24" style="height:24px;width:auto;display:block;" />
+          <div class="coin-preview-brand" style="display: flex; align-items: center; padding: 0 10px 20px;">
+            <img src="/cloudflops/logo-horizontal.png" alt="CloudFlops" class="coin-brand-logo" />
           </div>
           <div style="display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 10px; background: oklch(0.6 0.13 200 / 0.22); border: 1px solid oklch(0.86 0.11 195 / 0.3); font-size: 13px; color: #f0fbff;"><span style="width: 6px; height: 6px; border-radius: 2px; background: oklch(0.88 0.12 192);"></span>Overview</div>
           <div style="display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 10px; font-size: 13px; color: rgba(230,244,250,0.7);"><span style="width: 6px; height: 6px; border-radius: 2px; background: rgba(150,235,250,0.3);"></span>Plans</div>
@@ -606,8 +606,8 @@
   <footer data-screen-label="Footer" style="position: relative; z-index: 5; padding: 56px 72px 36px; border-top: 1px solid rgba(150,235,250,0.1); background: rgba(150,235,250,0.02);">
     <div style="display: grid; grid-template-columns: 1.6fr repeat(4, 1fr); gap: 40px;">
       <div>
-        <div style="display: flex; align-items: center;">
-          <img src="/cloudflops/logo-horizontal.png" alt="CloudFlops" height="28" style="height:28px;width:auto;display:block;" />
+        <div class="coin-footer-brand" style="display: flex; align-items: center;">
+          <img src="/cloudflops/logo-horizontal.png" alt="CloudFlops" class="coin-brand-logo" />
         </div>
         <p style="margin: 16px 0 0; max-width: 280px; font-size: 13px; line-height: 1.6; color: rgba(230,244,250,0.68);">USDT investment platform with daily profit accrual.</p>
       </div>
