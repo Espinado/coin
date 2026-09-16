@@ -20,5 +20,33 @@
 </head>
 <body>
     {{ $slot }}
+    <script>
+        document.addEventListener('click', function (event) {
+            const button = event.target.closest('[data-password-toggle]');
+
+            if (! button) {
+                return;
+            }
+
+            const form = button.closest('form');
+
+            if (! form) {
+                return;
+            }
+
+            const inputs = form.querySelectorAll('.js-password-input');
+            const reveal = Array.from(inputs).some(function (input) {
+                return input.type === 'password';
+            });
+
+            inputs.forEach(function (input) {
+                input.type = reveal ? 'text' : 'password';
+            });
+
+            button.textContent = reveal
+                ? button.dataset.hideLabel
+                : button.dataset.showLabel;
+        });
+    </script>
 </body>
 </html>

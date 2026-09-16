@@ -18,7 +18,7 @@
 
             @include('partials.login-errors')
 
-            <form method="POST" action="{{ route('login') }}" x-data="{ visible: false }">
+            <form method="POST" action="{{ route('login') }}">
                 @csrf
 
                 <div style="margin-top: 26px;">
@@ -33,8 +33,8 @@
                         <a href="{{ route('password.request') }}" style="font-size: 12.5px;">{{ __('coin.auth.forgot') }}</a>
                     </div>
                     <div style="position: relative; margin-top: 9px;">
-                        <input id="password" :type="visible ? 'text' : 'password'" name="password" required autocomplete="current-password" placeholder="{{ __('coin.auth.password_placeholder') }}" style="width: 100%; box-sizing: border-box; padding: 14px 92px 14px 16px; border-radius: 12px; border: 1px solid rgba(150,235,250,0.18); background: rgba(4,16,28,0.7); color: #f0fbff; font-family: inherit; font-size: 14.5px;" />
-                        <button type="button" @click="visible = !visible" style="position: absolute; top: 50%; right: 10px; transform: translateY(-50%); padding: 7px 12px; border-radius: 8px; border: 1px solid rgba(150,235,250,0.18); background: rgba(150,235,250,0.07); color: rgba(230,244,250,0.85); font-family: inherit; font-size: 12px; cursor: pointer;" x-text="visible ? '{{ __('coin.auth.hide') }}' : '{{ __('coin.auth.show') }}'"></button>
+                        <input id="password" type="password" name="password" required autocomplete="current-password" class="js-password-input" placeholder="{{ __('coin.auth.password_placeholder') }}" style="width: 100%; box-sizing: border-box; padding: 14px 92px 14px 16px; border-radius: 12px; border: 1px solid rgba(150,235,250,0.18); background: rgba(4,16,28,0.7); color: #f0fbff; font-family: inherit; font-size: 14.5px;" />
+                        <button type="button" data-password-toggle data-show-label="{{ __('coin.auth.show') }}" data-hide-label="{{ __('coin.auth.hide') }}" style="position: absolute; top: 50%; right: 10px; transform: translateY(-50%); padding: 7px 12px; border-radius: 8px; border: 1px solid rgba(150,235,250,0.18); background: rgba(150,235,250,0.07); color: rgba(230,244,250,0.85); font-family: inherit; font-size: 12px; cursor: pointer;">{{ __('coin.auth.show') }}</button>
                     </div>
                     @error('password')<div class="coin-auth-error">{{ $message }}</div>@enderror
                 </div>
