@@ -8,6 +8,11 @@ use App\Models\ReferralProfile;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 
+/**
+ * Referral L1 commissions: configurable percent (default 20%) on plan purchases and upgrade top-ups.
+ *
+ * @see docs/TZ.md §2.7 — purchase: full principal; upgrade: max(0, new plan min − current principal).
+ */
 class ReferralCommissionService
 {
     public function __construct(
@@ -89,6 +94,11 @@ class ReferralCommissionService
         });
     }
 
+    /**
+     * Pays the referrer when a referred user upgrades to a more expensive plan.
+     * Commission base is the top-up difference only, not the new principal total.
+     * Called from PlanPurchaseService::changePlan() after admin-approved plan change.
+     */
     public function onContractUpgradeTopUp(Contract $contract, float $topUpAmount): ?ReferralCommission
     {
         if ($topUpAmount <= 0.009) {

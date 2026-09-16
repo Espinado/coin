@@ -6,6 +6,8 @@ use App\Mail\UserEventNotificationMail;
 use App\Models\Admin;
 use App\Models\Plan;
 use App\Models\PlanChangeRequest;
+use App\Models\ReferralCommission;
+use App\Models\ReferralProfile;
 use App\Models\User;
 use App\Services\DepositService;
 use App\Services\PlanChangeRequestService;
@@ -86,6 +88,51 @@ class PlanChangeRequestTest extends TestCase
                 && str_contains($mail->subjectLine, 'изменение плана')
                 && str_contains(implode("\n", $mail->lines), $approved->reference);
         });
+    }
+
+    public function test_admin_approval_pays_referrer_twenty_percent_of_upgrade_difference(): void
+    {
+        Mail::fake();
+
+        $admin = Admin::query()->create([
+            'name' => 'Referral Admin',
+            'email' => 'ref-admin@test.lv',
+            'password' => 'secret',
+        ]);
+
+        $referrer = User::factory()->create();
+        ReferralProfile::query()->create([
+            'user_id' => $referrer->id,
+            'code' => 'COIN-REFPC',
+            'level1_percent' => 20,
+            'level2_percent' => 0,
+        ]);
+
+        $user = User::factory()->create([
+            'referred_by_user_id' => $referrer->id,
+        ]);
+
+        $core = Plan::query()->where('slug', 'core')->firstOrFail();
+        $cluster = Plan::query()->where('slug', 'cluster')->firstOrFail();
+
+        app(DepositService::class)->createPending($user, 5000);
+        $contract = app(PlanPurchaseService::class)->purchase($user, $core, 1100);
+
+        $referrer->refresh();
+        $this->assertSame('220.00', number_format((float) $referrer->wallet->available, 2, '.', ''));
+
+        $request = app(PlanChangeRequestService::class)->createRequest($user->fresh(), $contract->fresh(['plan']), $cluster);
+
+        app(PlanChangeRequestService::class)->approve($request->fresh(), $admin);
+
+        $referrer->refresh();
+
+        $this->assertSame('680.00', number_format((float) $referrer->wallet->available, 2, '.', ''));
+
+        $commission = ReferralCommission::query()->where('contract_id', $contract->id)->firstOrFail();
+
+        $this->assertSame('460.00', number_format((float) $commission->commission_amount - 220, 2, '.', ''));
+        $this->assertSame('680.00', number_format((float) $commission->commission_amount, 2, '.', ''));
     }
 
     public function test_admin_rejection_returns_reserved_top_up(): void

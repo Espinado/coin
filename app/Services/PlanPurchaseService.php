@@ -127,6 +127,7 @@ class PlanPurchaseService
         return round($principal * ($apr / 100) / 365, 2);
     }
 
+    /** Upgrade difference: max(0, new plan minimum deposit minus current contract principal). */
     public function topUpRequired(Contract $contract, Plan $newPlan): float
     {
         $required = $newPlan->requiredDepositAmount();

@@ -31,7 +31,7 @@
 3. Покупает **инвестиционный план** → создаётся **контракт** (депозит на срок)
 4. Получает **ежедневную прибыль** по APR плана
 5. Выводит доступные средства на внешний кошелёк
-6. Приглашает рефералов и получает **% от суммы покупок планов** рефералов
+6. Приглашает рефералов и получает **20% от покупок планов** рефералов и **20% от доплаты**, если реферал повышает план на более дорогой
 
 <span style="color:#c0392b">Это **не** биржа, **не** epoch-майнинг и **не** начисление TFLOPS. Старые термины (epoch, compute, COIN-токен) в UI убраны или оставлены как legacy в БД.</span>
 
@@ -246,7 +246,36 @@ confirm(deposit):
 
 ### 2.7. Реферальная программа
 
-<span style="color:#c0392b">**L1 реализован полностью.** Комиссия **20% от суммы покупки плана** (и от доплаты при upgrade), **не** от daily profit. Level 2 — только поле в settings, **не используется**.</span>
+<span style="color:#c0392b">**L1 реализован полностью.** Комиссия **20% от суммы покупки плана** и **20% от доплаты при повышении плана**, **не** от daily profit. Level 2 — только поле в settings, **не используется**.</span>
+
+#### Бизнес-правила комиссии
+
+| Событие | База для расчёта | Когда начисляется | Кому |
+|---------|------------------|-------------------|------|
+| Первая покупка плана рефералом | `principal_amount` контракта | Сразу при `PlanPurchaseService::purchase()` | Прямой пригласивший (`users.referred_by_user_id`) |
+| Повышение плана (upgrade) | **Разница (доплата)** = `max(0, min_deposit нового плана − текущий principal)` | После **одобрения админом** смены плана (`PlanChangeRequestService::approve` → `changePlan`) | Тот же пригласивший |
+| Понижение плана (downgrade) | — | **Не начисляется** (доплаты нет) | — |
+| Отклонённая заявка на смену | — | **Не начисляется** | — |
+| Повторная покупка того же плана (новый контракт) | Полная сумма нового контракта | Сразу при покупке | Тот же пригласивший |
+
+**Формулы** (процент из `referral_level1_percent`, по умолчанию **20**):
+
+```
+purchase_commission = principal × referral_level1_percent / 100
+
+topUp = max(0, newPlan.requiredDepositAmount() - contract.principal_amount)
+upgrade_commission = topUp × referral_level1_percent / 100
+```
+
+**Пример upgrade:** реферал на Core (1 100 USDT) → Cluster (min 3 400 USDT):
+- `topUp = 2 300 USDT`
+- `upgrade_commission = 460 USDT` (20%)
+- Если при покупке Core уже была комиссия 220 USDT, итого по контракту в `referral_commissions`: purchase_amount 3 400, commission_amount 680.
+
+**Код:**
+- Покупка: `ReferralCommissionService::onContractPurchased()`
+- Доплата при смене: `ReferralCommissionService::onContractUpgradeTopUp()` ← вызывается из `PlanPurchaseService::changePlan()` при `topUp > 0`
+- Зачисление: `referrer.wallet.available` и `balance` ↑; запись `wallet_transactions` тип «Referral credit»; e-mail при включённых уведомлениях.
 
 ```
 GET /r/{code} → cookie coin_referral_code (30d) + session
@@ -257,8 +286,10 @@ POST /register → referred_by_user_id, invited_count++
   → referrer.available += commission
   → ReferralCommission (unique contract_id)
 
-При upgrade topUp:
-  → доп. commission на сумму topUp (обновление записи commission)
+При upgrade topUp (после approve):
+  commission = topUp × referral_level1_percent / 100
+  → referrer.available += commission
+  → ReferralCommission по contract_id: purchase_amount и commission_amount накапливаются
 ```
 
 ---

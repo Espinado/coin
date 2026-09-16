@@ -3,6 +3,8 @@
 namespace Tests\Feature;
 
 use App\Models\Plan;
+use App\Models\ReferralCommission;
+use App\Models\ReferralProfile;
 use App\Models\User;
 use App\Services\DepositService;
 use App\Services\PlanPurchaseService;
@@ -90,6 +92,42 @@ class PlanChangeTest extends TestCase
         $this->assertTrue($updated->started_at?->eq($startedAt));
         $this->assertSame((float) $node->annual_profit_percent, (float) $updated->annual_profit_percent);
         $this->assertSame($node->duration_days, $updated->duration_days);
+    }
+
+    public function test_upgrade_pays_referrer_twenty_percent_of_top_up_difference(): void
+    {
+        $referrer = User::factory()->create();
+        ReferralProfile::query()->create([
+            'user_id' => $referrer->id,
+            'code' => 'COIN-REFUP',
+            'level1_percent' => 20,
+            'level2_percent' => 0,
+        ]);
+
+        $buyer = User::factory()->create([
+            'referred_by_user_id' => $referrer->id,
+        ]);
+
+        $core = Plan::query()->where('slug', 'core')->firstOrFail();
+        $cluster = Plan::query()->where('slug', 'cluster')->firstOrFail();
+
+        app(DepositService::class)->createPending($buyer, 5000);
+
+        $contract = app(PlanPurchaseService::class)->purchase($buyer, $core, 1100);
+
+        $referrer->refresh();
+        $this->assertSame('220.00', number_format((float) $referrer->wallet->available, 2, '.', ''));
+
+        app(PlanPurchaseService::class)->changePlan($buyer->fresh(), $contract->fresh(['plan']), $cluster);
+
+        $referrer->refresh();
+
+        $this->assertSame('680.00', number_format((float) $referrer->wallet->available, 2, '.', ''));
+
+        $commission = ReferralCommission::query()->where('contract_id', $contract->id)->firstOrFail();
+
+        $this->assertSame('3400.00', number_format((float) $commission->purchase_amount, 2, '.', ''));
+        $this->assertSame('680.00', number_format((float) $commission->commission_amount, 2, '.', ''));
     }
 
     public function test_cannot_change_to_same_plan(): void
