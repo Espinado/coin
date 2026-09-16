@@ -517,7 +517,7 @@ class Dashboard extends Component
 
     public function getPlanPriceProperty(): string
     {
-        return $this->selectedPlan?->price_label ?? '—';
+        return $this->selectedPlan?->formattedPriceLabel() ?? '—';
     }
 
     public function getPlanComputeProperty(): string

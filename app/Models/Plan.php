@@ -135,6 +135,33 @@ class Plan extends Model
         return (string) config('coin.wallet.base_currency', 'USDT');
     }
 
+    public function formattedPriceLabel(): string
+    {
+        $label = trim((string) ($this->price_label ?? ''));
+
+        if ($label === '') {
+            return '—';
+        }
+
+        if ($this->isEnterprise() || ! str_starts_with($label, '$')) {
+            return $label;
+        }
+
+        $amount = $this->min_deposit ?? $this->price_amount;
+
+        if ($amount !== null) {
+            return MoneyFormat::amount($amount, $this->displayCurrency(), 0);
+        }
+
+        $numeric = preg_replace('/[^0-9.]/', '', substr($label, 1));
+
+        if ($numeric !== '' && is_numeric($numeric)) {
+            return MoneyFormat::amount((float) $numeric, $this->displayCurrency(), 0);
+        }
+
+        return $label;
+    }
+
     public function formattedComputeLabel(): string
     {
         if ($this->min_deposit !== null) {

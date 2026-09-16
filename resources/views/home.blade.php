@@ -223,7 +223,7 @@
         <div style="font-size: 19px; font-weight: 600; letter-spacing: -0.02em;">Node</div>
         <div style="margin-top: 5px; font-size: 13.5px; color: rgba(230,244,250,0.7);">Starter volume</div>
         <div style="margin-top: 22px; display: flex; align-items: baseline; gap: 8px;">
-          <span style="font-size: 34px; font-weight: 600; letter-spacing: -0.035em;">$250</span>
+          <span style="font-size: 34px; font-weight: 600; letter-spacing: -0.035em;">250 USDT</span>
           <span style="font-size: 12.5px; color: rgba(230,244,250,0.68);">placeholder</span>
         </div>
         <div style="height: 1px; background: rgba(150,235,250,0.12); margin: 24px 0;"></div>
@@ -242,7 +242,7 @@
         <div style="font-size: 19px; font-weight: 600; letter-spacing: -0.02em;">Core</div>
         <div style="margin-top: 5px; font-size: 13.5px; color: rgba(230,244,250,0.74);">Best balance</div>
         <div style="margin-top: 22px; display: flex; align-items: baseline; gap: 8px;">
-          <span style="font-size: 34px; font-weight: 600; letter-spacing: -0.035em;">$1 100</span>
+          <span style="font-size: 34px; font-weight: 600; letter-spacing: -0.035em;">1,100 USDT</span>
           <span style="font-size: 12.5px; color: rgba(230,244,250,0.7);">placeholder</span>
         </div>
         <div style="height: 1px; background: rgba(150,235,250,0.16); margin: 24px 0;"></div>
@@ -260,7 +260,7 @@
         <div style="font-size: 19px; font-weight: 600; letter-spacing: -0.02em;">Cluster</div>
         <div style="margin-top: 5px; font-size: 13.5px; color: rgba(230,244,250,0.7);">Maximum volume</div>
         <div style="margin-top: 22px; display: flex; align-items: baseline; gap: 8px;">
-          <span style="font-size: 34px; font-weight: 600; letter-spacing: -0.035em;">$3 400</span>
+          <span style="font-size: 34px; font-weight: 600; letter-spacing: -0.035em;">3,400 USDT</span>
           <span style="font-size: 12.5px; color: rgba(230,244,250,0.68);">placeholder</span>
         </div>
         <div style="height: 1px; background: rgba(150,235,250,0.12); margin: 24px 0;"></div>

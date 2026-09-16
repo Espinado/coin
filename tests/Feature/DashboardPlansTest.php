@@ -37,7 +37,7 @@ class DashboardPlansTest extends TestCase
             ->assertSee('Core')
             ->assertSee('Cluster')
             ->assertSee('Enterprise')
-            ->assertSee('$3,400')
+            ->assertSee('3,400 USDT')
             ->assertSee('Dedicated pods');
     }
 
@@ -45,14 +45,14 @@ class DashboardPlansTest extends TestCase
     {
         $user = User::factory()->create();
         $plan = Plan::query()->where('slug', 'node')->firstOrFail();
-        $plan->update(['name' => 'Node Plus', 'price_label' => '$299']);
+        $plan->update(['name' => 'Node Plus', 'price_label' => '299 USDT', 'min_deposit' => 299]);
 
         Livewire::actingAs($user)
             ->test(Dashboard::class)
             ->call('setSection', 1)
             ->assertSee('Node Plus')
-            ->assertSee('$299')
-            ->assertDontSee('$250');
+            ->assertSee('299 USDT')
+            ->assertDontSee('250 USDT');
     }
 
     public function test_inactive_plans_are_hidden_from_dashboard(): void

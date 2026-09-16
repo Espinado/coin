@@ -23,7 +23,7 @@
   </div>
   <div style="margin-top: 20px; font-size: 19px; font-weight: 600; letter-spacing: -0.02em;">{{ $plan->displayName() }}</div>
   <div style="margin-top: 14px; display: flex; align-items: baseline; gap: 7px;">
-    <span style="font-size: 30px; font-weight: 600; letter-spacing: -0.03em;">{{ $plan->price_label }}</span>
+    <span style="font-size: 30px; font-weight: 600; letter-spacing: -0.03em;">{{ $plan->formattedPriceLabel() }}</span>
     <span style="font-size: 12.5px; color: rgba(214,238,248,0.72);">{{ $plan->formattedDuration() }}</span>
   </div>
   <div style="height: 1px; background: rgba(150,235,250,0.16); margin: 20px 0;"></div>
@@ -50,7 +50,7 @@
     <span style="font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.12em; color: rgba(214,238,248,0.66);">{{ $plan->displayTierLabel() }}</span>
   </div>
   <div style="margin-top: 20px; font-size: 19px; font-weight: 600; letter-spacing: -0.02em;">{{ $plan->displayName() }}</div>
-  <div style="margin-top: 14px; display: flex; align-items: baseline; gap: 7px;"><span style="font-size: 30px; font-weight: 600; letter-spacing: -0.03em;">{{ $plan->price_label }}</span></div>
+  <div style="margin-top: 14px; display: flex; align-items: baseline; gap: 7px;"><span style="font-size: 30px; font-weight: 600; letter-spacing: -0.03em;">{{ $plan->formattedPriceLabel() }}</span></div>
   <div style="height: 1px; background: rgba(150,235,250,0.12); margin: 20px 0;"></div>
   <div style="display: flex; flex-direction: column; gap: 13px; font-size: 13px;">
     <div style="display: flex; justify-content: space-between; gap: 14px;"><span style="color: rgba(214,238,248,0.72); min-width: 0;">{{ __('coin.invest.min_investment') }}</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">{{ $plan->formattedMinDeposit() ?? $plan->formattedComputeLabel() }}</span></div>
@@ -80,7 +80,7 @@
   </div>
   <div style="margin-top: 20px; font-size: 19px; font-weight: 600; letter-spacing: -0.02em;">{{ $plan->displayName() }}</div>
   <div style="margin-top: 14px; display: flex; align-items: baseline; gap: 7px;">
-    <span style="font-size: 30px; font-weight: 600; letter-spacing: -0.03em;">{{ $plan->price_label }}</span>
+    <span style="font-size: 30px; font-weight: 600; letter-spacing: -0.03em;">{{ $plan->formattedPriceLabel() }}</span>
     <span style="font-size: 12.5px; color: rgba(214,238,248,0.7);">{{ $plan->formattedDuration() }}</span>
   </div>
   <div style="height: 1px; background: rgba(150,235,250,0.12); margin: 20px 0;"></div>

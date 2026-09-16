@@ -43,7 +43,7 @@
                 @forelse($plans as $plan)
                     <tr style="border-bottom:1px solid rgba(255,255,255,0.06);">
                         <td style="padding:14px 18px;"><a href="{{ route('admin.plans.edit', $plan) }}">{{ $plan->name }}</a></td>
-                        <td style="padding:14px 18px;">{{ $plan->formattedMinDeposit() ?? $plan->price_label }}</td>
+                        <td style="padding:14px 18px;">{{ $plan->formattedMinDeposit() ?? $plan->formattedPriceLabel() }}</td>
                         <td style="padding:14px 18px;">{{ $plan->formattedAnnualProfit() ?? '—' }}</td>
                         <td style="padding:14px 18px;">{{ $plan->formattedDuration() }}</td>
                         <td style="padding:14px 18px;">{{ $plan->is_active ? __('coin.admin.published') : __('coin.admin.hidden') }}@if($plan->is_featured) · {{ __('coin.admin.highlighted') }} @endif</td>

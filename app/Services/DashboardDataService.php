@@ -70,7 +70,7 @@ class DashboardDataService
                 'max' => $plan->max_tflops ?? PHP_INT_MAX,
                 'name' => $plan->name,
                 'infra' => $plan->infra,
-                'price' => $plan->price_label,
+                'price' => $plan->formattedPriceLabel(),
                 'mult' => (float) $plan->reward_multiplier,
             ]);
     }
