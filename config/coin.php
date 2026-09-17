@@ -28,6 +28,8 @@ return [
         ],
     ],
 
+    'contact_email' => env('COIN_CONTACT_EMAIL', 'rvr@arguss.lv'),
+
     'wallet' => [
         'base_currency' => env('COIN_WALLET_BASE_CURRENCY', 'USDT'),
     ],

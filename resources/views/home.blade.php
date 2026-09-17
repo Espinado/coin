@@ -451,7 +451,7 @@
       <div>
         <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.16em; color: oklch(0.88 0.11 195);">FAQ</div>
         <h2 style="margin: 18px 0 0; font-size: 42px; line-height: 1.08; letter-spacing: -0.035em; font-weight: 600; color: #f0fbff;">Frequently asked questions</h2>
-        <p style="margin: 18px 0 0; font-size: 15px; line-height: 1.62; color: rgba(230,244,250,0.7);">Can't find an answer? <a href="#">Contact us</a>.</p>
+        <p style="margin: 18px 0 0; font-size: 15px; line-height: 1.62; color: rgba(230,244,250,0.7);">Can't find an answer? @endverbatim<a href="mailto:{{ config('coin.contact_email') }}">Contact us</a>@verbatim.</p>
       </div>
       <div>
         <div style="border-top: 1px solid rgba(150,235,250,0.12);">
@@ -524,8 +524,7 @@
       <h2 style="margin: 0 auto; max-width: 720px; font-size: 56px; line-height: 1.06; letter-spacing: -0.04em; font-weight: 600; color: #f2fdff;">Start investing today</h2>
       <p style="margin: 22px auto 0; max-width: 500px; font-size: 16.5px; line-height: 1.6; color: rgba(230,244,250,0.74);">Top up USDT, buy a plan, and track daily profit in your dashboard.</p>
       <div style="display: flex; justify-content: center; gap: 14px; margin-top: 36px;">
-        <button style="padding: 17px 32px; border-radius: 13px; border: 1px solid oklch(0.86 0.11 195 / 0.5); background: linear-gradient(140deg, oklch(0.86 0.12 192), oklch(0.66 0.13 205)); color: #04121f; font-family: inherit; font-size: 16px; font-weight: 600; cursor: pointer; box-shadow: 0 24px 60px -24px oklch(0.8 0.13 195 / 0.8);">Start investing</button>
-        <button style="padding: 17px 28px; border-radius: 13px; border: 1px solid rgba(150,235,250,0.2); background: rgba(150,235,250,0.05); color: #e6f4fa; font-family: inherit; font-size: 16px; font-weight: 500; cursor: pointer;">Contact us</button>
+        @endverbatim<a href="{{ route('register') }}" style="display: inline-block; padding: 17px 32px; border-radius: 13px; border: 1px solid oklch(0.86 0.11 195 / 0.5); background: linear-gradient(140deg, oklch(0.86 0.12 192), oklch(0.66 0.13 205)); color: #04121f; font-family: inherit; font-size: 16px; font-weight: 600; cursor: pointer; box-shadow: 0 24px 60px -24px oklch(0.8 0.13 195 / 0.8); text-decoration: none;">Start investing</a><a href="mailto:{{ config('coin.contact_email') }}" style="display: inline-block; padding: 17px 28px; border-radius: 13px; border: 1px solid rgba(150,235,250,0.2); background: rgba(150,235,250,0.05); color: #e6f4fa; font-family: inherit; font-size: 16px; font-weight: 500; cursor: pointer; text-decoration: none;">Contact us</a>@verbatim
       </div>
     </div>
   </section>
@@ -560,7 +559,7 @@
         <div style="display: flex; flex-direction: column; gap: 11px; margin-top: 16px; font-size: 13.5px;">
           <a href="#faq" style="color: rgba(230,244,250,0.78);">FAQ</a>
           <a href="#support" style="color: rgba(230,244,250,0.78);">Help</a>
-          <a href="#support" style="color: rgba(230,244,250,0.78);">Contact</a>
+          @endverbatim<a href="mailto:{{ config('coin.contact_email') }}" style="color: rgba(230,244,250,0.78);">Contact</a>@verbatim
         </div>
       </div>
       <div>
