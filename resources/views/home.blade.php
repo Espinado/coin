@@ -178,22 +178,22 @@
       <div style="padding: 28px 24px; border-radius: 18px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.04);">
         <div style="display: flex; align-items: center; justify-content: space-between;">
           <div style="width: 44px; height: 44px; border-radius: 13px; border: 1px solid rgba(150,235,250,0.22); background: rgba(150,235,250,0.07); display: grid; place-items: center;">
-            <div style="display: flex; align-items: flex-end; gap: 3px; height: 16px;"><div style="width: 4px; height: 45%; border-radius: 2px; background: rgba(214,238,248,0.4);"></div><div style="width: 4px; height: 72%; border-radius: 2px; background: oklch(0.78 0.11 205);"></div><div style="width: 4px; height: 100%; border-radius: 2px; background: oklch(0.88 0.12 192);"></div></div>
+            <div style="width: 17px; height: 17px; border-radius: 5px; background: linear-gradient(145deg, oklch(0.88 0.12 192), oklch(0.62 0.13 210));"></div>
           </div>
           <span style="font-family: 'JetBrains Mono', monospace; font-size: 20px; color: oklch(0.86 0.11 195 / 0.6);">01</span>
         </div>
-        <h3 style="margin: 22px 0 0; font-size: 18px; font-weight: 600; letter-spacing: -0.015em; color: #f0fbff;">Choose a plan</h3>
-        <p style="margin: 9px 0 0; font-size: 14px; line-height: 1.6; color: rgba(230,244,250,0.7);">Each plan defines minimum investment, APR, and contract term.</p>
+        <h3 style="margin: 22px 0 0; font-size: 18px; font-weight: 600; letter-spacing: -0.015em; color: #f0fbff;">Top up account</h3>
+        <p style="margin: 9px 0 0; font-size: 14px; line-height: 1.6; color: rgba(230,244,250,0.7);">Add USDT to your wallet, then invest from available balance.</p>
       </div>
       <div style="padding: 28px 24px; border-radius: 18px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.04);">
         <div style="display: flex; align-items: center; justify-content: space-between;">
           <div style="width: 44px; height: 44px; border-radius: 13px; border: 1px solid rgba(150,235,250,0.22); background: rgba(150,235,250,0.07); display: grid; place-items: center;">
-            <div style="width: 17px; height: 17px; border-radius: 5px; background: linear-gradient(145deg, oklch(0.88 0.12 192), oklch(0.62 0.13 210));"></div>
+            <div style="display: flex; align-items: flex-end; gap: 3px; height: 16px;"><div style="width: 4px; height: 45%; border-radius: 2px; background: rgba(214,238,248,0.4);"></div><div style="width: 4px; height: 72%; border-radius: 2px; background: oklch(0.78 0.11 205);"></div><div style="width: 4px; height: 100%; border-radius: 2px; background: oklch(0.88 0.12 192);"></div></div>
           </div>
           <span style="font-family: 'JetBrains Mono', monospace; font-size: 20px; color: oklch(0.86 0.11 195 / 0.6);">02</span>
         </div>
-        <h3 style="margin: 22px 0 0; font-size: 18px; font-weight: 600; letter-spacing: -0.015em; color: #f0fbff;">Top up account</h3>
-        <p style="margin: 9px 0 0; font-size: 14px; line-height: 1.6; color: rgba(230,244,250,0.7);">Add USDT to your wallet, then invest from available balance.</p>
+        <h3 style="margin: 22px 0 0; font-size: 18px; font-weight: 600; letter-spacing: -0.015em; color: #f0fbff;">Choose a plan</h3>
+        <p style="margin: 9px 0 0; font-size: 14px; line-height: 1.6; color: rgba(230,244,250,0.7);">Each plan defines minimum investment, APR, and contract term.</p>
       </div>
       <div style="padding: 28px 24px; border-radius: 18px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.04);">
         <div style="display: flex; align-items: center; justify-content: space-between;">
