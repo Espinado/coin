@@ -630,6 +630,36 @@ html.coin-nav-open .coin-nav-mobile {
   scrollbar-color: rgba(150, 235, 250, 0.25) transparent;
 }
 
+.coin-nav-notifications {
+  position: relative;
+}
+
+.coin-nav-notifications--unread:not(.coin-nav-item--active) {
+  color: #f0fbff;
+}
+
+.coin-nav-notifications__unread-bg {
+  position: absolute;
+  inset: 0;
+  border-radius: 10px;
+  background: oklch(0.6 0.13 200 / 0.12);
+  border: 1px solid oklch(0.86 0.11 195 / 0.35);
+  pointer-events: none;
+}
+
+.coin-nav-notifications--unread {
+  color: #f0fbff !important;
+}
+
+.coin-nav-notifications--unread .coin-nav-notifications-dot {
+  background: oklch(0.86 0.12 192) !important;
+  box-shadow: 0 0 10px oklch(0.86 0.12 192 / 0.8);
+}
+
+.coin-nav-notifications--unread .coin-nav-notifications-label {
+  font-weight: 600 !important;
+}
+
 .coin-nav-support {
   position: relative;
 }

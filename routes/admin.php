@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\AdminStaffController;
+use App\Http\Controllers\Admin\BroadcastController;
 use App\Http\Controllers\Admin\Auth\AcceptInvitationController;
 use App\Http\Controllers\Admin\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Admin\Auth\RequestPasswordResetController;
@@ -104,6 +105,11 @@ Route::middleware(['admin.domain', 'reject.web.on.admin'])->group(function () {
         Route::post('admins/{admin}/reset-password', [AdminStaffController::class, 'resetPassword'])->name('admin.admins.reset-password');
         Route::delete('admins/invitations/{invitation}', [AdminStaffController::class, 'destroyInvitation'])->name('admin.admins.invitations.destroy');
         Route::post('admins/invitations/{invitation}/resend', [AdminStaffController::class, 'resendInvitation'])->name('admin.admins.invitations.resend');
+
+        Route::get('broadcasts', [BroadcastController::class, 'index'])->name('admin.broadcasts.index');
+        Route::get('broadcasts/create', [BroadcastController::class, 'create'])->name('admin.broadcasts.create');
+        Route::post('broadcasts', [BroadcastController::class, 'store'])->name('admin.broadcasts.store');
+        Route::get('broadcasts/{broadcast}', [BroadcastController::class, 'show'])->name('admin.broadcasts.show');
 
         Route::get('support', [SupportTicketController::class, 'index'])
             ->name('admin.support.index');

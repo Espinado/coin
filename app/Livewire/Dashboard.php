@@ -8,7 +8,9 @@ use App\Models\SupportTicket;
 use App\Models\User;
 use App\Models\SupportTicketMessage;
 use App\Models\WalletTransaction;
+use App\Models\UserNotification;
 use App\Services\DashboardDataService;
+use App\Services\UserInAppNotificationService;
 use App\Services\DepositService;
 use App\Services\PlanChangeRequestService;
 use App\Services\PlanPurchaseService;
@@ -90,7 +92,12 @@ class Dashboard extends Component
     /** @var Collection<int, mixed> */
     public Collection $tickets;
 
+    /** @var Collection<int, UserNotification> */
+    public Collection $userNotifications;
+
     public ?int $selectedTicketId = null;
+
+    public ?int $selectedNotificationId = null;
 
     public bool $showCreateTicket = false;
 
@@ -214,7 +221,9 @@ class Dashboard extends Component
             ->orderByDesc('updated_at')
             ->get();
 
-        if ($this->section < 0 || $this->section > 7) {
+        $this->reloadUserNotifications();
+
+        if ($this->section < 0 || $this->section > 8) {
             $this->section = 0;
         }
     }
@@ -239,6 +248,29 @@ class Dashboard extends Component
         } else {
             $this->refreshSupportUnreadState();
         }
+
+        if ($section !== 8) {
+            $this->syncNotificationsUnreadBadge();
+        }
+    }
+
+    public function openNotification(int $notificationId): void
+    {
+        $notification = app(UserInAppNotificationService::class)->findForUser($notificationId, $this->user);
+
+        if (! $notification instanceof UserNotification) {
+            return;
+        }
+
+        if (! $notification->isRead()) {
+            app(UserInAppNotificationService::class)->markAsRead($notification, $this->user);
+            $this->reloadUserNotifications();
+            $this->syncNotificationsUnreadBadge();
+        }
+
+        $this->selectedNotificationId = $notification->id;
+        $this->section = 8;
+        $this->menuOpen = false;
     }
 
     public function openSupport(): void
@@ -701,6 +733,11 @@ class Dashboard extends Component
     public function getUnreadSupportCountProperty(): int
     {
         return $this->unreadSupportTotalForUser();
+    }
+
+    public function getUnreadNotificationsCountProperty(): int
+    {
+        return app(UserInAppNotificationService::class)->unreadCountForUser((int) $this->user->id);
     }
 
     public function getTicketCategoriesProperty(): array
@@ -1314,6 +1351,13 @@ class Dashboard extends Component
         }
     }
 
+    #[On('echo-private:notifications.user.{user.id},.UserNotificationCreated')]
+    public function onUserNotificationCreated(mixed $payload = null): void
+    {
+        $this->reloadUserNotifications();
+        $this->syncNotificationsUnreadBadge();
+    }
+
     #[On('echo-private:support.user.{user.id},.SupportTicketMessageSent')]
     #[On('echo-private:support.user.{user.id},.SupportTicketUpdated')]
     public function onSupportTicketRealtime(mixed $payload = null): void
@@ -1805,6 +1849,16 @@ class Dashboard extends Component
     {
         $this->reloadTickets();
         $this->syncSupportUnreadBadge();
+    }
+
+    private function reloadUserNotifications(): void
+    {
+        $this->userNotifications = app(UserInAppNotificationService::class)->listForUser($this->user);
+    }
+
+    private function syncNotificationsUnreadBadge(): void
+    {
+        $this->dispatch('notifications-unread-updated', count: $this->unreadNotificationsCount);
     }
 
     private function unreadSupportTotalForUser(): int

@@ -163,6 +163,11 @@ class User extends Authenticatable
         return $this->hasMany(SupportTicket::class);
     }
 
+    public function inAppNotifications(): HasMany
+    {
+        return $this->hasMany(UserNotification::class);
+    }
+
     public function withdrawals(): HasMany
     {
         return $this->hasMany(Withdrawal::class);

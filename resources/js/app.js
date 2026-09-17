@@ -102,6 +102,94 @@ function syncUserSupportNavBadgeFromDom() {
 
 window.updateUserSupportNavBadge = updateUserSupportNavBadge;
 
+const userNotificationsBadgeStyle = 'position:relative;font-family:\'JetBrains Mono\',monospace;font-size:10px;font-weight:700;min-width:20px;text-align:center;padding:3px 7px;border-radius:999px;background:linear-gradient(140deg, oklch(0.86 0.12 192), oklch(0.66 0.13 205));color:#04121f;box-shadow:0 0 16px oklch(0.86 0.12 192 / 0.45);';
+
+function readInitialUserNotificationsNavUnread() {
+    const nav = document.querySelector('.coin-nav-notifications');
+
+    if (! nav?.dataset.unreadNotifications) {
+        return 0;
+    }
+
+    return Number(nav.dataset.unreadNotifications);
+}
+
+function isUserNotificationsSectionOpen() {
+    const wire = window.Livewire?.first?.();
+
+    return wire ? Number(wire.get?.('section') ?? 0) === 8 : false;
+}
+
+let userNotificationsNavUnreadCount = readInitialUserNotificationsNavUnread();
+
+function renderUserNotificationsNavBadge(total) {
+    const nav = document.querySelector('.coin-nav-notifications');
+
+    if (! nav) {
+        return;
+    }
+
+    let badge = nav.querySelector('[data-user-notifications-nav-badge]');
+    const unread = Number(total) > 0;
+
+    nav.classList.toggle('coin-nav-notifications--unread', unread);
+
+    if (! unread) {
+        badge?.remove();
+        nav.querySelector('[data-user-notifications-nav-bg]')?.remove();
+        nav.dataset.unreadNotifications = '0';
+
+        return;
+    }
+
+    if (! nav.querySelector('[data-user-notifications-nav-bg]') && ! nav.classList.contains('coin-nav-item--active')) {
+        const bg = document.createElement('span');
+        bg.dataset.userNotificationsNavBg = '';
+        bg.style.cssText = 'position:absolute;inset:0;border-radius:10px;background:oklch(0.6 0.13 200 / 0.12);border:1px solid oklch(0.86 0.11 195 / 0.35);pointer-events:none;';
+        nav.prepend(bg);
+    }
+
+    if (! badge) {
+        badge = document.createElement('span');
+        badge.className = 'coin-notifications-badge';
+        badge.dataset.userNotificationsNavBadge = '';
+        badge.style.cssText = userNotificationsBadgeStyle;
+        nav.appendChild(badge);
+    }
+
+    badge.textContent = String(total);
+    nav.dataset.unreadNotifications = String(total);
+}
+
+function updateUserNotificationsNavBadge(total, options = {}) {
+    const count = Number(total);
+
+    if (! Number.isFinite(count)) {
+        return;
+    }
+
+    if (options.force === true) {
+        userNotificationsNavUnreadCount = count;
+        renderUserNotificationsNavBadge(userNotificationsNavUnreadCount);
+
+        return;
+    }
+
+    if (count <= userNotificationsNavUnreadCount) {
+        return;
+    }
+
+    userNotificationsNavUnreadCount = count;
+    renderUserNotificationsNavBadge(userNotificationsNavUnreadCount);
+}
+
+function syncUserNotificationsNavBadgeFromDom() {
+    userNotificationsNavUnreadCount = readInitialUserNotificationsNavUnread();
+    renderUserNotificationsNavBadge(userNotificationsNavUnreadCount);
+}
+
+window.updateUserNotificationsNavBadge = updateUserNotificationsNavBadge;
+
 function readLivewireEventPayload(payload, key = null) {
     const item = Array.isArray(payload) ? payload[0] : payload;
 
@@ -241,14 +329,42 @@ function bootUserSupportRealtime() {
     reverbLog('info', 'user support realtime subscribed', { userId });
 }
 
+function bootUserNotificationsRealtime() {
+    const echo = window.Echo ?? (hasEchoKey() ? initEcho() : null);
+    const userId = window.coinReverb?.supportUserId;
+
+    if (! echo || ! userId) {
+        return;
+    }
+
+    echo.private(`notifications.user.${userId}`)
+        .listen('.UserNotificationCreated', (payload) => {
+            reverbLog('info', 'user channel: UserNotificationCreated', {
+                notificationId: payload?.notification?.id ?? null,
+            });
+
+            if (payload?.total_unread !== undefined && payload?.total_unread !== null) {
+                updateUserNotificationsNavBadge(Number(payload.total_unread));
+            }
+
+            if (! isUserNotificationsSectionOpen() && payload?.user_toast) {
+                showSupportToast(payload.user_toast, 'success');
+            }
+        });
+
+    reverbLog('info', 'user notifications realtime subscribed', { userId });
+}
+
 if (hasEchoKey()) {
     initEcho();
     bootUserSupportRealtime();
+    bootUserNotificationsRealtime();
 } else {
     reverbLog('warn', 'user Echo skipped: no Reverb key in runtime config or Vite build');
 }
 
 syncUserSupportNavBadgeFromDom();
+syncUserNotificationsNavBadgeFromDom();
 
 function onLivewireInit() {
     bootUserWalletRealtime();
@@ -261,6 +377,16 @@ function onLivewireInit() {
         }
 
         updateUserSupportNavBadge(Number(count), { force: true });
+    });
+
+    Livewire.on('notifications-unread-updated', (payload) => {
+        const count = readLivewireEventPayload(payload, 'count');
+
+        if (count === undefined || count === null) {
+            return;
+        }
+
+        updateUserNotificationsNavBadge(Number(count), { force: true });
     });
 }
 

@@ -69,6 +69,13 @@ Broadcast::channel('wallet.user.{userId}', function ($user, int $userId) {
     return $allowed;
 });
 
+Broadcast::channel('notifications.user.{userId}', function ($user, int $userId) {
+    $allowed = $user instanceof User && (int) $user->id === (int) $userId;
+    logSupportChannelAuth('notifications.user.'.$userId, $user, $allowed, 'user_self');
+
+    return $allowed;
+});
+
 Broadcast::channel('support.guest.{ticketId}', function ($user, int $ticketId) {
     $allowed = SupportGuestSession::canAccessTicket($ticketId);
     logSupportChannelAuth('support.guest.'.$ticketId, $user, $allowed, 'guest_session');
