@@ -2,6 +2,7 @@
     'variant' => 'horizontal',
     'height' => 32,
     'fluid' => false,
+    'maxHeight' => 52,
 ])
 
 <img
@@ -9,8 +10,8 @@
     src="{{ \App\Support\PlatformBrand::logo($variant) }}"
     alt="{{ \App\Support\PlatformBrand::name() }}"
     @if($fluid)
-        style="max-width: 100%; height: auto; width: auto; display: block; object-fit: contain;"
+        style="max-width: 100%; height: auto; width: auto; max-height: {{ (int) $maxHeight }}px; display: block; object-fit: contain;"
     @else
-        style="height: {{ $height }}px; width: auto; max-width: 100%; display: block; object-fit: contain;"
+        style="height: {{ (int) $height }}px; width: auto; max-width: 100%; max-height: {{ (int) $maxHeight }}px; display: block; object-fit: contain;"
     @endif
 />

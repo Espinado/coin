@@ -27,6 +27,9 @@
             0%, 100% { transform: scale(1); box-shadow: 0 0 14px rgba(255,180,84,0.45); }
             50% { transform: scale(1.06); box-shadow: 0 0 20px rgba(255,180,84,0.65); }
         }
+        .admin-sidebar-brand__logo,
+        .admin-topbar-brand__logo { max-width: 100%; max-height: 44px; height: auto; width: auto; object-fit: contain; }
+        .admin-topbar-brand { max-width: min(340px, 72vw); }
     </style>
     @stack('head')
     @auth('admin')
