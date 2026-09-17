@@ -41,7 +41,7 @@
         accent-color: oklch(0.8 0.13 192);
     }
 
-    @media (max-width: 900px) {
+    @@media (max-width: 900px) {
         .landing-plans-calculator { grid-template-columns: 1fr !important; gap: 28px !important; }
         #plans { padding-left: 24px !important; padding-right: 24px !important; }
     }

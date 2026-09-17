@@ -34,7 +34,7 @@
   body { margin: 0; background: #04101c; -webkit-font-smoothing: antialiased; }
   a { color: oklch(0.86 0.11 195); text-decoration: none; }
   a:hover { color: oklch(0.92 0.09 195); }
-  @keyframes paiPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+  @@keyframes paiPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
   input[type="range"] { accent-color: oklch(0.8 0.13 192); }
 </style>
 </helmet>

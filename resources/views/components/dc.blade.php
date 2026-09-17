@@ -1,1 +1,5 @@
-{!! '<x-dc>' !!}{!! $slot !!}{!! '</x-dc>' !!}
+@php
+    echo '<'.'x-dc'.'>';
+    echo $slot;
+    echo '</'.'x-dc'.'>';
+@endphp
