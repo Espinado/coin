@@ -5,13 +5,49 @@
 @endphp
 
 <style>
+    #plans {
+        color: #e6f4fa;
+    }
+
+    #plans .landing-plan-card {
+        color: #f0fbff;
+    }
+
+    #plans .landing-plan-card__title {
+        color: #f0fbff;
+    }
+
+    #plans .landing-plan-card__price {
+        color: #f0fbff;
+    }
+
+    #plans .landing-plan-card__value {
+        color: #f0fbff;
+    }
+
+    #plans .landing-plans-calculator {
+        color: #e6f4fa;
+    }
+
+    #plans .landing-plans-calculator__title {
+        color: #f0fbff;
+    }
+
+    #plans .landing-plans-calculator__stat {
+        color: #f0fbff;
+    }
+
+    #plans [data-landing-slider] {
+        accent-color: oklch(0.8 0.13 192);
+    }
+
     @media (max-width: 900px) {
         .landing-plans-calculator { grid-template-columns: 1fr !important; gap: 28px !important; }
         #plans { padding-left: 24px !important; padding-right: 24px !important; }
     }
 </style>
 
-<section id="plans" data-screen-label="Plans" style="position: relative; z-index: 5; padding: 48px 72px; border-top: 1px solid rgba(150,235,250,0.08);">
+<section id="plans" data-screen-label="Plans" style="position: relative; z-index: 5; padding: 48px 72px; border-top: 1px solid rgba(150,235,250,0.08); color: #e6f4fa;">
     <div style="text-align: center; max-width: 620px; margin: 0 auto;">
         <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.16em; color: oklch(0.88 0.11 195);">PLANS</div>
         <h2 style="margin: 18px 0 0; font-size: 46px; line-height: 1.08; letter-spacing: -0.035em; font-weight: 600; color: #f0fbff;">Choose your investment plan</h2>
@@ -45,18 +81,18 @@
                         @if($isFeatured)
                             <div style="position: absolute; top: -10px; left: 30px; padding: 4px 11px; border-radius: 7px; background: linear-gradient(140deg, oklch(0.88 0.12 192), oklch(0.66 0.13 205)); font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.12em; color: #04121f;">{{ mb_strtoupper($plan->displayTierLabel()) }}</div>
                         @endif
-                        <div style="font-size: 19px; font-weight: 600; letter-spacing: -0.02em;">{{ $plan->displayName() }}</div>
+                        <div class="landing-plan-card__title" style="font-size: 19px; font-weight: 600; letter-spacing: -0.02em; color: #f0fbff;">{{ $plan->displayName() }}</div>
                         <div style="margin-top: 5px; font-size: 13.5px; color: rgba(230,244,250,0.74);">{{ $plan->displayTierLabel() }}</div>
                         <div style="margin-top: 22px; display: flex; align-items: baseline; gap: 8px;">
-                            <span style="font-size: 34px; font-weight: 600; letter-spacing: -0.035em;">{{ $plan->formattedPriceLabel() }}</span>
+                            <span class="landing-plan-card__price" style="font-size: 34px; font-weight: 600; letter-spacing: -0.035em; color: #f0fbff;">{{ $plan->formattedPriceLabel() }}</span>
                         </div>
                         <div style="height: 1px; background: rgba(150,235,250,0.12); margin: 24px 0;"></div>
                         <div style="display: flex; flex-direction: column; gap: 14px; font-size: 13.5px;">
-                            <div style="display: flex; justify-content: space-between; gap: 14px;"><span style="color: rgba(230,244,250,0.72); min-width: 0;">{{ __('coin.invest.min_investment') }}</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">{{ $plan->formattedMinDeposit() ?? $plan->formattedComputeLabel() }}</span></div>
-                            <div style="display: flex; justify-content: space-between; gap: 14px;"><span style="color: rgba(230,244,250,0.72); min-width: 0;">{{ __('coin.invest.term') }}</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">{{ $plan->formattedDuration() }}</span></div>
-                            <div style="display: flex; justify-content: space-between; gap: 14px;"><span style="color: rgba(230,244,250,0.72); min-width: 0;">APR</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">{{ $plan->formattedAnnualProfit() ?? '—' }}</span></div>
-                            <div style="display: flex; justify-content: space-between; gap: 14px;"><span style="color: rgba(230,244,250,0.72); min-width: 0;">{{ __('coin.invest.daily_estimate') }}</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">{{ $plan->formattedDailyEstimate() ?? '—' }}</span></div>
-                            <div style="display: flex; justify-content: space-between; gap: 14px;"><span style="color: rgba(230,244,250,0.72); min-width: 0;">{{ __('coin.invest.infrastructure') }}</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">{{ $plan->displayInfra() }}</span></div>
+                            <div style="display: flex; justify-content: space-between; gap: 14px;"><span style="color: rgba(230,244,250,0.72); min-width: 0;">{{ __('coin.invest.min_investment') }}</span><span class="landing-plan-card__value" style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right; color: #f0fbff;">{{ $plan->formattedMinDeposit() ?? $plan->formattedComputeLabel() }}</span></div>
+                            <div style="display: flex; justify-content: space-between; gap: 14px;"><span style="color: rgba(230,244,250,0.72); min-width: 0;">{{ __('coin.invest.term') }}</span><span class="landing-plan-card__value" style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right; color: #f0fbff;">{{ $plan->formattedDuration() }}</span></div>
+                            <div style="display: flex; justify-content: space-between; gap: 14px;"><span style="color: rgba(230,244,250,0.72); min-width: 0;">APR</span><span class="landing-plan-card__value" style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right; color: #f0fbff;">{{ $plan->formattedAnnualProfit() ?? '—' }}</span></div>
+                            <div style="display: flex; justify-content: space-between; gap: 14px;"><span style="color: rgba(230,244,250,0.72); min-width: 0;">{{ __('coin.invest.daily_estimate') }}</span><span class="landing-plan-card__value" style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right; color: #f0fbff;">{{ $plan->formattedDailyEstimate() ?? '—' }}</span></div>
+                            <div style="display: flex; justify-content: space-between; gap: 14px;"><span style="color: rgba(230,244,250,0.72); min-width: 0;">{{ __('coin.invest.infrastructure') }}</span><span class="landing-plan-card__value" style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right; color: #f0fbff;">{{ $plan->displayInfra() }}</span></div>
                         </div>
                         <button
                             type="button"
@@ -76,9 +112,9 @@
                     : 0;
             @endphp
 
-            <div class="landing-plans-calculator" style="margin-top: 20px; padding: 32px 36px; border-radius: 20px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.035); display: grid; grid-template-columns: 1fr 320px; gap: 48px; align-items: center;">
+            <div class="landing-plans-calculator" style="margin-top: 20px; padding: 32px 36px; border-radius: 20px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.08); display: grid; grid-template-columns: 1fr 320px; gap: 48px; align-items: center; color: #e6f4fa;">
                 <div>
-                    <div style="font-size: 20px; font-weight: 600; letter-spacing: -0.02em;">Profit estimate</div>
+                    <div class="landing-plans-calculator__title" style="font-size: 20px; font-weight: 600; letter-spacing: -0.02em; color: #f0fbff;">Profit estimate</div>
                     <div style="margin-top: 22px; display: flex; align-items: baseline; justify-content: space-between;">
                         <span style="font-size: 13.5px; color: rgba(230,244,250,0.74);">{{ __('coin.invest.investment_amount') }}</span>
                         <span data-landing-amount style="font-family: 'JetBrains Mono', monospace; font-size: 18px; color: #f0fbff;">{{ number_format($initialAmount, 0, '.', ',') }} <span style="font-size: 12px; color: rgba(230,244,250,0.7);">{{ $currency }}</span></span>
@@ -103,8 +139,8 @@
                     <div style="font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.14em; color: rgba(230,244,250,0.72);">EST. PER DAY</div>
                     <div data-landing-daily style="margin-top: 12px; font-family: 'JetBrains Mono', monospace; font-size: 32px; color: oklch(0.9 0.12 192);">{{ number_format($initialDaily, 2, '.', ',') }}</div>
                     <div style="height: 1px; background: rgba(150,235,250,0.14); margin: 20px 0;"></div>
-                    <div style="display: flex; justify-content: space-between; gap: 14px; font-size: 13px; margin-bottom: 12px;"><span style="color: rgba(230,244,250,0.72); min-width: 0;">{{ __('coin.invest.per_month') }}</span><span data-landing-monthly style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">{{ number_format($initialDaily * 30, 1, '.', ',') }}</span></div>
-                    <div style="display: flex; justify-content: space-between; gap: 14px; font-size: 13px;"><span style="color: rgba(230,244,250,0.72); min-width: 0;">{{ __('coin.invest.matching_plan') }}</span><span data-landing-plan-name style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">{{ $initialPlan->displayName() }}</span></div>
+                    <div style="display: flex; justify-content: space-between; gap: 14px; font-size: 13px; margin-bottom: 12px;"><span style="color: rgba(230,244,250,0.72); min-width: 0;">{{ __('coin.invest.per_month') }}</span><span data-landing-monthly class="landing-plans-calculator__stat" style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right; color: #f0fbff;">{{ number_format($initialDaily * 30, 1, '.', ',') }}</span></div>
+                    <div style="display: flex; justify-content: space-between; gap: 14px; font-size: 13px;"><span style="color: rgba(230,244,250,0.72); min-width: 0;">{{ __('coin.invest.matching_plan') }}</span><span data-landing-plan-name class="landing-plans-calculator__stat" style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right; color: #f0fbff;">{{ $initialPlan->displayName() }}</span></div>
                 </div>
             </div>
         @endif

@@ -1,51 +1,60 @@
 (function () {
-    const root = document.getElementById('landing-plans');
+    let plans = [];
+    let currency = 'USDT';
+    let selectedId = null;
+    let power = 0;
 
-    if (!root) {
-        return;
+    function loadPayload() {
+        const dataEl = document.getElementById('landing-plans-data');
+
+        if (!dataEl) {
+            return false;
+        }
+
+        try {
+            const data = JSON.parse(dataEl.textContent || '{}');
+            plans = Array.isArray(data.plans) ? data.plans : [];
+            currency = data.currency || 'USDT';
+            selectedId = data.defaultPlanId ?? plans[0]?.id ?? null;
+            const plan = getPlan(selectedId);
+            power = plan?.minAmount ?? 0;
+
+            return plans.length > 0 && selectedId !== null;
+        } catch (error) {
+            console.error('[landing-plans] invalid payload', error);
+
+            return false;
+        }
     }
 
-    const dataEl = document.getElementById('landing-plans-data');
-
-    if (!dataEl) {
-        return;
+    function getRoot() {
+        return document.getElementById('landing-plans');
     }
-
-    let data;
-
-    try {
-        data = JSON.parse(dataEl.textContent || '{}');
-    } catch (error) {
-        console.error('[landing-plans] invalid payload', error);
-
-        return;
-    }
-
-    const plans = Array.isArray(data.plans) ? data.plans : [];
-
-    if (plans.length === 0) {
-        return;
-    }
-
-    const currency = data.currency || 'USDT';
-    let selectedId = data.defaultPlanId ?? plans[0].id;
-    let power = plans.find(function (plan) {
-        return plan.id === selectedId;
-    })?.minAmount ?? plans[0].minAmount;
-
-    const slider = root.querySelector('[data-landing-slider]');
-    const amountEl = root.querySelector('[data-landing-amount]');
-    const dailyEl = root.querySelector('[data-landing-daily]');
-    const monthlyEl = root.querySelector('[data-landing-monthly]');
-    const planNameEl = root.querySelector('[data-landing-plan-name]');
-    const sliderMinEl = root.querySelector('[data-landing-slider-min]');
-    const sliderMidEl = root.querySelector('[data-landing-slider-mid]');
-    const sliderMaxEl = root.querySelector('[data-landing-slider-max]');
 
     function getPlan(id) {
         return plans.find(function (plan) {
             return plan.id === id;
         });
+    }
+
+    function queryElements() {
+        const root = getRoot();
+
+        if (!root) {
+            return null;
+        }
+
+        return {
+            root: root,
+            slider: root.querySelector('[data-landing-slider]'),
+            amountEl: root.querySelector('[data-landing-amount]'),
+            dailyEl: root.querySelector('[data-landing-daily]'),
+            monthlyEl: root.querySelector('[data-landing-monthly]'),
+            planNameEl: root.querySelector('[data-landing-plan-name]'),
+            sliderMinEl: root.querySelector('[data-landing-slider-min]'),
+            sliderMidEl: root.querySelector('[data-landing-slider-mid]'),
+            sliderMaxEl: root.querySelector('[data-landing-slider-max]'),
+        };
     }
 
     function clampPower(plan, value) {
@@ -74,36 +83,35 @@
     }
 
     function updateCardStyles() {
+        const root = getRoot();
+
+        if (!root) {
+            return;
+        }
+
         root.querySelectorAll('[data-landing-card]').forEach(function (card) {
             const planId = Number(card.dataset.landingCard);
             const isSelected = planId === selectedId;
             const isFeatured = card.dataset.landingFeatured === '1';
+            const button = card.querySelector('[data-landing-select]');
 
             card.classList.toggle('landing-plan-card--selected', isSelected);
 
-            const button = card.querySelector('[data-landing-select]');
-
-            if (!button) {
-                return;
+            if (button) {
+                if (isSelected) {
+                    button.style.border = '1px solid oklch(0.86 0.11 195 / 0.5)';
+                    button.style.background = 'linear-gradient(140deg, oklch(0.86 0.12 192), oklch(0.66 0.13 205))';
+                    button.style.color = '#04121f';
+                    button.style.fontWeight = '600';
+                } else {
+                    button.style.border = '1px solid rgba(150,235,250,0.2)';
+                    button.style.background = 'rgba(150,235,250,0.06)';
+                    button.style.color = '#e6f4fa';
+                    button.style.fontWeight = '500';
+                }
             }
 
-            if (isSelected) {
-                button.style.border = '1px solid oklch(0.86 0.11 195 / 0.5)';
-                button.style.background = 'linear-gradient(140deg, oklch(0.86 0.12 192), oklch(0.66 0.13 205))';
-                button.style.color = '#04121f';
-                button.style.fontWeight = '600';
-            } else {
-                button.style.border = '1px solid rgba(150,235,250,0.2)';
-                button.style.background = 'rgba(150,235,250,0.06)';
-                button.style.color = '#e6f4fa';
-                button.style.fontWeight = '500';
-            }
-
-            if (isFeatured && !isSelected) {
-                card.style.border = '1px solid oklch(0.86 0.11 195 / 0.36)';
-                card.style.background = 'linear-gradient(170deg, oklch(0.6 0.13 200 / 0.22), rgba(150,235,250,0.03))';
-                card.style.boxShadow = '0 30px 70px -44px oklch(0.7 0.14 195 / 0.9)';
-            } else if (isSelected) {
+            if (isFeatured || isSelected) {
                 card.style.border = '1px solid oklch(0.86 0.11 195 / 0.36)';
                 card.style.background = 'linear-gradient(170deg, oklch(0.6 0.13 200 / 0.22), rgba(150,235,250,0.03))';
                 card.style.boxShadow = '0 30px 70px -44px oklch(0.7 0.14 195 / 0.9)';
@@ -117,78 +125,157 @@
 
     function syncSliderToPlan() {
         const plan = getPlan(selectedId);
+        const els = queryElements();
 
-        if (!plan || !slider) {
+        if (!plan || !els?.slider) {
             return;
         }
 
         power = clampPower(plan, power);
-        slider.min = String(plan.minAmount);
-        slider.max = String(plan.maxAmount);
-        slider.step = String(plan.step);
-        slider.value = String(power);
+        els.slider.min = String(plan.minAmount);
+        els.slider.max = String(plan.maxAmount);
+        els.slider.step = String(plan.step);
+        els.slider.value = String(power);
 
-        if (sliderMinEl) {
-            sliderMinEl.textContent = formatSliderLabel(plan.minAmount);
+        if (els.sliderMinEl) {
+            els.sliderMinEl.textContent = formatSliderLabel(plan.minAmount);
         }
 
-        if (sliderMaxEl) {
-            sliderMaxEl.textContent = formatSliderLabel(plan.maxAmount);
+        if (els.sliderMaxEl) {
+            els.sliderMaxEl.textContent = formatSliderLabel(plan.maxAmount);
         }
 
-        if (sliderMidEl) {
-            sliderMidEl.textContent = formatSliderLabel(Math.round((plan.minAmount + plan.maxAmount) / 2));
+        if (els.sliderMidEl) {
+            els.sliderMidEl.textContent = formatSliderLabel(Math.round((plan.minAmount + plan.maxAmount) / 2));
         }
     }
 
     function updateCalculator() {
         const plan = getPlan(selectedId);
+        const els = queryElements();
 
-        if (!plan) {
+        if (!plan || !els) {
             return;
         }
 
         power = clampPower(plan, power);
         const daily = dailyProfit(plan, power);
 
-        if (amountEl) {
-            amountEl.innerHTML = fmt(power, 0) + ' <span style="font-size: 12px; color: rgba(230,244,250,0.7);">' + currency + '</span>';
+        if (els.amountEl) {
+            els.amountEl.innerHTML = fmt(power, 0) + ' <span style="font-size: 12px; color: rgba(230,244,250,0.7);">' + currency + '</span>';
         }
 
-        if (dailyEl) {
-            dailyEl.textContent = fmt(daily, 2);
+        if (els.dailyEl) {
+            els.dailyEl.textContent = fmt(daily, 2);
         }
 
-        if (monthlyEl) {
-            monthlyEl.textContent = fmt(daily * 30, 1);
+        if (els.monthlyEl) {
+            els.monthlyEl.textContent = fmt(daily * 30, 1);
         }
 
-        if (planNameEl) {
-            planNameEl.textContent = plan.name;
+        if (els.planNameEl) {
+            els.planNameEl.textContent = plan.name;
+        }
+
+        if (els.slider && els.slider.value !== String(power)) {
+            els.slider.value = String(power);
         }
 
         updateCardStyles();
     }
 
-    root.addEventListener('click', function (event) {
-        const button = event.target.closest('[data-landing-select]');
+    function bootLandingPlans() {
+        if (!loadPayload()) {
+            return;
+        }
 
-        if (!button) {
+        syncSliderToPlan();
+        updateCalculator();
+    }
+
+    document.addEventListener('click', function (event) {
+        const button = event.target.closest('[data-landing-select]');
+        const root = getRoot();
+
+        if (!button || !root || !root.contains(button)) {
+            return;
+        }
+
+        if (plans.length === 0 && !loadPayload()) {
             return;
         }
 
         selectedId = Number(button.dataset.landingSelect);
+        const plan = getPlan(selectedId);
+
+        if (plan) {
+            power = plan.minAmount;
+        }
+
         syncSliderToPlan();
         updateCalculator();
     });
 
-    if (slider) {
-        slider.addEventListener('input', function (event) {
-            power = Number(event.target.value);
-            updateCalculator();
-        });
+    document.addEventListener('input', function (event) {
+        const root = getRoot();
+
+        if (!event.target.matches('[data-landing-slider]') || !root || !root.contains(event.target)) {
+            return;
+        }
+
+        if (plans.length === 0 && !loadPayload()) {
+            return;
+        }
+
+        power = Number(event.target.value);
+        updateCalculator();
+    });
+
+    window.coinInitLandingPlans = bootLandingPlans;
+
+    function scheduleBoot() {
+        bootLandingPlans();
     }
 
-    syncSliderToPlan();
-    updateCalculator();
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', scheduleBoot);
+    } else {
+        scheduleBoot();
+    }
+
+    const observer = new MutationObserver(function () {
+        if (document.getElementById('landing-plans-data')) {
+            scheduleBoot();
+        }
+    });
+
+    observer.observe(document.documentElement, { childList: true, subtree: true });
+
+    function patchDcBoot() {
+        const boot = window.__dcBoot;
+
+        if (typeof boot !== 'function' || boot.__coinLandingPatched) {
+            return;
+        }
+
+        window.__dcBoot = function () {
+            const result = boot.apply(this, arguments);
+            scheduleBoot();
+
+            return result;
+        };
+        window.__dcBoot.__coinLandingPatched = true;
+        scheduleBoot();
+    }
+
+    const bootPoll = window.setInterval(function () {
+        if (typeof window.__dcBoot === 'function') {
+            patchDcBoot();
+            window.clearInterval(bootPoll);
+        }
+    }, 50);
+
+    window.setTimeout(function () {
+        window.clearInterval(bootPoll);
+    }, 10000);
 })();
