@@ -10,6 +10,16 @@
     @vite(['resources/js/guest-support.js'])
     @include('partials.coin-reverb-config-guest')
     <script src="{{ asset('coin/support.js') }}"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="{{ asset('coin/responsive.css') }}?v={{ file_exists(public_path('coin/responsive.css')) ? filemtime(public_path('coin/responsive.css')) : 1 }}" />
+    <script src="{{ asset('coin/mobile.js') }}" defer></script>
+    <style>
+      body { margin: 0; background: #04101c; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+      .coin-app { width: 100%; max-width: 1440px; margin: 0 auto; box-sizing: border-box; overflow-x: hidden; }
+      .coin-brand-logo { width: min(260px, 54vw); height: auto; max-height: 56px; display: block; object-fit: contain; }
+    </style>
 </head>
 <body>
 @include('partials.page-loading-overlay')
@@ -27,11 +37,9 @@
   @keyframes paiPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
   input[type="range"] { accent-color: oklch(0.8 0.13 192); }
 </style>
-<link rel="stylesheet" href="/coin/responsive.css" />
-<script src="/coin/mobile.js" defer></script>
 </helmet>
 
-<div class="coin-app" style="width: 1440px; margin: 0 auto; position: relative; background: #061423; color: #e6f4fa; font-family: 'Sora', 'Helvetica Neue', Helvetica, sans-serif; overflow: hidden;">
+<div class="coin-app" style="margin: 0 auto; position: relative; background: #061423; color: #e6f4fa; font-family: 'Sora', 'Helvetica Neue', Helvetica, sans-serif; overflow: hidden;">
   <div style="position: absolute; top: -240px; right: -80px; width: 820px; height: 660px; border-radius: 50%; background: radial-gradient(closest-side, oklch(0.62 0.13 198 / 0.28), transparent 72%); filter: blur(30px); pointer-events: none;"></div>
 
   <div class="coin-nav-overlay" onClick="{{ closeMenu }}"></div>
