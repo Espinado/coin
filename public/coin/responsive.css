@@ -1022,3 +1022,66 @@ html.coin-nav-open .coin-nav-mobile {
     max-height: 38px;
   }
 }
+
+/* ——— Landing scroll-to-top ——— */
+
+.coin-scroll-top {
+  position: fixed;
+  right: 24px;
+  bottom: 92px;
+  z-index: 9998;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border-radius: 50%;
+  border: 1px solid rgba(150, 235, 250, 0.28);
+  background: rgba(6, 20, 35, 0.92);
+  backdrop-filter: blur(10px);
+  color: oklch(0.88 0.11 195);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(12px);
+  transition: opacity 0.25s ease, visibility 0.25s ease, transform 0.25s ease, background 0.2s ease, border-color 0.2s ease;
+  box-shadow: 0 12px 32px -16px rgba(0, 0, 0, 0.55);
+}
+
+.coin-scroll-top.is-visible {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.coin-scroll-top:hover {
+  background: rgba(20, 55, 80, 0.95);
+  border-color: oklch(0.86 0.11 195 / 0.45);
+  color: #f0fbff;
+}
+
+.coin-scroll-top:focus-visible {
+  outline: 2px solid oklch(0.86 0.11 195 / 0.7);
+  outline-offset: 2px;
+}
+
+.coin-scroll-top svg {
+  width: 20px;
+  height: 20px;
+  display: block;
+}
+
+@media (max-width: 768px) {
+  .coin-scroll-top {
+    right: 16px;
+    bottom: 84px;
+    width: 40px;
+    height: 40px;
+  }
+
+  .coin-scroll-top svg {
+    width: 18px;
+    height: 18px;
+  }
+}

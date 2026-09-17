@@ -16,6 +16,7 @@
     <link rel="stylesheet" href="{{ asset('coin/responsive.css') }}?v={{ file_exists(public_path('coin/responsive.css')) ? filemtime(public_path('coin/responsive.css')) : 1 }}" />
     <script src="{{ asset('coin/mobile.js') }}" defer></script>
     <script src="{{ asset('coin/landing-plans.js') }}?v={{ file_exists(public_path('coin/landing-plans.js')) ? filemtime(public_path('coin/landing-plans.js')) : 1 }}" defer></script>
+    <script src="{{ asset('coin/landing-scroll-top.js') }}?v={{ file_exists(public_path('coin/landing-scroll-top.js')) ? filemtime(public_path('coin/landing-scroll-top.js')) : 1 }}" defer></script>
     <style>
       body { margin: 0; background: #04101c; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
       .coin-app { width: 100%; max-width: 1440px; margin: 0 auto; box-sizing: border-box; overflow-x: hidden; }
@@ -585,6 +586,13 @@ class Component extends DCLogic {
   }
 }
 </script>
+
+<button type="button" id="coin-scroll-top" class="coin-scroll-top" aria-label="Наверх" title="Наверх">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <path d="M12 19V5"></path>
+    <path d="M5 12l7-7 7 7"></path>
+  </svg>
+</button>
 
 @livewire('guest-support-chat')
 @livewireScripts
