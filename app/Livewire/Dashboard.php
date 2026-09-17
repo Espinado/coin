@@ -21,12 +21,15 @@ use Illuminate\Support\Collection;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
 use Livewire\Attributes\On;
+use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
 
 class Dashboard extends Component
 {
     use WithPagination;
+
+    #[Url(as: 'section', history: true, keep: false)]
     public int $section = 0;
 
     public int $power = 1200;
@@ -202,11 +205,6 @@ class Dashboard extends Component
             ?? $this->plans->first(fn (Plan $plan) => ! $plan->isEnterprise())?->id;
         $this->power = (int) ($this->primaryPlan?->min_deposit ?? $this->selectedPlan?->calculatorMinAmount() ?? 1200);
         $this->syncPowerToSelectedPlan();
-
-        $requestedSection = request()->integer('section');
-        if ($requestedSection >= 0 && $requestedSection <= 7) {
-            $this->section = $requestedSection;
-        }
 
         $this->tickets = $this->user->supportTickets()
             ->with('messages')

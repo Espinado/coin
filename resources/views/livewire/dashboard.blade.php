@@ -10,46 +10,17 @@
 
     <div style="font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: 0.16em; color: rgba(214,238,248,0.55); padding: 0 12px 10px;">{{ mb_strtoupper(__('coin.nav.main')) }}</div>
 
-    <button wire:click="setSection(0)" style="position: relative; display: flex; align-items: center; gap: 11px; padding: 11px 12px; border: 0; border-radius: 10px; background: none; font-family: inherit; font-size: 13.5px; color: #e6f4fa; text-align: left; cursor: pointer;">
-      @if($section === 0)<span style="position: absolute; inset: 0; border-radius: 10px; background: oklch(0.6 0.13 200 / 0.22); border: 1px solid oklch(0.86 0.11 195 / 0.3); pointer-events: none;"></span>@endif
-      <span style="position: relative; width: 7px; height: 7px; border-radius: 2px; background: oklch(0.86 0.12 192);"></span>
-      <span style="position: relative;">{{ __('coin.nav.overview') }}</span>
-    </button>
-    <button wire:click="setSection(1)" style="position: relative; display: flex; align-items: center; gap: 11px; padding: 11px 12px; border: 0; border-radius: 10px; background: none; font-family: inherit; font-size: 13.5px; color: rgba(230,244,250,0.72); text-align: left; cursor: pointer;">
-      @if($section === 1)<span style="position: absolute; inset: 0; border-radius: 10px; background: oklch(0.6 0.13 200 / 0.22); border: 1px solid oklch(0.86 0.11 195 / 0.3); pointer-events: none;"></span>@endif
-      <span style="position: relative; width: 7px; height: 7px; border-radius: 2px; background: rgba(150,235,250,0.3);"></span>
-      <span style="position: relative;">{{ __('coin.nav.investment_plans') }}</span>
-    </button>
-    <button wire:click="setSection(2)" style="position: relative; display: flex; align-items: center; gap: 11px; padding: 11px 12px; border: 0; border-radius: 10px; background: none; font-family: inherit; font-size: 13.5px; color: rgba(230,244,250,0.72); text-align: left; cursor: pointer;">
-      @if($section === 2)<span style="position: absolute; inset: 0; border-radius: 10px; background: oklch(0.6 0.13 200 / 0.22); border: 1px solid oklch(0.86 0.11 195 / 0.3); pointer-events: none;"></span>@endif
-      <span style="position: relative; width: 7px; height: 7px; border-radius: 2px; background: rgba(150,235,250,0.3);"></span>
-      <span style="position: relative; flex: 1;">{{ __('coin.nav.my_investments') }}</span>
-      <span style="position: relative; font-family: 'JetBrains Mono', monospace; font-size: 10px; padding: 2px 7px; border-radius: 6px; background: rgba(150,235,250,0.1); color: rgba(214,238,248,0.8);">{{ $this->activeContractCount }}</span>
-    </button>
-    <button wire:click="setSection(3)" style="position: relative; display: flex; align-items: center; gap: 11px; padding: 11px 12px; border: 0; border-radius: 10px; background: none; font-family: inherit; font-size: 13.5px; color: rgba(230,244,250,0.72); text-align: left; cursor: pointer;">
-      @if($section === 3)<span style="position: absolute; inset: 0; border-radius: 10px; background: oklch(0.6 0.13 200 / 0.22); border: 1px solid oklch(0.86 0.11 195 / 0.3); pointer-events: none;"></span>@endif
-      <span style="position: relative; width: 7px; height: 7px; border-radius: 2px; background: rgba(150,235,250,0.3);"></span>
-      <span style="position: relative;">{{ __('coin.nav.statistics') }}</span>
-    </button>
-    <button wire:click="setSection(4)" style="position: relative; display: flex; align-items: center; gap: 11px; padding: 11px 12px; border: 0; border-radius: 10px; background: none; font-family: inherit; font-size: 13.5px; color: rgba(230,244,250,0.72); text-align: left; cursor: pointer;">
-      @if($section === 4)<span style="position: absolute; inset: 0; border-radius: 10px; background: oklch(0.6 0.13 200 / 0.22); border: 1px solid oklch(0.86 0.11 195 / 0.3); pointer-events: none;"></span>@endif
-      <span style="position: relative; width: 7px; height: 7px; border-radius: 2px; background: rgba(150,235,250,0.3);"></span>
-      <span style="position: relative;">{{ __('coin.nav.wallet') }}</span>
-    </button>
-    <button wire:click="setSection(5)" style="position: relative; display: flex; align-items: center; gap: 11px; padding: 11px 12px; border: 0; border-radius: 10px; background: none; font-family: inherit; font-size: 13.5px; color: rgba(230,244,250,0.72); text-align: left; cursor: pointer;">
-      @if($section === 5)<span style="position: absolute; inset: 0; border-radius: 10px; background: oklch(0.6 0.13 200 / 0.22); border: 1px solid oklch(0.86 0.11 195 / 0.3); pointer-events: none;"></span>@endif
-      <span style="position: relative; width: 7px; height: 7px; border-radius: 2px; background: rgba(150,235,250,0.3);"></span>
-      <span style="position: relative;">{{ __('coin.nav.referrals') }}</span>
-    </button>
+    @include('livewire.partials.dashboard-nav-item', ['sectionId' => 0, 'label' => __('coin.nav.overview'), 'currentSection' => $section])
+    @include('livewire.partials.dashboard-nav-item', ['sectionId' => 1, 'label' => __('coin.nav.investment_plans'), 'currentSection' => $section])
+    @include('livewire.partials.dashboard-nav-item', ['sectionId' => 2, 'label' => __('coin.nav.my_investments'), 'currentSection' => $section, 'badge' => $this->activeContractCount])
+    @include('livewire.partials.dashboard-nav-item', ['sectionId' => 3, 'label' => __('coin.nav.statistics'), 'currentSection' => $section])
+    @include('livewire.partials.dashboard-nav-item', ['sectionId' => 4, 'label' => __('coin.nav.wallet'), 'currentSection' => $section])
+    @include('livewire.partials.dashboard-nav-item', ['sectionId' => 5, 'label' => __('coin.nav.referrals'), 'currentSection' => $section])
 
     <div style="font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: 0.16em; color: rgba(214,238,248,0.55); padding: 22px 12px 10px;">{{ mb_strtoupper(__('coin.nav.account')) }}</div>
-    <button wire:click="setSection(6)" style="position: relative; display: flex; align-items: center; gap: 11px; padding: 11px 12px; border: 0; border-radius: 10px; background: none; font-family: inherit; font-size: 13.5px; color: rgba(230,244,250,0.72); text-align: left; cursor: pointer;">
-      @if($section === 6)<span style="position: absolute; inset: 0; border-radius: 10px; background: oklch(0.6 0.13 200 / 0.22); border: 1px solid oklch(0.86 0.11 195 / 0.3); pointer-events: none;"></span>@endif
-      <span style="position: relative; width: 7px; height: 7px; border-radius: 2px; background: rgba(150,235,250,0.3);"></span>
-      <span style="position: relative;">{{ __('coin.nav.settings') }}</span>
-    </button>
-    <button type="button" wire:click="openSupport" wire:key="support-nav-{{ $this->unreadSupportCount }}" data-unread-support="{{ $this->unreadSupportCount }}" class="coin-nav-support {{ $this->unreadSupportCount > 0 ? 'coin-nav-support--unread' : '' }}" style="position: relative; display: flex; align-items: center; gap: 11px; padding: 11px 12px; border: 0; border-radius: 10px; background: none; font-family: inherit; font-size: 13.5px; color: {{ $this->unreadSupportCount > 0 ? '#f0fbff' : ($section === 7 ? '#e6f4fa' : 'rgba(230,244,250,0.72)') }}; text-align: left; cursor: pointer; width: 100%; z-index: 2;">
-      @if($section === 7)<span style="position: absolute; inset: 0; border-radius: 10px; background: oklch(0.6 0.13 200 / 0.22); border: 1px solid oklch(0.86 0.11 195 / 0.3); pointer-events: none;"></span>@elseif($this->unreadSupportCount > 0)<span data-user-support-nav-bg style="position: absolute; inset: 0; border-radius: 10px; background: oklch(0.72 0.16 35 / 0.12); border: 1px solid oklch(0.82 0.18 35 / 0.35); pointer-events: none;"></span>@endif
+    @include('livewire.partials.dashboard-nav-item', ['sectionId' => 6, 'label' => __('coin.nav.settings'), 'currentSection' => $section])
+    <button type="button" wire:click="openSupport" wire:key="support-nav-{{ $this->unreadSupportCount }}" data-unread-support="{{ $this->unreadSupportCount }}" class="coin-nav-item coin-nav-support {{ $section === 7 ? 'coin-nav-item--active' : '' }} {{ $this->unreadSupportCount > 0 ? 'coin-nav-support--unread' : '' }}">
+      @if($section === 7)<span class="coin-nav-item__bg" aria-hidden="true"></span>@elseif($this->unreadSupportCount > 0)<span data-user-support-nav-bg class="coin-nav-support__unread-bg" aria-hidden="true"></span>@endif
       <span class="coin-nav-support-dot" style="position: relative; width: 7px; height: 7px; border-radius: 2px; background: {{ $this->unreadSupportCount > 0 ? 'oklch(0.85 0.18 35)' : ($section === 7 ? 'oklch(0.86 0.12 192)' : 'rgba(150,235,250,0.3)') }}; {{ $this->unreadSupportCount > 0 ? 'box-shadow: 0 0 10px oklch(0.85 0.18 35 / 0.8);' : '' }}"></span>
       <span class="coin-nav-support-label" style="position: relative; flex: 1; font-weight: {{ $this->unreadSupportCount > 0 ? '600' : '400' }};">{{ __('coin.nav.live_support') }}</span>
       @if($this->unreadSupportCount > 0)
