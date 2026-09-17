@@ -70,7 +70,7 @@
     </div>
   </header>
 
-  <section data-screen-label="Hero" style="position: relative; z-index: 5; display: grid; grid-template-columns: 1fr 540px; gap: 60px; align-items: center; padding: 96px 72px 104px;">
+  <section data-screen-label="Hero" style="position: relative; z-index: 5; display: grid; grid-template-columns: 1fr 540px; gap: 60px; align-items: center; padding: 72px 72px 48px;">
     <div>
       <div style="display: inline-flex; align-items: center; gap: 10px; padding: 7px 14px; border-radius: 999px; border: 1px solid rgba(150,235,250,0.2); background: rgba(150,235,250,0.06); font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.14em; color: oklch(0.88 0.11 195);">
         <span style="width: 6px; height: 6px; border-radius: 50%; background: oklch(0.85 0.15 160); animation: paiPulse 2.4s infinite;"></span>ИНВЕСТИЦИОННАЯ ПЛАТФОРМА
@@ -133,7 +133,7 @@
     </div>
   </section>
 
-  <section data-screen-label="Metrics" style="position: relative; z-index: 5; padding: 0 72px 104px;">
+  <section data-screen-label="Metrics" style="position: relative; z-index: 5; padding: 0 72px 48px;">
     <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px;">
       <div style="padding: 26px; border-radius: 18px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.04);">
         <div style="font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.14em; color: rgba(230,244,250,0.7);">TOTAL AUM</div>
@@ -155,7 +155,7 @@
     <div style="margin-top: 16px; font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.1em; color: rgba(230,244,250,0.62);">PLACEHOLDER VALUES · REPLACED WITH LIVE DATA</div>
   </section>
 
-  <section id="how" data-screen-label="How it works" style="position: relative; z-index: 5; padding: 100px 72px; border-top: 1px solid rgba(150,235,250,0.08);">
+  <section id="how" data-screen-label="How it works" style="position: relative; z-index: 5; padding: 48px 72px; border-top: 1px solid rgba(150,235,250,0.08);">
     <div style="display: flex; align-items: flex-end; justify-content: space-between; gap: 60px;">
       <div>
         <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.16em; color: oklch(0.88 0.11 195);">HOW IT WORKS</div>
@@ -212,7 +212,7 @@
 @include('partials.landing-plans-section', ['plans' => $plans, 'landingPlansPayload' => $landingPlansPayload])
 @verbatim
 
-  <section id="product" data-screen-label="Benefits" style="position: relative; z-index: 5; padding: 100px 72px; border-top: 1px solid rgba(150,235,250,0.08);">
+  <section id="product" data-screen-label="Benefits" style="position: relative; z-index: 5; padding: 48px 72px; border-top: 1px solid rgba(150,235,250,0.08);">
     <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.16em; color: oklch(0.88 0.11 195);">WHY CloudFlops</div>
     <h2 style="margin: 18px 0 0; max-width: 560px; font-size: 46px; line-height: 1.08; letter-spacing: -0.035em; font-weight: 600; color: #f0fbff;">A clear investment product</h2>
     <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 48px;">
@@ -249,7 +249,7 @@
     </div>
   </section>
 
-  <section id="infra" data-screen-label="Infrastructure" style="position: relative; z-index: 5; padding: 100px 72px; border-top: 1px solid rgba(150,235,250,0.08);">
+  <section id="infra" data-screen-label="Infrastructure" style="position: relative; z-index: 5; padding: 48px 72px; border-top: 1px solid rgba(150,235,250,0.08);">
     <div style="display: grid; grid-template-columns: 1fr 560px; gap: 60px; align-items: center;">
       <div>
         <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.16em; color: oklch(0.88 0.11 195);">SECURITY</div>
@@ -318,7 +318,7 @@
     </div>
   </section>
 
-  <section id="account" data-screen-label="Dashboard" style="position: relative; z-index: 5; padding: 100px 72px; border-top: 1px solid rgba(150,235,250,0.08);">
+  <section id="account" data-screen-label="Dashboard" style="position: relative; z-index: 5; padding: 48px 72px; border-top: 1px solid rgba(150,235,250,0.08);">
     <div style="display: flex; align-items: flex-end; justify-content: space-between; gap: 60px; margin-bottom: 44px;">
       <div>
         <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.16em; color: oklch(0.88 0.11 195);">DASHBOARD</div>
@@ -418,7 +418,7 @@
     </div>
   </section>
 
-  <section data-screen-label="Referrals" style="position: relative; z-index: 5; padding: 100px 72px; border-top: 1px solid rgba(150,235,250,0.08);">
+  <section data-screen-label="Referrals" style="position: relative; z-index: 5; padding: 48px 72px; border-top: 1px solid rgba(150,235,250,0.08);">
     <div style="padding: 44px 48px; border-radius: 22px; border: 1px solid rgba(180,180,255,0.16); background: linear-gradient(120deg, oklch(0.6 0.13 200 / 0.16), rgba(120,110,220,0.1)); display: grid; grid-template-columns: 1fr 360px; gap: 56px; align-items: center;">
       <div>
         <h2 style="margin: 0; font-size: 36px; line-height: 1.1; letter-spacing: -0.035em; font-weight: 600; color: #f0fbff;">Invite and earn more</h2>
@@ -441,7 +441,7 @@
     </div>
   </section>
 
-  <section id="faq" data-screen-label="FAQ" style="position: relative; z-index: 5; padding: 100px 72px; border-top: 1px solid rgba(150,235,250,0.08);">
+  <section id="faq" data-screen-label="FAQ" style="position: relative; z-index: 5; padding: 48px 72px; border-top: 1px solid rgba(150,235,250,0.08);">
     <div style="display: grid; grid-template-columns: 380px 1fr; gap: 72px;">
       <div>
         <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.16em; color: oklch(0.88 0.11 195);">FAQ</div>
@@ -515,7 +515,7 @@
     </div>
   </section>
 
-  <section data-screen-label="Final CTA" style="position: relative; z-index: 5; padding: 120px 72px 130px; border-top: 1px solid rgba(150,235,250,0.08); text-align: center; overflow: hidden;">
+  <section data-screen-label="Final CTA" style="position: relative; z-index: 5; padding: 64px 72px 72px; border-top: 1px solid rgba(150,235,250,0.08); text-align: center; overflow: hidden;">
     <div style="position: absolute; bottom: -280px; left: 50%; width: 900px; height: 520px; margin-left: -450px; border-radius: 50%; background: radial-gradient(closest-side, oklch(0.6 0.13 198 / 0.34), transparent 74%); filter: blur(24px);"></div>
     <div style="position: relative;">
       <h2 style="margin: 0 auto; max-width: 720px; font-size: 56px; line-height: 1.06; letter-spacing: -0.04em; font-weight: 600; color: #f2fdff;">Start investing today</h2>
