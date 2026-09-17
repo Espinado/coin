@@ -48,6 +48,7 @@
             <a href="{{ route('admin.profit-accrual.index') }}" class="{{ $navClass($adminNavActive($routeName, 'admin.profit-accrual')) }}">{{ __('coin.admin.profit_accrual') }}</a>
             <a href="{{ route('admin.admins.index') }}" class="{{ $navClass($adminNavActive($routeName, 'admin.admins')) }}">{{ __('coin.admin.admins.title') }}</a>
             <a href="{{ route('admin.settings.edit') }}" class="{{ $navClass($adminNavActive($routeName, 'admin.settings')) }}">{{ __('coin.admin.settings') }}</a>
+            <a href="{{ route('admin.legal.index') }}" class="{{ $navClass($adminNavActive($routeName, 'admin.legal')) }}">{{ __('coin.admin.legal.title') }}</a>
             <a href="{{ route('admin.broadcasts.index') }}" class="{{ $navClass($adminNavActive($routeName, 'admin.broadcasts')) }}">{{ __('coin.admin.broadcasts.title') }}</a>
             <a href="{{ route('admin.support.index') }}" class="{{ $navClass($adminNavActive($routeName, 'admin.support')) }}" data-admin-support-nav>
                 <span>{{ __('coin.admin.support') }}</span>

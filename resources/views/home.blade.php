@@ -534,15 +534,15 @@
       <div>
         <div style="font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.14em; color: rgba(230,244,250,0.65);">LEGAL</div>
         <div style="display: flex; flex-direction: column; gap: 11px; margin-top: 16px; font-size: 13.5px;">
-          <a href="#" style="color: rgba(230,244,250,0.78);">Terms</a>
-          <a href="#" style="color: rgba(230,244,250,0.78);">Privacy</a>
-          <a href="#" style="color: rgba(230,244,250,0.78);">Risks</a>
+          @foreach($legalPages as $legalPage)
+            <a href="{{ route('legal.show', $legalPage) }}" style="color: rgba(230,244,250,0.78);">{{ $legalPage->slugLabel() }}</a>
+          @endforeach
         </div>
       </div>
       <div>
         <div style="font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.14em; color: rgba(230,244,250,0.65);">SUPPORT</div>
         <div style="display: flex; flex-direction: column; gap: 11px; margin-top: 16px; font-size: 13.5px;">
-          <a href="#faq" style="color: rgba(230,244,250,0.78);">FAQ</a>
+          <a href="#faq" style="color: rgba(230,244,250,0.78);">{{ __('coin.legal.slugs.faq') }}</a>
           <a href="#support" style="color: rgba(230,244,250,0.78);">Help</a>
 @include('partials.landing-footer-contact')
         </div>

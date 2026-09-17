@@ -866,6 +866,23 @@ return [
             'admin_password_reset_sent' => 'Ссылка для смены пароля отправлена на e-mail.',
             'admin_password_reset_self' => 'Для смены своего пароля используйте «Забыли пароль?» на странице входа.',
             'broadcast_sent' => 'Уведомление отправлено :count пользователям.',
+            'legal_saved' => 'Юридический раздел сохранён.',
+        ],
+        'legal' => [
+            'title' => 'Legal',
+            'subtitle' => 'Terms, Privacy, Risks и FAQ для лендинга',
+            'section' => 'Раздел',
+            'title_field' => 'Заголовок страницы',
+            'body_field' => 'Содержимое',
+            'status' => 'Статус',
+            'updated_at' => 'Обновлено',
+            'published' => 'Опубликовано',
+            'draft' => 'Черновик',
+            'edit' => 'Редактировать',
+            'preview' => 'На сайте',
+            'publish' => 'Опубликовать на лендинге',
+            'edit_hint' => 'Текст отображается на отдельной странице по ссылке из футера лендинга.',
+            'empty' => 'Разделы Legal ещё не созданы. Запустите миграцию или сидер.',
         ],
         'broadcasts' => [
             'title' => 'Уведомления',
@@ -952,5 +969,15 @@ return [
         'buy_plan' => 'Покупка плана',
         'daily_profit' => 'Ежедневная прибыль',
         'request_payout' => 'Вывод средств',
+    ],
+
+    'legal' => [
+        'back_home' => 'На главную',
+        'slugs' => [
+            'terms' => 'Terms',
+            'privacy' => 'Privacy',
+            'risks' => 'Risks',
+            'faq' => 'FAQ',
+        ],
     ],
 ];

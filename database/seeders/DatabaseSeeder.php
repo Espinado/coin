@@ -12,6 +12,7 @@ class DatabaseSeeder extends Seeder
             AdminSeeder::class,
             PlatformSettingsSeeder::class,
             PlanSeeder::class,
+            LegalPageSeeder::class,
             CoinDemoSeeder::class,
         ]);
     }

@@ -10,6 +10,7 @@ use App\Http\Controllers\ReverbDebugLogController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\DepositController;
 use App\Http\Controllers\Admin\EpochController;
+use App\Http\Controllers\Admin\LegalPageController;
 use App\Http\Controllers\Admin\ProfitAccrualController;
 use App\Http\Controllers\Admin\PlanChangeRequestController;
 use App\Http\Controllers\Admin\PlanController;
@@ -105,6 +106,10 @@ Route::middleware(['admin.domain', 'reject.web.on.admin'])->group(function () {
         Route::post('admins/{admin}/reset-password', [AdminStaffController::class, 'resetPassword'])->name('admin.admins.reset-password');
         Route::delete('admins/invitations/{invitation}', [AdminStaffController::class, 'destroyInvitation'])->name('admin.admins.invitations.destroy');
         Route::post('admins/invitations/{invitation}/resend', [AdminStaffController::class, 'resendInvitation'])->name('admin.admins.invitations.resend');
+
+        Route::get('legal', [LegalPageController::class, 'index'])->name('admin.legal.index');
+        Route::get('legal/{legalPage}/edit', [LegalPageController::class, 'edit'])->name('admin.legal.edit');
+        Route::patch('legal/{legalPage}', [LegalPageController::class, 'update'])->name('admin.legal.update');
 
         Route::get('broadcasts', [BroadcastController::class, 'index'])->name('admin.broadcasts.index');
         Route::get('broadcasts/create', [BroadcastController::class, 'create'])->name('admin.broadcasts.create');

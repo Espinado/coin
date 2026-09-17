@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\LegalPage;
 use App\Models\Plan;
 use App\Support\LandingPlans;
 use Illuminate\Contracts\View\View;
@@ -23,6 +24,7 @@ class HomeController extends Controller
             'plans' => $landingPlans,
             'activePlanCount' => $allActive->count(),
             'landingPlansPayload' => LandingPlans::calculatorPayload($landingPlans),
+            'legalPages' => LegalPage::query()->published()->ordered()->get(),
         ]);
     }
 }

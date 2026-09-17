@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\GuestBroadcastAuthController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\LegalPageController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReferralInviteController;
 use App\Http\Controllers\ReverbDebugLogController;
@@ -14,6 +15,10 @@ Route::domain(config('coin.user_domain'))
     ->middleware('user.domain')
     ->group(function () {
         Route::get('/', HomeController::class)->name('home');
+
+        Route::get('/legal/{legalPage:slug}', [LegalPageController::class, 'show'])
+            ->where('legalPage', 'terms|privacy|risks|faq')
+            ->name('legal.show');
 
         Route::get('/r/{code}', ReferralInviteController::class)->name('referral.invite');
 
