@@ -17,6 +17,7 @@
     <script src="{{ asset('coin/mobile.js') }}" defer></script>
     <script src="{{ asset('coin/landing-plans.js') }}?v={{ file_exists(public_path('coin/landing-plans.js')) ? filemtime(public_path('coin/landing-plans.js')) : 1 }}" defer></script>
     <script src="{{ asset('coin/landing-scroll-top.js') }}?v={{ file_exists(public_path('coin/landing-scroll-top.js')) ? filemtime(public_path('coin/landing-scroll-top.js')) : 1 }}" defer></script>
+    <script src="{{ asset('coin/landing-faq.js') }}?v={{ file_exists(public_path('coin/landing-faq.js')) ? filemtime(public_path('coin/landing-faq.js')) : 1 }}" defer></script>
     <style>
       body { margin: 0; background: #04101c; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
       .coin-app { width: 100%; max-width: 1440px; margin: 0 auto; box-sizing: border-box; overflow-x: hidden; }
@@ -435,70 +436,11 @@
     <div style="display: grid; grid-template-columns: 380px 1fr; gap: 72px;">
       <div>
         <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.16em; color: oklch(0.88 0.11 195);">FAQ</div>
-        <h2 style="margin: 18px 0 0; font-size: 42px; line-height: 1.08; letter-spacing: -0.035em; font-weight: 600; color: #f0fbff;">Frequently asked questions</h2>
+        <h2 style="margin: 18px 0 0; font-size: 42px; line-height: 1.08; letter-spacing: -0.035em; font-weight: 600; color: #f0fbff;">{{ $faqPage?->title ?? 'Frequently asked questions' }}</h2>
 @include('partials.landing-faq-contact')
       </div>
       <div>
-        <div style="border-top: 1px solid rgba(150,235,250,0.12);">
-          <button onClick="@{{ toggle0 }}" style="width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 22px 2px; background: none; border: 0; text-align: left; font-family: inherit; font-size: 17.5px; font-weight: 500; letter-spacing: -0.02em; color: #f0fbff; cursor: pointer;">
-            <span>What is CloudFlops?</span>
-            <sc-if value="@{{ open0 }}" hint-placeholder-val="@{{ true }}"><span style="font-family: 'JetBrains Mono', monospace; font-size: 18px; color: oklch(0.88 0.11 195); flex: none;">−</span></sc-if>
-            <sc-if value="@{{ closed0 }}" hint-placeholder-val="@{{ false }}"><span style="font-family: 'JetBrains Mono', monospace; font-size: 18px; color: rgba(230,244,250,0.6); flex: none;">+</span></sc-if>
-          </button>
-          <sc-if value="@{{ open0 }}" hint-placeholder-val="@{{ true }}">
-            <p style="margin: 0; padding: 0 80px 24px 2px; font-size: 15px; line-height: 1.65; color: rgba(230,244,250,0.72);">An investment platform where you top up USDT, buy a plan with fixed APR, and receive daily profit to your available balance.</p>
-          </sc-if>
-        </div>
-        <div style="border-top: 1px solid rgba(150,235,250,0.12);">
-          <button onClick="@{{ toggle1 }}" style="width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 22px 2px; background: none; border: 0; text-align: left; font-family: inherit; font-size: 17.5px; font-weight: 500; letter-spacing: -0.02em; color: #f0fbff; cursor: pointer;">
-            <span>How do plans work?</span>
-            <sc-if value="@{{ open1 }}" hint-placeholder-val="@{{ false }}"><span style="font-family: 'JetBrains Mono', monospace; font-size: 18px; color: oklch(0.88 0.11 195); flex: none;">−</span></sc-if>
-            <sc-if value="@{{ closed1 }}" hint-placeholder-val="@{{ true }}"><span style="font-family: 'JetBrains Mono', monospace; font-size: 18px; color: rgba(230,244,250,0.6); flex: none;">+</span></sc-if>
-          </button>
-          <sc-if value="@{{ open1 }}" hint-placeholder-val="@{{ false }}">
-            <p style="margin: 0; padding: 0 80px 24px 2px; font-size: 15px; line-height: 1.65; color: rgba(230,244,250,0.72);">A plan defines minimum investment, APR, and contract term. When you buy a plan, principal is locked until maturity.</p>
-          </sc-if>
-        </div>
-        <div style="border-top: 1px solid rgba(150,235,250,0.12);">
-          <button onClick="@{{ toggle2 }}" style="width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 22px 2px; background: none; border: 0; text-align: left; font-family: inherit; font-size: 17.5px; font-weight: 500; letter-spacing: -0.02em; color: #f0fbff; cursor: pointer;">
-            <span>Where does profit come from?</span>
-            <sc-if value="@{{ open2 }}" hint-placeholder-val="@{{ false }}"><span style="font-family: 'JetBrains Mono', monospace; font-size: 18px; color: oklch(0.88 0.11 195); flex: none;">−</span></sc-if>
-            <sc-if value="@{{ closed2 }}" hint-placeholder-val="@{{ true }}"><span style="font-family: 'JetBrains Mono', monospace; font-size: 18px; color: rgba(230,244,250,0.6); flex: none;">+</span></sc-if>
-          </button>
-          <sc-if value="@{{ open2 }}" hint-placeholder-val="@{{ false }}">
-            <p style="margin: 0; padding: 0 80px 24px 2px; font-size: 15px; line-height: 1.65; color: rgba(230,244,250,0.72);">Daily profit is calculated as principal × APR / 365 and credited to your available balance. At maturity, principal returns to available balance.</p>
-          </sc-if>
-        </div>
-        <div style="border-top: 1px solid rgba(150,235,250,0.12);">
-          <button onClick="@{{ toggle3 }}" style="width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 22px 2px; background: none; border: 0; text-align: left; font-family: inherit; font-size: 17.5px; font-weight: 500; letter-spacing: -0.02em; color: #f0fbff; cursor: pointer;">
-            <span>How do referrals work?</span>
-            <sc-if value="@{{ open3 }}" hint-placeholder-val="@{{ false }}"><span style="font-family: 'JetBrains Mono', monospace; font-size: 18px; color: oklch(0.88 0.11 195); flex: none;">−</span></sc-if>
-            <sc-if value="@{{ closed3 }}" hint-placeholder-val="@{{ true }}"><span style="font-family: 'JetBrains Mono', monospace; font-size: 18px; color: rgba(230,244,250,0.6); flex: none;">+</span></sc-if>
-          </button>
-          <sc-if value="@{{ open3 }}" hint-placeholder-val="@{{ false }}">
-            <p style="margin: 0; padding: 0 80px 24px 2px; font-size: 15px; line-height: 1.65; color: rgba(230,244,250,0.72);">When someone you invited purchases a plan, you receive a one-time commission (default 20%) credited to your available balance.</p>
-          </sc-if>
-        </div>
-        <div style="border-top: 1px solid rgba(150,235,250,0.12);">
-          <button onClick="@{{ toggle4 }}" style="width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 22px 2px; background: none; border: 0; text-align: left; font-family: inherit; font-size: 17.5px; font-weight: 500; letter-spacing: -0.02em; color: #f0fbff; cursor: pointer;">
-            <span>How do I request a payout?</span>
-            <sc-if value="@{{ open4 }}" hint-placeholder-val="@{{ false }}"><span style="font-family: 'JetBrains Mono', monospace; font-size: 18px; color: oklch(0.88 0.11 195); flex: none;">−</span></sc-if>
-            <sc-if value="@{{ closed4 }}" hint-placeholder-val="@{{ true }}"><span style="font-family: 'JetBrains Mono', monospace; font-size: 18px; color: rgba(230,244,250,0.6); flex: none;">+</span></sc-if>
-          </button>
-          <sc-if value="@{{ open4 }}" hint-placeholder-val="@{{ false }}">
-            <p style="margin: 0; padding: 0 80px 24px 2px; font-size: 15px; line-height: 1.65; color: rgba(230,244,250,0.72);">Submit a request in the Wallet section of your dashboard. Fee and processing time are shown before confirmation. Specific terms are subject to change.</p>
-          </sc-if>
-        </div>
-        <div style="border-top: 1px solid rgba(150,235,250,0.12); border-bottom: 1px solid rgba(150,235,250,0.12);">
-          <button onClick="@{{ toggle5 }}" style="width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 22px 2px; background: none; border: 0; text-align: left; font-family: inherit; font-size: 17.5px; font-weight: 500; letter-spacing: -0.02em; color: #f0fbff; cursor: pointer;">
-            <span>What can I see in the dashboard?</span>
-            <sc-if value="@{{ open5 }}" hint-placeholder-val="@{{ false }}"><span style="font-family: 'JetBrains Mono', monospace; font-size: 18px; color: oklch(0.88 0.11 195); flex: none;">−</span></sc-if>
-            <sc-if value="@{{ closed5 }}" hint-placeholder-val="@{{ true }}"><span style="font-family: 'JetBrains Mono', monospace; font-size: 18px; color: rgba(230,244,250,0.6); flex: none;">+</span></sc-if>
-          </button>
-          <sc-if value="@{{ open5 }}" hint-placeholder-val="@{{ false }}">
-            <p style="margin: 0; padding: 0 80px 24px 2px; font-size: 15px; line-height: 1.65; color: rgba(230,244,250,0.72);">Balance, investments, profit history, wallet, payouts, referrals, and support.</p>
-          </sc-if>
-        </div>
+@include('partials.landing-faq-accordion')
       </div>
     </div>
   </section>
@@ -542,7 +484,7 @@
       <div>
         <div style="font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.14em; color: rgba(230,244,250,0.65);">SUPPORT</div>
         <div style="display: flex; flex-direction: column; gap: 11px; margin-top: 16px; font-size: 13.5px;">
-          <a href="#faq" style="color: rgba(230,244,250,0.78);">{{ __('coin.legal.slugs.faq') }}</a>
+          <a href="{{ ($faqPage ?? null) ? route('legal.show', $faqPage) : '#faq' }}" style="color: rgba(230,244,250,0.78);">{{ __('coin.legal.slugs.faq') }}</a>
           <a href="#support" style="color: rgba(230,244,250,0.78);">Help</a>
 @include('partials.landing-footer-contact')
         </div>
@@ -565,7 +507,7 @@
 </x-dc>
 <script type="text/x-dc" data-dc-script>
 class Component extends DCLogic {
-  state = { faq: 0, menuOpen: false };
+  state = { menuOpen: false };
 
   setMenuOpen(open) {
     this.setState({ menuOpen: open });
@@ -573,16 +515,10 @@ class Component extends DCLogic {
   }
 
   renderVals() {
-    const vals = {
+    return {
       toggleMenu: () => this.setMenuOpen(!this.state.menuOpen),
       closeMenu: () => this.setMenuOpen(false),
     };
-    for (let i = 0; i < 6; i++) {
-      vals['open' + i] = this.state.faq === i;
-      vals['closed' + i] = this.state.faq !== i;
-      vals['toggle' + i] = () => this.setState((s) => ({ faq: s.faq === i ? -1 : i }));
-    }
-    return vals;
   }
 }
 </script>

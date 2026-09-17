@@ -20,11 +20,18 @@ class HomeController extends Controller
 
         $landingPlans = $allActive->reject(fn (Plan $plan) => $plan->isEnterprise())->values();
 
+        $faqPage = LegalPage::query()
+            ->where('slug', LegalPage::SLUG_FAQ)
+            ->published()
+            ->first();
+
         return view('home', [
             'plans' => $landingPlans,
             'activePlanCount' => $allActive->count(),
             'landingPlansPayload' => LandingPlans::calculatorPayload($landingPlans),
             'legalPages' => LegalPage::query()->published()->ordered()->get(),
+            'faqPage' => $faqPage,
+            'faqItems' => $faqPage?->faqItems() ?? [],
         ]);
     }
 }

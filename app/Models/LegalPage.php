@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\LegalFaq;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
@@ -65,5 +66,40 @@ class LegalPage extends Model
     public function scopeOrdered(Builder $query): Builder
     {
         return $query->orderBy('sort_order')->orderBy('id');
+    }
+
+    public function isFaq(): bool
+    {
+        return $this->slug === self::SLUG_FAQ;
+    }
+
+    /**
+     * @return list<array{question: string, answer: string}>
+     */
+    public function decodedFaqItems(): array
+    {
+        if (! $this->isFaq()) {
+            return [];
+        }
+
+        return LegalFaq::decode($this->body);
+    }
+
+    /**
+     * @return list<array{question: string, answer: string}>
+     */
+    public function faqItems(): array
+    {
+        $items = $this->decodedFaqItems();
+
+        return $items !== [] ? $items : LegalFaq::defaultItems();
+    }
+
+    /**
+     * @param  list<array{question: string, answer: string}>  $items
+     */
+    public function setFaqItems(array $items): void
+    {
+        $this->body = LegalFaq::encode($items);
     }
 }

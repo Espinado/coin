@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\LegalPage;
+use App\Support\LegalFaq;
 use Illuminate\Database\Seeder;
 
 class LegalPageSeeder extends Seeder
@@ -30,8 +31,8 @@ class LegalPageSeeder extends Seeder
             ],
             [
                 'slug' => LegalPage::SLUG_FAQ,
-                'title' => 'Часто задаваемые вопросы',
-                'body' => "В: Как пополнить счёт?\nО: Перейдите в личный кабинет → Кошелёк → Пополнение.\n\nВ: Когда начисляется прибыль?\nО: Ежедневно согласно условиям выбранного плана.\n\nДобавьте или измените вопросы и ответы в админ-панели.",
+                'title' => 'Frequently asked questions',
+                'body' => LegalFaq::encode(LegalFaq::defaultItems()),
                 'sort_order' => 40,
             ],
         ];

@@ -1023,6 +1023,32 @@ html.coin-nav-open .coin-nav-mobile {
   }
 }
 
+/* ——— Landing FAQ accordion ——— */
+
+.landing-faq-item [data-faq-panel] {
+  display: none;
+}
+
+.landing-faq-item.is-open [data-faq-panel] {
+  display: block;
+}
+
+.landing-faq-item [data-faq-icon-minus] {
+  display: none;
+}
+
+.landing-faq-item [data-faq-icon-plus] {
+  display: inline;
+}
+
+.landing-faq-item.is-open [data-faq-icon-minus] {
+  display: inline;
+}
+
+.landing-faq-item.is-open [data-faq-icon-plus] {
+  display: none;
+}
+
 /* ——— Landing scroll-to-top ——— */
 
 .coin-scroll-top {

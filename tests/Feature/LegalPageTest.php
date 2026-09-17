@@ -49,6 +49,46 @@ class LegalPageTest extends TestCase
         $this->get('http://coin.test/legal/privacy')->assertNotFound();
     }
 
+    public function test_admin_can_update_faq_items_as_json(): void
+    {
+        $page = LegalPage::query()->where('slug', LegalPage::SLUG_FAQ)->firstOrFail();
+
+        $response = $this->actingAs($this->admin, 'admin')
+            ->patch('http://admin.coin.test/legal/'.$page->slug, [
+                'title' => 'FAQ updated',
+                'is_published' => '1',
+                'faq_items' => [
+                    ['question' => 'Test question?', 'answer' => 'Test answer.'],
+                ],
+            ]);
+
+        $response->assertRedirect(route('admin.legal.index', absolute: false));
+
+        $page->refresh();
+
+        $this->assertSame('FAQ updated', $page->title);
+        $this->assertSame([
+            ['question' => 'Test question?', 'answer' => 'Test answer.'],
+        ], $page->decodedFaqItems());
+    }
+
+    public function test_landing_renders_published_faq_items(): void
+    {
+        LegalPage::query()->where('slug', LegalPage::SLUG_FAQ)->update([
+            'title' => 'Landing FAQ',
+            'body' => json_encode([
+                ['question' => 'Dynamic question?', 'answer' => 'Dynamic answer.'],
+            ], JSON_UNESCAPED_UNICODE),
+            'is_published' => true,
+        ]);
+
+        $this->get('http://coin.test/')
+            ->assertOk()
+            ->assertSee('Dynamic question?', false)
+            ->assertSee('Dynamic answer.', false)
+            ->assertSee('landing-faq', false);
+    }
+
     public function test_admin_can_update_legal_page(): void
     {
         $page = LegalPage::query()->where('slug', LegalPage::SLUG_RISKS)->firstOrFail();
