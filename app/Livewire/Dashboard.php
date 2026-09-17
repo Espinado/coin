@@ -210,6 +210,10 @@ class Dashboard extends Component
             ->with('messages')
             ->orderByDesc('updated_at')
             ->get();
+
+        if ($this->section < 0 || $this->section > 7) {
+            $this->section = 0;
+        }
     }
 
     public function setSection(int $section): void
