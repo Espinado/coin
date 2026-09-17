@@ -3,8 +3,6 @@
 @section('title', __('coin.admin.page_title', ['section' => __('coin.admin.plan_change_detail', ['id' => $request->id])]))
 
 @section('content')
-    @include('admin.partials.nav')
-
     @if (session('status'))
         <div class="admin-card" style="margin-bottom:16px;border-color:{{ session('status_type') === 'error' ? 'rgba(255,143,143,0.35)' : 'rgba(255,180,84,0.35)' }};">{{ session('status') }}</div>
     @endif

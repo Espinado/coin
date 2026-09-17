@@ -3,8 +3,11 @@
 namespace App\Http\Requests\Auth;
 
 use App\Models\User;
+use App\Services\Auth\AuthAuditLogger;
+use App\Services\Auth\AuthFailureStage;
 use Illuminate\Auth\Events\Lockout;
 use Illuminate\Contracts\Validation\ValidationRule;
+use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -61,6 +64,8 @@ class LoginRequest extends FormRequest
         if (! $user) {
             RateLimiter::hit($this->throttleKey());
 
+            $this->authAuditLogger()->logFailure('web', 'credentials', AuthFailureStage::EMAIL_NOT_FOUND, $this);
+
             throw ValidationException::withMessages([
                 'email' => __('coin.auth.login_email_not_found'),
             ]);
@@ -69,6 +74,11 @@ class LoginRequest extends FormRequest
         if (! Hash::check($this->string('password')->toString(), (string) $user->password)) {
             RateLimiter::hit($this->throttleKey());
 
+            $this->authAuditLogger()->logFailure('web', 'credentials', AuthFailureStage::PASSWORD_INVALID, $this, [
+                'subject_id' => $user->id,
+                'email' => $user->email,
+            ]);
+
             throw ValidationException::withMessages([
                 'password' => __('coin.auth.login_password_invalid'),
             ]);
@@ -76,6 +86,11 @@ class LoginRequest extends FormRequest
 
         if ($user->is_blocked) {
             RateLimiter::hit($this->throttleKey());
+
+            $this->authAuditLogger()->logFailure('web', 'credentials', AuthFailureStage::ACCOUNT_BLOCKED, $this, [
+                'subject_id' => $user->id,
+                'email' => $user->email,
+            ]);
 
             throw ValidationException::withMessages([
                 'email' => __('coin.auth.blocked'),
@@ -97,10 +112,27 @@ class LoginRequest extends FormRequest
         $user = $this->validateCredentials();
 
         if (! Auth::loginUsingId($user->id, $this->boolean('remember'))) {
+            $this->authAuditLogger()->logFailure('web', 'credentials', AuthFailureStage::SESSION_LOGIN_FAILED, $this, [
+                'subject_id' => $user->id,
+                'email' => $user->email,
+            ]);
+
             throw ValidationException::withMessages([
                 'email' => __('coin.auth.login_failed'),
             ]);
         }
+    }
+
+    protected function failedValidation(Validator $validator): void
+    {
+        $this->authAuditLogger()->logValidationFailure('web', 'credentials', $this, $validator);
+
+        parent::failedValidation($validator);
+    }
+
+    private function authAuditLogger(): AuthAuditLogger
+    {
+        return app(AuthAuditLogger::class);
     }
 
     /**

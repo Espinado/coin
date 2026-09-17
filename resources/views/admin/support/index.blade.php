@@ -3,8 +3,6 @@
 @section('title', __('coin.admin.page_title', ['section' => __('coin.admin.support')]))
 
 @section('content')
-    @include('admin.partials.nav')
-
     <div class="admin-card">
         <div style="margin-bottom:16px;">
             <h1 style="margin:0;font-size:24px;font-weight:600;">{{ __('coin.admin.support') }}</h1>

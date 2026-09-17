@@ -3,8 +3,6 @@
 @section('title', __('coin.admin.page_title', ['section' => __('coin.admin.admins.invite')]))
 
 @section('content')
-    @include('admin.partials.nav')
-
     <div class="admin-card">
         <div style="margin-bottom:20px;">
             <a href="{{ route('admin.admins.index') }}" class="admin-btn">{{ __('coin.back') }}</a>

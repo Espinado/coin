@@ -151,6 +151,14 @@ return [
             'replace_placeholders' => true,
         ],
 
+        'auth_security' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/auth-security.log'),
+            'level' => 'info',
+            'days' => 90,
+            'replace_placeholders' => true,
+        ],
+
     ],
 
 ];

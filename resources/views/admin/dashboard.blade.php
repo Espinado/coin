@@ -3,8 +3,6 @@
 @section('title', __('coin.admin.page_title', ['section' => __('coin.admin.overview')]))
 
 @section('content')
-    @include('admin.partials.nav')
-
     <div class="admin-card">
         <div class="admin-kicker">{{ strtoupper(__('coin.admin.platform_overview')) }}</div>
         <h1 class="admin-title">{{ __('coin.admin.console') }}</h1>

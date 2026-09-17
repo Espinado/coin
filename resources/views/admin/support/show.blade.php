@@ -16,8 +16,6 @@
 @endpush
 
 @section('content')
-    @include('admin.partials.nav')
-
     @if (session('status'))
         <div class="admin-card" style="margin-bottom:16px;border-color:rgba(255,180,84,0.35);">{{ session('status') }}</div>
     @endif

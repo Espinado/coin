@@ -5,6 +5,7 @@ namespace App\Livewire;
 use App\Models\Contract;
 use App\Models\Plan;
 use App\Models\SupportTicket;
+use App\Models\User;
 use App\Models\SupportTicketMessage;
 use App\Models\WalletTransaction;
 use App\Services\DashboardDataService;
@@ -18,8 +19,10 @@ use App\Services\WithdrawalService;
 use Carbon\Carbon;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
+use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\On;
 use Livewire\Attributes\Url;
 use Livewire\Component;
@@ -863,6 +866,14 @@ class Dashboard extends Component
             return;
         }
 
+        $this->validate([
+            'profileTwoFactorPassword' => ['required', 'string'],
+        ], [], [
+            'profileTwoFactorPassword' => __('coin.profile.two_factor_password'),
+        ]);
+
+        $this->assertCurrentUserPassword($this->profileTwoFactorPassword, 'profileTwoFactorPassword');
+
         $this->user->update(['email_two_factor_enabled' => false]);
         $this->profileTwoFactorPassword = '';
         $this->reloadPortfolioData();
@@ -907,7 +918,7 @@ class Dashboard extends Component
         $this->resetActionFeedback();
 
         $this->validate([
-            'profileCurrentPassword' => ['required', 'current_password'],
+            'profileCurrentPassword' => ['required', 'string'],
             'profileNewPassword' => ['required', 'string', Password::defaults()],
             'profileNewPasswordConfirmation' => ['required', 'same:profileNewPassword'],
         ], [], [
@@ -916,9 +927,13 @@ class Dashboard extends Component
             'profileNewPasswordConfirmation' => __('coin.auth.password_confirm'),
         ]);
 
+        $this->assertCurrentUserPassword($this->profileCurrentPassword, 'profileCurrentPassword');
+
         $this->user->update([
             'password' => $this->profileNewPassword,
         ]);
+
+        auth()->setUser($this->user->fresh());
 
         $this->reset(['profileCurrentPassword', 'profileNewPassword', 'profileNewPasswordConfirmation']);
         $this->actionMessage = __('coin.messages.password_updated');
@@ -1395,6 +1410,19 @@ class Dashboard extends Component
     private function walletPageSize(): int
     {
         return in_array($this->walletPerPage, [10, 20, 50], true) ? $this->walletPerPage : 10;
+    }
+
+    private function assertCurrentUserPassword(string $password, string $field): void
+    {
+        $storedHash = User::query()
+            ->whereKey(auth()->id())
+            ->value('password');
+
+        if (! is_string($storedHash) || ! Hash::check($password, $storedHash)) {
+            throw ValidationException::withMessages([
+                $field => __('coin.auth.login_password_invalid'),
+            ]);
+        }
     }
 
     private function reloadPortfolioData(): void

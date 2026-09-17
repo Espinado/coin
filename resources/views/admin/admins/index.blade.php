@@ -3,8 +3,6 @@
 @section('title', __('coin.admin.page_title', ['section' => __('coin.admin.admins.title')]))
 
 @section('content')
-    @include('admin.partials.nav')
-
     <div class="admin-card">
         <div class="admin-page-head">
             <div>

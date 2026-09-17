@@ -4,6 +4,8 @@ namespace App\Services;
 
 use App\Mail\LoginVerificationMail;
 use App\Models\User;
+use App\Services\Auth\AuthAuditLogger;
+use App\Services\Auth\AuthFailureStage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
@@ -13,6 +15,10 @@ use Illuminate\Validation\ValidationException;
 
 class LoginTwoFactorService
 {
+    public function __construct(
+        private readonly AuthAuditLogger $authAuditLogger,
+    ) {}
+
     public const SESSION_USER_KEY = 'login.two_factor.user_id';
 
     public const SESSION_REMEMBER_KEY = 'login.two_factor.remember';
@@ -48,6 +54,8 @@ class LoginTwoFactorService
         $userId = (int) $request->session()->get(self::SESSION_USER_KEY);
 
         if (! $userId) {
+            $this->authAuditLogger->logFailure('web', 'two_factor', AuthFailureStage::TWO_FACTOR_NO_SESSION, $request);
+
             throw ValidationException::withMessages([
                 'code' => __('coin.auth.two_factor_invalid'),
             ]);
@@ -55,6 +63,8 @@ class LoginTwoFactorService
 
         if ($this->challengeExpired($request)) {
             $this->clearChallenge($request);
+
+            $this->logTwoFactorFailure($request, AuthFailureStage::TWO_FACTOR_EXPIRED, $userId);
 
             throw ValidationException::withMessages([
                 'code' => __('coin.auth.two_factor_expired'),
@@ -65,6 +75,8 @@ class LoginTwoFactorService
 
         if (! Hash::check($code, (string) ($payload['code_hash'] ?? ''))) {
             RateLimiter::hit($this->throttleKey($request));
+
+            $this->logTwoFactorFailure($request, AuthFailureStage::TWO_FACTOR_CODE_INVALID, $userId);
 
             throw ValidationException::withMessages([
                 'code' => __('coin.auth.two_factor_invalid'),
@@ -137,11 +149,28 @@ class LoginTwoFactorService
 
         $seconds = RateLimiter::availableIn($this->throttleKey($request));
 
+        $userId = (int) $request->session()->get(self::SESSION_USER_KEY);
+
+        $this->authAuditLogger->logFailure('web', 'two_factor', AuthFailureStage::TWO_FACTOR_RATE_LIMIT, $request, array_filter([
+            'subject_id' => $userId > 0 ? $userId : null,
+            'retry_after_seconds' => $seconds,
+        ], fn ($value) => $value !== null));
+
         throw ValidationException::withMessages([
             'code' => __('coin.auth.login_throttle', [
                 'seconds' => $seconds,
                 'minutes' => ceil($seconds / 60),
             ]),
         ]);
+    }
+
+    private function logTwoFactorFailure(Request $request, string $stage, int $userId): void
+    {
+        $user = User::query()->find($userId);
+
+        $this->authAuditLogger->logFailure('web', 'two_factor', $stage, $request, array_filter([
+            'subject_id' => $userId > 0 ? $userId : null,
+            'email' => $user?->email,
+        ], fn ($value) => $value !== null));
     }
 }

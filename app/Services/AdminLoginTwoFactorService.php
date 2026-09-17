@@ -4,6 +4,8 @@ namespace App\Services;
 
 use App\Mail\AdminLoginVerificationMail;
 use App\Models\Admin;
+use App\Services\Auth\AuthAuditLogger;
+use App\Services\Auth\AuthFailureStage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
@@ -13,6 +15,10 @@ use Illuminate\Validation\ValidationException;
 
 class AdminLoginTwoFactorService
 {
+    public function __construct(
+        private readonly AuthAuditLogger $authAuditLogger,
+    ) {}
+
     public const SESSION_ADMIN_KEY = 'admin.login.two_factor.admin_id';
 
     public const SESSION_REMEMBER_KEY = 'admin.login.two_factor.remember';
@@ -54,6 +60,8 @@ class AdminLoginTwoFactorService
         $adminId = (int) $request->session()->get(self::SESSION_ADMIN_KEY);
 
         if (! $adminId) {
+            $this->authAuditLogger->logFailure('admin', 'two_factor', AuthFailureStage::TWO_FACTOR_NO_SESSION, $request);
+
             throw ValidationException::withMessages([
                 'code' => __('coin.auth.two_factor_invalid'),
             ]);
@@ -61,6 +69,8 @@ class AdminLoginTwoFactorService
 
         if ($this->challengeExpired($request)) {
             $this->clearChallenge($request);
+
+            $this->logTwoFactorFailure($request, AuthFailureStage::TWO_FACTOR_EXPIRED, $adminId);
 
             throw ValidationException::withMessages([
                 'code' => __('coin.auth.two_factor_expired'),
@@ -71,6 +81,8 @@ class AdminLoginTwoFactorService
 
         if (! Hash::check($code, (string) ($payload['code_hash'] ?? ''))) {
             RateLimiter::hit($this->throttleKey($request));
+
+            $this->logTwoFactorFailure($request, AuthFailureStage::TWO_FACTOR_CODE_INVALID, $adminId);
 
             throw ValidationException::withMessages([
                 'code' => __('coin.auth.two_factor_invalid'),
@@ -152,6 +164,12 @@ class AdminLoginTwoFactorService
         }
 
         $seconds = RateLimiter::availableIn($this->throttleKey($request));
+        $adminId = (int) $request->session()->get(self::SESSION_ADMIN_KEY);
+
+        $this->authAuditLogger->logFailure('admin', 'two_factor', AuthFailureStage::TWO_FACTOR_RATE_LIMIT, $request, array_filter([
+            'subject_id' => $adminId > 0 ? $adminId : null,
+            'retry_after_seconds' => $seconds,
+        ], fn ($value) => $value !== null));
 
         throw ValidationException::withMessages([
             'code' => __('coin.auth.login_throttle', [
@@ -159,5 +177,15 @@ class AdminLoginTwoFactorService
                 'minutes' => ceil($seconds / 60),
             ]),
         ]);
+    }
+
+    private function logTwoFactorFailure(Request $request, string $stage, int $adminId): void
+    {
+        $admin = Admin::query()->find($adminId);
+
+        $this->authAuditLogger->logFailure('admin', 'two_factor', $stage, $request, array_filter([
+            'subject_id' => $adminId > 0 ? $adminId : null,
+            'email' => $admin?->email,
+        ], fn ($value) => $value !== null));
     }
 }

@@ -14,10 +14,7 @@
         body { margin: 0; font-family: 'Sora', sans-serif; background: #0c0f14; color: #e8edf5; -webkit-font-smoothing: antialiased; }
         a { color: #9db4ff; text-decoration: none; }
         a:hover { color: #c5d4ff; }
-        .admin-shell { min-height: 100vh; }
-        .admin-topbar { display: flex; align-items: center; justify-content: space-between; padding: 16px 28px; border-bottom: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.02); }
         .admin-badge { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.14em; color: #ffb454; border: 1px solid rgba(255,180,84,0.35); padding: 4px 8px; border-radius: 6px; }
-        .admin-content { padding: 28px; max-width: 1200px; margin: 0 auto; }
         .admin-card { padding: 24px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.03); }
         button, .admin-btn { cursor: pointer; font-family: inherit; }
         .admin-btn { padding: 10px 16px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.14); background: rgba(255,255,255,0.06); color: #e8edf5; font-size: 13px; }
@@ -41,37 +38,85 @@
         </script>
     @endauth
 </head>
-<body class="admin-shell">
+<body @class(['admin-shell', 'admin-shell--sidebar' => auth('admin')->check() && ! View::hasSection('topbar')])>
     @include('partials.page-loading-overlay')
-    <div class="admin-shell">
-        @hasSection('topbar')
+
+    @hasSection('topbar')
+        <div class="admin-shell">
             @yield('topbar')
+            @include('admin.partials.flash-toast')
+            <main class="admin-content admin-content--auth">
+                @yield('content')
+            </main>
+        </div>
+    @else
+        @auth('admin')
+            <div class="admin-app">
+                <div class="admin-sidebar-overlay" id="admin-sidebar-overlay" hidden></div>
+                @include('admin.partials.sidebar')
+                <div class="admin-main">
+                    <header class="admin-main-header">
+                        <button type="button" class="admin-sidebar-toggle" id="admin-sidebar-toggle" aria-expanded="false" aria-controls="admin-sidebar">
+                            <span></span><span></span><span></span>
+                            <span class="admin-sidebar-toggle__label">{{ __('coin.admin.open_menu') }}</span>
+                        </button>
+                    </header>
+                    @include('admin.partials.flash-toast')
+                    <main class="admin-content">
+                        @yield('content')
+                    </main>
+                </div>
+            </div>
         @else
-            <header class="admin-topbar">
-                <a href="{{ route('admin.dashboard') }}" class="admin-topbar-brand">
-                    <x-brand-logo variant="horizontal" fluid class="admin-topbar-brand__logo" />
-                    <span class="admin-badge">STAFF ONLY</span>
-                </a>
-                @auth('admin')
-                    <div class="admin-topbar-actions">
-                        <form method="POST" action="{{ route('admin.logout') }}">
-                            @csrf
-                            <button type="submit" class="admin-btn">Log out</button>
-                        </form>
-                    </div>
-                @endauth
-            </header>
-        @endif
-        @include('admin.partials.flash-toast')
-        <main class="admin-content">
-            @yield('content')
-        </main>
-    </div>
+            <div class="admin-shell">
+                @include('admin.partials.flash-toast')
+                <main class="admin-content admin-content--auth">
+                    @yield('content')
+                </main>
+            </div>
+        @endauth
+    @endif
+
     @include('admin.partials.sweetalert')
     @stack('scripts')
     @auth('admin')
         @vite(['resources/js/admin-support-realtime.js'])
     @endauth
     <script src="{{ asset('coin/page-navigate.js') }}" defer></script>
+    @auth('admin')
+        @unless(View::hasSection('topbar'))
+            <script>
+                (function () {
+                    const root = document.documentElement;
+                    const toggle = document.getElementById('admin-sidebar-toggle');
+                    const overlay = document.getElementById('admin-sidebar-overlay');
+
+                    function setOpen(open) {
+                        root.classList.toggle('admin-sidebar-open', open);
+                        toggle?.setAttribute('aria-expanded', open ? 'true' : 'false');
+                        if (overlay) {
+                            overlay.hidden = ! open;
+                        }
+                    }
+
+                    toggle?.addEventListener('click', function () {
+                        setOpen(! root.classList.contains('admin-sidebar-open'));
+                    });
+
+                    overlay?.addEventListener('click', function () {
+                        setOpen(false);
+                    });
+
+                    document.getElementById('admin-sidebar')?.querySelectorAll('a.admin-sidebar-link').forEach(function (link) {
+                        link.addEventListener('click', function () {
+                            if (window.matchMedia('(max-width: 1024px)').matches) {
+                                setOpen(false);
+                            }
+                        });
+                    });
+                })();
+            </script>
+        @endunless
+    @endauth
 </body>
 </html>

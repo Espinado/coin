@@ -3,8 +3,6 @@
 @section('title', \App\Support\PlatformBrand::adminPageTitle('Epoch #'.$epoch->number))
 
 @section('content')
-    @include('admin.partials.nav')
-
     <div class="admin-card">
         <h1 style="margin:0;font-size:24px;font-weight:600;">Epoch #{{ $epoch->number }}</h1>
         <p style="margin:8px 0 0;font-size:14px;color:rgba(232,237,245,0.72);">

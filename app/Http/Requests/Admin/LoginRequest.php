@@ -3,8 +3,11 @@
 namespace App\Http\Requests\Admin;
 
 use App\Models\Admin;
+use App\Services\Auth\AuthAuditLogger;
+use App\Services\Auth\AuthFailureStage;
 use Illuminate\Auth\Events\Lockout;
 use Illuminate\Contracts\Validation\ValidationRule;
+use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -54,6 +57,8 @@ class LoginRequest extends FormRequest
         if (! $admin) {
             RateLimiter::hit($this->throttleKey());
 
+            $this->authAuditLogger()->logFailure('admin', 'credentials', AuthFailureStage::EMAIL_NOT_FOUND, $this);
+
             throw ValidationException::withMessages([
                 'email' => __('coin.auth.login_email_not_found'),
             ]);
@@ -61,6 +66,11 @@ class LoginRequest extends FormRequest
 
         if (! Hash::check($this->string('password')->toString(), (string) $admin->password)) {
             RateLimiter::hit($this->throttleKey());
+
+            $this->authAuditLogger()->logFailure('admin', 'credentials', AuthFailureStage::PASSWORD_INVALID, $this, [
+                'subject_id' => $admin->id,
+                'email' => $admin->email,
+            ]);
 
             throw ValidationException::withMessages([
                 'password' => __('coin.auth.login_password_invalid'),
@@ -106,5 +116,17 @@ class LoginRequest extends FormRequest
     public function throttleKey(): string
     {
         return Str::transliterate('admin|'.Str::lower($this->string('email')).'|'.$this->ip());
+    }
+
+    protected function failedValidation(Validator $validator): void
+    {
+        $this->authAuditLogger()->logValidationFailure('admin', 'credentials', $this, $validator);
+
+        parent::failedValidation($validator);
+    }
+
+    private function authAuditLogger(): AuthAuditLogger
+    {
+        return app(AuthAuditLogger::class);
     }
 }
