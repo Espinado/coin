@@ -861,16 +861,10 @@ class Dashboard extends Component
             return;
         }
 
-        $this->validate([
-            'profileTwoFactorPassword' => ['required', 'current_password'],
-        ], [], [
-            'profileTwoFactorPassword' => __('coin.profile.two_factor_password'),
-        ]);
-
         $this->user->update(['email_two_factor_enabled' => false]);
         $this->profileTwoFactorPassword = '';
         $this->reloadPortfolioData();
-        $this->setActionFeedback(__('coin.messages.two_factor_disabled'), 'error');
+        $this->setActionFeedback(__('coin.messages.two_factor_disabled'), 'success');
     }
 
     public function saveProfileEmail(): void

@@ -46,13 +46,22 @@ class LoginTwoFactorService
         $this->ensureIsNotRateLimited($request);
 
         $userId = (int) $request->session()->get(self::SESSION_USER_KEY);
-        $payload = Cache::get($this->cacheKey($request));
 
-        if (! $userId || ! is_array($payload) || (int) ($payload['user_id'] ?? 0) !== $userId) {
+        if (! $userId) {
             throw ValidationException::withMessages([
                 'code' => __('coin.auth.two_factor_invalid'),
             ]);
         }
+
+        if ($this->challengeExpired($request)) {
+            $this->clearChallenge($request);
+
+            throw ValidationException::withMessages([
+                'code' => __('coin.auth.two_factor_expired'),
+            ]);
+        }
+
+        $payload = Cache::get($this->cacheKey($request));
 
         if (! Hash::check($code, (string) ($payload['code_hash'] ?? ''))) {
             RateLimiter::hit($this->throttleKey($request));
@@ -80,6 +89,18 @@ class LoginTwoFactorService
     public function hasPendingChallenge(Request $request): bool
     {
         return $request->session()->has(self::SESSION_USER_KEY);
+    }
+
+    public function challengeExpired(Request $request): bool
+    {
+        if (! $this->hasPendingChallenge($request)) {
+            return false;
+        }
+
+        $userId = (int) $request->session()->get(self::SESSION_USER_KEY);
+        $payload = Cache::get($this->cacheKey($request));
+
+        return ! is_array($payload) || (int) ($payload['user_id'] ?? 0) !== $userId;
     }
 
     public function rememberFromSession(Request $request): bool
@@ -117,7 +138,7 @@ class LoginTwoFactorService
         $seconds = RateLimiter::availableIn($this->throttleKey($request));
 
         throw ValidationException::withMessages([
-            'code' => trans('auth.throttle', [
+            'code' => __('coin.auth.login_throttle', [
                 'seconds' => $seconds,
                 'minutes' => ceil($seconds / 60),
             ]),

@@ -49,7 +49,7 @@
         @else
             <header class="admin-topbar">
                 <a href="{{ route('admin.dashboard') }}" class="admin-topbar-brand">
-                    <x-brand-logo variant="horizontal" :height="44" class="admin-topbar-brand__logo" />
+                    <x-brand-logo variant="horizontal" fluid class="admin-topbar-brand__logo" />
                     <span class="admin-badge">STAFF ONLY</span>
                 </a>
                 @auth('admin')

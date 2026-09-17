@@ -51,11 +51,19 @@ class LoginRequest extends FormRequest
             ->whereRaw('LOWER(email) = ?', [$email])
             ->first();
 
-        if (! $admin || ! Hash::check($this->string('password')->toString(), (string) $admin->password)) {
+        if (! $admin) {
             RateLimiter::hit($this->throttleKey());
 
             throw ValidationException::withMessages([
-                'email' => __('coin.auth.login_failed'),
+                'email' => __('coin.auth.login_email_not_found'),
+            ]);
+        }
+
+        if (! Hash::check($this->string('password')->toString(), (string) $admin->password)) {
+            RateLimiter::hit($this->throttleKey());
+
+            throw ValidationException::withMessages([
+                'password' => __('coin.auth.login_password_invalid'),
             ]);
         }
 

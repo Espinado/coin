@@ -74,8 +74,46 @@ class AuthenticationTest extends TestCase
         ]);
 
         $this->assertGuest();
+        $response->assertSessionHasErrors('password');
+        $response->assertSee(__('coin.auth.login_password_invalid'), false);
+    }
+
+    public function test_users_can_not_authenticate_with_unknown_email(): void
+    {
+        $response = $this->post('/login', [
+            'email' => 'missing@example.com',
+            'password' => 'password',
+        ]);
+
+        $this->assertGuest();
         $response->assertSessionHasErrors('email');
-        $response->assertSee(__('coin.auth.login_failed'), false);
+        $response->assertSee(__('coin.auth.login_email_not_found'), false);
+    }
+
+    public function test_two_factor_challenge_expires_and_restarts_from_login(): void
+    {
+        Mail::fake();
+
+        $user = User::factory()->withEmailTwoFactor()->create();
+
+        $this->post('/login', [
+            'email' => $user->email,
+            'password' => 'password',
+        ])->assertRedirect(route('login.two-factor', absolute: false));
+
+        $sessionId = session()->getId();
+        \Illuminate\Support\Facades\Cache::forget('login_2fa:'.$sessionId);
+
+        $this->get(route('login.two-factor', absolute: false))
+            ->assertRedirect(route('login', absolute: false))
+            ->assertSessionHas('status', __('coin.auth.two_factor_expired'));
+
+        $this->post('/login', [
+            'email' => $user->email,
+            'password' => 'password',
+        ])->assertRedirect(route('login.two-factor', absolute: false));
+
+        Mail::assertSent(LoginVerificationMail::class, 2);
     }
 
     public function test_users_can_authenticate_with_mixed_case_email(): void

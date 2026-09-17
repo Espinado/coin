@@ -234,8 +234,9 @@
 }
 
 .admin-topbar-brand__logo {
-    height: 44px;
     width: auto;
+    height: auto;
+    max-height: 44px;
     max-width: min(280px, 58vw);
     display: block;
     object-fit: contain;

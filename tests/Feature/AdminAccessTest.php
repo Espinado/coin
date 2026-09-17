@@ -80,7 +80,7 @@ class AdminAccessTest extends TestCase
         ]);
 
         $response->assertSessionHasErrors('email');
-        $response->assertSee(__('coin.auth.login_failed'), false);
+        $response->assertSee(__('coin.auth.login_email_not_found'), false);
     }
 
     public function test_admin_can_sign_in_and_access_dashboard(): void

@@ -20,8 +20,6 @@
                 </div>
             @endif
 
-            @include('partials.login-errors')
-
             <form method="POST" action="{{ route('admin.login.two-factor.store') }}" style="margin-top:24px;display:flex;flex-direction:column;gap:16px;">
                 @csrf
 

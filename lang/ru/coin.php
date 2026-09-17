@@ -896,7 +896,8 @@ return [
         'two_factor_resend' => 'Отправить код повторно',
         'two_factor_resent' => 'Новый код отправлен на ваш e-mail.',
         'two_factor_back' => 'Вернуться ко входу',
-        'two_factor_invalid' => 'Неверный или просроченный код.',
+        'two_factor_invalid' => 'Неверный код подтверждения.',
+        'two_factor_expired' => 'Время ввода кода истекло. Вернитесь на страницу входа и авторизуйтесь заново — мы отправим новый код.',
         'two_factor_mail_subject' => 'Код для входа в CloudFlops',
         'two_factor_mail_title' => 'Подтверждение входа',
         'two_factor_mail_intro' => 'Здравствуйте, :name!',
@@ -908,6 +909,8 @@ return [
         'admin_login' => 'Вход для администратора',
         'admin_login_hint' => 'Отдельный доступ для персонала на :domain. Регистрация и смена пароля — только по ссылке из e-mail-приглашения.',
         'login_failed' => 'Неверный e-mail или пароль.',
+        'login_email_not_found' => 'Аккаунт с таким e-mail не найден.',
+        'login_password_invalid' => 'Неверный пароль.',
         'login_throttle' => 'Слишком много попыток входа. Повторите через :seconds сек.',
     ],
 

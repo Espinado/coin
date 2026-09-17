@@ -52,13 +52,22 @@ class AdminLoginTwoFactorService
         $this->ensureIsNotRateLimited($request);
 
         $adminId = (int) $request->session()->get(self::SESSION_ADMIN_KEY);
-        $payload = Cache::get($this->cacheKey($request));
 
-        if (! $adminId || ! is_array($payload) || (int) ($payload['admin_id'] ?? 0) !== $adminId) {
+        if (! $adminId) {
             throw ValidationException::withMessages([
                 'code' => __('coin.auth.two_factor_invalid'),
             ]);
         }
+
+        if ($this->challengeExpired($request)) {
+            $this->clearChallenge($request);
+
+            throw ValidationException::withMessages([
+                'code' => __('coin.auth.two_factor_expired'),
+            ]);
+        }
+
+        $payload = Cache::get($this->cacheKey($request));
 
         if (! Hash::check($code, (string) ($payload['code_hash'] ?? ''))) {
             RateLimiter::hit($this->throttleKey($request));
@@ -87,6 +96,18 @@ class AdminLoginTwoFactorService
     public function hasPendingChallenge(Request $request): bool
     {
         return $request->session()->has(self::SESSION_ADMIN_KEY);
+    }
+
+    public function challengeExpired(Request $request): bool
+    {
+        if (! $this->hasPendingChallenge($request)) {
+            return false;
+        }
+
+        $adminId = (int) $request->session()->get(self::SESSION_ADMIN_KEY);
+        $payload = Cache::get($this->cacheKey($request));
+
+        return ! is_array($payload) || (int) ($payload['admin_id'] ?? 0) !== $adminId;
     }
 
     public function rememberFromSession(Request $request): bool

@@ -7,6 +7,7 @@ use App\Services\AdminLoginTwoFactorService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
 class TwoFactorLoginController extends Controller
@@ -15,6 +16,12 @@ class TwoFactorLoginController extends Controller
     {
         if (! $twoFactor->hasPendingChallenge($request)) {
             return redirect()->route('admin.login');
+        }
+
+        if ($twoFactor->challengeExpired($request)) {
+            $twoFactor->clearChallenge($request);
+
+            return redirect()->route('admin.login')->with('status', __('coin.auth.two_factor_expired'));
         }
 
         $admin = $twoFactor->pendingAdmin($request);
@@ -36,13 +43,28 @@ class TwoFactorLoginController extends Controller
             return redirect()->route('admin.login');
         }
 
+        if ($twoFactor->challengeExpired($request)) {
+            $twoFactor->clearChallenge($request);
+
+            return redirect()->route('admin.login')->with('status', __('coin.auth.two_factor_expired'));
+        }
+
         $request->validate([
             'code' => ['required', 'string', 'digits:6'],
         ], [], [
             'code' => __('coin.auth.two_factor_code'),
         ]);
 
-        $admin = $twoFactor->verify($request->string('code')->toString(), $request);
+        try {
+            $admin = $twoFactor->verify($request->string('code')->toString(), $request);
+        } catch (ValidationException $exception) {
+            if (($exception->errors()['code'][0] ?? null) === __('coin.auth.two_factor_expired')) {
+                return redirect()->route('admin.login')->with('status', __('coin.auth.two_factor_expired'));
+            }
+
+            throw $exception;
+        }
+
         $remember = $twoFactor->rememberFromSession($request);
         $postLoginMessageKey = $twoFactor->pullPostLoginMessageKey($request);
 
@@ -66,6 +88,12 @@ class TwoFactorLoginController extends Controller
     {
         if (! $twoFactor->hasPendingChallenge($request)) {
             return redirect()->route('admin.login');
+        }
+
+        if ($twoFactor->challengeExpired($request)) {
+            $twoFactor->clearChallenge($request);
+
+            return redirect()->route('admin.login')->with('status', __('coin.auth.two_factor_expired'));
         }
 
         $admin = $twoFactor->pendingAdmin($request);
