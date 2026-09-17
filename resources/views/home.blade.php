@@ -25,7 +25,6 @@
 <body>
 @include('partials.page-loading-overlay')
 <script src="{{ asset('coin/page-navigate.js') }}" defer></script>
-@verbatim
 <x-dc>
 <helmet>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -43,12 +42,12 @@
 <div class="coin-app" style="margin: 0 auto; position: relative; background: #061423; color: #e6f4fa; font-family: 'Sora', 'Helvetica Neue', Helvetica, sans-serif; overflow: hidden;">
   <div style="position: absolute; top: -240px; right: -80px; width: 820px; height: 660px; border-radius: 50%; background: radial-gradient(closest-side, oklch(0.62 0.13 198 / 0.28), transparent 72%); filter: blur(30px); pointer-events: none;"></div>
 
-  <div class="coin-nav-overlay" onClick="{{ closeMenu }}"></div>
+  <div class="coin-nav-overlay" onClick="@{{ closeMenu }}"></div>
   <header class="coin-header" data-screen-label="Header" style="position: relative; z-index: 20; display: flex; align-items: center; justify-content: space-between; padding: 22px 72px; border-bottom: 1px solid rgba(150,235,250,0.1); background: rgba(6,20,35,0.75); backdrop-filter: blur(14px);">
     <div class="coin-header-brand" style="display: flex; align-items: center;">
       <img src="/cloudflops/logo-horizontal.png" alt="CloudFlops" class="coin-brand-logo" />
     </div>
-    <button type="button" class="coin-burger" onClick="{{ toggleMenu }}" aria-label="Open menu"><span></span><span></span><span></span></button>
+    <button type="button" class="coin-burger" onClick="@{{ toggleMenu }}" aria-label="Open menu"><span></span><span></span><span></span></button>
     <nav class="coin-nav coin-nav-desktop" style="display: flex; align-items: center; gap: 30px;">
       <a href="#product" style="font-size: 14px; color: rgba(230,244,250,0.78);">Продукт</a>
       <a href="#how" style="font-size: 14px; color: rgba(230,244,250,0.78);">Как это работает</a>
@@ -58,12 +57,12 @@
       <a href="#faq" style="font-size: 14px; color: rgba(230,244,250,0.78);">Вопросы</a>
     </nav>
     <nav class="coin-nav coin-nav-mobile">
-      <a href="#product" onClick="{{ closeMenu }}" style="font-size: 14px; color: rgba(230,244,250,0.78);">Product</a>
-      <a href="#how" onClick="{{ closeMenu }}" style="font-size: 14px; color: rgba(230,244,250,0.78);">How it works</a>
-      <a href="#plans" onClick="{{ closeMenu }}" style="font-size: 14px; color: rgba(230,244,250,0.78);">Plans</a>
-      <a href="#infra" onClick="{{ closeMenu }}" style="font-size: 14px; color: rgba(230,244,250,0.78);">Security</a>
-      <a href="/dashboard" onClick="{{ closeMenu }}" style="font-size: 14px; color: rgba(230,244,250,0.78);">Dashboard</a>
-      <a href="#faq" onClick="{{ closeMenu }}" style="font-size: 14px; color: rgba(230,244,250,0.78);">FAQ</a>
+      <a href="#product" onClick="@{{ closeMenu }}" style="font-size: 14px; color: rgba(230,244,250,0.78);">Product</a>
+      <a href="#how" onClick="@{{ closeMenu }}" style="font-size: 14px; color: rgba(230,244,250,0.78);">How it works</a>
+      <a href="#plans" onClick="@{{ closeMenu }}" style="font-size: 14px; color: rgba(230,244,250,0.78);">Plans</a>
+      <a href="#infra" onClick="@{{ closeMenu }}" style="font-size: 14px; color: rgba(230,244,250,0.78);">Security</a>
+      <a href="/dashboard" onClick="@{{ closeMenu }}" style="font-size: 14px; color: rgba(230,244,250,0.78);">Dashboard</a>
+      <a href="#faq" onClick="@{{ closeMenu }}" style="font-size: 14px; color: rgba(230,244,250,0.78);">FAQ</a>
     </nav>
     <div class="coin-header-actions" style="display: flex; align-items: center; gap: 12px;">
       <a href="/dashboard" style="padding: 11px 22px; border-radius: 11px; border: 1px solid oklch(0.86 0.11 195 / 0.5); background: linear-gradient(140deg, oklch(0.86 0.12 192), oklch(0.66 0.13 205)); color: #04121f; font-family: inherit; font-size: 14px; font-weight: 600; cursor: pointer;">Личный кабинет</a>
@@ -78,13 +77,9 @@
       <h1 style="margin: 26px 0 0; font-size: 66px; line-height: 1.06; letter-spacing: -0.04em; font-weight: 600; color: #f0fbff;">Инвестируйте USDT и получайте прибыль каждый день</h1>
       <p style="margin: 24px 0 0; max-width: 520px; font-size: 17px; line-height: 1.62; color: rgba(230,244,250,0.72);">Пополните счёт USDT, купите план с фиксированной доходностью и следите за прибылью в личном кабинете. Тело возвращается в конце срока.</p>
       <div style="display: flex; gap: 14px; margin-top: 36px;">
-@endverbatim
 @include('partials.landing-hero-cta')
-@verbatim
       </div>
-@endverbatim
 @include('partials.landing-hero-stats', ['activePlanCount' => $activePlanCount])
-@verbatim
     </div>
 
     <div style="position: relative;">
@@ -208,9 +203,7 @@
     </div>
   </section>
 
-@endverbatim
 @include('partials.landing-plans-section', ['plans' => $plans, 'landingPlansPayload' => $landingPlansPayload])
-@verbatim
 
   <section id="product" data-screen-label="Benefits" style="position: relative; z-index: 5; padding: 48px 72px; border-top: 1px solid rgba(150,235,250,0.08);">
     <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.16em; color: oklch(0.88 0.11 195);">WHY CloudFlops</div>
@@ -258,11 +251,7 @@
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 36px; max-width: 460px;">
           <div style="padding: 20px; border-radius: 16px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.04);">
             <div style="font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.14em; color: rgba(230,244,250,0.7);">ACTIVE PLANS</div>
-            <div style="margin-top: 12px; font-size: 26px; font-weight: 600; letter-spacing: -0.03em;">
-@endverbatim
-@include('partials.landing-infra-plan-count', ['activePlanCount' => $activePlanCount])
-@verbatim
-            </div>
+            <div style="margin-top: 12px; font-size: 26px; font-weight: 600; letter-spacing: -0.03em;">{{ $activePlanCount }}</div>
           </div>
           <div style="padding: 20px; border-radius: 16px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.04);">
             <div style="font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.14em; color: rgba(230,244,250,0.7);">TOTAL LOCKED</div>
@@ -446,68 +435,66 @@
       <div>
         <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.16em; color: oklch(0.88 0.11 195);">FAQ</div>
         <h2 style="margin: 18px 0 0; font-size: 42px; line-height: 1.08; letter-spacing: -0.035em; font-weight: 600; color: #f0fbff;">Frequently asked questions</h2>
-@endverbatim
 @include('partials.landing-faq-contact')
-@verbatim
       </div>
       <div>
         <div style="border-top: 1px solid rgba(150,235,250,0.12);">
-          <button onClick="{{ toggle0 }}" style="width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 22px 2px; background: none; border: 0; text-align: left; font-family: inherit; font-size: 17.5px; font-weight: 500; letter-spacing: -0.02em; color: #f0fbff; cursor: pointer;">
+          <button onClick="@{{ toggle0 }}" style="width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 22px 2px; background: none; border: 0; text-align: left; font-family: inherit; font-size: 17.5px; font-weight: 500; letter-spacing: -0.02em; color: #f0fbff; cursor: pointer;">
             <span>What is CloudFlops?</span>
-            <sc-if value="{{ open0 }}" hint-placeholder-val="{{ true }}"><span style="font-family: 'JetBrains Mono', monospace; font-size: 18px; color: oklch(0.88 0.11 195); flex: none;">−</span></sc-if>
-            <sc-if value="{{ closed0 }}" hint-placeholder-val="{{ false }}"><span style="font-family: 'JetBrains Mono', monospace; font-size: 18px; color: rgba(230,244,250,0.6); flex: none;">+</span></sc-if>
+            <sc-if value="@{{ open0 }}" hint-placeholder-val="@{{ true }}"><span style="font-family: 'JetBrains Mono', monospace; font-size: 18px; color: oklch(0.88 0.11 195); flex: none;">−</span></sc-if>
+            <sc-if value="@{{ closed0 }}" hint-placeholder-val="@{{ false }}"><span style="font-family: 'JetBrains Mono', monospace; font-size: 18px; color: rgba(230,244,250,0.6); flex: none;">+</span></sc-if>
           </button>
-          <sc-if value="{{ open0 }}" hint-placeholder-val="{{ true }}">
+          <sc-if value="@{{ open0 }}" hint-placeholder-val="@{{ true }}">
             <p style="margin: 0; padding: 0 80px 24px 2px; font-size: 15px; line-height: 1.65; color: rgba(230,244,250,0.72);">An investment platform where you top up USDT, buy a plan with fixed APR, and receive daily profit to your available balance.</p>
           </sc-if>
         </div>
         <div style="border-top: 1px solid rgba(150,235,250,0.12);">
-          <button onClick="{{ toggle1 }}" style="width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 22px 2px; background: none; border: 0; text-align: left; font-family: inherit; font-size: 17.5px; font-weight: 500; letter-spacing: -0.02em; color: #f0fbff; cursor: pointer;">
+          <button onClick="@{{ toggle1 }}" style="width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 22px 2px; background: none; border: 0; text-align: left; font-family: inherit; font-size: 17.5px; font-weight: 500; letter-spacing: -0.02em; color: #f0fbff; cursor: pointer;">
             <span>How do plans work?</span>
-            <sc-if value="{{ open1 }}" hint-placeholder-val="{{ false }}"><span style="font-family: 'JetBrains Mono', monospace; font-size: 18px; color: oklch(0.88 0.11 195); flex: none;">−</span></sc-if>
-            <sc-if value="{{ closed1 }}" hint-placeholder-val="{{ true }}"><span style="font-family: 'JetBrains Mono', monospace; font-size: 18px; color: rgba(230,244,250,0.6); flex: none;">+</span></sc-if>
+            <sc-if value="@{{ open1 }}" hint-placeholder-val="@{{ false }}"><span style="font-family: 'JetBrains Mono', monospace; font-size: 18px; color: oklch(0.88 0.11 195); flex: none;">−</span></sc-if>
+            <sc-if value="@{{ closed1 }}" hint-placeholder-val="@{{ true }}"><span style="font-family: 'JetBrains Mono', monospace; font-size: 18px; color: rgba(230,244,250,0.6); flex: none;">+</span></sc-if>
           </button>
-          <sc-if value="{{ open1 }}" hint-placeholder-val="{{ false }}">
+          <sc-if value="@{{ open1 }}" hint-placeholder-val="@{{ false }}">
             <p style="margin: 0; padding: 0 80px 24px 2px; font-size: 15px; line-height: 1.65; color: rgba(230,244,250,0.72);">A plan defines minimum investment, APR, and contract term. When you buy a plan, principal is locked until maturity.</p>
           </sc-if>
         </div>
         <div style="border-top: 1px solid rgba(150,235,250,0.12);">
-          <button onClick="{{ toggle2 }}" style="width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 22px 2px; background: none; border: 0; text-align: left; font-family: inherit; font-size: 17.5px; font-weight: 500; letter-spacing: -0.02em; color: #f0fbff; cursor: pointer;">
+          <button onClick="@{{ toggle2 }}" style="width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 22px 2px; background: none; border: 0; text-align: left; font-family: inherit; font-size: 17.5px; font-weight: 500; letter-spacing: -0.02em; color: #f0fbff; cursor: pointer;">
             <span>Where does profit come from?</span>
-            <sc-if value="{{ open2 }}" hint-placeholder-val="{{ false }}"><span style="font-family: 'JetBrains Mono', monospace; font-size: 18px; color: oklch(0.88 0.11 195); flex: none;">−</span></sc-if>
-            <sc-if value="{{ closed2 }}" hint-placeholder-val="{{ true }}"><span style="font-family: 'JetBrains Mono', monospace; font-size: 18px; color: rgba(230,244,250,0.6); flex: none;">+</span></sc-if>
+            <sc-if value="@{{ open2 }}" hint-placeholder-val="@{{ false }}"><span style="font-family: 'JetBrains Mono', monospace; font-size: 18px; color: oklch(0.88 0.11 195); flex: none;">−</span></sc-if>
+            <sc-if value="@{{ closed2 }}" hint-placeholder-val="@{{ true }}"><span style="font-family: 'JetBrains Mono', monospace; font-size: 18px; color: rgba(230,244,250,0.6); flex: none;">+</span></sc-if>
           </button>
-          <sc-if value="{{ open2 }}" hint-placeholder-val="{{ false }}">
+          <sc-if value="@{{ open2 }}" hint-placeholder-val="@{{ false }}">
             <p style="margin: 0; padding: 0 80px 24px 2px; font-size: 15px; line-height: 1.65; color: rgba(230,244,250,0.72);">Daily profit is calculated as principal × APR / 365 and credited to your available balance. At maturity, principal returns to available balance.</p>
           </sc-if>
         </div>
         <div style="border-top: 1px solid rgba(150,235,250,0.12);">
-          <button onClick="{{ toggle3 }}" style="width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 22px 2px; background: none; border: 0; text-align: left; font-family: inherit; font-size: 17.5px; font-weight: 500; letter-spacing: -0.02em; color: #f0fbff; cursor: pointer;">
+          <button onClick="@{{ toggle3 }}" style="width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 22px 2px; background: none; border: 0; text-align: left; font-family: inherit; font-size: 17.5px; font-weight: 500; letter-spacing: -0.02em; color: #f0fbff; cursor: pointer;">
             <span>How do referrals work?</span>
-            <sc-if value="{{ open3 }}" hint-placeholder-val="{{ false }}"><span style="font-family: 'JetBrains Mono', monospace; font-size: 18px; color: oklch(0.88 0.11 195); flex: none;">−</span></sc-if>
-            <sc-if value="{{ closed3 }}" hint-placeholder-val="{{ true }}"><span style="font-family: 'JetBrains Mono', monospace; font-size: 18px; color: rgba(230,244,250,0.6); flex: none;">+</span></sc-if>
+            <sc-if value="@{{ open3 }}" hint-placeholder-val="@{{ false }}"><span style="font-family: 'JetBrains Mono', monospace; font-size: 18px; color: oklch(0.88 0.11 195); flex: none;">−</span></sc-if>
+            <sc-if value="@{{ closed3 }}" hint-placeholder-val="@{{ true }}"><span style="font-family: 'JetBrains Mono', monospace; font-size: 18px; color: rgba(230,244,250,0.6); flex: none;">+</span></sc-if>
           </button>
-          <sc-if value="{{ open3 }}" hint-placeholder-val="{{ false }}">
+          <sc-if value="@{{ open3 }}" hint-placeholder-val="@{{ false }}">
             <p style="margin: 0; padding: 0 80px 24px 2px; font-size: 15px; line-height: 1.65; color: rgba(230,244,250,0.72);">When someone you invited purchases a plan, you receive a one-time commission (default 20%) credited to your available balance.</p>
           </sc-if>
         </div>
         <div style="border-top: 1px solid rgba(150,235,250,0.12);">
-          <button onClick="{{ toggle4 }}" style="width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 22px 2px; background: none; border: 0; text-align: left; font-family: inherit; font-size: 17.5px; font-weight: 500; letter-spacing: -0.02em; color: #f0fbff; cursor: pointer;">
+          <button onClick="@{{ toggle4 }}" style="width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 22px 2px; background: none; border: 0; text-align: left; font-family: inherit; font-size: 17.5px; font-weight: 500; letter-spacing: -0.02em; color: #f0fbff; cursor: pointer;">
             <span>How do I request a payout?</span>
-            <sc-if value="{{ open4 }}" hint-placeholder-val="{{ false }}"><span style="font-family: 'JetBrains Mono', monospace; font-size: 18px; color: oklch(0.88 0.11 195); flex: none;">−</span></sc-if>
-            <sc-if value="{{ closed4 }}" hint-placeholder-val="{{ true }}"><span style="font-family: 'JetBrains Mono', monospace; font-size: 18px; color: rgba(230,244,250,0.6); flex: none;">+</span></sc-if>
+            <sc-if value="@{{ open4 }}" hint-placeholder-val="@{{ false }}"><span style="font-family: 'JetBrains Mono', monospace; font-size: 18px; color: oklch(0.88 0.11 195); flex: none;">−</span></sc-if>
+            <sc-if value="@{{ closed4 }}" hint-placeholder-val="@{{ true }}"><span style="font-family: 'JetBrains Mono', monospace; font-size: 18px; color: rgba(230,244,250,0.6); flex: none;">+</span></sc-if>
           </button>
-          <sc-if value="{{ open4 }}" hint-placeholder-val="{{ false }}">
+          <sc-if value="@{{ open4 }}" hint-placeholder-val="@{{ false }}">
             <p style="margin: 0; padding: 0 80px 24px 2px; font-size: 15px; line-height: 1.65; color: rgba(230,244,250,0.72);">Submit a request in the Wallet section of your dashboard. Fee and processing time are shown before confirmation. Specific terms are subject to change.</p>
           </sc-if>
         </div>
         <div style="border-top: 1px solid rgba(150,235,250,0.12); border-bottom: 1px solid rgba(150,235,250,0.12);">
-          <button onClick="{{ toggle5 }}" style="width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 22px 2px; background: none; border: 0; text-align: left; font-family: inherit; font-size: 17.5px; font-weight: 500; letter-spacing: -0.02em; color: #f0fbff; cursor: pointer;">
+          <button onClick="@{{ toggle5 }}" style="width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 22px 2px; background: none; border: 0; text-align: left; font-family: inherit; font-size: 17.5px; font-weight: 500; letter-spacing: -0.02em; color: #f0fbff; cursor: pointer;">
             <span>What can I see in the dashboard?</span>
-            <sc-if value="{{ open5 }}" hint-placeholder-val="{{ false }}"><span style="font-family: 'JetBrains Mono', monospace; font-size: 18px; color: oklch(0.88 0.11 195); flex: none;">−</span></sc-if>
-            <sc-if value="{{ closed5 }}" hint-placeholder-val="{{ true }}"><span style="font-family: 'JetBrains Mono', monospace; font-size: 18px; color: rgba(230,244,250,0.6); flex: none;">+</span></sc-if>
+            <sc-if value="@{{ open5 }}" hint-placeholder-val="@{{ false }}"><span style="font-family: 'JetBrains Mono', monospace; font-size: 18px; color: oklch(0.88 0.11 195); flex: none;">−</span></sc-if>
+            <sc-if value="@{{ closed5 }}" hint-placeholder-val="@{{ true }}"><span style="font-family: 'JetBrains Mono', monospace; font-size: 18px; color: rgba(230,244,250,0.6); flex: none;">+</span></sc-if>
           </button>
-          <sc-if value="{{ open5 }}" hint-placeholder-val="{{ false }}">
+          <sc-if value="@{{ open5 }}" hint-placeholder-val="@{{ false }}">
             <p style="margin: 0; padding: 0 80px 24px 2px; font-size: 15px; line-height: 1.65; color: rgba(230,244,250,0.72);">Balance, investments, profit history, wallet, payouts, referrals, and support.</p>
           </sc-if>
         </div>
@@ -521,9 +508,7 @@
       <h2 style="margin: 0 auto; max-width: 720px; font-size: 56px; line-height: 1.06; letter-spacing: -0.04em; font-weight: 600; color: #f2fdff;">Start investing today</h2>
       <p style="margin: 22px auto 0; max-width: 500px; font-size: 16.5px; line-height: 1.6; color: rgba(230,244,250,0.74);">Top up USDT, buy a plan, and track daily profit in your dashboard.</p>
       <div style="display: flex; justify-content: center; gap: 14px; margin-top: 36px;">
-@endverbatim
 @include('partials.landing-final-cta')
-@verbatim
       </div>
     </div>
   </section>
@@ -558,9 +543,7 @@
         <div style="display: flex; flex-direction: column; gap: 11px; margin-top: 16px; font-size: 13.5px;">
           <a href="#faq" style="color: rgba(230,244,250,0.78);">FAQ</a>
           <a href="#support" style="color: rgba(230,244,250,0.78);">Help</a>
-@endverbatim
 @include('partials.landing-footer-contact')
-@verbatim
         </div>
       </div>
       <div>
@@ -602,7 +585,6 @@ class Component extends DCLogic {
   }
 }
 </script>
-@endverbatim
 
 @livewire('guest-support-chat')
 @livewireScripts
