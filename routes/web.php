@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\GuestBroadcastAuthController;
+use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReferralInviteController;
 use App\Http\Controllers\ReverbDebugLogController;
@@ -12,7 +13,7 @@ use Illuminate\Support\Facades\Route;
 Route::domain(config('coin.user_domain'))
     ->middleware('user.domain')
     ->group(function () {
-        Route::view('/', 'home')->name('home');
+        Route::get('/', HomeController::class)->name('home');
 
         Route::get('/r/{code}', ReferralInviteController::class)->name('referral.invite');
 

@@ -15,6 +15,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="{{ asset('coin/responsive.css') }}?v={{ file_exists(public_path('coin/responsive.css')) ? filemtime(public_path('coin/responsive.css')) : 1 }}" />
     <script src="{{ asset('coin/mobile.js') }}" defer></script>
+    <script src="{{ asset('coin/landing-plans.js') }}?v={{ file_exists(public_path('coin/landing-plans.js')) ? filemtime(public_path('coin/landing-plans.js')) : 1 }}" defer></script>
     <style>
       body { margin: 0; background: #04101c; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
       .coin-app { width: 100%; max-width: 1440px; margin: 0 auto; box-sizing: border-box; overflow-x: hidden; }
@@ -82,7 +83,7 @@
       </div>
       <div style="display: flex; gap: 36px; margin-top: 44px; padding-top: 26px; border-top: 1px solid rgba(150,235,250,0.1);">
         <div>
-          <div style="font-family: 'JetBrains Mono', monospace; font-size: 19px; color: #f0fbff;">7</div>
+          <div style="font-family: 'JetBrains Mono', monospace; font-size: 19px; color: #f0fbff;">@endverbatim{{ $activePlanCount }}@verbatim</div>
           <div style="margin-top: 6px; font-size: 13px; color: rgba(230,244,250,0.7);">investment plans</div>
         </div>
         <div>
@@ -217,90 +218,9 @@
     </div>
   </section>
 
-  <section id="plans" data-screen-label="Plans" style="position: relative; z-index: 5; padding: 100px 72px; border-top: 1px solid rgba(150,235,250,0.08);">
-    <div style="text-align: center; max-width: 620px; margin: 0 auto;">
-      <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.16em; color: oklch(0.88 0.11 195);">PLANS</div>
-      <h2 style="margin: 18px 0 0; font-size: 46px; line-height: 1.08; letter-spacing: -0.035em; font-weight: 600; color: #f0fbff;">Choose your investment plan</h2>
-      <p style="margin: 18px 0 0; font-size: 16px; line-height: 1.6; color: rgba(230,244,250,0.72);">Fixed APR plans with transparent daily profit. Estimates are indicative; terms apply at purchase.</p>
-    </div>
-
-    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 48px;">
-      <div style="padding: 30px; border-radius: 20px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.04); display: flex; flex-direction: column;">
-        <div style="font-size: 19px; font-weight: 600; letter-spacing: -0.02em;">Node</div>
-        <div style="margin-top: 5px; font-size: 13.5px; color: rgba(230,244,250,0.7);">Starter volume</div>
-        <div style="margin-top: 22px; display: flex; align-items: baseline; gap: 8px;">
-          <span style="font-size: 34px; font-weight: 600; letter-spacing: -0.035em;">250 USDT</span>
-          <span style="font-size: 12.5px; color: rgba(230,244,250,0.68);">placeholder</span>
-        </div>
-        <div style="height: 1px; background: rgba(150,235,250,0.12); margin: 24px 0;"></div>
-        <div style="display: flex; flex-direction: column; gap: 14px; font-size: 13.5px;">
-          <div style="display: flex; justify-content: space-between; gap: 14px;"><span style="color: rgba(230,244,250,0.72); min-width: 0;">Min investment</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">250 USDT</span></div>
-          <div style="display: flex; justify-content: space-between; gap: 14px;"><span style="color: rgba(230,244,250,0.72); min-width: 0;">Term</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">90 days</span></div>
-          <div style="display: flex; justify-content: space-between; gap: 14px;"><span style="color: rgba(230,244,250,0.72); min-width: 0;">APR</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">12%</span></div>
-          <div style="display: flex; justify-content: space-between; gap: 14px;"><span style="color: rgba(230,244,250,0.72); min-width: 0;">Daily profit est.</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">~0.08 / day</span></div>
-          <div style="display: flex; justify-content: space-between; gap: 14px;"><span style="color: rgba(230,244,250,0.72); min-width: 0;">Infrastructure</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">Shared pool</span></div>
-        </div>
-        <button style="margin-top: 28px; padding: 12px; border-radius: 11px; border: 1px solid rgba(150,235,250,0.2); background: rgba(150,235,250,0.06); color: #e6f4fa; font-family: inherit; font-size: 14px; font-weight: 500; cursor: pointer;">Select</button>
-      </div>
-
-      <div style="position: relative; padding: 30px; border-radius: 20px; border: 1px solid oklch(0.86 0.11 195 / 0.36); background: linear-gradient(170deg, oklch(0.6 0.13 200 / 0.22), rgba(150,235,250,0.03)); display: flex; flex-direction: column; box-shadow: 0 30px 70px -44px oklch(0.7 0.14 195 / 0.9);">
-        <div style="position: absolute; top: -10px; left: 30px; padding: 4px 11px; border-radius: 7px; background: linear-gradient(140deg, oklch(0.88 0.12 192), oklch(0.66 0.13 205)); font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.12em; color: #04121f;">POPULAR</div>
-        <div style="font-size: 19px; font-weight: 600; letter-spacing: -0.02em;">Core</div>
-        <div style="margin-top: 5px; font-size: 13.5px; color: rgba(230,244,250,0.74);">Best balance</div>
-        <div style="margin-top: 22px; display: flex; align-items: baseline; gap: 8px;">
-          <span style="font-size: 34px; font-weight: 600; letter-spacing: -0.035em;">1,100 USDT</span>
-          <span style="font-size: 12.5px; color: rgba(230,244,250,0.7);">placeholder</span>
-        </div>
-        <div style="height: 1px; background: rgba(150,235,250,0.16); margin: 24px 0;"></div>
-        <div style="display: flex; flex-direction: column; gap: 14px; font-size: 13.5px;">
-          <div style="display: flex; justify-content: space-between; gap: 14px;"><span style="color: rgba(230,244,250,0.74); min-width: 0;">Min investment</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">1,100 USDT</span></div>
-          <div style="display: flex; justify-content: space-between; gap: 14px;"><span style="color: rgba(230,244,250,0.74); min-width: 0;">Term</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">180 days</span></div>
-          <div style="display: flex; justify-content: space-between; gap: 14px;"><span style="color: rgba(230,244,250,0.74); min-width: 0;">APR</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">15%</span></div>
-          <div style="display: flex; justify-content: space-between; gap: 14px;"><span style="color: rgba(230,244,250,0.74); min-width: 0;">Daily profit est.</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">~0.45 / day</span></div>
-          <div style="display: flex; justify-content: space-between; gap: 14px;"><span style="color: rgba(230,244,250,0.74); min-width: 0;">Infrastructure</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">Priority pool</span></div>
-        </div>
-        <button style="margin-top: 28px; padding: 12px; border-radius: 11px; border: 1px solid oklch(0.86 0.11 195 / 0.5); background: linear-gradient(140deg, oklch(0.86 0.12 192), oklch(0.66 0.13 205)); color: #04121f; font-family: inherit; font-size: 14px; font-weight: 600; cursor: pointer;">Select</button>
-      </div>
-
-      <div style="padding: 30px; border-radius: 20px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.04); display: flex; flex-direction: column;">
-        <div style="font-size: 19px; font-weight: 600; letter-spacing: -0.02em;">Cluster</div>
-        <div style="margin-top: 5px; font-size: 13.5px; color: rgba(230,244,250,0.7);">Maximum volume</div>
-        <div style="margin-top: 22px; display: flex; align-items: baseline; gap: 8px;">
-          <span style="font-size: 34px; font-weight: 600; letter-spacing: -0.035em;">3,400 USDT</span>
-          <span style="font-size: 12.5px; color: rgba(230,244,250,0.68);">placeholder</span>
-        </div>
-        <div style="height: 1px; background: rgba(150,235,250,0.12); margin: 24px 0;"></div>
-        <div style="display: flex; flex-direction: column; gap: 14px; font-size: 13.5px;">
-          <div style="display: flex; justify-content: space-between; gap: 14px;"><span style="color: rgba(230,244,250,0.72); min-width: 0;">Min investment</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">3,400 USDT</span></div>
-          <div style="display: flex; justify-content: space-between; gap: 14px;"><span style="color: rgba(230,244,250,0.72); min-width: 0;">Term</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">365 days</span></div>
-          <div style="display: flex; justify-content: space-between; gap: 14px;"><span style="color: rgba(230,244,250,0.72); min-width: 0;">APR</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">18%</span></div>
-          <div style="display: flex; justify-content: space-between; gap: 14px;"><span style="color: rgba(230,244,250,0.72); min-width: 0;">Daily profit est.</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">~1.68 / day</span></div>
-          <div style="display: flex; justify-content: space-between; gap: 14px;"><span style="color: rgba(230,244,250,0.72); min-width: 0;">Infrastructure</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">Dedicated pods</span></div>
-        </div>
-        <button style="margin-top: 28px; padding: 12px; border-radius: 11px; border: 1px solid rgba(150,235,250,0.2); background: rgba(150,235,250,0.06); color: #e6f4fa; font-family: inherit; font-size: 14px; font-weight: 500; cursor: pointer;">Select</button>
-      </div>
-    </div>
-
-    <div style="margin-top: 20px; padding: 32px 36px; border-radius: 20px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.035); display: grid; grid-template-columns: 1fr 320px; gap: 48px; align-items: center;">
-      <div>
-        <div style="font-size: 20px; font-weight: 600; letter-spacing: -0.02em;">Profit estimate</div>
-        <div style="margin-top: 22px; display: flex; align-items: baseline; justify-content: space-between;">
-          <span style="font-size: 13.5px; color: rgba(230,244,250,0.74);">Investment amount</span>
-          <span style="font-family: 'JetBrains Mono', monospace; font-size: 18px; color: #f0fbff;">{{ powerLabel }} <span style="font-size: 12px; color: rgba(230,244,250,0.7);">USDT</span></span>
-        </div>
-        <input type="range" min="100" max="10000" step="100" value="{{ power }}" onChange="{{ onPower }}" style="width: 100%; margin-top: 16px; height: 4px; cursor: pointer;" />
-        <div style="display: flex; justify-content: space-between; margin-top: 8px; font-family: 'JetBrains Mono', monospace; font-size: 10px; color: rgba(230,244,250,0.65);"><span>100</span><span>5 000</span><span>10 000</span></div>
-        <p style="margin: 20px 0 0; font-size: 12px; line-height: 1.55; color: rgba(230,244,250,0.65);">This calculation is indicative only. Actual profit follows plan APR; returns are not guaranteed.</p>
-      </div>
-      <div style="padding: 24px; border-radius: 16px; border: 1px solid rgba(150,235,250,0.16); background: linear-gradient(170deg, rgba(20,55,80,0.75), rgba(6,20,35,0.9));">
-        <div style="font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.14em; color: rgba(230,244,250,0.72);">EST. PER DAY</div>
-        <div style="margin-top: 12px; font-family: 'JetBrains Mono', monospace; font-size: 32px; color: oklch(0.9 0.12 192);">{{ daily }}</div>
-        <div style="height: 1px; background: rgba(150,235,250,0.14); margin: 20px 0;"></div>
-        <div style="display: flex; justify-content: space-between; gap: 14px; font-size: 13px; margin-bottom: 12px;"><span style="color: rgba(230,244,250,0.72); min-width: 0;">Per month</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">{{ monthly }}</span></div>
-        <div style="display: flex; justify-content: space-between; gap: 14px; font-size: 13px;"><span style="color: rgba(230,244,250,0.72); min-width: 0;">Matching plan</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">{{ planName }}</span></div>
-      </div>
-    </div>
-  </section>
+@endverbatim
+@include('partials.landing-plans-section', ['plans' => $plans, 'landingPlansPayload' => $landingPlansPayload])
+@verbatim
 
   <section id="product" data-screen-label="Benefits" style="position: relative; z-index: 5; padding: 100px 72px; border-top: 1px solid rgba(150,235,250,0.08);">
     <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.16em; color: oklch(0.88 0.11 195);">WHY CloudFlops</div>
@@ -348,7 +268,7 @@
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 36px; max-width: 460px;">
           <div style="padding: 20px; border-radius: 16px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.04);">
             <div style="font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.14em; color: rgba(230,244,250,0.7);">ACTIVE PLANS</div>
-            <div style="margin-top: 12px; font-size: 26px; font-weight: 600; letter-spacing: -0.03em;">7</div>
+            <div style="margin-top: 12px; font-size: 26px; font-weight: 600; letter-spacing: -0.03em;">@endverbatim{{ $activePlanCount }}@verbatim</div>
           </div>
           <div style="padding: 20px; border-radius: 16px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.04);">
             <div style="font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.14em; color: rgba(230,244,250,0.7);">TOTAL LOCKED</div>
@@ -660,13 +580,9 @@
   </footer>
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props="{&quot;rewardRate&quot;:{&quot;editor&quot;:&quot;float&quot;,&quot;default&quot;:0.0042,&quot;tsType&quot;:&quot;number&quot;,&quot;min&quot;:0.001,&quot;max&quot;:0.01,&quot;step&quot;:0.0001,&quot;section&quot;:&quot;Reward model&quot;}}">
+<script type="text/x-dc" data-dc-script>
 class Component extends DCLogic {
-  state = { power: 1200, faq: 0, menuOpen: false };
-
-  fmt(n, d) {
-    return n.toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d });
-  }
+  state = { faq: 0, menuOpen: false };
 
   setMenuOpen(open) {
     this.setState({ menuOpen: open });
@@ -674,24 +590,9 @@ class Component extends DCLogic {
   }
 
   renderVals() {
-    const tiers = [
-      { max: 600, name: 'Node', mult: 0.86 },
-      { max: 2500, name: 'Core', mult: 1 },
-      { max: 6000, name: 'Cluster', mult: 1.12 },
-      { max: Infinity, name: 'Custom', mult: 1.2 }
-    ];
-    const rate = this.props.rewardRate ?? 0.0042;
-    const tier = tiers.find((t) => this.state.power <= t.max);
-    const daily = this.state.power * rate * tier.mult;
     const vals = {
-      power: this.state.power,
-      powerLabel: this.fmt(this.state.power, 0),
-      daily: this.fmt(daily, 2),
-      monthly: this.fmt(daily * 30, 1),
-      planName: tier.name,
       toggleMenu: () => this.setMenuOpen(!this.state.menuOpen),
       closeMenu: () => this.setMenuOpen(false),
-      onPower: (e) => this.setState({ power: Number(e.target.value) })
     };
     for (let i = 0; i < 6; i++) {
       vals['open' + i] = this.state.faq === i;
