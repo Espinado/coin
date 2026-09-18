@@ -5,6 +5,8 @@ namespace App\Livewire;
 use App\Models\Contract;
 use App\Models\Deposit;
 use App\Models\Plan;
+use App\Models\ReferralCommission;
+use App\Models\ReferralInvitation;
 use App\Models\Withdrawal;
 use App\Models\SupportTicket;
 use App\Models\User;
@@ -69,8 +71,23 @@ class Dashboard extends Component
     /** @var Collection<int, mixed> */
     public Collection $referralAccruals;
 
-    /** @var Collection<int, mixed> */
-    public Collection $referralCommissions;
+    public string $referralTab = 'accruals';
+
+    public string $referralAccrualSearch = '';
+
+    public string $referralAccrualSort = '';
+
+    public string $referralAccrualDir = 'desc';
+
+    public int $referralAccrualPerPage = 10;
+
+    public string $referralInvitedSearch = '';
+
+    public string $referralInvitedSort = '';
+
+    public string $referralInvitedDir = 'desc';
+
+    public int $referralInvitedPerPage = 10;
 
     /** @var Collection<int, mixed> */
     public Collection $profitTransactions;
@@ -195,6 +212,59 @@ class Dashboard extends Component
         $this->resetPage('walletPage');
     }
 
+    public function setReferralTab(string $tab): void
+    {
+        if (! in_array($tab, ['accruals', 'invited'], true)) {
+            return;
+        }
+
+        $this->referralTab = $tab;
+    }
+
+    public function updatedReferralAccrualPerPage(): void
+    {
+        $this->resetPage('referralAccrualPage');
+    }
+
+    public function updatedReferralAccrualSearch(): void
+    {
+        $this->resetPage('referralAccrualPage');
+    }
+
+    public function updatedReferralInvitedPerPage(): void
+    {
+        $this->resetPage('referralInvitedPage');
+    }
+
+    public function updatedReferralInvitedSearch(): void
+    {
+        $this->resetPage('referralInvitedPage');
+    }
+
+    public function sortReferralAccruals(string $column): void
+    {
+        if ($this->referralAccrualSort === $column) {
+            $this->referralAccrualDir = $this->referralAccrualDir === 'asc' ? 'desc' : 'asc';
+        } else {
+            $this->referralAccrualSort = $column;
+            $this->referralAccrualDir = 'desc';
+        }
+
+        $this->resetPage('referralAccrualPage');
+    }
+
+    public function sortReferralInvited(string $column): void
+    {
+        if ($this->referralInvitedSort === $column) {
+            $this->referralInvitedDir = $this->referralInvitedDir === 'asc' ? 'desc' : 'asc';
+        } else {
+            $this->referralInvitedSort = $column;
+            $this->referralInvitedDir = 'desc';
+        }
+
+        $this->resetPage('referralInvitedPage');
+    }
+
     public function mount(DashboardDataService $data, PlatformSettingsService $settings): void
     {
         $this->symbol = $settings->tokenSymbol();
@@ -212,7 +282,6 @@ class Dashboard extends Component
         $this->periodTotals = $payload['periodTotals'];
         $this->referral = $payload['referral'];
         $this->referralAccruals = $payload['referralAccruals'];
-        $this->referralCommissions = $payload['referralCommissions'];
         $this->profitTransactions = $payload['profitTransactions'];
         $this->primaryContract = $payload['primaryContract'];
         $this->primaryPlan = $payload['primaryPlan'];
@@ -1303,6 +1372,7 @@ class Dashboard extends Component
         }
 
         $this->referralInviteEmail = '';
+        $this->resetPage('referralInvitedPage');
         $this->resetErrorBag();
         $this->actionMessage = __('coin.referrals.invite_sent');
         $this->js(sprintf(
@@ -1385,6 +1455,7 @@ class Dashboard extends Component
     #[On('echo-private:wallet.user.{user.id},.ReferralCommissionPaid')]
     public function onReferralCommissionPaid(mixed $payload = null): void
     {
+        $this->resetPage('referralAccrualPage');
         $this->reloadPortfolioData();
 
         $message = is_array($payload)
@@ -1499,12 +1570,27 @@ class Dashboard extends Component
 
     public function render(): View
     {
+        $userId = (int) auth()->id();
+
         return view('livewire.dashboard', [
             'walletTransactions' => WalletTransaction::query()
-                ->where('user_id', auth()->id())
+                ->where('user_id', $userId)
                 ->searchTerm($this->walletSearch)
                 ->applyListSort($this->walletSort, $this->walletDir, 'sort_order')
                 ->paginate($this->walletPageSize(), pageName: 'walletPage'),
+            'referralAccrualPage' => ReferralCommission::query()
+                ->where('referrer_user_id', $userId)
+                ->whereHas('contract')
+                ->with(['referral', 'contract.plan'])
+                ->searchTerm($this->referralAccrualSearch)
+                ->applyListSort($this->referralAccrualSort, $this->referralAccrualDir, 'created_at')
+                ->paginate($this->referralAccrualPageSize(), pageName: 'referralAccrualPage'),
+            'referralInvitedPage' => ReferralInvitation::query()
+                ->forReferrer($userId)
+                ->with('registeredUser')
+                ->searchTerm($this->referralInvitedSearch)
+                ->applyListSort($this->referralInvitedSort, $this->referralInvitedDir, 'sent_at')
+                ->paginate($this->referralInvitedPageSize(), pageName: 'referralInvitedPage'),
         ])->layout('layouts.coin-dashboard', ['title' => \App\Support\PlatformBrand::pageTitle(__('coin.nav.portal'))]);
     }
 
@@ -1529,6 +1615,16 @@ class Dashboard extends Component
     private function walletPageSize(): int
     {
         return in_array($this->walletPerPage, [10, 20, 50], true) ? $this->walletPerPage : 10;
+    }
+
+    private function referralAccrualPageSize(): int
+    {
+        return in_array($this->referralAccrualPerPage, [10, 20, 50], true) ? $this->referralAccrualPerPage : 10;
+    }
+
+    private function referralInvitedPageSize(): int
+    {
+        return in_array($this->referralInvitedPerPage, [10, 20, 50], true) ? $this->referralInvitedPerPage : 10;
     }
 
     private function assertCurrentUserPassword(string $password, string $field): void
@@ -1559,7 +1655,6 @@ class Dashboard extends Component
         $this->periodTotals = $payload['periodTotals'];
         $this->referral = $payload['referral'];
         $this->referralAccruals = $payload['referralAccruals'];
-        $this->referralCommissions = $payload['referralCommissions'];
         $this->profitTransactions = $payload['profitTransactions'];
         $this->primaryContract = $payload['primaryContract'];
         $this->primaryPlan = $payload['primaryPlan'];

@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Mail\ReferralInvitationMail;
+use App\Models\ReferralInvitation;
 use App\Models\ReferralProfile;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -71,6 +72,8 @@ class ReferralService
 
             $referrerProfile->increment('invited_count');
             $referrerProfile->increment('level1_users');
+
+            $this->recordReferralRegistration($referrerProfile->user_id, $user);
         }
 
         $this->ensureReferralProfile($user);
@@ -109,8 +112,50 @@ class ReferralService
     public function sendInvitation(User $referrer, string $email): void
     {
         $profile = $this->ensureReferralProfile($referrer);
+        $normalizedEmail = strtolower(trim($email));
 
-        Mail::to($email)->send(new ReferralInvitationMail($referrer, $profile));
+        ReferralInvitation::query()->updateOrCreate(
+            [
+                'referrer_user_id' => $referrer->id,
+                'email' => $normalizedEmail,
+            ],
+            [
+                'channel' => ReferralInvitation::CHANNEL_EMAIL,
+                'sent_at' => now(),
+            ],
+        );
+
+        Mail::to($normalizedEmail)->send(new ReferralInvitationMail($referrer, $profile));
+    }
+
+    private function recordReferralRegistration(int $referrerUserId, User $user): void
+    {
+        $normalizedEmail = strtolower((string) $user->email);
+
+        $invitation = ReferralInvitation::query()
+            ->where('referrer_user_id', $referrerUserId)
+            ->where('email', $normalizedEmail)
+            ->first();
+
+        if ($invitation) {
+            if ($invitation->registered_user_id === null) {
+                $invitation->update([
+                    'registered_user_id' => $user->id,
+                    'registered_at' => $user->created_at ?? now(),
+                ]);
+            }
+
+            return;
+        }
+
+        ReferralInvitation::query()->create([
+            'referrer_user_id' => $referrerUserId,
+            'email' => $normalizedEmail,
+            'channel' => ReferralInvitation::CHANNEL_LINK,
+            'sent_at' => $user->created_at ?? now(),
+            'registered_user_id' => $user->id,
+            'registered_at' => $user->created_at ?? now(),
+        ]);
     }
 
     private function normalizeCode(string $code): string

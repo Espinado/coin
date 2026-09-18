@@ -27,9 +27,6 @@ class DashboardDataService
             'rewardPeriodTotals',
             'referralProfile',
             'referralAccruals',
-            'referralCommissionsEarned' => fn ($query) => $query
-                ->whereHas('contract')
-                ->with(['referral', 'contract.plan']),
             'supportTickets',
         ]);
 
@@ -50,7 +47,6 @@ class DashboardDataService
             'periodTotals' => $user->rewardPeriodTotals->keyBy('period_key'),
             'referral' => $user->referralProfile,
             'referralAccruals' => $user->referralAccruals->sortBy('sort_order')->values(),
-            'referralCommissions' => $user->referralCommissionsEarned->sortByDesc('created_at')->values(),
             'profitTransactions' => $user->walletTransactions
                 ->filter(fn ($tx) => in_array($tx->type, WalletTransaction::profitHistoryTypes(), true))
                 ->sortByDesc(fn ($tx) => $tx->occurred_at ?? $tx->sort_order)

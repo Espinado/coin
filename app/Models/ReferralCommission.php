@@ -42,6 +42,60 @@ class ReferralCommission extends Model
         return $this->belongsTo(Contract::class);
     }
 
+    public function scopeSearchTerm($query, string $term)
+    {
+        $term = trim($term);
+
+        if ($term === '') {
+            return $query;
+        }
+
+        $like = '%'.$term.'%';
+
+        return $query->where(function ($inner) use ($like) {
+            $inner->where('currency', 'like', $like)
+                ->orWhere('purchase_amount', 'like', $like)
+                ->orWhere('commission_amount', 'like', $like)
+                ->orWhereHas('referral', function ($userQuery) use ($like) {
+                    $userQuery->where('name', 'like', $like)
+                        ->orWhere('email', 'like', $like)
+                        ->orWhere('account_slug', 'like', $like);
+                })
+                ->orWhereHas('contract.plan', function ($planQuery) use ($like) {
+                    $planQuery->where('name', 'like', $like);
+                });
+        });
+    }
+
+    public function scopeApplyListSort($query, string $sort, string $dir, string $defaultColumn = 'created_at')
+    {
+        $direction = strtolower($dir) === 'asc' ? 'asc' : 'desc';
+        $allowed = [
+            'created_at' => 'created_at',
+            'user' => 'referral_user_id',
+            'plan' => 'contract_id',
+            'purchase' => 'purchase_amount',
+            'commission' => 'commission_amount',
+        ];
+
+        if ($sort === 'plan') {
+            $query->leftJoin('contracts', 'contracts.id', '=', 'referral_commissions.contract_id')
+                ->leftJoin('plans', 'plans.id', '=', 'contracts.plan_id')
+                ->orderBy('plans.name', $direction)
+                ->select('referral_commissions.*');
+        } elseif ($sort === 'user') {
+            $query->leftJoin('users', 'users.id', '=', 'referral_commissions.referral_user_id')
+                ->orderBy('users.name', $direction)
+                ->select('referral_commissions.*');
+        } elseif ($sort !== '' && array_key_exists($sort, $allowed)) {
+            $query->orderBy($allowed[$sort], $direction);
+        } else {
+            $query->orderBy($defaultColumn, 'desc');
+        }
+
+        return $query->orderByDesc('referral_commissions.id');
+    }
+
     public function referralLabel(): string
     {
         return $this->referral?->accountLabel() ?? 'Referral';

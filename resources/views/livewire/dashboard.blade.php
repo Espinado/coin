@@ -594,76 +594,7 @@
     @endif
 
     @if($section === 5)
-      <section data-screen-label="{{ __('coin.nav.referrals') }}" style="padding: 28px 32px 40px; display: flex; flex-direction: column; gap: 16px;">
-        <div style="padding: 28px; border-radius: 18px; border: 1px solid rgba(180,180,255,0.18); background: linear-gradient(120deg, oklch(0.6 0.13 200 / 0.16), rgba(120,110,220,0.12));">
-          <div style="font-size: 20px; font-weight: 600; letter-spacing: -0.02em;">{{ __('coin.referrals.hero_title') }}</div>
-          <p style="margin: 10px 0 0; max-width: 620px; font-size: 14px; line-height: 1.6; color: rgba(214,238,248,0.75);">{{ __('coin.referrals.hero_sub') }}</p>
-          <div style="display: flex; align-items: center; gap: 12px; margin-top: 22px; flex-wrap: wrap;">
-            <div id="referral-share-url" style="padding: 13px 18px; border-radius: 11px; border: 1px dashed rgba(150,235,250,0.3); background: rgba(4,16,28,0.5); font-family: 'JetBrains Mono', monospace; font-size: 13.5px; color: #eafcff;">{{ $referral?->shareUrl() }}</div>
-            <button type="button" wire:click="copyReferralLink" style="padding: 13px 22px; border-radius: 11px; border: 1px solid oklch(0.86 0.11 195 / 0.5); background: linear-gradient(140deg, oklch(0.86 0.12 192), oklch(0.66 0.13 205)); color: #04121f; font-family: inherit; font-size: 13.5px; font-weight: 600; cursor: pointer;">{{ __('coin.referrals.copy_link') }}</button>
-            <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-              <input type="email" wire:model="referralInviteEmail" placeholder="{{ __('coin.referrals.invite_email_placeholder') }}" style="min-width: 220px; padding: 13px 16px; border-radius: 11px; border: 1px solid rgba(150,235,250,0.2); background: rgba(4,16,28,0.55); color: #eafcff; font-family: inherit; font-size: 13.5px; outline: none;" />
-              <button type="button" wire:click="sendReferralInvite" wire:loading.attr="disabled" wire:target="sendReferralInvite" style="padding: 13px 20px; border-radius: 11px; border: 1px solid rgba(150,235,250,0.2); background: rgba(150,235,250,0.06); color: #e6f4fa; font-family: inherit; font-size: 13.5px; font-weight: 500; cursor: pointer;">
-                <span wire:loading.remove wire:target="sendReferralInvite">{{ __('coin.referrals.invite_email') }}</span>
-                <span wire:loading wire:target="sendReferralInvite">{{ __('coin.referrals.invite_sending') }}</span>
-              </button>
-            </div>
-            @error('referralInviteEmail')<p style="width: 100%; margin: 0; font-size: 12px; color: #ff8f8f;">{{ $message }}</p>@enderror
-          </div>
-        </div>
-
-        <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px;">
-          <div style="padding: 20px; border-radius: 16px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.04);">
-            <div style="font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.14em; color: rgba(214,238,248,0.7);">{{ mb_strtoupper(__('coin.referrals.invited')) }}</div>
-            <div style="margin-top: 12px; font-family: 'JetBrains Mono', monospace; font-size: 24px; color: #f0fbff;">{{ $referral?->invited_count ?? 0 }}</div>
-          </div>
-          <div style="padding: 20px; border-radius: 16px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.04);">
-            <div style="font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.14em; color: rgba(214,238,248,0.7);">{{ mb_strtoupper(__('coin.invest.active_investments')) }}</div>
-            <div style="margin-top: 12px; font-family: 'JetBrains Mono', monospace; font-size: 24px; color: #f0fbff;">{{ $referral?->referralInvestmentsCount() ?? 0 }}</div>
-            <div style="margin-top: 7px; font-size: 12px; color: rgba(214,238,248,0.7);">{{ __('coin.referrals.referral_investments_hint') }}</div>
-          </div>
-          <div style="padding: 20px; border-radius: 16px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.04);">
-            <div style="font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.14em; color: rgba(214,238,248,0.7);">{{ mb_strtoupper(__('coin.referrals.referral_rewards')) }}</div>
-            <div style="margin-top: 12px; font-family: 'JetBrains Mono', monospace; font-size: 24px; color: oklch(0.9 0.12 192);">{{ $referral?->formattedRewardsBalance() }}</div>
-          </div>
-          <div style="padding: 20px; border-radius: 16px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.04);">
-            <div style="font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.14em; color: rgba(214,238,248,0.7);">{{ mb_strtoupper(__('coin.referrals.commission_share')) }}</div>
-            <div style="margin-top: 12px; font-family: 'JetBrains Mono', monospace; font-size: 24px; color: #f0fbff;">{{ $referral?->commissionLabel() }}</div>
-          </div>
-        </div>
-
-        <div style="display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 16px;">
-          <div style="padding: 24px; border-radius: 16px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.035);">
-            <div style="display: flex; align-items: baseline; justify-content: space-between;">
-              <span style="font-size: 15px; font-weight: 600;">{{ __('coin.referrals.accrual_history') }}</span>
-              <span style="font-family: 'JetBrains Mono', monospace; font-size: 10.5px; color: rgba(214,238,248,0.66);">{{ mb_strtoupper(__('coin.table.last_5')) }}</span>
-            </div>
-            <div style="display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr) minmax(0, 0.8fr); padding: 16px 0 12px; border-bottom: 1px solid rgba(150,235,250,0.1); font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.12em; color: rgba(214,238,248,0.66);"><span>{{ mb_strtoupper(__('coin.table.user')) }}</span><span>{{ mb_strtoupper(__('coin.table.plan')) }}</span><span>{{ mb_strtoupper(__('coin.table.purchase')) }}</span><span style="text-align: right;">{{ mb_strtoupper(__('coin.table.commission')) }}</span></div>
-            @forelse($referralCommissions as $commission)
-            <div style="display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr) minmax(0, 0.8fr); padding: 13px 0;@if(!$loop->last) border-bottom: 1px solid rgba(150,235,250,0.07);@endif font-size: 13px;"><span style="font-family: 'JetBrains Mono', monospace; color: rgba(214,238,248,0.78);">{{ $commission->referralLabel() }}</span><span style="color: rgba(214,238,248,0.78);">{{ $commission->planName() }}</span><span style="font-family: 'JetBrains Mono', monospace; color: rgba(214,238,248,0.78);">{{ $commission->formattedPurchaseAmount() }}</span><span style="font-family: 'JetBrains Mono', monospace; text-align: right; color: oklch(0.88 0.12 192);">{{ $commission->formattedCommission() }}</span></div>
-            @empty
-            @foreach($referralAccruals as $accrual)
-            <div style="display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr) minmax(0, 0.8fr); padding: 13px 0;@if(!$loop->last) border-bottom: 1px solid rgba(150,235,250,0.07);@endif font-size: 13px;"><span style="font-family: 'JetBrains Mono', monospace; color: rgba(214,238,248,0.78);">{{ $accrual->user_label }}</span><span style="color: rgba(214,238,248,0.78);">{{ $accrual->plan_name }}</span><span style="color: rgba(214,238,248,0.78);">—</span><span style="font-family: 'JetBrains Mono', monospace; text-align: right; color: oklch(0.88 0.12 192);">{{ $accrual->amount_label }}</span></div>
-            @endforeach
-            @if($referralCommissions->isEmpty() && $referralAccruals->isEmpty())
-            <div style="padding: 13px 0; font-size: 13px; color: rgba(214,238,248,0.68);">{{ __('coin.referrals.no_commissions') }}</div>
-            @endif
-            @endforelse
-          </div>
-
-          <div style="padding: 24px; border-radius: 16px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.035);">
-            <span style="font-size: 15px; font-weight: 600;">{{ __('coin.referrals.network') }}</span>
-            <div style="margin-top: 22px; display: flex; flex-direction: column; gap: 18px;">
-              <div>
-                <div style="display: flex; justify-content: space-between; font-size: 13px;"><span style="color: rgba(214,238,248,0.78);">{{ __('coin.referrals.direct_referrals') }}</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">{{ __('coin.referrals.users_count', ['count' => $referral?->level1_users]) }}</span></div>
-                <div style="margin-top: 9px; height: 5px; border-radius: 3px; background: rgba(150,235,250,0.12);"><div style="width: 100%; height: 100%; border-radius: 3px; background: oklch(0.86 0.12 192);"></div></div>
-                <div style="margin-top: 7px; font-family: 'JetBrains Mono', monospace; font-size: 10.5px; color: rgba(214,238,248,0.68);">{{ mb_strtoupper(__('coin.referrals.percent_on_plan', ['percent' => $referral?->level1_percent])) }}</div>
-              </div>
-            </div>
-            <p style="margin: 22px 0 0; font-size: 11.5px; line-height: 1.5; color: rgba(214,238,248,0.66);">{{ __('coin.referrals.one_level_note') }}</p>
-          </div>
-        </div>
-      </section>
+      @include('livewire.partials.referrals-section')
     @endif
 
     @if($section === 6)

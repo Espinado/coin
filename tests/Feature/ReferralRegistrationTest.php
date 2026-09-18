@@ -2,9 +2,12 @@
 
 namespace Tests\Feature;
 
+use App\Models\ReferralInvitation;
 use App\Models\ReferralProfile;
 use App\Models\User;
+use App\Services\ReferralService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Mail;
 use Tests\TestCase;
 
 class ReferralRegistrationTest extends TestCase
@@ -89,5 +92,45 @@ class ReferralRegistrationTest extends TestCase
         $this->assertNotNull($user);
         $this->assertNull($user->referred_by_user_id);
         $this->assertNotNull($user->referralProfile);
+    }
+
+    public function test_registration_via_referral_creates_invitation_record(): void
+    {
+        $referrer = User::factory()->create();
+        ReferralProfile::query()->create([
+            'user_id' => $referrer->id,
+            'code' => 'COIN-REF03',
+        ]);
+
+        $this
+            ->withCookie('coin_referral_code', 'COIN-REF03')
+            ->post('/register', [
+                'name' => 'Linked User',
+                'email' => 'linked@example.com',
+                'password' => 'password',
+                'password_confirmation' => 'password',
+            ]);
+
+        $this->assertDatabaseHas('referral_invitations', [
+            'referrer_user_id' => $referrer->id,
+            'email' => 'linked@example.com',
+            'channel' => ReferralInvitation::CHANNEL_LINK,
+        ]);
+    }
+
+    public function test_email_invite_creates_pending_invitation_record(): void
+    {
+        Mail::fake();
+
+        $referrer = User::factory()->create();
+
+        app(ReferralService::class)->sendInvitation($referrer, 'Pending@Example.com');
+
+        $this->assertDatabaseHas('referral_invitations', [
+            'referrer_user_id' => $referrer->id,
+            'email' => 'pending@example.com',
+            'channel' => ReferralInvitation::CHANNEL_EMAIL,
+            'registered_user_id' => null,
+        ]);
     }
 }

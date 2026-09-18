@@ -190,6 +190,11 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(ReferralCommission::class, 'referrer_user_id');
     }
 
+    public function referralInvitationsSent(): HasMany
+    {
+        return $this->hasMany(ReferralInvitation::class, 'referrer_user_id');
+    }
+
     public function accountLabel(): string
     {
         if (filled($this->name)) {
