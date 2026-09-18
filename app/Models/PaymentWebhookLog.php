@@ -45,4 +45,15 @@ class PaymentWebhookLog extends Model
     {
         return $this->belongsTo(Withdrawal::class);
     }
+
+    public static function formatProcessingResult(string $result, string $message, int $maxLength = 1000): string
+    {
+        $text = $result.': '.$message;
+
+        if (strlen($text) <= $maxLength) {
+            return $text;
+        }
+
+        return substr($text, 0, $maxLength - 3).'...';
+    }
 }

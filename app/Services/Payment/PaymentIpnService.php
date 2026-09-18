@@ -112,7 +112,7 @@ class PaymentIpnService
         $this->withdrawals->markPaidFromGateway(
             $withdrawal->fresh(),
             $event->txid,
-            (string) ($event->gatewayRequestId ?? '7'),
+            (string) $event->confirmation,
         );
 
         return $this->finish($log, PaymentWebhookLog::RESULT_PROCESSED, 'Withdrawal marked paid from IPN.');
@@ -180,7 +180,7 @@ class PaymentIpnService
     private function finish(PaymentWebhookLog $log, string $result, string $message): PaymentWebhookLog
     {
         $log->update([
-            'processing_result' => $result.': '.$message,
+            'processing_result' => PaymentWebhookLog::formatProcessingResult($result, $message),
             'processed_at' => now(),
         ]);
 

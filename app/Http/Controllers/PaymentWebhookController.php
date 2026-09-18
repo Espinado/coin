@@ -25,7 +25,10 @@ class PaymentWebhookController extends Controller
                 'payload' => $request->json()->all(),
                 'signature_valid' => false,
                 'idempotency_key' => 'invalid:'.sha1($request->getContent()),
-                'processing_result' => PaymentWebhookLog::RESULT_FAILED.': '.$exception->getMessage(),
+                'processing_result' => PaymentWebhookLog::formatProcessingResult(
+                    PaymentWebhookLog::RESULT_FAILED,
+                    $exception->getMessage(),
+                ),
                 'processed_at' => now(),
             ]);
 
