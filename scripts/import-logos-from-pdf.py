@@ -62,6 +62,21 @@ def remove_solid_bg(image: np.ndarray, tol: int = BG_TOLERANCE) -> np.ndarray:
     distance = np.linalg.norm(bgr_float - bg_color, axis=2)
     dark = (bgr_float[:, :, 0] < 40) & (bgr_float[:, :, 1] < 60) & (bgr_float[:, :, 2] < 85)
     image[(distance <= tol + 6) & dark, 3] = 0
+    return strip_non_logo_fringe(image)
+
+
+def strip_non_logo_fringe(image: np.ndarray) -> np.ndarray:
+    blue, green, red = cv2.split(image[:, :, :3])
+    alpha = image[:, :, 3]
+    visible = alpha > 0
+
+    white = (red > 175) & (green > 175) & (blue > 175)
+    cyan = (green > 130) & (blue > 130) & (red < 145)
+    shadow = cv2.max(cv2.max(blue, green), red) < 35
+    keep = visible & (white | cyan | shadow)
+
+    image = image.copy()
+    image[~keep, 3] = 0
 
     return image
 

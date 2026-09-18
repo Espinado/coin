@@ -50,7 +50,7 @@
   <div class="coin-nav-overlay"></div>
   <header class="coin-header" data-screen-label="Header" style="position: relative; z-index: 20; display: flex; align-items: center; justify-content: space-between; padding: 22px 72px; border-bottom: 1px solid rgba(150,235,250,0.1); background: rgba(6,20,35,0.75); backdrop-filter: blur(14px);">
     <div class="coin-header-brand" style="display: flex; align-items: center;">
-      <img src="/cloudflops/logo-horizontal.png" alt="CloudFlops" class="coin-brand-logo" />
+      <img src="{{ \App\Support\PlatformBrand::logo('horizontal') }}" alt="CloudFlops" class="coin-brand-logo" />
     </div>
     <button type="button" class="coin-burger" aria-label="Open menu"><span></span><span></span><span></span></button>
     <nav class="coin-nav coin-nav-desktop">
@@ -325,7 +325,7 @@
       <div style="display: grid; grid-template-columns: 216px 1fr;">
         <aside style="padding: 22px 14px; border-right: 1px solid rgba(150,235,250,0.1); display: flex; flex-direction: column; gap: 3px;">
           <div class="coin-preview-brand" style="display: flex; align-items: center; padding: 0 10px 20px;">
-            <img src="/cloudflops/logo-horizontal.png" alt="CloudFlops" class="coin-brand-logo" />
+            <img src="{{ \App\Support\PlatformBrand::logo('horizontal') }}" alt="CloudFlops" class="coin-brand-logo" />
           </div>
           <div style="display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 10px; background: oklch(0.6 0.13 200 / 0.22); border: 1px solid oklch(0.86 0.11 195 / 0.3); font-size: 13px; color: #f0fbff;"><span style="width: 6px; height: 6px; border-radius: 2px; background: oklch(0.88 0.12 192);"></span>Overview</div>
           <div style="display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 10px; font-size: 13px; color: rgba(230,244,250,0.7);"><span style="width: 6px; height: 6px; border-radius: 2px; background: rgba(150,235,250,0.3);"></span>Plans</div>
@@ -463,7 +463,7 @@
     <div class="coin-landing-footer__grid">
       <div class="coin-landing-footer__brand">
         <div class="coin-footer-brand">
-          <img src="/cloudflops/logo-horizontal.png" alt="CloudFlops" class="coin-brand-logo" />
+          <img src="{{ \App\Support\PlatformBrand::logo('horizontal') }}" alt="CloudFlops" class="coin-brand-logo" />
         </div>
         <p class="coin-landing-footer__tagline">USDT investment platform with daily profit accrual.</p>
         @include('partials.landing-footer-company', ['companyLegal' => $companyLegal])
