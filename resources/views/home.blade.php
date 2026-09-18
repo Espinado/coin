@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    @include('partials.coin-ios-meta')
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ \App\Support\PlatformBrand::pageTitle('Инвестиционная платформа') }}</title>
     <link rel="icon" href="{{ asset('cloudflops/logo-mark.png') }}" type="image/png" />

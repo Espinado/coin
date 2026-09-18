@@ -8,7 +8,7 @@
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    @include('partials.coin-ios-meta')
     <title>{{ \App\Support\PlatformBrand::pageTitle($title) }}</title>
     <link rel="icon" href="{{ asset('cloudflops/logo-mark.png') }}" type="image/png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -19,7 +19,7 @@
       body { margin: 0; background: #04101c; color: #e6f4fa; font-family: 'Sora', 'Helvetica Neue', Helvetica, sans-serif; -webkit-font-smoothing: antialiased; }
       a { color: oklch(0.86 0.11 195); text-decoration: none; }
       a:hover { color: oklch(0.92 0.09 195); }
-      .coin-legal-shell { width: 100%; max-width: 860px; margin: 0 auto; padding: 32px 24px 72px; box-sizing: border-box; }
+      .coin-legal-shell { width: 100%; max-width: 860px; margin: 0 auto; padding: calc(32px + env(safe-area-inset-top, 0px)) calc(24px + env(safe-area-inset-right, 0px)) calc(72px + env(safe-area-inset-bottom, 0px)) calc(24px + env(safe-area-inset-left, 0px)); box-sizing: border-box; }
       .coin-legal-top { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 36px; padding-bottom: 22px; border-bottom: 1px solid rgba(150,235,250,0.12); }
       .coin-brand-logo { width: min(220px, 54vw); height: auto; max-height: 48px; display: block; object-fit: contain; }
       .coin-legal-back { font-size: 14px; color: rgba(230,244,250,0.78); }

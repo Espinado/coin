@@ -89,20 +89,20 @@ class AdminModuleTest extends TestCase
 
         $this->actingAs($this->admin, 'admin')
             ->patch('http://admin.coin.test/withdrawals/'.$withdrawal->id.'/status', [
-                'status' => Withdrawal::STATUS_APPROVED,
-                'admin_note' => 'Approved for payout batch.',
+                'status' => Withdrawal::STATUS_PAID,
+                'admin_note' => 'Sent on-chain.',
             ])
             ->assertRedirect();
 
         $withdrawal->refresh();
         $wallet->refresh();
-        $this->assertSame(Withdrawal::STATUS_APPROVED, $withdrawal->status);
+        $this->assertSame(Withdrawal::STATUS_PAID, $withdrawal->status);
         $this->assertSame($balanceBeforeApproval - 50, (float) $wallet->balance);
         $this->assertSame(0.0, (float) $wallet->pending);
 
         Event::assertDispatched(WithdrawalUpdated::class, function (WithdrawalUpdated $event) use ($withdrawal): bool {
             return $event->withdrawal->is($withdrawal)
-                && $event->withdrawal->status === Withdrawal::STATUS_APPROVED;
+                && $event->withdrawal->status === Withdrawal::STATUS_PAID;
         });
     }
 
@@ -128,6 +128,31 @@ class AdminModuleTest extends TestCase
             return $mail->hasTo($user->email)
                 && $mail->subjectLine === __('coin.notifications.mail.payout_subject');
         });
+    }
+
+    public function test_admin_cannot_change_closed_withdrawal_status(): void
+    {
+        $user = User::query()->where('email', 'test@test.lv')->firstOrFail();
+
+        app(DepositService::class)->createPending($user, 200);
+        $user->refresh();
+
+        $withdrawal = app(\App\Services\WithdrawalService::class)->createForUser($user, 50);
+
+        $this->actingAs($this->admin, 'admin')
+            ->patch('http://admin.coin.test/withdrawals/'.$withdrawal->id.'/status', [
+                'status' => Withdrawal::STATUS_PAID,
+            ])
+            ->assertRedirect();
+
+        $response = $this->actingAs($this->admin, 'admin')
+            ->patch('http://admin.coin.test/withdrawals/'.$withdrawal->id.'/status', [
+                'status' => Withdrawal::STATUS_REJECTED,
+            ]);
+
+        $response->assertRedirect();
+        $response->assertSessionHas('status', __('coin.admin.withdrawal_closed'));
+        $this->assertSame(Withdrawal::STATUS_PAID, $withdrawal->fresh()->status);
     }
 
     public function test_admin_plan_crud(): void

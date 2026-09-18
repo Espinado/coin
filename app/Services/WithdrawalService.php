@@ -67,7 +67,7 @@ class WithdrawalService
 
     public function updateStatus(Withdrawal $withdrawal, string $status, Admin $admin, ?string $note = null): Withdrawal
     {
-        if (! array_key_exists($status, Withdrawal::statuses())) {
+        if (! array_key_exists($status, Withdrawal::adminStatuses())) {
             throw new RuntimeException('Invalid withdrawal status.');
         }
 
@@ -79,10 +79,14 @@ class WithdrawalService
                 return $withdrawal;
             }
 
+            if (in_array($previous, Withdrawal::closedStatuses(), true)) {
+                throw new RuntimeException(__('coin.admin.withdrawal_closed'));
+            }
+
             if (! Withdrawal::canTransition($previous, $status)) {
                 throw new RuntimeException(__('coin.admin.withdrawal_invalid_transition', [
-                    'from' => Withdrawal::statuses()[$previous] ?? $previous,
-                    'to' => Withdrawal::statuses()[$status] ?? $status,
+                    'from' => $withdrawal->statusLabel(),
+                    'to' => Withdrawal::adminStatuses()[$status] ?? $status,
                 ]));
             }
 
@@ -114,10 +118,6 @@ class WithdrawalService
             ]);
 
             $withdrawal = $withdrawal->fresh(['user.wallet', 'processedByAdmin']);
-
-            if ($status === Withdrawal::STATUS_PROCESSING && $previous !== Withdrawal::STATUS_PROCESSING) {
-                $withdrawal = $this->initiateGatewayPayout($withdrawal, $admin);
-            }
 
             if ($status === Withdrawal::STATUS_PAID && $previous !== Withdrawal::STATUS_PAID) {
                 $fee = $this->settings->getFloat('network_fee');
@@ -197,11 +197,6 @@ class WithdrawalService
 
             return $withdrawal;
         });
-    }
-
-    private function initiateGatewayPayout(Withdrawal $withdrawal, Admin $admin): Withdrawal
-    {
-        return $this->dispatchViaGateway($withdrawal, $admin);
     }
 
     private function usesPaymentGateway(): bool

@@ -6,8 +6,7 @@
   $input = 'width:100%;box-sizing:border-box;padding:12px 14px;border-radius:10px;border:1px solid rgba(150,235,250,0.14);background:rgba(4,16,28,0.5);font-size:13.5px;color:#f0fbff;';
   $hint = 'font-size: 12px; color: rgba(214,238,248,0.66); line-height: 1.45;';
   $error = 'margin: 0; font-size: 12px; color: #ff8f8f;';
-  $btnSecondary = 'padding: 11px 20px; border-radius: 10px; border: 1px solid rgba(150,235,250,0.2); background: rgba(150,235,250,0.06); color: #e6f4fa; font-family: inherit; font-size: 13px; font-weight: 500; cursor: pointer; align-self: flex-start;';
-  $btnPrimary = 'padding: 11px 20px; border-radius: 10px; border: 1px solid oklch(0.86 0.11 195 / 0.5); background: linear-gradient(140deg, oklch(0.86 0.12 192), oklch(0.66 0.13 205)); color: #04121f; font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer; align-self: flex-start;';
+  $btnPrimary = 'padding: 11px 20px; border-radius: 10px; border: 1px solid oklch(0.86 0.11 195 / 0.5); background: linear-gradient(140deg, oklch(0.86 0.12 192), oklch(0.66 0.13 205)); color: #04121f; font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer; align-self: flex-start; box-shadow: 0 20px 46px -22px oklch(0.8 0.13 195 / 0.85);';
   $innerRow = 'padding: 14px 16px; border-radius: 12px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.03);';
   $grid = 'display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; align-items: stretch;';
 @endphp
@@ -67,7 +66,7 @@
           @if($user->hasEmailTwoFactorEnabled())
           <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
             <input type="password" wire:model="profileTwoFactorPassword" autocomplete="current-password" placeholder="{{ __('coin.profile.two_factor_password_placeholder') }}" style="{{ $input }}; flex: 1; min-width: 180px;" />
-            <button type="button" wire:click="disableEmailTwoFactor" wire:loading.attr="disabled" wire:target="disableEmailTwoFactor" style="{{ $btnSecondary }}; padding: 10px 16px; font-size: 12.5px;">{{ __('coin.profile.disable_two_factor') }}</button>
+            <button type="button" wire:click="disableEmailTwoFactor" wire:loading.attr="disabled" wire:target="disableEmailTwoFactor" style="{{ $btnPrimary }}; padding: 10px 16px; font-size: 12.5px;">{{ __('coin.profile.disable_two_factor') }}</button>
           </div>
           @error('profileTwoFactorPassword')<p style="{{ $error }}">{{ $message }}</p>@enderror
           @else
@@ -90,7 +89,7 @@
             <div style="font-size: 13.5px;">{{ __('coin.profile.active_sessions') }}</div>
             <div style="margin-top: 4px; {{ $hint }}">{{ __('coin.profile.sessions_devices') }}</div>
           </div>
-          <button type="button" style="{{ $btnSecondary }}; padding: 8px 14px; font-size: 12.5px;">{{ __('coin.profile.review') }}</button>
+          <button type="button" style="{{ $btnPrimary }}; padding: 8px 14px; font-size: 12.5px;">{{ __('coin.profile.review') }}</button>
         </div>
       </div>
     </div>
@@ -107,7 +106,7 @@
           <input type="email" wire:model="profileEmail" autocomplete="email" style="{{ $input }}; margin-top: 8px;" />
         </div>
         @error('profileEmail')<p style="{{ $error }}">{{ $message }}</p>@enderror
-        <button type="button" wire:click="saveProfileEmail" wire:loading.attr="disabled" wire:target="saveProfileEmail" style="{{ $btnSecondary }}; margin-top: auto;">
+        <button type="button" wire:click="saveProfileEmail" wire:loading.attr="disabled" wire:target="saveProfileEmail" style="{{ $btnPrimary }}; margin-top: auto;">
           <span wire:loading.remove wire:target="saveProfileEmail">{{ __('coin.profile.save_email') }}</span>
           <span wire:loading wire:target="saveProfileEmail">{{ __('coin.profile.saving_email') }}</span>
         </button>
@@ -155,8 +154,8 @@
           </div>
         </div>
         <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px;">
-          <button type="button" style="{{ $btnSecondary }}; width: 100%; text-align: center; align-self: stretch;">{{ __('coin.profile.add_address') }}</button>
-          <button type="button" style="{{ $btnSecondary }}; width: 100%; text-align: center; align-self: stretch;">{{ __('coin.profile.disconnect') }}</button>
+          <button type="button" style="{{ $btnPrimary }}; width: 100%; text-align: center; align-self: stretch;">{{ __('coin.profile.add_address') }}</button>
+          <button type="button" style="{{ $btnPrimary }}; width: 100%; text-align: center; align-self: stretch;">{{ __('coin.profile.disconnect') }}</button>
         </div>
         <div style="{{ $innerRow }}; display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-top: auto;">
           <div>

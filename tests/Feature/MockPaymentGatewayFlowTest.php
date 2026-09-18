@@ -67,11 +67,7 @@ class MockPaymentGatewayFlowTest extends TestCase
         $user->wallet->update(['available' => 500, 'balance' => 500]);
 
         $withdrawal = app(WithdrawalService::class)->createForUser($user, 100);
-        $withdrawal = app(WithdrawalService::class)->updateStatus(
-            $withdrawal,
-            Withdrawal::STATUS_PROCESSING,
-            $admin,
-        );
+        $withdrawal = app(WithdrawalService::class)->dispatchViaGateway($withdrawal, $admin);
 
         $withdrawal->refresh();
 

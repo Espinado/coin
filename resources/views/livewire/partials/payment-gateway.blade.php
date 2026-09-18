@@ -21,7 +21,7 @@
   @if($canDismiss && $paymentModalStep !== 'payment') wire:click="closePaymentModal" wire:keydown.escape.window="closePaymentModal" @endif
 >
   @if($paymentModalStep === 'gateway')
-  <div style="min-height: 100dvh; display: flex; align-items: safe center; justify-content: center; padding: 24px; background: rgba(2, 8, 16, 0.82); backdrop-filter: blur(8px);">
+  <div class="coin-payment-overlay__stage">
     <div style="width: min(100%, 440px); margin: auto; border-radius: 20px; border: 1px solid rgba(150,235,250,0.18); background: linear-gradient(170deg, rgba(12, 34, 52, 0.98), rgba(6, 20, 35, 0.98)); box-shadow: 0 32px 80px -24px rgba(0, 0, 0, 0.75); overflow: hidden;" wire:click.stop>
       <div style="padding: 18px 22px; border-bottom: 1px solid rgba(150,235,250,0.1); display: flex; align-items: center; justify-content: space-between; gap: 12px;">
         <div>
@@ -52,7 +52,7 @@
   </div>
 
   @elseif($paymentModalStep === 'payment')
-  <div style="min-height: 100dvh; display: flex; align-items: safe center; justify-content: center; padding: 24px; background: rgba(2, 8, 16, 0.82); backdrop-filter: blur(8px);">
+  <div class="coin-payment-overlay__stage">
     <div style="width: min(100%, 460px); margin: auto; border-radius: 20px; border: 1px solid rgba(150,235,250,0.18); background: linear-gradient(170deg, rgba(12, 34, 52, 0.98), rgba(6, 20, 35, 0.98)); box-shadow: 0 32px 80px -24px rgba(0, 0, 0, 0.75); overflow: hidden;" wire:click.stop>
       <div style="padding: 18px 22px; border-bottom: 1px solid rgba(150,235,250,0.1);">
         <div style="font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: 0.14em; color: rgba(214,238,248,0.62);">{{ __('coin.crypto_gateway.payment_step') }}</div>
@@ -85,7 +85,7 @@
   </div>
 
   @elseif($paymentModalStep === 'processing')
-  <div style="min-height: 100dvh; display: flex; align-items: center; justify-content: center; padding: 24px; background: rgba(2, 8, 16, 0.88); backdrop-filter: blur(8px);">
+  <div class="coin-payment-overlay__stage coin-payment-overlay__stage--opaque">
     <div style="width: min(100%, 380px); text-align: center;" wire:click.stop>
       <div style="width: 56px; height: 56px; margin: 0 auto; border-radius: 50%; border: 3px solid rgba(150,235,250,0.14); border-top-color: oklch(0.88 0.12 192); animation: coinPaySpin 0.9s linear infinite;"></div>
       <div style="margin-top: 22px; font-size: 18px; font-weight: 600; color: #f0fbff;">{{ __('coin.crypto_gateway.processing_title') }}</div>
@@ -95,7 +95,7 @@
   </div>
 
   @elseif($paymentModalStep === 'success')
-  <div style="min-height: 100dvh; display: flex; align-items: safe center; justify-content: center; padding: 24px; background: rgba(2, 8, 16, 0.82); backdrop-filter: blur(8px);">
+  <div class="coin-payment-overlay__stage">
     <div style="width: min(100%, 420px); margin: auto; border-radius: 20px; border: 1px solid rgba(150,235,250,0.18); background: linear-gradient(170deg, rgba(12, 34, 52, 0.98), rgba(6, 20, 35, 0.98)); box-shadow: 0 32px 80px -24px rgba(0, 0, 0, 0.75); overflow: hidden;" wire:click.stop>
       <div style="padding: 28px 22px 22px; text-align: center;">
         <div style="width: 62px; height: 62px; margin: 0 auto; border-radius: 50%; background: rgba(120, 230, 180, 0.14); border: 1px solid rgba(120, 230, 180, 0.35); display: grid; place-items: center;">
@@ -114,7 +114,7 @@
   </div>
 
   @elseif($paymentModalStep === 'error')
-  <div style="min-height: 100dvh; display: flex; align-items: safe center; justify-content: center; padding: 24px; background: rgba(2, 8, 16, 0.82); backdrop-filter: blur(8px);">
+  <div class="coin-payment-overlay__stage">
     <div style="width: min(100%, 420px); margin: auto; border-radius: 20px; border: 1px solid rgba(150,238,248,0.18); background: linear-gradient(170deg, rgba(12, 34, 52, 0.98), rgba(6, 20, 35, 0.98)); box-shadow: 0 32px 80px -24px rgba(0, 0, 0, 0.75); overflow: hidden;" wire:click.stop>
       <div style="padding: 28px 22px 22px; text-align: center;">
         <div style="width: 62px; height: 62px; margin: 0 auto; border-radius: 50%; background: rgba(255, 143, 143, 0.12); border: 1px solid rgba(255, 143, 143, 0.28); display: grid; place-items: center;">

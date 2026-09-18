@@ -22,18 +22,25 @@
 
             <div class="admin-card" style="margin-top:16px;">
                 <h2 style="margin:0 0 14px;font-size:16px;font-weight:600;">{{ __('coin.admin.update_status') }}</h2>
-                <form method="POST" action="{{ route('admin.withdrawals.status', $withdrawal) }}" style="display:flex;flex-direction:column;gap:12px;">
-                    @csrf
-                    @method('PATCH')
-                    <select name="status" style="padding:10px 12px;border-radius:10px;border:1px solid rgba(255,255,255,0.12);background:#070a10;color:#e8edf5;">
-                        @foreach($statuses as $value => $label)
-                            <option value="{{ $value }}" @selected($withdrawal->status === $value)>{{ $label }}</option>
-                        @endforeach
-                    </select>
-                    <textarea name="admin_note" rows="3" placeholder="{{ __('coin.admin.audit_note_placeholder') }}"
-                        style="width:100%;box-sizing:border-box;padding:12px 14px;border-radius:10px;border:1px solid rgba(255,255,255,0.12);background:#070a10;color:#e8edf5;">{{ old('admin_note', $withdrawal->admin_note) }}</textarea>
-                    <button type="submit" class="admin-btn admin-btn-primary" style="align-self:flex-start;">{{ __('coin.admin.save_status') }}</button>
-                </form>
+                @if($withdrawal->isClosed())
+                    <p style="margin:0;font-size:13px;line-height:1.65;color:rgba(232,237,245,0.72);">{{ __('coin.admin.withdrawal_closed_hint') }}</p>
+                    @if($withdrawal->processed_at)
+                        <p style="margin:10px 0 0;font-size:12.5px;color:rgba(232,237,245,0.58);">{{ __('coin.admin.withdrawal_closed_at', ['date' => $withdrawal->processed_at->format('M j, Y H:i')]) }}</p>
+                    @endif
+                @else
+                    <form method="POST" action="{{ route('admin.withdrawals.status', $withdrawal) }}" style="display:flex;flex-direction:column;gap:12px;">
+                        @csrf
+                        @method('PATCH')
+                        <select name="status" style="padding:10px 12px;border-radius:10px;border:1px solid rgba(255,255,255,0.12);background:#070a10;color:#e8edf5;">
+                            @foreach($statuses as $value => $label)
+                                <option value="{{ $value }}" @selected($withdrawal->adminStatus() === $value)>{{ $label }}</option>
+                            @endforeach
+                        </select>
+                        <textarea name="admin_note" rows="3" placeholder="{{ __('coin.admin.audit_note_placeholder') }}"
+                            style="width:100%;box-sizing:border-box;padding:12px 14px;border-radius:10px;border:1px solid rgba(255,255,255,0.12);background:#070a10;color:#e8edf5;">{{ old('admin_note', $withdrawal->admin_note) }}</textarea>
+                        <button type="submit" class="admin-btn admin-btn-primary" style="align-self:flex-start;">{{ __('coin.admin.save_status') }}</button>
+                    </form>
+                @endif
             </div>
         </div>
 

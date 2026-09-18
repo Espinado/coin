@@ -23,7 +23,7 @@ export function showSupportToast(message, variant = 'success') {
         root = document.createElement('div');
         root.id = 'coin-support-toast-root';
         root.setAttribute('aria-live', 'assertive');
-        root.style.cssText = 'position:fixed;top:20px;right:20px;z-index:2147483000;display:flex;flex-direction:column;gap:10px;pointer-events:none;max-width:min(420px,calc(100vw - 32px));';
+        root.className = 'coin-support-toast-root';
         document.body.appendChild(root);
     }
 

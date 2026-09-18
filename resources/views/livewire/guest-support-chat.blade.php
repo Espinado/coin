@@ -1,7 +1,6 @@
 <div id="guest-support-root" @if($isOpen && $ticketId) wire:poll.3s="pollMessages" @endif style="position:fixed;inset:0;z-index:9999;pointer-events:none;">
     @if(! $isOpen)
-    <button type="button" wire:click="openChat" data-open-guest-support
-        style="pointer-events:auto;position:fixed;right:24px;bottom:24px;display:flex;align-items:center;gap:10px;padding:14px 20px;border-radius:999px;border:1px solid oklch(0.86 0.11 195 / 0.5);background:linear-gradient(140deg, oklch(0.86 0.12 192), oklch(0.66 0.13 205));color:#04121f;font-family:'Sora','Helvetica Neue',Helvetica,sans-serif;font-size:14px;font-weight:600;cursor:pointer;box-shadow:0 20px 50px -22px oklch(0.8 0.13 195 / 0.7);">
+    <button type="button" wire:click="openChat" data-open-guest-support class="coin-guest-support-fab">
         <span style="width:10px;height:10px;border-radius:50%;background:oklch(0.85 0.15 160);box-shadow:0 0 12px oklch(0.85 0.15 160);"></span>
         Support
     </button>
@@ -10,7 +9,7 @@
     @if($isOpen)
         <div wire:click="closeChat" style="pointer-events:auto;position:fixed;inset:0;background:rgba(4,16,28,0.55);backdrop-filter:blur(4px);"></div>
 
-        <div style="pointer-events:auto;position:fixed;right:24px;bottom:24px;width:min(420px,calc(100vw - 32px));max-height:min(680px,calc(100vh - 48px));display:flex;flex-direction:column;border-radius:18px;border:1px solid rgba(150,235,250,0.18);background:#061423;color:#e6f4fa;font-family:'Sora','Helvetica Neue',Helvetica,sans-serif;box-shadow:0 28px 80px -24px rgba(0,0,0,0.65);overflow:hidden;">
+        <div class="coin-guest-support-panel">
             <div style="padding:18px 20px;border-bottom:1px solid rgba(150,235,250,0.12);display:flex;align-items:center;justify-content:space-between;gap:12px;background:rgba(150,235,250,0.04);">
                 <div>
                     <div style="font-size:16px;font-weight:600;">Live support</div>

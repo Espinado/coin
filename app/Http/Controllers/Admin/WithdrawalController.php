@@ -24,7 +24,8 @@ class WithdrawalController extends Controller
 
         $query = Withdrawal::query()
             ->with(['user', 'processedByAdmin'])
-            ->when($status !== '', fn ($query) => $query->where('status', $status))
+            ->when($status === Withdrawal::STATUS_PENDING, fn ($query) => $query->whereIn('status', Withdrawal::openStatuses()))
+            ->when($status !== '' && $status !== Withdrawal::STATUS_PENDING, fn ($query) => $query->where('status', $status))
             ->when($search !== '', function ($query) use ($search) {
                 $query->where(function ($inner) use ($search) {
                     $inner->where('reference', 'like', "%{$search}%")
@@ -46,7 +47,7 @@ class WithdrawalController extends Controller
 
         return view('admin.withdrawals.index', [
             'withdrawals' => $this->adminPaginate($query, $request),
-            'statuses' => Withdrawal::statuses(),
+            'statuses' => Withdrawal::adminStatuses(),
             ...$this->adminListState($request),
         ]);
     }
@@ -57,14 +58,14 @@ class WithdrawalController extends Controller
 
         return view('admin.withdrawals.show', [
             'withdrawal' => $withdrawal,
-            'statuses' => Withdrawal::statuses(),
+            'statuses' => $withdrawal->adminSelectableStatuses(),
         ]);
     }
 
     public function updateStatus(Request $request, Withdrawal $withdrawal, WithdrawalService $withdrawals): RedirectResponse
     {
         $validated = $request->validate([
-            'status' => ['required', 'in:'.implode(',', array_keys(Withdrawal::statuses()))],
+            'status' => ['required', 'in:'.implode(',', array_keys(Withdrawal::adminStatuses()))],
             'admin_note' => ['nullable', 'string', 'max:2000'],
         ]);
 

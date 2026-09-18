@@ -17,7 +17,7 @@ class AdminOverviewService
     /** @return array<string, mixed> */
     public function metrics(): array
     {
-        $pendingWithdrawals = Withdrawal::query()->where('status', Withdrawal::STATUS_PENDING);
+        $pendingWithdrawals = Withdrawal::query()->whereIn('status', Withdrawal::openStatuses());
 
         return [
             'total_users' => User::query()->count(),

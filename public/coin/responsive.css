@@ -1,8 +1,123 @@
 /* CloudFlops — mobile & tablet layout */
 
+/* ——— iOS / safe-area (progressive enhancement) ——— */
+
+:root {
+  --coin-safe-top: env(safe-area-inset-top, 0px);
+  --coin-safe-right: env(safe-area-inset-right, 0px);
+  --coin-safe-bottom: env(safe-area-inset-bottom, 0px);
+  --coin-safe-left: env(safe-area-inset-left, 0px);
+  --coin-fab-bottom: calc(24px + var(--coin-safe-bottom));
+  --coin-scroll-top-bottom: calc(92px + var(--coin-safe-bottom));
+  --coin-scroll-top-bottom-mobile: calc(84px + var(--coin-safe-bottom));
+  --coin-footer-pad-bottom-mobile: calc(96px + var(--coin-safe-bottom));
+  --coin-btn-border: oklch(0.86 0.11 195 / 0.5);
+  --coin-btn-bg: linear-gradient(140deg, oklch(0.86 0.12 192), oklch(0.66 0.13 205));
+  --coin-btn-color: #04121f;
+  --coin-btn-shadow: 0 20px 46px -22px oklch(0.8 0.13 195 / 0.85);
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
 html,
 body {
   overflow-x: hidden;
+}
+
+body {
+  -webkit-overflow-scrolling: touch;
+  -webkit-tap-highlight-color: rgba(150, 235, 250, 0.12);
+}
+
+/* Prevent iOS Safari zoom on input focus (< 16px triggers zoom) */
+.coin-auth input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]),
+.coin-auth select,
+.coin-auth textarea,
+.coin-shell input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="hidden"]),
+.coin-shell select,
+.coin-shell textarea,
+#guest-support-root input,
+#guest-support-root select,
+#guest-support-root textarea {
+  font-size: 16px;
+}
+
+.coin-auth input[inputmode="numeric"][maxlength="6"],
+.coin-auth input[pattern="[0-9]{6}"] {
+  font-size: 24px;
+}
+
+.coin-payment-overlay__stage {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  align-items: safe center;
+  justify-content: center;
+  padding:
+    calc(24px + var(--coin-safe-top))
+    calc(24px + var(--coin-safe-right))
+    calc(24px + var(--coin-safe-bottom))
+    calc(24px + var(--coin-safe-left));
+  background: rgba(2, 8, 16, 0.82);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-sizing: border-box;
+}
+
+.coin-payment-overlay__stage--opaque {
+  background: rgba(2, 8, 16, 0.88);
+}
+
+.coin-guest-support-fab {
+  pointer-events: auto;
+  position: fixed;
+  right: calc(24px + var(--coin-safe-right));
+  bottom: var(--coin-fab-bottom);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 20px;
+  border-radius: 999px;
+  border: 1px solid oklch(0.86 0.11 195 / 0.5);
+  background: linear-gradient(140deg, oklch(0.86 0.12 192), oklch(0.66 0.13 205));
+  color: #04121f;
+  font-family: 'Sora', 'Helvetica Neue', Helvetica, sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 20px 50px -22px oklch(0.8 0.13 195 / 0.7);
+}
+
+.coin-guest-support-panel {
+  pointer-events: auto;
+  position: fixed;
+  right: calc(24px + var(--coin-safe-right));
+  bottom: var(--coin-fab-bottom);
+  width: min(420px, calc(100vw - 32px - var(--coin-safe-left) - var(--coin-safe-right)));
+  max-height: min(680px, calc(100dvh - 48px - var(--coin-safe-top) - var(--coin-safe-bottom)));
+  display: flex;
+  flex-direction: column;
+  border-radius: 18px;
+  border: 1px solid rgba(150, 235, 250, 0.18);
+  background: #061423;
+  color: #e6f4fa;
+  font-family: 'Sora', 'Helvetica Neue', Helvetica, sans-serif;
+  box-shadow: 0 28px 80px -24px rgba(0, 0, 0, 0.65);
+  overflow: hidden;
+}
+
+.coin-support-toast-root {
+  position: fixed;
+  top: calc(20px + var(--coin-safe-top));
+  right: calc(20px + var(--coin-safe-right));
+  z-index: 2147483000;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  pointer-events: none;
+  max-width: min(420px, calc(100vw - 32px - var(--coin-safe-left) - var(--coin-safe-right)));
 }
 
 html.coin-nav-open body,
@@ -200,7 +315,7 @@ html.coin-nav-open .coin-nav-overlay {
   height: 100dvh;
   flex-direction: column;
   gap: 0 !important;
-  padding: 88px 20px 32px !important;
+  padding: calc(88px + var(--coin-safe-top)) 20px calc(32px + var(--coin-safe-bottom)) !important;
   border-left: 1px solid rgba(150, 235, 250, 0.14);
   background: rgba(6, 20, 35, 0.98);
   backdrop-filter: blur(16px);
@@ -478,31 +593,52 @@ html.coin-nav-open .coin-nav-mobile {
   box-sizing: border-box;
 }
 
-.coin-plan-card__cta--selected {
-  border: 1px solid oklch(0.86 0.11 195 / 0.5);
-  background: linear-gradient(140deg, oklch(0.86 0.12 192), oklch(0.66 0.13 205));
-  color: #04121f;
-  font-weight: 600;
-}
-
-.coin-plan-card__cta--default {
-  border: 1px solid rgba(150, 235, 250, 0.2);
-  background: rgba(150, 235, 250, 0.06);
-  color: #e6f4fa;
-  font-weight: 500;
-}
-
-.coin-plan-card__cta--enterprise {
-  border: 1px solid rgba(180, 180, 255, 0.28);
-  background: rgba(150, 140, 255, 0.1);
-  color: #e6f4fa;
-  font-weight: 500;
-}
-
+.coin-plan-card__cta--selected,
+.coin-plan-card__cta--default,
+.coin-plan-card__cta--enterprise,
 .coin-plan-card__cta--enterprise.coin-plan-card__cta--selected {
-  border: 1px solid rgba(180, 180, 255, 0.36);
-  background: rgba(150, 140, 255, 0.16);
-  color: #f0fbff;
+  border: 1px solid var(--coin-btn-border);
+  background: var(--coin-btn-bg);
+  color: var(--coin-btn-color);
+  font-weight: 600;
+  box-shadow: var(--coin-btn-shadow);
+}
+
+/* Ghost / secondary action buttons → brand turquoise */
+.coin-app button[style*="rgba(150,235,250,0."]:not(.coin-burger):not(.coin-nav-item):not(.coin-btn-quiet):not([data-password-toggle]),
+.coin-shell button[style*="rgba(150,235,250,0."]:not(.coin-nav-item):not(.coin-btn-quiet):not([data-password-toggle]),
+.coin-shell button[style*="rgba(150,140,255"]:not(.coin-btn-quiet),
+.coin-shell button[style*="background: oklch(0.6 0.13 200 / 0.22)"]:not(.coin-btn-quiet),
+.coin-auth button[style*="rgba(150,235,250,0."]:not(.coin-btn-quiet):not([data-password-toggle]),
+.coin-payment-overlay button[style*="rgba(150,235,250,0."]:not(.coin-btn-quiet),
+#guest-support-root button[style*="rgba(150,235,250,0."]:not(.coin-btn-quiet),
+.coin-app a[style*="rgba(150,235,250,0."]:not(.coin-btn-quiet),
+.coin-shell a[style*="rgba(150,235,250,0."]:not(.coin-btn-quiet),
+.coin-auth a[style*="rgba(150,235,250,0."]:not(.coin-btn-quiet) {
+  border: 1px solid var(--coin-btn-border) !important;
+  background: var(--coin-btn-bg) !important;
+  color: var(--coin-btn-color) !important;
+  font-weight: 600 !important;
+  box-shadow: var(--coin-btn-shadow);
+}
+
+.coin-app button[style*="rgba(150,235,250,0."]:not(.coin-burger):not(.coin-nav-item):not(.coin-btn-quiet):not([data-password-toggle]):hover,
+.coin-shell button[style*="rgba(150,235,250,0."]:not(.coin-nav-item):not(.coin-btn-quiet):not([data-password-toggle]):hover,
+.coin-shell button[style*="rgba(150,140,255"]:not(.coin-btn-quiet):hover,
+.coin-shell button[style*="background: oklch(0.6 0.13 200 / 0.22)"]:not(.coin-btn-quiet):hover,
+.coin-auth button[style*="rgba(150,235,250,0."]:not(.coin-btn-quiet):not([data-password-toggle]):hover,
+.coin-payment-overlay button[style*="rgba(150,235,250,0."]:not(.coin-btn-quiet):hover,
+#guest-support-root button[style*="rgba(150,235,250,0."]:not(.coin-btn-quiet):hover,
+.coin-app a[style*="rgba(150,235,250,0."]:not(.coin-btn-quiet):hover,
+.coin-shell a[style*="rgba(150,235,250,0."]:not(.coin-btn-quiet):hover,
+.coin-auth a[style*="rgba(150,235,250,0."]:not(.coin-btn-quiet):hover {
+  filter: brightness(1.06);
+}
+
+.coin-plan-card__cta--default:hover,
+.coin-plan-card__cta--enterprise:hover,
+.coin-plan-card__cta--selected:hover {
+  filter: brightness(1.06);
 }
 
 .coin-plan-calculator,
@@ -803,8 +939,8 @@ html.coin-nav-open .coin-nav-mobile {
 
 .coin-action-toast {
   position: fixed;
-  top: 20px;
-  right: 20px;
+  top: calc(20px + var(--coin-safe-top));
+  right: calc(20px + var(--coin-safe-right));
   z-index: 10000;
   width: min(100%, 380px);
   padding: 14px 16px;
@@ -965,7 +1101,11 @@ html.coin-nav-open .coin-nav-mobile {
 
 @media (max-width: 768px) {
   .coin-header {
-    padding: 14px 16px !important;
+    padding:
+      calc(14px + var(--coin-safe-top))
+      calc(16px + var(--coin-safe-right))
+      14px
+      calc(16px + var(--coin-safe-left)) !important;
     flex-wrap: nowrap !important;
   }
 
@@ -997,7 +1137,11 @@ html.coin-nav-open .coin-nav-mobile {
   }
 
   .coin-landing-footer {
-    padding: 36px 16px 96px !important;
+    padding:
+      36px
+      calc(16px + var(--coin-safe-right))
+      var(--coin-footer-pad-bottom-mobile)
+      calc(16px + var(--coin-safe-left)) !important;
   }
 
   .coin-landing-footer__grid {
@@ -1165,9 +1309,12 @@ html.coin-nav-open .coin-nav-mobile {
     height: 100vh !important;
     height: 100dvh !important;
     margin: 0 !important;
+    padding-top: calc(22px + var(--coin-safe-top)) !important;
+    padding-bottom: calc(16px + var(--coin-safe-bottom)) !important;
     transform: translateX(-100%);
     box-shadow: 8px 0 40px rgba(0, 0, 0, 0.35);
     overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch;
   }
 
   html.coin-nav-open .coin-sidebar {
@@ -1175,7 +1322,11 @@ html.coin-nav-open .coin-nav-mobile {
   }
 
   .coin-dash-header {
-    padding: 14px 16px !important;
+    padding:
+      calc(14px + var(--coin-safe-top))
+      calc(16px + var(--coin-safe-right))
+      14px
+      calc(16px + var(--coin-safe-left)) !important;
     gap: 12px !important;
   }
 
@@ -1210,10 +1361,20 @@ html.coin-nav-open .coin-nav-mobile {
   }
 
   .coin-action-toast {
-    top: 16px;
-    right: 16px;
-    left: 16px;
+    top: calc(16px + var(--coin-safe-top));
+    right: calc(16px + var(--coin-safe-right));
+    left: calc(16px + var(--coin-safe-left));
     width: auto;
+  }
+
+  .coin-guest-support-fab,
+  .coin-guest-support-panel {
+    right: calc(16px + var(--coin-safe-right));
+  }
+
+  .coin-guest-support-panel {
+    width: min(420px, calc(100vw - 32px - var(--coin-safe-left) - var(--coin-safe-right)));
+    max-height: min(680px, calc(100dvh - 32px - var(--coin-safe-top) - var(--coin-safe-bottom)));
   }
 }
 
@@ -1238,6 +1399,7 @@ html.coin-nav-open .coin-nav-mobile {
   width: 100% !important;
   max-width: 1440px;
   min-height: 100vh !important;
+  min-height: 100dvh !important;
   box-sizing: border-box;
 }
 
@@ -1327,8 +1489,8 @@ html.coin-nav-open .coin-nav-mobile {
 
 .coin-scroll-top {
   position: fixed;
-  right: 24px;
-  bottom: 92px;
+  right: calc(24px + var(--coin-safe-right));
+  bottom: var(--coin-scroll-top-bottom);
   z-index: 9998;
   width: 44px;
   height: 44px;
@@ -1374,8 +1536,8 @@ html.coin-nav-open .coin-nav-mobile {
 
 @media (max-width: 768px) {
   .coin-scroll-top {
-    right: 16px;
-    bottom: 84px;
+    right: calc(16px + var(--coin-safe-right));
+    bottom: var(--coin-scroll-top-bottom-mobile);
     width: 40px;
     height: 40px;
   }

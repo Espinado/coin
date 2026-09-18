@@ -10,8 +10,10 @@ class Withdrawal extends Model
 {
     public const STATUS_PENDING = 'pending';
 
+    /** @deprecated Legacy intermediate status — displayed as pending. */
     public const STATUS_APPROVED = 'approved';
 
+    /** Internal gateway-in-flight status — displayed as pending. */
     public const STATUS_PROCESSING = 'processing';
 
     public const STATUS_PAID = 'paid';
@@ -51,14 +53,22 @@ class Withdrawal extends Model
     }
 
     /** @return array<string, string> */
-    public static function statuses(): array
+    public static function adminStatuses(): array
     {
         return [
             self::STATUS_PENDING => __('coin.withdrawal_status.pending'),
-            self::STATUS_APPROVED => __('coin.withdrawal_status.approved'),
-            self::STATUS_PROCESSING => __('coin.withdrawal_status.processing'),
             self::STATUS_PAID => __('coin.withdrawal_status.paid'),
             self::STATUS_REJECTED => __('coin.withdrawal_status.rejected'),
+        ];
+    }
+
+    /** @return list<string> */
+    public static function openStatuses(): array
+    {
+        return [
+            self::STATUS_PENDING,
+            self::STATUS_APPROVED,
+            self::STATUS_PROCESSING,
         ];
     }
 
@@ -75,22 +85,15 @@ class Withdrawal extends Model
     /** @return array<string, list<string>> */
     public static function allowedTransitions(): array
     {
+        $openTargets = [
+            self::STATUS_PAID,
+            self::STATUS_REJECTED,
+        ];
+
         return [
-            self::STATUS_PENDING => [
-                self::STATUS_APPROVED,
-                self::STATUS_PROCESSING,
-                self::STATUS_PAID,
-                self::STATUS_REJECTED,
-            ],
-            self::STATUS_APPROVED => [
-                self::STATUS_PROCESSING,
-                self::STATUS_PAID,
-                self::STATUS_REJECTED,
-            ],
-            self::STATUS_PROCESSING => [
-                self::STATUS_PAID,
-                self::STATUS_REJECTED,
-            ],
+            self::STATUS_PENDING => $openTargets,
+            self::STATUS_APPROVED => $openTargets,
+            self::STATUS_PROCESSING => $openTargets,
             self::STATUS_PAID => [],
             self::STATUS_REJECTED => [],
         ];
@@ -99,6 +102,39 @@ class Withdrawal extends Model
     public static function canTransition(string $from, string $to): bool
     {
         return in_array($to, self::allowedTransitions()[$from] ?? [], true);
+    }
+
+    /** @return list<string> */
+    public static function closedStatuses(): array
+    {
+        return [
+            self::STATUS_PAID,
+            self::STATUS_REJECTED,
+        ];
+    }
+
+    public function isClosed(): bool
+    {
+        return in_array($this->status, self::closedStatuses(), true);
+    }
+
+    public function adminStatus(): string
+    {
+        if (in_array($this->status, self::openStatuses(), true)) {
+            return self::STATUS_PENDING;
+        }
+
+        return $this->status;
+    }
+
+    /** @return array<string, string> */
+    public function adminSelectableStatuses(): array
+    {
+        $current = $this->adminStatus();
+        $next = self::allowedTransitions()[$this->status] ?? [];
+        $keys = array_values(array_unique(array_merge([$current], $next)));
+
+        return array_intersect_key(self::adminStatuses(), array_flip($keys));
     }
 
     public function user(): BelongsTo
@@ -113,7 +149,7 @@ class Withdrawal extends Model
 
     public function statusLabel(): string
     {
-        return self::statuses()[$this->status] ?? ucfirst($this->status);
+        return self::adminStatuses()[$this->adminStatus()] ?? ucfirst((string) $this->status);
     }
 
     public function formattedAmount(): string
@@ -123,6 +159,6 @@ class Withdrawal extends Model
 
     public static function pendingCountForAdmin(): int
     {
-        return self::query()->where('status', self::STATUS_PENDING)->count();
+        return self::query()->whereIn('status', self::openStatuses())->count();
     }
 }
