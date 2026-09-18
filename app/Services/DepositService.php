@@ -7,6 +7,8 @@ use App\Support\PlatformTerms;
 use App\Models\Admin;
 use App\Models\Deposit;
 use App\Models\User;
+use App\Services\Payment\Dtos\DepositIntentDto;
+use App\Services\Payment\PaymentGatewayInterface;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
 
@@ -17,7 +19,7 @@ class DepositService
         private ExchangeRateService $exchangeRates,
     ) {}
 
-    public function createPending(User $user, float $amount, string $currency = 'USDT'): Deposit
+    public function createPending(User $user, float $amount, string $currency = 'USDT', ?string $method = null): Deposit
     {
         if ($amount <= 0) {
             throw new RuntimeException('Top-up amount must be greater than zero.');
@@ -30,21 +32,60 @@ class DepositService
             throw new RuntimeException('Unsupported top-up currency.');
         }
 
-        $deposit = DB::transaction(function () use ($user, $amount, $currency) {
+        $method ??= (string) config('coin.payments.driver', 'mock');
+
+        $deposit = DB::transaction(function () use ($user, $amount, $currency, $method) {
             return Deposit::query()->create([
                 'user_id' => $user->id,
                 'amount' => $amount,
                 'currency' => $currency,
                 'status' => Deposit::STATUS_PENDING,
-                'method' => 'mock',
+                'method' => $method,
             ]);
         });
 
-        if (config('coin.deposits.auto_confirm_mock')) {
+        if ($this->shouldAutoConfirmMock()) {
             return $this->confirm($deposit, null);
         }
 
         return $deposit;
+    }
+
+    public function initiateWithGateway(User $user, float $amount, string $currency, PaymentGatewayInterface $gateway): Deposit
+    {
+        $driver = (string) config('coin.payments.driver', 'mock');
+        $deposit = $this->createPending($user, $amount, $currency, $driver);
+
+        if ($this->shouldAutoConfirmMock()) {
+            return $deposit;
+        }
+
+        $intent = $gateway->createDepositIntent($deposit);
+        $this->applyDepositIntent($deposit, $intent);
+
+        return $deposit->fresh(['user']);
+    }
+
+    public function applyDepositIntent(Deposit $deposit, DepositIntentDto $intent): Deposit
+    {
+        $deposit->update([
+            'payment_address' => $intent->paymentAddress,
+            'gateway_uniq_id' => $intent->gatewayUniqId,
+            'gateway_network' => $intent->gatewayNetwork,
+            'expires_at' => $intent->expiresAt,
+            'external_reference' => $intent->gatewayUniqId,
+        ]);
+
+        return $deposit->fresh(['user']);
+    }
+
+    private function shouldAutoConfirmMock(): bool
+    {
+        if (! config('coin.deposits.auto_confirm_mock')) {
+            return false;
+        }
+
+        return app()->environment(['local', 'testing']);
     }
 
     public function confirm(Deposit $deposit, ?Admin $admin = null): Deposit

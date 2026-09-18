@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Mail\AdminInvitationMail;
 use App\Models\Admin;
 use App\Models\AdminInvitation;
+use App\Support\AdminRole;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
@@ -114,6 +115,7 @@ class AdminInvitationService
                 'name' => trim($name),
                 'email' => $invitation->email,
                 'password' => $password,
+                'role' => AdminRole::Operator,
             ]);
 
             $invitation->update(['accepted_at' => now()]);

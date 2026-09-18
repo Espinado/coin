@@ -35,8 +35,25 @@ return [
     ],
 
     'deposits' => [
-        'auto_confirm_mock' => env('COIN_DEPOSITS_AUTO_CONFIRM_MOCK', true),
+        'auto_confirm_mock' => env('COIN_DEPOSITS_AUTO_CONFIRM_MOCK', false),
         'currencies' => ['USDT', 'BTC'],
+    ],
+
+    'payments' => [
+        'driver' => env('COIN_PAYMENT_DRIVER', 'mock'),
+
+        'ccapi' => [
+            'base_url' => env('CCAPI_BASE_URL', 'https://new.cryptocurrencyapi.net'),
+            'api_key' => env('CCAPI_API_KEY', ''),
+            'networks' => [
+                'USDT' => ['network' => 'trx', 'token' => 'USDT'],
+                'BTC' => ['network' => 'btc', 'token' => ''],
+            ],
+            'deposit_period_minutes' => (int) env('CCAPI_DEPOSIT_PERIOD_MINUTES', 60),
+            'forward_to' => env('CCAPI_FORWARD_ADDRESS'),
+            'ipn_url' => env('CCAPI_IPN_URL', env('APP_URL').'/webhooks/ccapi'),
+            'min_confirmations' => (int) env('CCAPI_MIN_CONFIRMATIONS', 1),
+        ],
     ],
 
     'profit_accrual' => [

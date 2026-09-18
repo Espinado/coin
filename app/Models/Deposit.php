@@ -23,9 +23,20 @@ class Deposit extends Model
         'status',
         'method',
         'external_reference',
+        'payment_address',
+        'gateway_uniq_id',
+        'gateway_network',
+        'txid',
+        'received_amount',
+        'expires_at',
         'confirmed_by',
         'confirmed_at',
     ];
+
+    public static function gatewayUniqId(int $id): string
+    {
+        return 'deposit:'.$id;
+    }
 
     protected function casts(): array
     {
@@ -33,6 +44,8 @@ class Deposit extends Model
             'amount' => 'decimal:2',
             'credited_amount' => 'decimal:2',
             'exchange_rate' => 'decimal:8',
+            'received_amount' => 'decimal:8',
+            'expires_at' => 'datetime',
             'confirmed_at' => 'datetime',
         ];
     }

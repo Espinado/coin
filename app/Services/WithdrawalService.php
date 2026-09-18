@@ -77,6 +77,13 @@ class WithdrawalService
                 return $withdrawal;
             }
 
+            if (! Withdrawal::canTransition($previous, $status)) {
+                throw new RuntimeException(__('coin.admin.withdrawal_invalid_transition', [
+                    'from' => Withdrawal::statuses()[$previous] ?? $previous,
+                    'to' => Withdrawal::statuses()[$status] ?? $status,
+                ]));
+            }
+
             $wallet = $withdrawal->user->wallet ?? throw new RuntimeException('User has no wallet.');
             $amount = (float) $withdrawal->amount;
             $wasPending = $previous === Withdrawal::STATUS_PENDING;
@@ -118,6 +125,50 @@ class WithdrawalService
                     $currency,
                 );
             }
+
+            WithdrawalUpdated::dispatch($withdrawal);
+
+            return $withdrawal;
+        });
+    }
+
+    public function markPaidFromGateway(Withdrawal $withdrawal, ?string $txid = null, ?string $gatewayState = null): Withdrawal
+    {
+        return DB::transaction(function () use ($withdrawal, $txid, $gatewayState) {
+            $withdrawal->refresh();
+            $previous = $withdrawal->status;
+
+            if ($previous === Withdrawal::STATUS_PAID) {
+                return $withdrawal;
+            }
+
+            if ($previous !== Withdrawal::STATUS_PROCESSING) {
+                throw new RuntimeException('Only processing withdrawals can be marked paid from gateway.');
+            }
+
+            $wallet = $withdrawal->user->wallet ?? throw new RuntimeException('User has no wallet.');
+
+            $this->recordPayoutTransaction($withdrawal, $wallet);
+
+            $withdrawal->update([
+                'status' => Withdrawal::STATUS_PAID,
+                'txid' => $txid ?? $withdrawal->txid,
+                'gateway_state' => $gatewayState ?? $withdrawal->gateway_state,
+                'processed_at' => now(),
+            ]);
+
+            $withdrawal = $withdrawal->fresh(['user.wallet', 'processedByAdmin']);
+
+            $fee = $this->settings->getFloat('network_fee');
+            $net = max(0, (float) $withdrawal->amount - $fee);
+            $currency = $withdrawal->currency ?: $this->settings->tokenSymbol();
+
+            $this->notifications->notifyWithdrawalPaid(
+                $withdrawal->user,
+                $withdrawal,
+                $net,
+                $currency,
+            );
 
             WithdrawalUpdated::dispatch($withdrawal);
 

@@ -854,7 +854,16 @@ class Dashboard extends Component
             return;
         }
 
+        $this->validate([
+            'profileTwoFactorPassword' => ['required', 'string'],
+        ], [], [
+            'profileTwoFactorPassword' => __('coin.profile.two_factor_password'),
+        ]);
+
+        $this->assertCurrentUserPassword($this->profileTwoFactorPassword, 'profileTwoFactorPassword');
+
         $this->user->update(['email_two_factor_enabled' => true]);
+        $this->profileTwoFactorPassword = '';
         $this->reloadPortfolioData();
         $this->setActionFeedback(__('coin.messages.two_factor_enabled'), 'success');
     }

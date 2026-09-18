@@ -23,11 +23,17 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->trustProxies(at: '*');
 
+        $middleware->validateCsrfTokens(except: [
+            'webhooks/ccapi',
+        ]);
+
         $middleware->alias([
             'user.domain' => \App\Http\Middleware\EnsureUserDomain::class,
             'admin.domain' => \App\Http\Middleware\EnsureAdminDomain::class,
             'reject.web.on.admin' => \App\Http\Middleware\RejectWebGuardOnAdmin::class,
             'broadcast.auth' => \App\Http\Middleware\AuthenticateBroadcasting::class,
+            'user.not-blocked' => \App\Http\Middleware\EnsureUserNotBlocked::class,
+            'admin.ability' => \App\Http\Middleware\EnsureAdminAbility::class,
         ]);
 
         Authenticate::redirectUsing(function (Request $request) {

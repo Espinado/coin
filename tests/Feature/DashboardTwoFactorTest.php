@@ -25,6 +25,22 @@ class DashboardTwoFactorTest extends TestCase
         $this->seed(PlanSeeder::class);
     }
 
+    public function test_user_can_enable_email_two_factor_with_current_password(): void
+    {
+        $user = User::factory()->create([
+            'password' => 'SecretPass1!',
+        ]);
+
+        Livewire::actingAs($user)
+            ->test(Dashboard::class)
+            ->set('profileTwoFactorPassword', 'SecretPass1!')
+            ->call('enableEmailTwoFactor')
+            ->assertHasNoErrors()
+            ->assertSet('user.email_two_factor_enabled', true);
+
+        $this->assertTrue($user->fresh()->hasEmailTwoFactorEnabled());
+    }
+
     public function test_user_can_disable_email_two_factor_with_current_password(): void
     {
         $user = User::factory()->withEmailTwoFactor()->create([

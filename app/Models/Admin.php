@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\AdminRole;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -14,6 +15,7 @@ class Admin extends Authenticatable
         'name',
         'email',
         'password',
+        'role',
     ];
 
     protected $hidden = [
@@ -25,6 +27,17 @@ class Admin extends Authenticatable
     {
         return [
             'password' => 'hashed',
+            'role' => AdminRole::class,
         ];
+    }
+
+    public function adminRole(): AdminRole
+    {
+        return $this->role ?? AdminRole::Operator;
+    }
+
+    public function isSuperadmin(): bool
+    {
+        return $this->adminRole() === AdminRole::Superadmin;
     }
 }

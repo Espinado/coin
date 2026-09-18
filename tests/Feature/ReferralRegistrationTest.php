@@ -55,7 +55,7 @@ class ReferralRegistrationTest extends TestCase
                 'password_confirmation' => 'password',
             ]);
 
-        $response->assertRedirect(route('dashboard', absolute: false));
+        $response->assertRedirect(route('verification.notice', absolute: false));
 
         $invited = User::query()->where('email', 'invited@example.com')->first();
 
@@ -82,7 +82,7 @@ class ReferralRegistrationTest extends TestCase
                 'password_confirmation' => 'password',
             ]);
 
-        $response->assertRedirect(route('dashboard', absolute: false));
+        $response->assertRedirect(route('verification.notice', absolute: false));
 
         $user = User::query()->where('email', 'solo@example.com')->first();
 

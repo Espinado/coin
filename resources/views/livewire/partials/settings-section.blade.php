@@ -71,7 +71,11 @@
           </div>
           @error('profileTwoFactorPassword')<p style="{{ $error }}">{{ $message }}</p>@enderror
           @else
-          <button type="button" wire:click="enableEmailTwoFactor" wire:loading.attr="disabled" wire:target="enableEmailTwoFactor" style="{{ $btnPrimary }}; padding: 10px 16px; font-size: 12.5px;">{{ __('coin.profile.enable_two_factor') }}</button>
+          <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+            <input type="password" wire:model="profileTwoFactorPassword" autocomplete="current-password" placeholder="{{ __('coin.profile.two_factor_password_placeholder') }}" style="{{ $input }}; flex: 1; min-width: 180px;" />
+            <button type="button" wire:click="enableEmailTwoFactor" wire:loading.attr="disabled" wire:target="enableEmailTwoFactor" style="{{ $btnPrimary }}; padding: 10px 16px; font-size: 12.5px;">{{ __('coin.profile.enable_two_factor') }}</button>
+          </div>
+          @error('profileTwoFactorPassword')<p style="{{ $error }}">{{ $message }}</p>@enderror
           @endif
         </div>
         <div style="{{ $innerRow }}; display: flex; align-items: center; justify-content: space-between; gap: 16px;">

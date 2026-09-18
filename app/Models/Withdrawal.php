@@ -26,16 +26,26 @@ class Withdrawal extends Model
         'withdrawal_type',
         'payout_address',
         'network_label',
+        'gateway_request_id',
+        'txid',
+        'gateway_state',
+        'sent_at',
         'status',
         'processed_by',
         'admin_note',
         'processed_at',
     ];
 
+    public static function gatewayUniqId(string $reference): string
+    {
+        return 'withdrawal:'.$reference;
+    }
+
     protected function casts(): array
     {
         return [
             'amount' => 'decimal:2',
+            'sent_at' => 'datetime',
             'processed_at' => 'datetime',
         ];
     }
@@ -60,6 +70,35 @@ class Withdrawal extends Model
             self::STATUS_PROCESSING,
             self::STATUS_PAID,
         ];
+    }
+
+    /** @return array<string, list<string>> */
+    public static function allowedTransitions(): array
+    {
+        return [
+            self::STATUS_PENDING => [
+                self::STATUS_APPROVED,
+                self::STATUS_PROCESSING,
+                self::STATUS_PAID,
+                self::STATUS_REJECTED,
+            ],
+            self::STATUS_APPROVED => [
+                self::STATUS_PROCESSING,
+                self::STATUS_PAID,
+                self::STATUS_REJECTED,
+            ],
+            self::STATUS_PROCESSING => [
+                self::STATUS_PAID,
+                self::STATUS_REJECTED,
+            ],
+            self::STATUS_PAID => [],
+            self::STATUS_REJECTED => [],
+        ];
+    }
+
+    public static function canTransition(string $from, string $to): bool
+    {
+        return in_array($to, self::allowedTransitions()[$from] ?? [], true);
     }
 
     public function user(): BelongsTo
