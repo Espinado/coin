@@ -163,6 +163,10 @@
       });
     }
     const dc = doc.querySelector("x-dc");
+    if (!dc) return null;
+    const hideStyle = doc.createElement("style");
+    hideStyle.textContent = "x-dc{display:none!important}";
+    doc.head.appendChild(hideStyle);
     const hostEl = doc.createElement("div");
     hostEl.id = "dc-root";
     dc.replaceWith(hostEl);
@@ -1140,10 +1144,10 @@
   }
 
   // src/cdn.ts
-  var REACT_URL = "https://unpkg.com/react@18.3.1/umd/react.production.min.js";
-  var REACT_SRI = "sha384-DGyLxAyjq0f9SPpVevD6IgztCFlnMF6oW/XQGmfe+IsZ8TqEiDrcHkMLKI6fiB/Z";
-  var REACT_DOM_URL = "https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js";
-  var REACT_DOM_SRI = "sha384-gTGxhz21lVGYNMcdJOyq01Edg0jhn/c22nsx0kyqP0TxaV5WVdsSH1fSDUf5YJj1";
+  var REACT_URL = "/coin/vendor/react.production.min.js";
+  var REACT_SRI = "";
+  var REACT_DOM_URL = "/coin/vendor/react-dom.production.min.js";
+  var REACT_DOM_SRI = "";
   var BABEL_URL = "https://unpkg.com/@babel/standalone@7.29.0/babel.min.js";
   var BABEL_SRI = "sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y";
   function cdnScriptFor(url, sri) {
@@ -1903,9 +1907,10 @@
     if (document.readyState !== "loading") api.__dcBoot();
     else document.addEventListener("DOMContentLoaded", () => api.__dcBoot());
   }
-  hideRawTemplate();
   loadReactUmd().then(init).catch((err) => {
     console.error("[dc] failed to load React or boot:", err);
-    throw err;
+    document.querySelectorAll("style").forEach((s) => {
+      if (s.textContent === "x-dc{display:none!important}") s.remove();
+    });
   });
 })();
