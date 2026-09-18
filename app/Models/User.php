@@ -125,6 +125,27 @@ class User extends Authenticatable implements MustVerifyEmail
         };
     }
 
+    public function isKycApproved(): bool
+    {
+        return $this->kyc_status === self::KYC_APPROVED;
+    }
+
+    public function kycProfileLabel(): string
+    {
+        return $this->isKycApproved()
+            ? __('coin.profile.kyc_confirmed')
+            : __('coin.profile.kyc_not_confirmed');
+    }
+
+    public function kycProfileBadgeStyle(): string
+    {
+        if ($this->isKycApproved()) {
+            return 'background: oklch(0.6 0.14 160 / 0.2); border: 1px solid oklch(0.7 0.14 160 / 0.4); color: oklch(0.88 0.14 160);';
+        }
+
+        return 'background: rgba(255,143,143,0.15); border: 1px solid rgba(255,143,143,0.35); color: #ff8f8f;';
+    }
+
     public function wallet(): HasOne
     {
         return $this->hasOne(Wallet::class);

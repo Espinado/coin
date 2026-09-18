@@ -162,7 +162,7 @@
             <div style="font-size: 13.5px;">{{ __('coin.profile.kyc') }}</div>
             <div style="margin-top: 4px; {{ $hint }}">{{ __('coin.profile.kyc_hint') }}</div>
           </div>
-          <span style="padding: 5px 11px; border-radius: 7px; font-family: 'JetBrains Mono', monospace; font-size: 10px; {{ $user->kycBadgeStyle() }}">{{ mb_strtoupper($user->kycLabel()) }}</span>
+          <span style="padding: 5px 11px; border-radius: 7px; font-family: 'JetBrains Mono', monospace; font-size: 10px; {{ $user->kycProfileBadgeStyle() }}">{{ mb_strtoupper($user->kycProfileLabel()) }}</span>
         </div>
       </div>
     </div>
