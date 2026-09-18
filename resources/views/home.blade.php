@@ -9,7 +9,6 @@
     @livewireStyles
     @vite(['resources/js/guest-support.js'])
     @include('partials.coin-reverb-config-guest')
-    <script src="{{ asset('coin/support.js') }}"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
     <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
@@ -22,34 +21,24 @@
       body { margin: 0; background: #04101c; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
       .coin-app { width: 100%; max-width: 1440px; margin: 0 auto; box-sizing: border-box; overflow-x: hidden; }
       .coin-brand-logo { width: min(260px, 54vw); height: auto; max-height: 56px; display: block; object-fit: contain; }
+      a { color: oklch(0.86 0.11 195); text-decoration: none; }
+      a:hover { color: oklch(0.92 0.09 195); }
+      @@keyframes paiPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+      input[type="range"] { accent-color: oklch(0.8 0.13 192); }
     </style>
 </head>
 <body>
 @include('partials.page-loading-overlay')
 <script src="{{ asset('coin/page-navigate.js') }}" defer></script>
-<x-dc>
-<helmet>
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
-<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
-<style>
-  body { margin: 0; background: #04101c; -webkit-font-smoothing: antialiased; }
-  a { color: oklch(0.86 0.11 195); text-decoration: none; }
-  a:hover { color: oklch(0.92 0.09 195); }
-  @@keyframes paiPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
-  input[type="range"] { accent-color: oklch(0.8 0.13 192); }
-</style>
-</helmet>
-
 <div class="coin-app" style="margin: 0 auto; position: relative; background: #061423; color: #e6f4fa; font-family: 'Sora', 'Helvetica Neue', Helvetica, sans-serif; overflow: hidden;">
   <div style="position: absolute; top: -240px; right: -80px; width: 820px; height: 660px; border-radius: 50%; background: radial-gradient(closest-side, oklch(0.62 0.13 198 / 0.28), transparent 72%); filter: blur(30px); pointer-events: none;"></div>
 
-  <div class="coin-nav-overlay" onClick="@{{ closeMenu }}"></div>
+  <div class="coin-nav-overlay"></div>
   <header class="coin-header" data-screen-label="Header" style="position: relative; z-index: 20; display: flex; align-items: center; justify-content: space-between; padding: 22px 72px; border-bottom: 1px solid rgba(150,235,250,0.1); background: rgba(6,20,35,0.75); backdrop-filter: blur(14px);">
     <div class="coin-header-brand" style="display: flex; align-items: center;">
       <img src="/cloudflops/logo-horizontal.png" alt="CloudFlops" class="coin-brand-logo" />
     </div>
-    <button type="button" class="coin-burger" onClick="@{{ toggleMenu }}" aria-label="Open menu"><span></span><span></span><span></span></button>
+    <button type="button" class="coin-burger" aria-label="Open menu"><span></span><span></span><span></span></button>
     <nav class="coin-nav coin-nav-desktop" style="display: flex; align-items: center; gap: 30px;">
       <a href="#product" style="font-size: 14px; color: rgba(230,244,250,0.78);">Продукт</a>
       <a href="#how" style="font-size: 14px; color: rgba(230,244,250,0.78);">Как это работает</a>
@@ -59,12 +48,12 @@
       <a href="#faq" style="font-size: 14px; color: rgba(230,244,250,0.78);">Вопросы</a>
     </nav>
     <nav class="coin-nav coin-nav-mobile">
-      <a href="#product" onClick="@{{ closeMenu }}" style="font-size: 14px; color: rgba(230,244,250,0.78);">Product</a>
-      <a href="#how" onClick="@{{ closeMenu }}" style="font-size: 14px; color: rgba(230,244,250,0.78);">How it works</a>
-      <a href="#plans" onClick="@{{ closeMenu }}" style="font-size: 14px; color: rgba(230,244,250,0.78);">Plans</a>
-      <a href="#infra" onClick="@{{ closeMenu }}" style="font-size: 14px; color: rgba(230,244,250,0.78);">Security</a>
-      <a href="/dashboard" onClick="@{{ closeMenu }}" style="font-size: 14px; color: rgba(230,244,250,0.78);">Dashboard</a>
-      <a href="#faq" onClick="@{{ closeMenu }}" style="font-size: 14px; color: rgba(230,244,250,0.78);">FAQ</a>
+      <a href="#product" style="font-size: 14px; color: rgba(230,244,250,0.78);">Product</a>
+      <a href="#how" style="font-size: 14px; color: rgba(230,244,250,0.78);">How it works</a>
+      <a href="#plans" style="font-size: 14px; color: rgba(230,244,250,0.78);">Plans</a>
+      <a href="#infra" style="font-size: 14px; color: rgba(230,244,250,0.78);">Security</a>
+      <a href="/dashboard" style="font-size: 14px; color: rgba(230,244,250,0.78);">Dashboard</a>
+      <a href="#faq" style="font-size: 14px; color: rgba(230,244,250,0.78);">FAQ</a>
     </nav>
     <div class="coin-header-actions" style="display: flex; align-items: center; gap: 12px;">
       <a href="/dashboard" style="padding: 11px 22px; border-radius: 11px; border: 1px solid oklch(0.86 0.11 195 / 0.5); background: linear-gradient(140deg, oklch(0.86 0.12 192), oklch(0.66 0.13 205)); color: #04121f; font-family: inherit; font-size: 14px; font-weight: 600; cursor: pointer;">Личный кабинет</a>
@@ -504,24 +493,6 @@
     </div>
   </footer>
 </div>
-</x-dc>
-<script type="text/x-dc" data-dc-script>
-class Component extends DCLogic {
-  state = { menuOpen: false };
-
-  setMenuOpen(open) {
-    this.setState({ menuOpen: open });
-    document.documentElement.classList.toggle('coin-nav-open', open);
-  }
-
-  renderVals() {
-    return {
-      toggleMenu: () => this.setMenuOpen(!this.state.menuOpen),
-      closeMenu: () => this.setMenuOpen(false),
-    };
-  }
-}
-</script>
 
 <button type="button" id="coin-scroll-top" class="coin-scroll-top" aria-label="Наверх" title="Наверх">
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">

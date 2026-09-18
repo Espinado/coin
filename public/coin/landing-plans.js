@@ -238,44 +238,9 @@
     }
 
     if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', scheduleBoot);
+        document.addEventListener('DOMContentLoaded', scheduleBoot, { once: true });
     } else {
         scheduleBoot();
     }
-
-    const observer = new MutationObserver(function () {
-        if (document.getElementById('landing-plans-data')) {
-            scheduleBoot();
-        }
-    });
-
-    observer.observe(document.documentElement, { childList: true, subtree: true });
-
-    function patchDcBoot() {
-        const boot = window.__dcBoot;
-
-        if (typeof boot !== 'function' || boot.__coinLandingPatched) {
-            return;
-        }
-
-        window.__dcBoot = function () {
-            const result = boot.apply(this, arguments);
-            scheduleBoot();
-
-            return result;
-        };
-        window.__dcBoot.__coinLandingPatched = true;
-        scheduleBoot();
-    }
-
-    const bootPoll = window.setInterval(function () {
-        if (typeof window.__dcBoot === 'function') {
-            patchDcBoot();
-            window.clearInterval(bootPoll);
-        }
-    }, 50);
-
-    window.setTimeout(function () {
-        window.clearInterval(bootPoll);
-    }, 10000);
 })();
+
