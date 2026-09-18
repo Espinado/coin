@@ -459,50 +459,52 @@
     </div>
   </section>
 
-  <footer data-screen-label="Footer" style="position: relative; z-index: 5; padding: 56px 72px 36px; border-top: 1px solid rgba(150,235,250,0.1); background: rgba(150,235,250,0.02);">
-    <div style="display: grid; grid-template-columns: 1.6fr repeat(4, 1fr); gap: 40px;">
-      <div>
-        <div class="coin-footer-brand" style="display: flex; align-items: center;">
+  <footer class="coin-landing-footer" data-screen-label="Footer">
+    <div class="coin-landing-footer__grid">
+      <div class="coin-landing-footer__brand">
+        <div class="coin-footer-brand">
           <img src="/cloudflops/logo-horizontal.png" alt="CloudFlops" class="coin-brand-logo" />
         </div>
-        <p style="margin: 16px 0 0; max-width: 280px; font-size: 13px; line-height: 1.6; color: rgba(230,244,250,0.68);">USDT investment platform with daily profit accrual.</p>
+        <p class="coin-landing-footer__tagline">USDT investment platform with daily profit accrual.</p>
         @include('partials.landing-footer-company', ['companyLegal' => $companyLegal])
       </div>
-      <div>
-        <div style="font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.14em; color: rgba(230,244,250,0.65);">PRODUCT</div>
-        <div style="display: flex; flex-direction: column; gap: 11px; margin-top: 16px; font-size: 13.5px;">
-          <a href="#how" style="color: rgba(230,244,250,0.78);">How it works</a>
-          <a href="#plans" style="color: rgba(230,244,250,0.78);">Plans</a>
-          <a href="#infra" style="color: rgba(230,244,250,0.78);">Security</a>
-          <a href="/dashboard" style="color: rgba(230,244,250,0.78);">Dashboard</a>
+      <div class="coin-landing-footer__links">
+        <div class="coin-landing-footer__col">
+          <div class="coin-landing-footer__heading">PRODUCT</div>
+          <div class="coin-landing-footer__nav">
+            <a href="#how">How it works</a>
+            <a href="#plans">Plans</a>
+            <a href="#infra">Security</a>
+            <a href="/dashboard">Dashboard</a>
+          </div>
         </div>
-      </div>
-      <div>
-        <div style="font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.14em; color: rgba(230,244,250,0.65);">LEGAL</div>
-        <div style="display: flex; flex-direction: column; gap: 11px; margin-top: 16px; font-size: 13.5px;">
-          @foreach($legalPages as $legalPage)
-            <a href="{{ route('legal.show', $legalPage) }}" style="color: rgba(230,244,250,0.78);">{{ $legalPage->slugLabel() }}</a>
-          @endforeach
+        <div class="coin-landing-footer__col">
+          <div class="coin-landing-footer__heading">LEGAL</div>
+          <div class="coin-landing-footer__nav">
+            @foreach($legalPages as $legalPage)
+              <a href="{{ route('legal.show', $legalPage) }}">{{ $legalPage->slugLabel() }}</a>
+            @endforeach
+          </div>
         </div>
-      </div>
-      <div>
-        <div style="font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.14em; color: rgba(230,244,250,0.65);">SUPPORT</div>
-        <div style="display: flex; flex-direction: column; gap: 11px; margin-top: 16px; font-size: 13.5px;">
-          <a href="{{ ($faqPage ?? null) ? route('legal.show', $faqPage) : '#faq' }}" style="color: rgba(230,244,250,0.78);">{{ __('coin.legal.slugs.faq') }}</a>
-          <a href="#support" style="color: rgba(230,244,250,0.78);">Help</a>
+        <div class="coin-landing-footer__col">
+          <div class="coin-landing-footer__heading">SUPPORT</div>
+          <div class="coin-landing-footer__nav">
+            <a href="{{ ($faqPage ?? null) ? route('legal.show', $faqPage) : '#faq' }}">{{ __('coin.legal.slugs.faq') }}</a>
+            <a href="#support">Help</a>
 @include('partials.landing-footer-contact', ['companyLegal' => $companyLegal])
+          </div>
         </div>
-      </div>
-      <div>
-        <div style="font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.14em; color: rgba(230,244,250,0.65);">SOCIAL</div>
-        <div style="display: flex; flex-direction: column; gap: 11px; margin-top: 16px; font-size: 13.5px;">
-          <a href="#" style="color: rgba(230,244,250,0.78);">Telegram</a>
-          <a href="#" style="color: rgba(230,244,250,0.78);">X</a>
-          <a href="#" style="color: rgba(230,244,250,0.78);">LinkedIn</a>
+        <div class="coin-landing-footer__col">
+          <div class="coin-landing-footer__heading">SOCIAL</div>
+          <div class="coin-landing-footer__nav">
+            <a href="#">Telegram</a>
+            <a href="#">X</a>
+            <a href="#">LinkedIn</a>
+          </div>
         </div>
       </div>
     </div>
-    <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 44px; padding-top: 22px; border-top: 1px solid rgba(150,235,250,0.1); font-size: 12.5px; color: rgba(230,244,250,0.62);">
+    <div class="coin-landing-footer__bottom">
       @php
           $footerCompany = trim($companyLegal['company_name'] ?? '');
           $footerReg = trim($companyLegal['company_registration_number'] ?? '');
@@ -513,7 +515,7 @@
               {{ __('coin.footer.registration_number') }} {{ $footerReg }}.
           @endif
       </span>
-      <span style="font-family: 'JetBrains Mono', monospace; letter-spacing: 0.1em;">NETWORK ONLINE</span>
+      <span class="coin-landing-footer__status">NETWORK ONLINE</span>
     </div>
   </footer>
 </div>

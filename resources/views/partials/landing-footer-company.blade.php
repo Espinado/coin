@@ -12,7 +12,7 @@
 @endphp
 
 @if($hasDetails)
-    <address style="margin: 20px 0 0; max-width: 320px; font-style: normal; font-size: 12px; line-height: 1.65; color: rgba(230,244,250,0.58);">
+    <address class="coin-landing-footer__company">
         @if($name !== '')
             <div style="font-size: 13px; font-weight: 600; color: rgba(230,244,250,0.82);">{{ $name }}</div>
         @endif
