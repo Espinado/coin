@@ -468,9 +468,19 @@
               <div style="padding: 11px 0; font-size: 13px; color: rgba(214,238,248,0.68);">{{ __('coin.stats.no_profit_yet') }}</div>
               @endforelse
             </div>
-            <a href="{{ route('dashboard.profit-history') }}" wire:navigate style="display: block; width: 100%; margin-top: 18px; padding: 10px; border-radius: 10px; border: 1px solid rgba(150,235,250,0.2); background: rgba(150,235,250,0.06); color: #e6f4fa; font-family: inherit; font-size: 13px; text-align: center; text-decoration: none; cursor: pointer;">{{ __('coin.stats.full_history') }}</a>
+            @if(! $showFullProfitHistory)
+            <button type="button" wire:click="openFullProfitHistory" style="display: block; width: 100%; margin-top: 18px; padding: 10px; border-radius: 10px; border: 1px solid rgba(150,235,250,0.2); background: rgba(150,235,250,0.06); color: #e6f4fa; font-family: inherit; font-size: 13px; text-align: center; cursor: pointer;">{{ __('coin.stats.full_history') }}</button>
+            @endif
           </div>
         </div>
+
+        @if($showFullProfitHistory && $profitHistoryPage)
+        <div id="profit-history-full" style="padding: 24px; border-radius: 16px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.035);">
+          <div style="margin-bottom: 6px; font-size: 12.5px; color: rgba(214,238,248,0.7);">{{ __('coin.stats.profit_history_sub') }}</div>
+          @include('livewire.partials.profit-history-list', ['transactions' => $profitHistoryPage, 'wallet' => $wallet])
+          <button type="button" wire:click="closeFullProfitHistory" style="display: block; width: 100%; margin-top: 18px; padding: 10px; border-radius: 10px; border: 1px solid rgba(150,235,250,0.2); background: rgba(150,235,250,0.06); color: #e6f4fa; font-family: inherit; font-size: 13px; text-align: center; cursor: pointer;">{{ __('coin.stats.collapse_history') }}</button>
+        </div>
+        @endif
       </section>
     @endif
 

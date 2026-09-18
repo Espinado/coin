@@ -190,6 +190,17 @@ class Dashboard extends Component
 
     public string $walletDir = 'desc';
 
+    #[Url(as: 'profit', history: true, keep: false)]
+    public bool $showFullProfitHistory = false;
+
+    public int $profitPerPage = 10;
+
+    public string $profitSearch = '';
+
+    public string $profitSort = '';
+
+    public string $profitDir = 'desc';
+
     public function updatedWalletPerPage(): void
     {
         $this->resetPage('walletPage');
@@ -210,6 +221,39 @@ class Dashboard extends Component
         }
 
         $this->resetPage('walletPage');
+    }
+
+    public function updatedProfitPerPage(): void
+    {
+        $this->resetPage('profitPage');
+    }
+
+    public function updatedProfitSearch(): void
+    {
+        $this->resetPage('profitPage');
+    }
+
+    public function sortProfit(string $column): void
+    {
+        if ($this->profitSort === $column) {
+            $this->profitDir = $this->profitDir === 'asc' ? 'desc' : 'asc';
+        } else {
+            $this->profitSort = $column;
+            $this->profitDir = 'desc';
+        }
+
+        $this->resetPage('profitPage');
+    }
+
+    public function openFullProfitHistory(): void
+    {
+        $this->showFullProfitHistory = true;
+        $this->resetPage('profitPage');
+    }
+
+    public function closeFullProfitHistory(): void
+    {
+        $this->showFullProfitHistory = false;
     }
 
     public function setReferralTab(string $tab): void
@@ -305,6 +349,10 @@ class Dashboard extends Component
         if ($this->section < 0 || $this->section > 8) {
             $this->section = 0;
         }
+
+        if ($this->showFullProfitHistory && $this->section !== 3) {
+            $this->section = 3;
+        }
     }
 
     public function setSection(int $section): void
@@ -313,9 +361,17 @@ class Dashboard extends Component
             $this->changingContractId = null;
         }
 
+        if ($section !== 3) {
+            $this->showFullProfitHistory = false;
+        }
+
         $this->section = $section;
         $this->menuOpen = false;
         $this->resetActionFeedback();
+
+        if ($section === 3) {
+            $this->resetPage('profitPage');
+        }
 
         if ($section === 4) {
             $this->wallet = $this->user->fresh(['wallet'])->wallet;
@@ -1578,6 +1634,14 @@ class Dashboard extends Component
                 ->searchTerm($this->walletSearch)
                 ->applyListSort($this->walletSort, $this->walletDir, 'sort_order')
                 ->paginate($this->walletPageSize(), pageName: 'walletPage'),
+            'profitHistoryPage' => $this->section === 3 && $this->showFullProfitHistory
+                ? WalletTransaction::query()
+                    ->where('user_id', $userId)
+                    ->profitHistory()
+                    ->searchTerm($this->profitSearch)
+                    ->applyListSort($this->profitSort, $this->profitDir, 'occurred_at')
+                    ->paginate($this->profitPageSize(), pageName: 'profitPage')
+                : null,
             'referralAccrualPage' => ReferralCommission::query()
                 ->where('referrer_user_id', $userId)
                 ->whereHas('contract')
@@ -1615,6 +1679,11 @@ class Dashboard extends Component
     private function walletPageSize(): int
     {
         return in_array($this->walletPerPage, [10, 20, 50], true) ? $this->walletPerPage : 10;
+    }
+
+    private function profitPageSize(): int
+    {
+        return in_array($this->profitPerPage, [10, 20, 50], true) ? $this->profitPerPage : 10;
     }
 
     private function referralAccrualPageSize(): int

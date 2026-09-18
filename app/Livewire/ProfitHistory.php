@@ -11,6 +11,11 @@ class ProfitHistory extends Component
 {
     use WithPagination;
 
+    public function mount(): void
+    {
+        $this->redirect(route('dashboard', ['section' => 3, 'profit' => 1]), navigate: true);
+    }
+
     public int $profitPerPage = 10;
 
     public string $profitSearch = '';
