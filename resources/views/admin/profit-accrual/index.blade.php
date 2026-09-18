@@ -12,8 +12,8 @@
             <h1 style="margin:0;font-size:24px;font-weight:600;">{{ __('coin.admin.profit_accrual') }}</h1>
             <p style="margin:8px 0 0;font-size:14px;color:rgba(232,237,245,0.72);">
                 {!! __('coin.admin.profit_accrual_sub', [
-                    'time' => config('coin.profit_accrual.schedule_time'),
-                    'timezone' => config('coin.profit_accrual.schedule_timezone'),
+                    'time' => $profitAccrualTime,
+                    'timezone' => $profitAccrualTimezone,
                     'command' => '<code style="font-family:\'JetBrains Mono\',monospace;">coin:accrue-daily-profits</code>',
                 ]) !!}
             </p>

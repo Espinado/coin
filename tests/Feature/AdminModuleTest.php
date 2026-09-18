@@ -215,10 +215,15 @@ class AdminModuleTest extends TestCase
                 'referral_level2_percent' => '0',
                 'kyc_required_for_withdrawal' => false,
                 'maintenance_mode' => false,
+                'btc_per_usdt' => '2',
+                'profit_accrual_time' => '10:30',
             ])
             ->assertRedirect();
 
-        $this->assertSame(20, app(PlatformSettingsService::class)->getInt('referral_level1_percent'));
+        $settings = app(PlatformSettingsService::class);
+
+        $this->assertSame(20, $settings->getInt('referral_level1_percent'));
+        $this->assertSame('10:30', $settings->profitAccrualTime());
     }
 
     public function test_admin_can_save_legal_company_info(): void

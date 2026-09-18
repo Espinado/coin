@@ -30,6 +30,8 @@ class SettingsController extends Controller
         foreach ($definitions as $key => $definition) {
             if ($definition['type'] === 'boolean') {
                 $rules[$key] = ['sometimes', 'boolean'];
+            } elseif ($definition['type'] === 'time') {
+                $rules[$key] = ['required', 'date_format:H:i'];
             } elseif ($key === 'token_symbol') {
                 $rules[$key] = ['required', 'string', 'max:12'];
             } elseif ($key === 'epochs_per_day') {

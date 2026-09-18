@@ -1,5 +1,6 @@
 <?php
 
+use App\Services\PlatformSettingsService;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Schedule;
@@ -9,6 +10,6 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote');
 
 Schedule::command('coin:accrue-daily-profits')
-    ->dailyAt(config('coin.profit_accrual.schedule_time', '09:00'))
-    ->timezone(config('coin.profit_accrual.schedule_timezone', 'Europe/Riga'))
+    ->dailyAt(app(PlatformSettingsService::class)->profitAccrualTime())
+    ->timezone(app(PlatformSettingsService::class)->profitAccrualTimezone())
     ->withoutOverlapping();

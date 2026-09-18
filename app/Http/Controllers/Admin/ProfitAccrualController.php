@@ -41,6 +41,8 @@ class ProfitAccrualController extends Controller
         return view('admin.profit-accrual.index', [
             'accruals' => $this->adminPaginate($query, $request),
             'currency' => $settings->tokenSymbol(),
+            'profitAccrualTime' => $settings->profitAccrualTime(),
+            'profitAccrualTimezone' => $settings->profitAccrualTimezone(),
             ...$this->adminListState($request),
         ]);
     }

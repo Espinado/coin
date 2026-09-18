@@ -22,6 +22,7 @@ class PlatformSettingsService
         'kyc_required_for_withdrawal' => '0',
         'maintenance_mode' => '0',
         'btc_per_usdt' => '2',
+        'profit_accrual_time' => '09:00',
     ];
 
     /** @var array<string, string> */
@@ -136,6 +137,26 @@ class PlatformSettingsService
         return $rate > 0 ? $rate : 2.0;
     }
 
+    public function profitAccrualTime(): string
+    {
+        $time = trim($this->get('profit_accrual_time'));
+
+        if ($time === '') {
+            $time = (string) config('coin.profit_accrual.schedule_time', '09:00');
+        }
+
+        if (preg_match('/^(\d{1,2}):(\d{2})$/', $time, $matches)) {
+            return sprintf('%02d:%02d', (int) $matches[1], (int) $matches[2]);
+        }
+
+        return '09:00';
+    }
+
+    public function profitAccrualTimezone(): string
+    {
+        return (string) config('coin.profit_accrual.schedule_timezone', 'Europe/Riga');
+    }
+
     /** @return array<string, array{label: string, type: string, default: string}> */
     public function definitions(): array
     {
@@ -151,6 +172,7 @@ class PlatformSettingsService
             'kyc_required_for_withdrawal' => ['label' => __('coin.settings.kyc_for_payout'), 'type' => 'boolean', 'default' => self::DEFAULTS['kyc_required_for_withdrawal']],
             'maintenance_mode' => ['label' => __('coin.settings.maintenance'), 'type' => 'boolean', 'default' => self::DEFAULTS['maintenance_mode']],
             'btc_per_usdt' => ['label' => __('coin.settings.btc_per_usdt'), 'type' => 'number', 'default' => self::DEFAULTS['btc_per_usdt']],
+            'profit_accrual_time' => ['label' => __('coin.settings.profit_accrual_time'), 'type' => 'time', 'default' => self::DEFAULTS['profit_accrual_time']],
         ];
     }
 

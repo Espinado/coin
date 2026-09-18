@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Services\PlatformSettingsService;
 use App\Services\ProfitAccrualService;
 use Illuminate\Console\Command;
 
@@ -11,12 +12,12 @@ class RunDailyProfitAccrual extends Command
 
     protected $description = 'Accrue daily investment profit for all active contracts (scheduled at 09:00 by default)';
 
-    public function handle(ProfitAccrualService $accrual): int
+    public function handle(ProfitAccrualService $accrual, PlatformSettingsService $settings): int
     {
         $this->info(sprintf(
             'Starting daily accrual (schedule: %s %s)...',
-            config('coin.profit_accrual.schedule_time'),
-            config('coin.profit_accrual.schedule_timezone'),
+            $settings->profitAccrualTime(),
+            $settings->profitAccrualTimezone(),
         ));
 
         $result = $accrual->accrueDaily();

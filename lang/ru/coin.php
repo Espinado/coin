@@ -935,6 +935,8 @@ return [
         'kyc_for_payout' => 'KYC обязателен для вывода',
         'maintenance' => 'Режим обслуживания',
         'btc_per_usdt' => 'Курс BTC: сколько BTC за 1 USDT',
+        'profit_accrual_time' => 'Время начисления прибыли',
+        'profit_accrual_time_hint' => 'Ежедневно в указанное время (:timezone).',
     ],
 
     'auth' => [

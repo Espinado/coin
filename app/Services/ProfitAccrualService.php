@@ -19,6 +19,7 @@ class ProfitAccrualService
         private WalletService $wallets,
         private PlanPurchaseService $purchases,
         private UserNotificationService $notifications,
+        private PlatformSettingsService $settings,
     ) {}
 
     /** Release principal for matured contracts only — daily profit runs on schedule at 09:00. */
@@ -60,8 +61,8 @@ class ProfitAccrualService
 
         Log::channel('profit_accrual')->info('Daily profit accrual run started', [
             'accrual_date' => now()->toDateString(),
-            'schedule_time' => config('coin.profit_accrual.schedule_time'),
-            'timezone' => config('coin.profit_accrual.schedule_timezone'),
+            'schedule_time' => $this->settings->profitAccrualTime(),
+            'timezone' => $this->settings->profitAccrualTimezone(),
             'started_at' => now()->toIso8601String(),
         ]);
 
@@ -304,8 +305,8 @@ class ProfitAccrualService
 
         $logger->info('Daily profit accrual run completed', [
             'accrual_date' => now()->toDateString(),
-            'schedule_time' => config('coin.profit_accrual.schedule_time'),
-            'timezone' => config('coin.profit_accrual.schedule_timezone'),
+            'schedule_time' => $this->settings->profitAccrualTime(),
+            'timezone' => $this->settings->profitAccrualTimezone(),
             'finished_at' => now()->toIso8601String(),
             ...$runSummary,
         ]);
@@ -356,7 +357,7 @@ class ProfitAccrualService
     /** @return array{transactions_removed: int, contracts_updated: int, total_reversed: float} */
     public function reverseAccrualsForDate(string $date, ?int $userId = null): array
     {
-        $timezone = config('coin.profit_accrual.schedule_timezone', 'Europe/Riga');
+        $timezone = $this->settings->profitAccrualTimezone();
         $dayStart = Carbon::parse($date, $timezone)->startOfDay()->utc();
         $dayEnd = Carbon::parse($date, $timezone)->endOfDay()->utc();
 
@@ -442,6 +443,6 @@ class ProfitAccrualService
 
     private function accrualCalendarToday(): string
     {
-        return now(config('coin.profit_accrual.schedule_timezone', 'Europe/Riga'))->toDateString();
+        return now($this->settings->profitAccrualTimezone())->toDateString();
     }
 }
