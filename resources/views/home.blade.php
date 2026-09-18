@@ -7,7 +7,6 @@
     <title>{{ \App\Support\PlatformBrand::pageTitle('Инвестиционная платформа') }}</title>
     <link rel="icon" href="{{ asset('cloudflops/logo-mark.png') }}" type="image/png" />
     @livewireStyles
-    @vite(['resources/js/guest-support.js'])
     @include('partials.coin-reverb-config-guest')
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
@@ -28,8 +27,23 @@
     </style>
 </head>
 <body>
-@include('partials.page-loading-overlay')
-<script src="{{ asset('coin/page-navigate.js') }}" defer></script>
+<script>
+(function () {
+    try {
+        sessionStorage.removeItem('coinPageNavigating');
+    } catch (_) {}
+    document.documentElement.classList.remove('coin-page-navigating');
+    document.querySelectorAll('style').forEach(function (node) {
+        if (node.textContent === 'x-dc{display:none!important}') {
+            node.remove();
+        }
+    });
+    var legacyDc = document.querySelector('x-dc');
+    if (legacyDc) {
+        legacyDc.style.display = 'block';
+    }
+})();
+</script>
 <div class="coin-app" style="margin: 0 auto; position: relative; background: #061423; color: #e6f4fa; font-family: 'Sora', 'Helvetica Neue', Helvetica, sans-serif; overflow: hidden;">
   <div style="position: absolute; top: -240px; right: -80px; width: 820px; height: 660px; border-radius: 50%; background: radial-gradient(closest-side, oklch(0.62 0.13 198 / 0.28), transparent 72%); filter: blur(30px); pointer-events: none;"></div>
 
@@ -503,5 +517,6 @@
 
 @livewire('guest-support-chat')
 @livewireScripts
+@vite(['resources/js/guest-support.js'])
 </body>
 </html>

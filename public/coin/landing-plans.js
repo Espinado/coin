@@ -233,7 +233,18 @@
 
     window.coinInitLandingPlans = bootLandingPlans;
 
+    var plansBooted = false;
+
     function scheduleBoot() {
+        if (plansBooted) {
+            return;
+        }
+
+        if (!loadPayload()) {
+            return;
+        }
+
+        plansBooted = true;
         bootLandingPlans();
     }
 

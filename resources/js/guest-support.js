@@ -165,6 +165,6 @@ document.querySelectorAll('[data-open-guest-support]').forEach((element) => {
     });
 });
 
-if (hasEchoKey()) {
+if (hasEchoKey() && window.coinReverb?.guestTicketId) {
     initEcho();
 }
