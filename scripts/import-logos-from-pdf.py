@@ -24,6 +24,21 @@ SCALE = 3
 BG_TOLERANCE = 34
 
 
+def sample_background_color(bgr: np.ndarray) -> np.ndarray:
+    height, width = bgr.shape[:2]
+    corners = np.array(
+        [
+            bgr[0, 0],
+            bgr[0, width - 1],
+            bgr[height - 1, 0],
+            bgr[height - 1, width - 1],
+        ],
+        dtype=np.float32,
+    )
+
+    return np.median(corners, axis=0)
+
+
 def remove_solid_bg(image: np.ndarray, tol: int = BG_TOLERANCE) -> np.ndarray:
     if image.shape[2] == 3:
         image = cv2.cvtColor(image, cv2.COLOR_BGR2BGRA)
@@ -41,6 +56,26 @@ def remove_solid_bg(image: np.ndarray, tol: int = BG_TOLERANCE) -> np.ndarray:
         background |= mask[1:-1, 1:-1] != 0
 
     image[background, 3] = 0
+
+    bg_color = sample_background_color(image[:, :, :3])
+    bgr_float = image[:, :, :3].astype(np.float32)
+    distance = np.linalg.norm(bgr_float - bg_color, axis=2)
+    dark = (bgr_float[:, :, 0] < 40) & (bgr_float[:, :, 1] < 60) & (bgr_float[:, :, 2] < 85)
+    image[(distance <= tol + 6) & dark, 3] = 0
+
+    return image
+
+
+def load_raster(path: Path) -> np.ndarray:
+    image = cv2.imread(str(path), cv2.IMREAD_UNCHANGED)
+    if image is None:
+        raise RuntimeError(f"Unable to read {path}")
+
+    if image.ndim == 2:
+        image = cv2.cvtColor(image, cv2.COLOR_GRAY2BGRA)
+    elif image.shape[2] == 3:
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2BGRA)
+
     return image
 
 
@@ -94,17 +129,39 @@ def export_logos(pdf_path: Path, out_dir: Path) -> None:
     doc.close()
 
 
+def export_horizontal_from_image(image_path: Path, out_dir: Path) -> None:
+    out_dir.mkdir(parents=True, exist_ok=True)
+    rendered = load_raster(image_path)
+    transparent = remove_solid_bg(rendered)
+    trimmed = trim_transparent(transparent)
+
+    for filename in ("logo-horizontal.png", "logo.png"):
+        target = out_dir / filename
+        cv2.imwrite(str(target), trimmed)
+        print(f"{filename}: {trimmed.shape[1]}x{trimmed.shape[0]} -> {target}")
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("pdf", nargs="?", default=str(DEFAULT_PDF), help="Source PDF path")
     parser.add_argument("--out", default=str(OUT_DIR), help="Output directory")
+    parser.add_argument("--image", help="Import horizontal logo from a PNG/JPG instead of PDF")
     args = parser.parse_args()
+
+    out_dir = Path(args.out)
+
+    if args.image:
+        image_path = Path(args.image).expanduser()
+        if not image_path.exists():
+            raise SystemExit(f"Image not found: {image_path}")
+        export_horizontal_from_image(image_path, out_dir)
+        return
 
     pdf_path = Path(args.pdf).expanduser()
     if not pdf_path.exists():
         raise SystemExit(f"PDF not found: {pdf_path}")
 
-    export_logos(pdf_path, Path(args.out))
+    export_logos(pdf_path, out_dir)
 
 
 if __name__ == "__main__":
