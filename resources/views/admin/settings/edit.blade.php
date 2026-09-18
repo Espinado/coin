@@ -42,4 +42,34 @@
             </div>
         </form>
     </div>
+
+    <div class="admin-card" style="margin-top:16px;">
+        <h2 style="margin:0;font-size:20px;font-weight:600;">{{ __('coin.admin.legal.title') }}</h2>
+        <p style="margin:8px 0 0;font-size:14px;color:rgba(232,237,245,0.72);">{{ __('coin.admin.legal.sub') }}</p>
+    </div>
+
+    <div class="admin-card" style="margin-top:16px;">
+        <form method="POST" action="{{ route('admin.settings.legal.update') }}" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;">
+            @csrf
+            @method('PATCH')
+
+            @foreach($legalDefinitions as $key => $definition)
+                <div @if($definition['type'] === 'textarea') style="grid-column:1/-1;" @endif>
+                    <label style="display:block;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.12em;color:rgba(232,237,245,0.65);">{{ strtoupper($definition['label']) }}</label>
+                    @if($definition['type'] === 'textarea')
+                        <textarea name="{{ $key }}" rows="3"
+                            style="width:100%;box-sizing:border-box;margin-top:8px;padding:10px 12px;border-radius:10px;border:1px solid rgba(255,255,255,0.12);background:#070a10;color:#e8edf5;resize:vertical;">{{ old($key, $values[$key] ?? $definition['default']) }}</textarea>
+                    @else
+                        <input type="{{ $definition['type'] === 'email' ? 'email' : 'text' }}" name="{{ $key }}" value="{{ old($key, $values[$key] ?? $definition['default']) }}"
+                            style="width:100%;box-sizing:border-box;margin-top:8px;padding:10px 12px;border-radius:10px;border:1px solid rgba(255,255,255,0.12);background:#070a10;color:#e8edf5;">
+                    @endif
+                    @error($key)<div style="margin-top:6px;font-size:12px;color:#ff8f8f;">{{ $message }}</div>@enderror
+                </div>
+            @endforeach
+
+            <div style="grid-column:1/-1;">
+                <button type="submit" class="admin-btn admin-btn-primary">{{ __('coin.admin.legal.save') }}</button>
+            </div>
+        </form>
+    </div>
 @endsection

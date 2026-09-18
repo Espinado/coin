@@ -466,6 +466,7 @@
           <img src="/cloudflops/logo-horizontal.png" alt="CloudFlops" class="coin-brand-logo" />
         </div>
         <p style="margin: 16px 0 0; max-width: 280px; font-size: 13px; line-height: 1.6; color: rgba(230,244,250,0.68);">USDT investment platform with daily profit accrual.</p>
+        @include('partials.landing-footer-company', ['companyLegal' => $companyLegal])
       </div>
       <div>
         <div style="font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.14em; color: rgba(230,244,250,0.65);">PRODUCT</div>
@@ -489,7 +490,7 @@
         <div style="display: flex; flex-direction: column; gap: 11px; margin-top: 16px; font-size: 13.5px;">
           <a href="{{ ($faqPage ?? null) ? route('legal.show', $faqPage) : '#faq' }}" style="color: rgba(230,244,250,0.78);">{{ __('coin.legal.slugs.faq') }}</a>
           <a href="#support" style="color: rgba(230,244,250,0.78);">Help</a>
-@include('partials.landing-footer-contact')
+@include('partials.landing-footer-contact', ['companyLegal' => $companyLegal])
         </div>
       </div>
       <div>
@@ -502,7 +503,16 @@
       </div>
     </div>
     <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 44px; padding-top: 22px; border-top: 1px solid rgba(150,235,250,0.1); font-size: 12.5px; color: rgba(230,244,250,0.62);">
-      <span>© 2026 CloudFlops. Concept — all values are placeholders.</span>
+      @php
+          $footerCompany = trim($companyLegal['company_name'] ?? '');
+          $footerReg = trim($companyLegal['company_registration_number'] ?? '');
+      @endphp
+      <span>
+          © {{ date('Y') }} {{ $footerCompany !== '' ? $footerCompany : 'CloudFlops' }}.
+          @if($footerReg !== '')
+              {{ __('coin.footer.registration_number') }} {{ $footerReg }}.
+          @endif
+      </span>
       <span style="font-family: 'JetBrains Mono', monospace; letter-spacing: 0.1em;">NETWORK ONLINE</span>
     </div>
   </footer>

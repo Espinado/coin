@@ -17,6 +17,7 @@ class SettingsController extends Controller
     {
         return view('admin.settings.edit', [
             'definitions' => $settings->adminDefinitions(),
+            'legalDefinitions' => $settings->legalDefinitions(),
             'values' => $settings->all(),
         ]);
     }
@@ -51,5 +52,22 @@ class SettingsController extends Controller
         $settings->setMany($validated);
 
         return $this->adminSuccess('coin.admin.flash.settings_saved', 'admin.settings.edit');
+    }
+
+    public function updateLegal(Request $request, PlatformSettingsService $settings): RedirectResponse
+    {
+        $rules = [
+            'company_name' => ['nullable', 'string', 'max:255'],
+            'company_legal_address' => ['nullable', 'string', 'max:2000'],
+            'company_physical_address' => ['nullable', 'string', 'max:2000'],
+            'company_registration_number' => ['nullable', 'string', 'max:100'],
+            'company_license_number' => ['nullable', 'string', 'max:100'],
+            'company_phone' => ['nullable', 'string', 'max:64'],
+            'company_email' => ['nullable', 'email', 'max:255'],
+        ];
+
+        $settings->setLegalMany($request->validate($rules));
+
+        return $this->adminSuccess('coin.admin.flash.legal_info_saved', 'admin.settings.edit');
     }
 }

@@ -98,6 +98,7 @@ Route::middleware(['admin.domain', 'reject.web.on.admin'])->group(function () {
 
         Route::get('settings', [SettingsController::class, 'edit'])->name('admin.settings.edit');
         Route::patch('settings', [SettingsController::class, 'update'])->name('admin.settings.update');
+        Route::patch('settings/legal', [SettingsController::class, 'updateLegal'])->name('admin.settings.legal.update');
 
         Route::get('admins', [AdminStaffController::class, 'index'])->name('admin.admins.index');
         Route::get('admins/invite', [AdminStaffController::class, 'create'])->name('admin.admins.invite');

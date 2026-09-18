@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Admin;
 use App\Models\LegalPage;
+use App\Services\PlatformSettingsService;
 use Database\Seeders\AdminSeeder;
 use Database\Seeders\LegalPageSeeder;
 use Database\Seeders\PlatformSettingsSeeder;
@@ -70,6 +71,28 @@ class LegalPageTest extends TestCase
         $this->assertSame([
             ['question' => 'Test question?', 'answer' => 'Test answer.'],
         ], $page->decodedFaqItems());
+    }
+
+    public function test_landing_renders_company_legal_info_in_footer(): void
+    {
+        app(PlatformSettingsService::class)->setLegalMany([
+            'company_name' => 'CloudFlops SIA',
+            'company_legal_address' => 'Rīga, Brīvības iela 1',
+            'company_physical_address' => 'Rīga, Brīvības iela 1',
+            'company_registration_number' => '40103123456',
+            'company_license_number' => 'LV-12345',
+            'company_phone' => '+371 20000000',
+            'company_email' => 'legal@cloudflops.example',
+        ]);
+
+        $this->get('http://coin.test/')
+            ->assertOk()
+            ->assertSee('CloudFlops SIA', false)
+            ->assertSee('40103123456', false)
+            ->assertSee('LV-12345', false)
+            ->assertSee('Rīga, Brīvības iela 1', false)
+            ->assertSee('+371 20000000', false)
+            ->assertSee('legal@cloudflops.example', false);
     }
 
     public function test_landing_renders_published_faq_items(): void

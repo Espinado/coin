@@ -24,6 +24,17 @@ class PlatformSettingsService
         'btc_per_usdt' => '2',
     ];
 
+    /** @var array<string, string> */
+    private const LEGAL_DEFAULTS = [
+        'company_name' => '',
+        'company_legal_address' => '',
+        'company_physical_address' => '',
+        'company_registration_number' => '',
+        'company_license_number' => '',
+        'company_phone' => '',
+        'company_email' => '',
+    ];
+
     public function get(string $key, ?string $default = null): string
     {
         $settings = $this->all();
@@ -52,21 +63,42 @@ class PlatformSettingsService
         return Cache::remember(self::CACHE_KEY, 3600, function () {
             $stored = PlatformSetting::query()->pluck('value', 'key')->all();
 
-            return array_merge(self::DEFAULTS, $stored);
+            return array_merge(self::DEFAULTS, self::LEGAL_DEFAULTS, $stored);
         });
     }
 
     /** @param array<string, string|int|float|bool> $values */
     public function setMany(array $values): void
     {
+        $this->persistKeys($values, self::DEFAULTS);
+    }
+
+    /** @param array<string, string|null> $values */
+    public function setLegalMany(array $values): void
+    {
+        $this->persistKeys($values, self::LEGAL_DEFAULTS);
+    }
+
+    /** @return array<string, string> */
+    public function legalInfo(): array
+    {
+        return array_intersect_key($this->all(), self::LEGAL_DEFAULTS);
+    }
+
+    /**
+     * @param  array<string, string|int|float|bool|null>  $values
+     * @param  array<string, string>  $allowed
+     */
+    private function persistKeys(array $values, array $allowed): void
+    {
         foreach ($values as $key => $value) {
-            if (! array_key_exists($key, self::DEFAULTS)) {
+            if (! array_key_exists($key, $allowed)) {
                 continue;
             }
 
             PlatformSetting::query()->updateOrCreate(
                 ['key' => $key],
-                ['value' => is_bool($value) ? ($value ? '1' : '0') : (string) $value],
+                ['value' => is_bool($value) ? ($value ? '1' : '0') : (string) ($value ?? '')],
             );
         }
 
@@ -130,5 +162,19 @@ class PlatformSettingsService
             fn (string $key) => ! in_array($key, ['reward_rate', 'epochs_per_day'], true),
             ARRAY_FILTER_USE_KEY,
         );
+    }
+
+    /** @return array<string, array{label: string, type: string, default: string}> */
+    public function legalDefinitions(): array
+    {
+        return [
+            'company_name' => ['label' => __('coin.admin.legal.company_name'), 'type' => 'text', 'default' => self::LEGAL_DEFAULTS['company_name']],
+            'company_legal_address' => ['label' => __('coin.admin.legal.legal_address'), 'type' => 'textarea', 'default' => self::LEGAL_DEFAULTS['company_legal_address']],
+            'company_physical_address' => ['label' => __('coin.admin.legal.physical_address'), 'type' => 'textarea', 'default' => self::LEGAL_DEFAULTS['company_physical_address']],
+            'company_registration_number' => ['label' => __('coin.admin.legal.registration_number'), 'type' => 'text', 'default' => self::LEGAL_DEFAULTS['company_registration_number']],
+            'company_license_number' => ['label' => __('coin.admin.legal.license_number'), 'type' => 'text', 'default' => self::LEGAL_DEFAULTS['company_license_number']],
+            'company_phone' => ['label' => __('coin.admin.legal.phone'), 'type' => 'text', 'default' => self::LEGAL_DEFAULTS['company_phone']],
+            'company_email' => ['label' => __('coin.admin.legal.email'), 'type' => 'email', 'default' => self::LEGAL_DEFAULTS['company_email']],
+        ];
     }
 }

@@ -221,6 +221,31 @@ class AdminModuleTest extends TestCase
         $this->assertSame(20, app(PlatformSettingsService::class)->getInt('referral_level1_percent'));
     }
 
+    public function test_admin_can_save_legal_company_info(): void
+    {
+        $this->actingAs($this->admin, 'admin')
+            ->get('http://admin.coin.test/settings')
+            ->assertOk()
+            ->assertSee('Юридическая информация');
+
+        $this->actingAs($this->admin, 'admin')
+            ->patch('http://admin.coin.test/settings/legal', [
+                'company_name' => 'CloudFlops SIA',
+                'company_legal_address' => 'Rīga, Brīvības iela 1',
+                'company_physical_address' => 'Rīga, Brīvības iela 1',
+                'company_registration_number' => '40103123456',
+                'company_license_number' => 'LV-12345',
+                'company_phone' => '+371 20000000',
+                'company_email' => 'legal@cloudflops.example',
+            ])
+            ->assertRedirect();
+
+        $legal = app(PlatformSettingsService::class)->legalInfo();
+
+        $this->assertSame('CloudFlops SIA', $legal['company_name']);
+        $this->assertSame('legal@cloudflops.example', $legal['company_email']);
+    }
+
     public function test_admin_overview_dashboard(): void
     {
         $this->assertSame(1, User::query()->count());
