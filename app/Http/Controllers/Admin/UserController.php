@@ -122,7 +122,7 @@ class UserController extends Controller
             $validated['notification_body'],
         );
 
-        $notifications->notifyInAppMessageReceived($user, $validated['notification_title']);
+        $notifications->notifyInAppMessageReceived($user);
 
         return $this->adminSuccess('coin.admin.flash.user_notification_sent', 'admin.users.show', $user);
     }

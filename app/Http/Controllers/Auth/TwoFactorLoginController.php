@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Services\Auth\AuthAuditLogger;
 use App\Services\Auth\AuthFailureStage;
+use App\Services\EmailVerificationAccess;
 use App\Services\LoginTwoFactorService;
 use App\Services\UserLoginRecorder;
 use Illuminate\Http\RedirectResponse;
@@ -89,6 +90,15 @@ class TwoFactorLoginController extends Controller
         $remember = $twoFactor->rememberFromSession($request);
 
         $twoFactor->clearChallenge($request);
+
+        if (! $user->hasVerifiedEmail()) {
+            return app(EmailVerificationAccess::class)->openVerificationGate(
+                $user,
+                $request,
+                $remember,
+                __('coin.auth.email_not_verified_login_sent'),
+            );
+        }
 
         Auth::login($user, $remember);
         $request->session()->regenerate();

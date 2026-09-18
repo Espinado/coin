@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
+use App\Services\EmailVerificationAccess;
 use App\Services\LoginTwoFactorService;
 use App\Services\UserLoginRecorder;
 use Illuminate\Http\RedirectResponse;
@@ -32,9 +33,22 @@ class AuthenticatedSessionController extends Controller
     /**
      * Handle an incoming authentication request.
      */
-    public function store(LoginRequest $request, LoginTwoFactorService $twoFactor, UserLoginRecorder $loginRecorder): RedirectResponse
-    {
+    public function store(
+        LoginRequest $request,
+        LoginTwoFactorService $twoFactor,
+        UserLoginRecorder $loginRecorder,
+        EmailVerificationAccess $verificationAccess,
+    ): RedirectResponse {
         $user = $request->validateCredentials();
+
+        if (! $user->hasVerifiedEmail()) {
+            return $verificationAccess->openVerificationGate(
+                $user,
+                $request,
+                $request->boolean('remember'),
+                __('coin.auth.email_not_verified_login_sent'),
+            );
+        }
 
         if ($user->hasEmailTwoFactorEnabled()) {
             $twoFactor->beginChallenge($user, $request->boolean('remember'), $request);

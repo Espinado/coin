@@ -20,7 +20,7 @@ class UserLastLoginTest extends TestCase
         ]);
     }
 
-    public function test_registration_session_records_last_login_on_verify_email_page(): void
+    public function test_registration_does_not_record_last_login_until_email_is_verified(): void
     {
         $this->post('/register', [
             'name' => 'Evgen',
@@ -36,7 +36,7 @@ class UserLastLoginTest extends TestCase
             ->assertOk();
 
         $user->refresh();
-        $this->assertNotNull($user->last_login_at);
+        $this->assertNull($user->last_login_at);
     }
 
     public function test_backfill_uses_verified_email_timestamp(): void

@@ -21,6 +21,7 @@ class UserLoginRecorder
         $user = $request->user('web');
 
         return $user instanceof User
+            && $user->hasVerifiedEmail()
             && ! $request->session()->get(self::SESSION_KEY);
     }
 

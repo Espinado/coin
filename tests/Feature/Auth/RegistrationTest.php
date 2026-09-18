@@ -27,5 +27,19 @@ class RegistrationTest extends TestCase
 
         $this->assertAuthenticated();
         $response->assertRedirect(route('verification.notice', absolute: false));
+        $response->assertSessionHas('status', __('coin.auth.verify_email_registration_sent'));
+    }
+
+    public function test_new_users_cannot_access_dashboard_before_email_verification(): void
+    {
+        $this->post('/register', [
+            'name' => 'Test User',
+            'email' => 'test@example.com',
+            'password' => 'password',
+            'password_confirmation' => 'password',
+        ]);
+
+        $this->get(route('dashboard', absolute: false))
+            ->assertRedirect(route('verification.notice', absolute: false));
     }
 }

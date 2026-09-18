@@ -6,10 +6,17 @@
 
         <div class="coin-auth-card" style="position: relative; width: min(100%, 460px); padding: 36px 36px 30px; border-radius: 22px; border: 1px solid rgba(150,235,250,0.16); background: linear-gradient(170deg, rgba(13,38,58,0.92), rgba(5,16,27,0.96)); box-shadow: 0 50px 110px -50px #000;">
             <div style="font-size: 22px; font-weight: 600; letter-spacing: -0.025em; color: #f0fbff;">{{ __('coin.auth.verify_email_title') }}</div>
-            <p style="margin: 10px 0 0; font-size: 13.5px; line-height: 1.65; color: rgba(230,244,250,0.74);">{{ __('coin.auth.verify_email_sub', ['email' => $email]) }}</p>
+            @include('partials.email-unverified-notice')
+            <p style="margin: 14px 0 0; font-size: 13.5px; line-height: 1.65; color: rgba(230,244,250,0.74);">{{ __('coin.auth.verify_email_sub', ['email' => $email]) }}</p>
 
-            @if (in_array(session('status'), ['verification-code-sent', 'verification-link-sent'], true))
-                <div class="coin-auth-status" style="margin-top: 20px;">{{ __('coin.auth.verify_email_resent') }}</div>
+            @if (session('status'))
+                <div class="coin-auth-status" style="margin-top: 20px;">
+                    @if (session('status') === 'verification-code-sent' || session('status') === 'verification-link-sent')
+                        {{ __('coin.auth.verify_email_resent') }}
+                    @else
+                        {{ session('status') }}
+                    @endif
+                </div>
             @endif
 
             <form method="POST" action="{{ route('verification.code') }}">

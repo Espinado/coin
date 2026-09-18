@@ -26,6 +26,7 @@ class EmailVerificationTest extends TestCase
 
         $response->assertStatus(200);
         $response->assertSee(__('coin.auth.verify_email_title'), false);
+        $response->assertSee(__('coin.auth.verify_email_unverified_notice'), false);
         $response->assertSee(__('coin.auth.verify_email_code'), false);
         Mail::assertSent(EmailVerificationMail::class);
     }
@@ -51,7 +52,9 @@ class EmailVerificationTest extends TestCase
 
         Event::assertDispatched(Verified::class);
         $this->assertTrue($user->fresh()->hasVerifiedEmail());
-        $response->assertRedirect(route('dashboard', absolute: false).'?verified=1');
+        $this->assertNotNull($user->fresh()->last_login_at);
+        $response->assertRedirect(route('dashboard', absolute: false));
+        $response->assertSessionHas('status', __('coin.auth.verify_email_confirmed_redirect'));
     }
 
     public function test_email_is_not_verified_with_invalid_code(): void
@@ -87,7 +90,8 @@ class EmailVerificationTest extends TestCase
 
         Event::assertDispatched(Verified::class);
         $this->assertTrue($user->fresh()->hasVerifiedEmail());
-        $response->assertRedirect(route('dashboard', absolute: false).'?verified=1');
+        $response->assertRedirect(route('dashboard', absolute: false));
+        $response->assertSessionHas('status', __('coin.auth.verify_email_confirmed_redirect'));
     }
 
     public function test_email_is_not_verified_with_invalid_hash(): void

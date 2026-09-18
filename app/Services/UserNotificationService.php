@@ -33,7 +33,7 @@ class UserNotificationService
         $this->sendAlways($user, $subject, $intro, $lines, $footer);
     }
 
-    public function notifyInAppMessageReceived(User $user, string $title): void
+    public function notifyInAppMessageReceived(User $user): void
     {
         $dashboardUrl = route('dashboard', absolute: true).'?section=8';
 
@@ -42,7 +42,6 @@ class UserNotificationService
             __('coin.notifications.mail.in_app_subject'),
             __('coin.notifications.mail.in_app_intro', ['name' => $user->name]),
             [
-                __('coin.notifications.mail.in_app_title_line', ['title' => $title]),
                 __('coin.notifications.mail.in_app_open', ['url' => $dashboardUrl]),
             ],
             __('coin.notifications.mail.in_app_footer'),

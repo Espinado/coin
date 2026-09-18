@@ -140,4 +140,37 @@ class AuthenticationTest extends TestCase
         $this->assertGuest();
         $response->assertRedirect('/');
     }
+
+    public function test_unverified_user_login_redirects_to_verification_with_code_sent(): void
+    {
+        Mail::fake();
+
+        $user = User::factory()->unverified()->create();
+
+        $response = $this->post('/login', [
+            'email' => $user->email,
+            'password' => 'password',
+        ]);
+
+        $this->assertAuthenticatedAs($user);
+        $response->assertRedirect(route('verification.notice', absolute: false));
+        $response->assertSessionHas('status', __('coin.auth.email_not_verified_login_sent'));
+        Mail::assertSent(\App\Mail\EmailVerificationMail::class);
+    }
+
+    public function test_unverified_user_can_resume_email_verification(): void
+    {
+        Mail::fake();
+
+        $user = User::factory()->unverified()->create();
+
+        $response = $this->post('/verify-email/resume', [
+            'email' => $user->email,
+            'password' => 'password',
+        ]);
+
+        $this->assertAuthenticatedAs($user);
+        $response->assertRedirect(route('verification.notice', absolute: false));
+        Mail::assertSent(\App\Mail\EmailVerificationMail::class);
+    }
 }
