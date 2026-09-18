@@ -594,6 +594,12 @@ return [
         'waiting_blockchain' => 'Ожидаем поступление в блокчейне. Баланс обновится автоматически после подтверждения.',
         'processing_title' => 'Обрабатываем платёж',
         'processing_hint' => 'Проверяем IPN и зачисляем средства на баланс…',
+        'payout_step' => 'ВЫВОД ЧЕРЕЗ ШЛЮЗ',
+        'payout_gateway_title' => 'Отправка через платёжный шлюз',
+        'simulate_payout' => 'Симулировать выплату (mock IPN)',
+        'payout_confirming' => 'Отправляем…',
+        'payout_mock_note' => 'Демо: send → IPN out → статус paid через PaymentGateway',
+        'payout_paid_success' => 'Выплата отправлена через шлюз и подтверждена mock IPN.',
     ],
 
     'bank_gateway' => [

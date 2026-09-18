@@ -5,6 +5,7 @@ namespace App\Livewire;
 use App\Models\Contract;
 use App\Models\Deposit;
 use App\Models\Plan;
+use App\Models\Withdrawal;
 use App\Models\SupportTicket;
 use App\Models\User;
 use App\Models\SupportTicketMessage;
@@ -139,6 +140,8 @@ class Dashboard extends Component
     public ?int $pendingDepositId = null;
 
     public ?string $pendingPaymentAddress = null;
+
+    public ?int $pendingWithdrawalId = null;
 
     public ?string $actionMessage = null;
 
@@ -854,15 +857,54 @@ class Dashboard extends Component
         $amount = (float) $this->withdrawAmount;
 
         try {
-            sleep(2);
-
             $withdrawal = $withdrawals->createForUser($this->user, $amount);
 
+            $this->paymentModalReference = $withdrawal->reference;
+            $this->pendingWithdrawalId = $withdrawal->id;
+
+            if ((string) config('coin.payments.driver', 'mock') === 'mock') {
+                $this->paymentModalStep = 'payout_gateway';
+
+                return;
+            }
+
             $this->withdrawAmount = '';
+            $this->pendingWithdrawalId = null;
+            $this->reloadPortfolioData();
+            $this->paymentModalStep = 'success';
+        } catch (\RuntimeException $exception) {
+            $this->paymentModalStep = 'error';
+            $this->paymentModalError = $exception->getMessage();
+            $this->addError('withdrawAmount', $exception->getMessage());
+        }
+    }
+
+    public function confirmPayoutGatewaySimulation(WithdrawalService $withdrawals): void
+    {
+        if ($this->paymentModal !== 'payout' || $this->paymentModalStep !== 'payout_gateway') {
+            return;
+        }
+
+        if ((string) config('coin.payments.driver', 'mock') !== 'mock') {
+            return;
+        }
+
+        $this->paymentModalError = null;
+        $this->paymentModalStep = 'processing';
+
+        try {
+            $withdrawal = Withdrawal::query()
+                ->whereKey($this->pendingWithdrawalId)
+                ->where('user_id', $this->user->id)
+                ->firstOrFail();
+
+            $withdrawal = $withdrawals->simulatePayoutViaGateway($withdrawal);
+
+            $this->withdrawAmount = '';
+            $this->pendingWithdrawalId = null;
             $this->reloadPortfolioData();
             $this->paymentModalReference = $withdrawal->reference;
             $this->paymentModalStep = 'success';
-            $this->actionMessage = __('coin.messages.payout_submitted');
         } catch (\RuntimeException $exception) {
             $this->paymentModalStep = 'error';
             $this->paymentModalError = $exception->getMessage();
@@ -1814,6 +1856,7 @@ class Dashboard extends Component
         $this->pendingTopUpAmount = null;
         $this->pendingDepositId = null;
         $this->pendingPaymentAddress = null;
+        $this->pendingWithdrawalId = null;
     }
 
     private function formatAmount(float $value, int $decimals): string

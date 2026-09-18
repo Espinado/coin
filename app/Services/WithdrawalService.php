@@ -138,28 +138,70 @@ class WithdrawalService
         });
     }
 
-    private function initiateGatewayPayout(Withdrawal $withdrawal, Admin $admin): Withdrawal
+    public function simulatePayoutViaGateway(Withdrawal $withdrawal): Withdrawal
+    {
+        if ((string) config('coin.payments.driver', 'mock') !== 'mock') {
+            throw new RuntimeException('Gateway payout simulation is only available for the mock driver.');
+        }
+
+        return $this->dispatchViaGateway($withdrawal, null, true);
+    }
+
+    public function dispatchViaGateway(Withdrawal $withdrawal, ?Admin $admin = null, ?bool $autoSimulateIpn = null): Withdrawal
     {
         if (! $this->usesPaymentGateway()) {
             return $withdrawal;
         }
 
-        $gateway = app(PaymentGatewayInterface::class);
-        $payout = $gateway->sendPayout($withdrawal);
+        $autoSimulateIpn ??= $this->shouldAutoCompleteMockPayout();
 
-        $withdrawal->update([
-            'gateway_request_id' => $payout->gatewayRequestId,
-            'sent_at' => now(),
-            'processed_by' => $admin->id,
-        ]);
+        return DB::transaction(function () use ($withdrawal, $admin, $autoSimulateIpn) {
+            $withdrawal->refresh();
 
-        if ($this->shouldAutoCompleteMockPayout()) {
-            app(PaymentSimulatorService::class)->simulateWithdrawalIpn($withdrawal->fresh());
+            if ($withdrawal->status === Withdrawal::STATUS_PENDING) {
+                $wallet = $withdrawal->user->wallet ?? throw new RuntimeException('User has no wallet.');
+                $this->commitWithdrawalFunds($wallet, (float) $withdrawal->amount);
 
-            return $withdrawal->fresh(['user.wallet', 'processedByAdmin']);
-        }
+                $withdrawal->update([
+                    'status' => Withdrawal::STATUS_PROCESSING,
+                    'processed_by' => $admin?->id ?? $withdrawal->processed_by,
+                ]);
 
-        return $withdrawal->fresh(['user.wallet', 'processedByAdmin']);
+                $withdrawal->refresh();
+            }
+
+            if ($withdrawal->status !== Withdrawal::STATUS_PROCESSING) {
+                throw new RuntimeException('Only pending or processing withdrawals can be sent via gateway.');
+            }
+
+            if ($withdrawal->gateway_request_id === null) {
+                $gateway = app(PaymentGatewayInterface::class);
+                $payout = $gateway->sendPayout($withdrawal);
+
+                $withdrawal->update([
+                    'gateway_request_id' => $payout->gatewayRequestId,
+                    'sent_at' => now(),
+                    'processed_by' => $admin?->id ?? $withdrawal->processed_by,
+                ]);
+
+                $withdrawal->refresh();
+            }
+
+            if ($autoSimulateIpn) {
+                app(PaymentSimulatorService::class)->simulateWithdrawalIpn($withdrawal);
+            }
+
+            $withdrawal = $withdrawal->fresh(['user.wallet', 'processedByAdmin']);
+
+            WithdrawalUpdated::dispatch($withdrawal);
+
+            return $withdrawal;
+        });
+    }
+
+    private function initiateGatewayPayout(Withdrawal $withdrawal, Admin $admin): Withdrawal
+    {
+        return $this->dispatchViaGateway($withdrawal, $admin);
     }
 
     private function usesPaymentGateway(): bool
@@ -173,11 +215,7 @@ class WithdrawalService
             return false;
         }
 
-        if (! config('coin.payments.mock.auto_complete_payout', true)) {
-            return false;
-        }
-
-        return app()->environment(['local', 'testing']);
+        return (bool) config('coin.payments.mock.auto_complete_payout', true);
     }
 
     public function markPaidFromGateway(Withdrawal $withdrawal, ?string $txid = null, ?string $gatewayState = null): Withdrawal

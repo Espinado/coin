@@ -79,4 +79,20 @@ class MockPaymentGatewayFlowTest extends TestCase
         $this->assertNotEmpty($withdrawal->gateway_request_id);
         $this->assertNotEmpty($withdrawal->txid);
     }
+
+    public function test_user_can_simulate_payout_via_gateway_from_pending_withdrawal(): void
+    {
+        $user = User::factory()->create();
+        $user->wallet->update(['available' => 300, 'balance' => 300, 'pending' => 0]);
+
+        $withdrawal = app(WithdrawalService::class)->createForUser($user, 80);
+        $withdrawal = app(WithdrawalService::class)->simulatePayoutViaGateway($withdrawal);
+
+        $user->refresh();
+
+        $this->assertSame(Withdrawal::STATUS_PAID, $withdrawal->status);
+        $this->assertNotEmpty($withdrawal->gateway_request_id);
+        $this->assertSame('220.00', number_format((float) $user->wallet->available, 2, '.', ''));
+        $this->assertSame('0.00', number_format((float) $user->wallet->pending, 2, '.', ''));
+    }
 }

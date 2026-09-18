@@ -4,6 +4,7 @@
   $isInvestment = $paymentModal === 'investment';
   $isPlanChange = $paymentModal === 'plan_change';
   $isPayout = $paymentModal === 'payout';
+  $isMockDriver = config('coin.payments.driver', 'mock') === 'mock';
   $changingContract = $isPlanChange ? $this->changingContract : null;
   $amount = $isPlanChange
     ? number_format($this->planChangeTopUp, 2, '.', ',')
@@ -25,7 +26,7 @@
       : __('coin.payment_modal.plan_changed'))
     : ($isInvestment
       ? __('coin.payment_modal.plan_activated')
-      : __('coin.payment_modal.payout_success'));
+      : ($isMockDriver ? __('coin.crypto_gateway.payout_paid_success') : __('coin.payment_modal.payout_success')));
   $reviewLabel = $isPlanChange
     ? __('coin.payment_modal.plan_change')
     : ($isInvestment
@@ -41,7 +42,7 @@
 <div
   class="coin-payment-overlay"
   style="position: fixed; inset: 0; z-index: 9999; display: flex; align-items: safe center; justify-content: center; padding: 24px; background: rgba(2, 8, 16, 0.82); backdrop-filter: blur(8px); overflow-y: auto;"
-  @if($paymentModalStep !== 'processing') wire:click="closePaymentModal" wire:keydown.escape.window="closePaymentModal" @endif
+  @if(! in_array($paymentModalStep, ['processing'], true)) wire:click="closePaymentModal" wire:keydown.escape.window="closePaymentModal" @endif
 >
   <div
     style="width: min(100%, 420px); max-height: min(90dvh, 720px); margin: auto; border-radius: 20px; border: 1px solid rgba(150,235,250,0.18); background: linear-gradient(170deg, rgba(12, 34, 52, 0.98), rgba(6, 20, 35, 0.98)); box-shadow: 0 32px 80px -24px rgba(0, 0, 0, 0.75); overflow: hidden; overflow-y: auto;"
@@ -128,6 +129,22 @@
         </button>
         @endif
         <p style="margin: 14px 0 0; font-size: 11px; line-height: 1.5; text-align: center; color: rgba(214,238,248,0.55);">{{ __('coin.payment_modal.demo_note') }}</p>
+
+      @elseif($paymentModalStep === 'payout_gateway' && $isPayout)
+        <div style="font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.12em; color: rgba(214,238,248,0.66);">{{ __('coin.crypto_gateway.payout_step') }}</div>
+        <div style="margin-top: 10px; font-size: 18px; font-weight: 600; color: #f0fbff;">{{ __('coin.crypto_gateway.payout_gateway_title') }}</div>
+        <div style="margin-top: 18px; padding: 16px; border-radius: 14px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.04); display: flex; flex-direction: column; gap: 12px; font-size: 13px;">
+          <div style="display: flex; justify-content: space-between; gap: 12px;"><span style="color: rgba(214,238,248,0.72);">{{ __('coin.payment_modal.total') }}</span><span style="font-family: 'JetBrains Mono', monospace; font-size: 15px; color: #f0fbff;">{{ $amount }} {{ $currency }}</span></div>
+          <div style="display: flex; justify-content: space-between; gap: 12px;"><span style="color: rgba(214,238,248,0.72);">{{ __('coin.payment_modal.destination') }}</span><span style="font-family: 'JetBrains Mono', monospace; font-size: 11px; text-align: right; word-break: break-all; max-width: 220px;">{{ $payoutAddress }}</span></div>
+          @if($paymentModalReference)
+          <div style="display: flex; justify-content: space-between; gap: 12px;"><span style="color: rgba(214,238,248,0.72);">{{ __('coin.payment_modal.reference') }}</span><span style="font-family: 'JetBrains Mono', monospace; font-size: 12px;">{{ $paymentModalReference }}</span></div>
+          @endif
+        </div>
+        <button type="button" wire:click="confirmPayoutGatewaySimulation" wire:loading.attr="disabled" wire:target="confirmPayoutGatewaySimulation" style="width: 100%; margin-top: 22px; padding: 13px; border-radius: 11px; border: 1px solid oklch(0.86 0.11 195 / 0.5); background: linear-gradient(140deg, oklch(0.86 0.12 192), oklch(0.66 0.13 205)); color: #04121f; font-family: inherit; font-size: 14px; font-weight: 600; cursor: pointer;">
+          <span wire:loading.remove wire:target="confirmPayoutGatewaySimulation">{{ __('coin.crypto_gateway.simulate_payout') }}</span>
+          <span wire:loading wire:target="confirmPayoutGatewaySimulation">{{ __('coin.crypto_gateway.payout_confirming') }}</span>
+        </button>
+        <p style="margin: 14px 0 0; font-size: 11px; line-height: 1.5; text-align: center; color: rgba(214,238,248,0.55);">{{ __('coin.crypto_gateway.payout_mock_note') }}</p>
 
       @elseif($paymentModalStep === 'processing')
         <div style="padding: 28px 0 18px; text-align: center;">
