@@ -5,6 +5,8 @@ namespace App\Services;
 use App\Models\Contract;
 use App\Models\User;
 use App\Models\Wallet;
+use App\Models\WalletTransaction;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -19,10 +21,10 @@ class ProfitAccrualService
         private UserNotificationService $notifications,
     ) {}
 
-    /** Settle active contracts whose term has ended — release locked principal to available balance. */
+    /** Release principal for matured contracts only — daily profit runs on schedule at 09:00. */
     public function settleMatureContractsForUser(User $user): int
     {
-        $matured = DB::transaction(function () use ($user) {
+        return DB::transaction(function () use ($user) {
             $contractIds = Contract::query()
                 ->where('user_id', $user->id)
                 ->active()
@@ -42,19 +44,13 @@ class ProfitAccrualService
                     continue;
                 }
 
-                $this->accrueContract($contract);
-
-                if ($this->completeIfMature($contract->fresh(['user.wallet', 'plan']))) {
+                if ($this->completeIfMature($contract)) {
                     $matured++;
                 }
             }
 
             return $matured;
         });
-
-        $this->sendPendingProfitNotifications($user->id);
-
-        return $matured;
     }
 
     /** @return array{contracts_processed: int, total_profit: float, contracts_matured: int, users_credited: int} */
@@ -123,7 +119,7 @@ class ProfitAccrualService
             return 0.0;
         }
 
-        $today = now()->toDateString();
+        $today = $this->accrualCalendarToday();
 
         if ($contract->last_accrued_on?->toDateString() === $today) {
             return 0.0;
@@ -355,5 +351,97 @@ class ProfitAccrualService
         $user->update([
             'expected_daily_reward' => round($daily, 2),
         ]);
+    }
+
+    /** @return array{transactions_removed: int, contracts_updated: int, total_reversed: float} */
+    public function reverseAccrualsForDate(string $date, ?int $userId = null): array
+    {
+        $timezone = config('coin.profit_accrual.schedule_timezone', 'Europe/Riga');
+        $dayStart = Carbon::parse($date, $timezone)->startOfDay()->utc();
+        $dayEnd = Carbon::parse($date, $timezone)->endOfDay()->utc();
+
+        return DB::transaction(function () use ($date, $userId, $dayStart, $dayEnd) {
+            $query = WalletTransaction::query()
+                ->where('type', 'Daily profit')
+                ->whereBetween('occurred_at', [$dayStart, $dayEnd])
+                ->where('reference_type', (new Contract)->getMorphClass())
+                ->orderBy('id');
+
+            if ($userId !== null) {
+                $query->where('user_id', $userId);
+            }
+
+            $transactions = $query->lockForUpdate()->get();
+
+            $totalReversed = 0.0;
+            $contractsUpdated = 0;
+            $usersTouched = [];
+
+            foreach ($transactions as $transaction) {
+                $amount = (float) $transaction->amount;
+
+                if ($amount <= 0) {
+                    continue;
+                }
+
+                $user = User::query()->lockForUpdate()->find($transaction->user_id);
+
+                if (! $user) {
+                    continue;
+                }
+
+                $wallet = $this->wallets->ensureWallet($user);
+                $wallet->decrement('available', $amount);
+                $wallet->decrement('balance', $amount);
+
+                $contract = Contract::query()->lockForUpdate()->find($transaction->reference_id);
+
+                if ($contract) {
+                    $contract->decrement('accrued_amount', $amount);
+
+                    if ($contract->termDays() > 0 && $contract->days_elapsed > 0) {
+                        $contract->decrement('days_elapsed');
+                    }
+
+                    $contract->refresh();
+
+                    if ($contract->last_accrued_on?->toDateString() === $date) {
+                        $contract->update([
+                            'last_accrued_on' => null,
+                            'progress_percent' => $contract->computedProgressPercent(),
+                        ]);
+                    }
+
+                    $contractsUpdated++;
+                }
+
+                $transaction->delete();
+                $totalReversed += $amount;
+                $usersTouched[$user->id] = $user;
+            }
+
+            foreach ($usersTouched as $user) {
+                $this->refreshUserDailyProfitExpectation($user);
+            }
+
+            Log::channel('profit_accrual')->warning('Daily profit accruals reversed', [
+                'accrual_date' => $date,
+                'user_id' => $userId,
+                'transactions_removed' => $transactions->count(),
+                'contracts_updated' => $contractsUpdated,
+                'total_reversed' => round($totalReversed, 2),
+            ]);
+
+            return [
+                'transactions_removed' => $transactions->count(),
+                'contracts_updated' => $contractsUpdated,
+                'total_reversed' => round($totalReversed, 2),
+            ];
+        });
+    }
+
+    private function accrualCalendarToday(): string
+    {
+        return now(config('coin.profit_accrual.schedule_timezone', 'Europe/Riga'))->toDateString();
     }
 }
