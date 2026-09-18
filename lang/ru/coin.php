@@ -487,6 +487,8 @@ return [
             'profit_intro' => 'Здравствуйте, :name! На ваш баланс зачислена ежедневная прибыль.',
             'profit_plan' => 'План: :plan',
             'profit_amount' => 'Сумма: :amount :currency',
+            'profit_plan_line' => ':plan — :amount :currency',
+            'profit_total' => 'Итого: :amount :currency',
             'expiry_subject' => 'CloudFlops — скоро окончание контракта',
             'expiry_intro' => 'Здравствуйте, :name! Напоминаем об окончании срока инвестиции.',
             'expiry_plan' => 'План: :plan',

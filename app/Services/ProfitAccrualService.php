@@ -22,7 +22,7 @@ class ProfitAccrualService
     /** Settle active contracts whose term has ended — release locked principal to available balance. */
     public function settleMatureContractsForUser(User $user): int
     {
-        return DB::transaction(function () use ($user) {
+        $matured = DB::transaction(function () use ($user) {
             $contractIds = Contract::query()
                 ->where('user_id', $user->id)
                 ->active()
@@ -51,6 +51,10 @@ class ProfitAccrualService
 
             return $matured;
         });
+
+        $this->sendPendingProfitNotifications($user->id);
+
+        return $matured;
     }
 
     /** @return array{contracts_processed: int, total_profit: float, contracts_matured: int, users_credited: int} */
@@ -166,9 +170,8 @@ class ProfitAccrualService
             $contract,
         );
 
-        $this->trackUserAccrual($user, $profit, $balanceBefore, $availableBefore, $wallet->fresh(), $contract);
+        $this->trackUserAccrual($user, $profit, $balanceBefore, $availableBefore, $wallet->fresh(), $contract, $currency);
         $this->refreshUserDailyProfitExpectation($user);
-        $this->notifications->notifyDailyProfit($user, $contract->fresh(['plan']), $profit, $currency);
 
         return $profit;
     }
@@ -246,6 +249,7 @@ class ProfitAccrualService
         float $availableBefore,
         Wallet $walletAfter,
         Contract $contract,
+        string $currency,
     ): void {
         $userId = $user->id;
 
@@ -254,6 +258,7 @@ class ProfitAccrualService
                 'user_id' => $userId,
                 'email' => $user->email,
                 'account' => $user->account_slug,
+                'currency' => $currency,
                 'balance_before' => $balanceBefore,
                 'available_before' => $availableBefore,
                 'profit_total' => 0.0,
@@ -267,7 +272,7 @@ class ProfitAccrualService
         $this->userAccrualSnapshots[$userId]['contracts'][] = [
             'contract_id' => $contract->id,
             'code' => $contract->code,
-            'plan' => $contract->plan?->name,
+            'plan' => $contract->plan?->displayName() ?? $contract->plan?->name,
             'profit' => round($profit, 2),
         ];
     }
@@ -299,6 +304,8 @@ class ProfitAccrualService
             ]);
         }
 
+        $this->sendPendingProfitNotifications();
+
         $logger->info('Daily profit accrual run completed', [
             'accrual_date' => now()->toDateString(),
             'schedule_time' => config('coin.profit_accrual.schedule_time'),
@@ -308,6 +315,34 @@ class ProfitAccrualService
         ]);
 
         $this->userAccrualSnapshots = [];
+    }
+
+    private function sendPendingProfitNotifications(?int $onlyUserId = null): void
+    {
+        foreach ($this->userAccrualSnapshots as $userId => $snapshot) {
+            if ($onlyUserId !== null && $userId !== $onlyUserId) {
+                continue;
+            }
+
+            $profitTotal = (float) ($snapshot['profit_total'] ?? 0);
+
+            if ($profitTotal <= 0) {
+                continue;
+            }
+
+            $user = User::query()->find($userId);
+
+            if (! $user instanceof User) {
+                continue;
+            }
+
+            $this->notifications->notifyDailyProfitBatch(
+                $user,
+                $snapshot['contracts'],
+                $profitTotal,
+                (string) ($snapshot['currency'] ?? 'USDT'),
+            );
+        }
     }
 
     private function refreshUserDailyProfitExpectation(User $user): void

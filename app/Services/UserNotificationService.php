@@ -49,20 +49,34 @@ class UserNotificationService
         }
     }
 
-    public function notifyDailyProfit(User $user, Contract $contract, float $amount, string $currency): void
+    /** @param  list<array{plan?: string|null, code?: string|null, profit: float}>  $contractRows */
+    public function notifyDailyProfitBatch(User $user, array $contractRows, float $total, string $currency): void
     {
+        if ($contractRows === [] || $total <= 0) {
+            return;
+        }
+
+        $lines = [];
+
+        foreach ($contractRows as $row) {
+            $lines[] = __('coin.notifications.mail.profit_plan_line', [
+                'plan' => $row['plan'] ?? $row['code'] ?? '—',
+                'amount' => number_format((float) $row['profit'], 2, '.', ','),
+                'currency' => $currency,
+            ]);
+        }
+
+        $lines[] = __('coin.notifications.mail.profit_total', [
+            'amount' => number_format($total, 2, '.', ','),
+            'currency' => $currency,
+        ]);
+
         $this->send(
             $user,
             self::TYPE_PROFIT_CREDIT,
             __('coin.notifications.mail.profit_subject'),
             __('coin.notifications.mail.profit_intro', ['name' => $user->name]),
-            [
-                __('coin.notifications.mail.profit_plan', ['plan' => $contract->plan?->displayName() ?? $contract->code]),
-                __('coin.notifications.mail.profit_amount', [
-                    'amount' => number_format($amount, 2, '.', ','),
-                    'currency' => $currency,
-                ]),
-            ],
+            $lines,
         );
     }
 

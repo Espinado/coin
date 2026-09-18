@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Mail\UserEventNotificationMail;
 use App\Models\Contract;
 use App\Models\Plan;
 use App\Models\ReferralProfile;
@@ -14,6 +15,7 @@ use App\Services\ReferralService;
 use Database\Seeders\PlanSeeder;
 use Database\Seeders\PlatformSettingsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Mail;
 use Tests\TestCase;
 
 class InvestmentFlowTest extends TestCase
@@ -78,6 +80,33 @@ class InvestmentFlowTest extends TestCase
 
         $repeat = app(ProfitAccrualService::class)->accrueDaily();
         $this->assertSame(0, $repeat['contracts_processed']);
+    }
+
+    public function test_daily_accrual_sends_one_consolidated_profit_email_for_multiple_plans(): void
+    {
+        Mail::fake();
+
+        $buyer = User::factory()->create([
+            'notify_profit_credit' => true,
+        ]);
+
+        app(DepositService::class)->createPending($buyer, 10000);
+
+        $node = Plan::query()->where('slug', 'node')->firstOrFail();
+        $core = Plan::query()->where('slug', 'core')->firstOrFail();
+        $cluster = Plan::query()->where('slug', 'cluster')->firstOrFail();
+
+        app(PlanPurchaseService::class)->purchase($buyer, $node, 250);
+        app(PlanPurchaseService::class)->purchase($buyer, $core, 1100);
+        app(PlanPurchaseService::class)->purchase($buyer, $cluster, 3400);
+
+        app(ProfitAccrualService::class)->accrueDaily();
+
+        Mail::assertSent(UserEventNotificationMail::class, 1);
+        Mail::assertSent(UserEventNotificationMail::class, function (UserEventNotificationMail $mail) use ($buyer): bool {
+            return $mail->hasTo($buyer->email)
+                && count($mail->lines) === 4;
+        });
     }
 
     public function test_mature_contract_releases_principal_to_available_balance(): void
