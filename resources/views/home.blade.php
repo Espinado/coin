@@ -44,7 +44,7 @@
     }
 })();
 </script>
-<div class="coin-app" style="margin: 0 auto; position: relative; background: #061423; color: #e6f4fa; font-family: 'Sora', 'Helvetica Neue', Helvetica, sans-serif; overflow: hidden;">
+<div class="coin-app coin-landing" style="margin: 0 auto; position: relative; background: #061423; color: #e6f4fa; font-family: 'Sora', 'Helvetica Neue', Helvetica, sans-serif; overflow: hidden;">
   <div style="position: absolute; top: -240px; right: -80px; width: 820px; height: 660px; border-radius: 50%; background: radial-gradient(closest-side, oklch(0.62 0.13 198 / 0.28), transparent 72%); filter: blur(30px); pointer-events: none;"></div>
 
   <div class="coin-nav-overlay"></div>
@@ -53,7 +53,7 @@
       <img src="/cloudflops/logo-horizontal.png" alt="CloudFlops" class="coin-brand-logo" />
     </div>
     <button type="button" class="coin-burger" aria-label="Open menu"><span></span><span></span><span></span></button>
-    <nav class="coin-nav coin-nav-desktop" style="display: flex; align-items: center; gap: 30px;">
+    <nav class="coin-nav coin-nav-desktop">
       <a href="#product" style="font-size: 14px; color: rgba(230,244,250,0.78);">Продукт</a>
       <a href="#how" style="font-size: 14px; color: rgba(230,244,250,0.78);">Как это работает</a>
       <a href="#plans" style="font-size: 14px; color: rgba(230,244,250,0.78);">Планы</a>
@@ -62,14 +62,14 @@
       <a href="#faq" style="font-size: 14px; color: rgba(230,244,250,0.78);">Вопросы</a>
     </nav>
     <nav class="coin-nav coin-nav-mobile">
-      <a href="#product" style="font-size: 14px; color: rgba(230,244,250,0.78);">Product</a>
-      <a href="#how" style="font-size: 14px; color: rgba(230,244,250,0.78);">How it works</a>
-      <a href="#plans" style="font-size: 14px; color: rgba(230,244,250,0.78);">Plans</a>
-      <a href="#infra" style="font-size: 14px; color: rgba(230,244,250,0.78);">Security</a>
-      <a href="/dashboard" style="font-size: 14px; color: rgba(230,244,250,0.78);">Dashboard</a>
-      <a href="#faq" style="font-size: 14px; color: rgba(230,244,250,0.78);">FAQ</a>
+      <a href="#product" style="font-size: 14px; color: rgba(230,244,250,0.78);">Продукт</a>
+      <a href="#how" style="font-size: 14px; color: rgba(230,244,250,0.78);">Как это работает</a>
+      <a href="#plans" style="font-size: 14px; color: rgba(230,244,250,0.78);">Планы</a>
+      <a href="#infra" style="font-size: 14px; color: rgba(230,244,250,0.78);">Безопасность</a>
+      <a href="/dashboard" style="font-size: 14px; color: rgba(230,244,250,0.78);">Личный кабинет</a>
+      <a href="#faq" style="font-size: 14px; color: rgba(230,244,250,0.78);">Вопросы</a>
     </nav>
-    <div class="coin-header-actions" style="display: flex; align-items: center; gap: 12px;">
+    <div class="coin-header-actions coin-hide-mobile" style="display: flex; align-items: center; gap: 12px;">
       <a href="/dashboard" style="padding: 11px 22px; border-radius: 11px; border: 1px solid oklch(0.86 0.11 195 / 0.5); background: linear-gradient(140deg, oklch(0.86 0.12 192), oklch(0.66 0.13 205)); color: #04121f; font-family: inherit; font-size: 14px; font-weight: 600; cursor: pointer;">Личный кабинет</a>
     </div>
   </header>

@@ -102,6 +102,8 @@ html.coin-nav-open .coin-nav-overlay {
 
 .coin-nav-desktop {
   display: flex;
+  align-items: center;
+  gap: 30px;
 }
 
 .coin-nav-mobile {
@@ -864,12 +866,119 @@ html.coin-nav-open .coin-nav-mobile {
 }
 
 @media (max-width: 768px) {
-  .coin-app [style*="display: flex; gap: 14px; margin-top: 36px"] button,
-  .coin-app [style*="display: flex; justify-content: center; gap: 14px"] button,
-  .coin-app [style*="display: flex; justify-content: center; gap: 14px"] a {
+  .coin-header {
+    padding: 14px 16px !important;
+    flex-wrap: nowrap !important;
+  }
+
+  .coin-nav-desktop {
+    display: none !important;
+  }
+
+  .coin-header-actions {
+    display: none !important;
+  }
+
+  .coin-burger {
+    display: flex !important;
+    margin-left: auto;
+  }
+
+  .coin-landing section[style*="padding: 48px 72px"],
+  .coin-landing section[style*="padding: 72px 72px"],
+  .coin-landing section[style*="padding: 0 72px"],
+  .coin-landing section[style*="padding: 64px 72px"],
+  .coin-landing footer[style*="padding: 56px 72px"],
+  .coin-landing #plans {
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+  }
+
+  .coin-landing section[data-screen-label="Hero"] {
+    padding-top: 32px !important;
+    padding-bottom: 32px !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 32px !important;
+  }
+
+  .coin-landing [style*="grid-template-columns: 1fr 540px"],
+  .coin-landing [style*="grid-template-columns: 1fr 560px"],
+  .coin-landing [style*="grid-template-columns: 1fr 360px"],
+  .coin-landing [style*="grid-template-columns: 380px 1fr"],
+  .coin-landing [style*="grid-template-columns: 216px 1fr"] {
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 24px !important;
+  }
+
+  .coin-landing [style*="grid-template-columns: repeat(4, 1fr)"] {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .coin-landing [style*="grid-template-columns: repeat(3, 1fr)"] {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  .coin-landing [style*="grid-template-columns: 1.5fr 1fr"] {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  .coin-landing footer [style*="grid-template-columns: 1.6fr repeat(4, 1fr)"] {
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 28px !important;
+  }
+
+  .coin-landing section [style*="display: flex; align-items: flex-end; justify-content: space-between"] {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 20px !important;
+  }
+
+  .coin-landing [style*="display: flex; gap: 14px; margin-top: 36px"],
+  .coin-landing [style*="display: flex; justify-content: center; gap: 14px"] {
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+
+  .coin-landing [style*="display: flex; gap: 14px; margin-top: 36px"] > *,
+  .coin-landing [style*="display: flex; justify-content: center; gap: 14px"] > *,
+  .coin-landing [style*="display: flex; gap: 14px; margin-top: 36px"] button,
+  .coin-landing [style*="display: flex; justify-content: center; gap: 14px"] button,
+  .coin-landing [style*="display: flex; justify-content: center; gap: 14px"] a {
     width: 100% !important;
     text-align: center !important;
     box-sizing: border-box;
+  }
+
+  .coin-landing section[data-screen-label="Referrals"] > div {
+    padding: 24px 20px !important;
+    gap: 28px !important;
+  }
+
+  .coin-landing section[data-screen-label="Referrals"] [style*="flex-wrap: wrap"] {
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+
+  .coin-landing section[data-screen-label="Referrals"] [style*="flex-wrap: wrap"] > * {
+    width: 100% !important;
+    box-sizing: border-box;
+  }
+
+  .coin-landing h1[style*="font-size: 66px"] {
+    font-size: clamp(28px, 8.5vw, 40px) !important;
+    line-height: 1.12 !important;
+  }
+
+  .coin-landing h2[style*="font-size: 46px"],
+  .coin-landing h2[style*="font-size: 42px"],
+  .coin-landing h2[style*="font-size: 56px"],
+  .coin-landing h2[style*="font-size: 36px"] {
+    font-size: clamp(26px, 7vw, 34px) !important;
+    line-height: 1.12 !important;
+  }
+
+  .coin-landing section[data-screen-label="Dashboard"] aside {
+    display: none !important;
   }
 
   .coin-app footer [style*="justify-content: space-between"] {
@@ -955,6 +1064,11 @@ html.coin-nav-open .coin-nav-mobile {
 
   .coin-dashboard [style*="flex-wrap: wrap"] button {
     flex: 1 1 100% !important;
+  }
+
+  .coin-landing [style*="grid-template-columns: repeat(4, 1fr)"],
+  .coin-landing [style*="grid-template-columns: 1fr 1fr"] {
+    grid-template-columns: minmax(0, 1fr) !important;
   }
 }
 
