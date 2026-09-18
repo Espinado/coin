@@ -9,6 +9,8 @@ use App\Models\User;
 use App\Models\Wallet;
 use App\Models\WalletTransaction;
 use App\Models\Withdrawal;
+use App\Services\Payment\PaymentGatewayInterface;
+use App\Services\Payment\PaymentSimulatorService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use RuntimeException;
@@ -113,6 +115,10 @@ class WithdrawalService
 
             $withdrawal = $withdrawal->fresh(['user.wallet', 'processedByAdmin']);
 
+            if ($status === Withdrawal::STATUS_PROCESSING && $previous !== Withdrawal::STATUS_PROCESSING) {
+                $withdrawal = $this->initiateGatewayPayout($withdrawal, $admin);
+            }
+
             if ($status === Withdrawal::STATUS_PAID && $previous !== Withdrawal::STATUS_PAID) {
                 $fee = $this->settings->getFloat('network_fee');
                 $net = max(0, $amount - $fee);
@@ -130,6 +136,48 @@ class WithdrawalService
 
             return $withdrawal;
         });
+    }
+
+    private function initiateGatewayPayout(Withdrawal $withdrawal, Admin $admin): Withdrawal
+    {
+        if (! $this->usesPaymentGateway()) {
+            return $withdrawal;
+        }
+
+        $gateway = app(PaymentGatewayInterface::class);
+        $payout = $gateway->sendPayout($withdrawal);
+
+        $withdrawal->update([
+            'gateway_request_id' => $payout->gatewayRequestId,
+            'sent_at' => now(),
+            'processed_by' => $admin->id,
+        ]);
+
+        if ($this->shouldAutoCompleteMockPayout()) {
+            app(PaymentSimulatorService::class)->simulateWithdrawalIpn($withdrawal->fresh());
+
+            return $withdrawal->fresh(['user.wallet', 'processedByAdmin']);
+        }
+
+        return $withdrawal->fresh(['user.wallet', 'processedByAdmin']);
+    }
+
+    private function usesPaymentGateway(): bool
+    {
+        return in_array((string) config('coin.payments.driver', 'mock'), ['mock', 'ccapi'], true);
+    }
+
+    private function shouldAutoCompleteMockPayout(): bool
+    {
+        if ((string) config('coin.payments.driver', 'mock') !== 'mock') {
+            return false;
+        }
+
+        if (! config('coin.payments.mock.auto_complete_payout', true)) {
+            return false;
+        }
+
+        return app()->environment(['local', 'testing']);
     }
 
     public function markPaidFromGateway(Withdrawal $withdrawal, ?string $txid = null, ?string $gatewayState = null): Withdrawal

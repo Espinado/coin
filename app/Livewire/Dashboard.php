@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Models\Contract;
+use App\Models\Deposit;
 use App\Models\Plan;
 use App\Models\SupportTicket;
 use App\Models\User;
@@ -12,6 +13,8 @@ use App\Models\UserNotification;
 use App\Services\DashboardDataService;
 use App\Services\UserInAppNotificationService;
 use App\Services\DepositService;
+use App\Services\Payment\PaymentGatewayInterface;
+use App\Services\Payment\PaymentSimulatorService;
 use App\Services\PlanChangeRequestService;
 use App\Services\PlanPurchaseService;
 use App\Services\PlatformSettingsService;
@@ -132,6 +135,10 @@ class Dashboard extends Component
     public ?int $changingContractId = null;
 
     public ?float $pendingTopUpAmount = null;
+
+    public ?int $pendingDepositId = null;
+
+    public ?string $pendingPaymentAddress = null;
 
     public ?string $actionMessage = null;
 
@@ -761,23 +768,9 @@ class Dashboard extends Component
         $this->pendingTopUpAmount = (float) $this->depositAmount;
     }
 
-    public function proceedToTopUpBank(): void
+    public function proceedToTopUpPayment(DepositService $deposits, PaymentGatewayInterface $gateway): void
     {
         if ($this->paymentModal !== 'topup' || $this->paymentModalStep !== 'gateway') {
-            return;
-        }
-
-        $this->paymentModalError = null;
-        $this->paymentModalStep = 'redirect';
-
-        sleep(1);
-
-        $this->paymentModalStep = 'bank';
-    }
-
-    public function confirmTopUpBankPayment(DepositService $deposits): void
-    {
-        if ($this->paymentModal !== 'topup' || $this->paymentModalStep !== 'bank') {
             return;
         }
 
@@ -787,12 +780,43 @@ class Dashboard extends Component
         $amount = $this->pendingTopUpAmount ?? (float) $this->depositAmount;
 
         try {
-            sleep(2);
+            $deposit = $deposits->initiateWithGateway($this->user, $amount, $this->depositCurrency, $gateway);
 
-            $deposit = $deposits->createPending($this->user, $amount, $this->depositCurrency);
+            $this->pendingDepositId = $deposit->id;
+            $this->pendingPaymentAddress = $deposit->payment_address;
+            $this->paymentModalStep = 'payment';
+        } catch (\RuntimeException $exception) {
+            $this->paymentModalStep = 'error';
+            $this->paymentModalError = $exception->getMessage();
+            $this->addError('depositAmount', $exception->getMessage());
+        }
+    }
+
+    public function confirmTopUpPayment(PaymentSimulatorService $simulator): void
+    {
+        if ($this->paymentModal !== 'topup' || $this->paymentModalStep !== 'payment') {
+            return;
+        }
+
+        if ((string) config('coin.payments.driver', 'mock') !== 'mock') {
+            return;
+        }
+
+        $this->paymentModalError = null;
+        $this->paymentModalStep = 'processing';
+
+        try {
+            $deposit = Deposit::query()
+                ->whereKey($this->pendingDepositId)
+                ->where('user_id', $this->user->id)
+                ->firstOrFail();
+
+            $simulator->simulateDepositIpn($deposit);
 
             $this->depositAmount = '';
             $this->pendingTopUpAmount = null;
+            $this->pendingDepositId = null;
+            $this->pendingPaymentAddress = null;
             $this->reloadPortfolioData();
             $this->paymentModalReference = 'TOP-'.$deposit->id;
             $this->paymentModalStep = 'success';
@@ -1163,7 +1187,7 @@ class Dashboard extends Component
 
     public function closePaymentModal(): void
     {
-        if (in_array($this->paymentModalStep, ['processing', 'redirect'], true)) {
+        if ($this->paymentModalStep === 'processing') {
             return;
         }
 
@@ -1788,6 +1812,8 @@ class Dashboard extends Component
         $this->paymentModalError = null;
         $this->paymentModalReference = null;
         $this->pendingTopUpAmount = null;
+        $this->pendingDepositId = null;
+        $this->pendingPaymentAddress = null;
     }
 
     private function formatAmount(float $value, int $decimals): string

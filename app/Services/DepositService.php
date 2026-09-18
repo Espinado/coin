@@ -56,10 +56,6 @@ class DepositService
         $driver = (string) config('coin.payments.driver', 'mock');
         $deposit = $this->createPending($user, $amount, $currency, $driver);
 
-        if ($this->shouldAutoConfirmMock()) {
-            return $deposit;
-        }
-
         $intent = $gateway->createDepositIntent($deposit);
         $this->applyDepositIntent($deposit, $intent);
 

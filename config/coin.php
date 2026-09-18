@@ -42,6 +42,10 @@ return [
     'payments' => [
         'driver' => env('COIN_PAYMENT_DRIVER', 'mock'),
 
+        'mock' => [
+            'auto_complete_payout' => env('COIN_MOCK_AUTO_COMPLETE_PAYOUT', true),
+        ],
+
         'ccapi' => [
             'base_url' => env('CCAPI_BASE_URL', 'https://new.cryptocurrencyapi.net'),
             'api_key' => env('CCAPI_API_KEY', ''),
