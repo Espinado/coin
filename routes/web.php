@@ -30,12 +30,12 @@ Route::domain(config('coin.user_domain'))
             ->middleware('web')
             ->name('guest.broadcasting.auth');
 
-        Route::get('/dashboard/profit-history', ProfitHistory::class)->middleware(['auth', 'verified', 'user.not-blocked'])->name('dashboard.profit-history');
-        Route::get('/dashboard', Dashboard::class)->middleware(['auth', 'verified', 'user.not-blocked'])->name('dashboard');
+        Route::get('/dashboard/profit-history', ProfitHistory::class)->middleware(['auth', 'verified', 'user.not-blocked', 'record.user.login'])->name('dashboard.profit-history');
+        Route::get('/dashboard', Dashboard::class)->middleware(['auth', 'verified', 'user.not-blocked', 'record.user.login'])->name('dashboard');
 
         Broadcast::routes(['middleware' => ['web', 'broadcast.auth:web']]);
 
-        Route::middleware(['auth', 'verified', 'user.not-blocked'])->group(function () {
+        Route::middleware(['auth', 'verified', 'user.not-blocked', 'record.user.login'])->group(function () {
             Route::post('/reverb-debug', [ReverbDebugLogController::class, 'store'])->name('reverb-debug.store');
             Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
             Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');

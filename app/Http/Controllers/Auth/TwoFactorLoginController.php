@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Services\Auth\AuthAuditLogger;
 use App\Services\Auth\AuthFailureStage;
 use App\Services\LoginTwoFactorService;
+use App\Services\UserLoginRecorder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -90,8 +91,8 @@ class TwoFactorLoginController extends Controller
         $twoFactor->clearChallenge($request);
 
         Auth::login($user, $remember);
-        $user->update(['last_login_at' => now()]);
         $request->session()->regenerate();
+        app(UserLoginRecorder::class)->record($user, $request);
 
         return redirect()->intended(route('dashboard', absolute: false));
     }

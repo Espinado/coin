@@ -16,7 +16,7 @@
         <div style="display:flex;justify-content:space-between;gap:12px;"><span style="color:rgba(232,237,245,0.62);">{{ __('coin.locked') }}</span><span style="font-family:'JetBrains Mono',monospace;">{{ $user->wallet?->formattedLocked() ?? '—' }}</span></div>
         <div style="display:flex;justify-content:space-between;gap:12px;"><span style="color:rgba(232,237,245,0.62);">{{ __('coin.pending') }}</span><span style="font-family:'JetBrains Mono',monospace;">{{ $user->wallet?->formattedPending() ?? '—' }}</span></div>
         <div style="display:flex;justify-content:space-between;gap:12px;"><span style="color:rgba(232,237,245,0.62);">{{ __('coin.admin.investments') }}</span><span style="font-family:'JetBrains Mono',monospace;">{{ $user->contracts->count() }}</span></div>
-        <div style="display:flex;justify-content:space-between;gap:12px;"><span style="color:rgba(232,237,245,0.62);">{{ __('coin.nav.referrals') }}</span><span style="font-family:'JetBrains Mono',monospace;">{{ $user->referralProfile?->invited_count ?? 0 }}</span></div>
+        <div style="display:flex;justify-content:space-between;gap:12px;"><span style="color:rgba(232,237,245,0.62);">{{ __('coin.nav.referrals') }}</span><span style="font-family:'JetBrains Mono',monospace;">{{ $user->referralProfile?->invitationsCount() ?? 0 }}</span></div>
         @isset($referralEarnings)
         <div style="display:flex;justify-content:space-between;gap:12px;"><span style="color:rgba(232,237,245,0.62);">{{ __('coin.user_context.referral_earned') }}</span><span style="font-family:'JetBrains Mono',monospace;">{{ \App\Support\MoneyFormat::amount($referralEarnings) }}</span></div>
         @endisset

@@ -116,10 +116,13 @@
             </div>
         </div>
 
-        @include('admin.partials.user-context', [
-            'user' => $user,
-            'referralVolume' => $referralVolume,
-            'referralEarnings' => $referralEarnings,
-        ])
+        <div>
+            @include('admin.partials.user-context', [
+                'user' => $user,
+                'referralVolume' => $referralVolume,
+                'referralEarnings' => $referralEarnings,
+            ])
+            @include('admin.partials.user-notification-form', ['user' => $user])
+        </div>
     </div>
 @endsection

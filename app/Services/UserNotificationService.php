@@ -33,6 +33,22 @@ class UserNotificationService
         $this->sendAlways($user, $subject, $intro, $lines, $footer);
     }
 
+    public function notifyInAppMessageReceived(User $user, string $title): void
+    {
+        $dashboardUrl = route('dashboard', absolute: true).'?section=8';
+
+        $this->sendAlways(
+            $user,
+            __('coin.notifications.mail.in_app_subject'),
+            __('coin.notifications.mail.in_app_intro', ['name' => $user->name]),
+            [
+                __('coin.notifications.mail.in_app_title_line', ['title' => $title]),
+                __('coin.notifications.mail.in_app_open', ['url' => $dashboardUrl]),
+            ],
+            __('coin.notifications.mail.in_app_footer'),
+        );
+    }
+
     /** Sends regardless of user notification toggles (payouts, referral commissions, etc.). */
     public function sendAlways(User $user, string $subject, string $intro, array $lines = [], ?string $footer = null): void
     {

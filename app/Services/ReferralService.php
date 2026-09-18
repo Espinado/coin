@@ -158,6 +158,74 @@ class ReferralService
         ]);
     }
 
+    public function syncInvitationRecords(): int
+    {
+        $synced = 0;
+
+        User::query()
+            ->whereNotNull('referred_by_user_id')
+            ->select(['id', 'email', 'referred_by_user_id', 'created_at'])
+            ->orderBy('id')
+            ->each(function (User $user) use (&$synced): void {
+                if ($this->syncInvitationForRegisteredUser($user)) {
+                    $synced++;
+                }
+            });
+
+        ReferralProfile::query()
+            ->select(['id', 'user_id'])
+            ->each(function (ReferralProfile $profile): void {
+                $registeredCount = User::query()
+                    ->where('referred_by_user_id', $profile->user_id)
+                    ->count();
+
+                $profile->update([
+                    'invited_count' => $registeredCount,
+                    'level1_users' => $registeredCount,
+                ]);
+            });
+
+        return $synced;
+    }
+
+    private function syncInvitationForRegisteredUser(User $user): bool
+    {
+        if ($user->referred_by_user_id === null) {
+            return false;
+        }
+
+        $normalizedEmail = strtolower((string) $user->email);
+
+        $invitation = ReferralInvitation::query()
+            ->where('referrer_user_id', $user->referred_by_user_id)
+            ->where('email', $normalizedEmail)
+            ->first();
+
+        if ($invitation) {
+            if ($invitation->registered_user_id !== null) {
+                return false;
+            }
+
+            $invitation->update([
+                'registered_user_id' => $user->id,
+                'registered_at' => $user->created_at ?? now(),
+            ]);
+
+            return true;
+        }
+
+        ReferralInvitation::query()->create([
+            'referrer_user_id' => $user->referred_by_user_id,
+            'email' => $normalizedEmail,
+            'channel' => ReferralInvitation::CHANNEL_LINK,
+            'sent_at' => $user->created_at ?? now(),
+            'registered_user_id' => $user->id,
+            'registered_at' => $user->created_at ?? now(),
+        ]);
+
+        return true;
+    }
+
     private function normalizeCode(string $code): string
     {
         return strtoupper(trim($code));

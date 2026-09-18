@@ -61,4 +61,27 @@ class PlatformBroadcastService
             return $broadcast->fresh(['admin']);
         });
     }
+
+    public function sendToUser(Admin $admin, User $user, string $title, string $body): UserNotification
+    {
+        return DB::transaction(function () use ($admin, $user, $title, $body) {
+            $broadcast = PlatformBroadcast::query()->create([
+                'admin_id' => $admin->id,
+                'title' => $title,
+                'body' => $body,
+                'recipients_count' => 1,
+            ]);
+
+            $notification = UserNotification::query()->create([
+                'user_id' => $user->id,
+                'platform_broadcast_id' => $broadcast->id,
+                'title' => $title,
+                'body' => $body,
+            ]);
+
+            UserNotificationCreated::dispatch($notification);
+
+            return $notification;
+        });
+    }
 }

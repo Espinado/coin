@@ -5,8 +5,11 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Admin\Concerns\AdminListQuery;
 use App\Http\Controllers\Admin\Concerns\RedirectsWithAdminFlash;
 use App\Http\Controllers\Controller;
+use App\Models\Admin;
 use App\Models\User;
 use App\Models\Wallet;
+use App\Services\PlatformBroadcastService;
+use App\Services\UserNotificationService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -93,5 +96,34 @@ class UserController extends Controller
         $user->update($validated);
 
         return $this->adminSuccess('coin.admin.flash.user_updated', 'admin.users.index');
+    }
+
+    public function sendNotification(
+        Request $request,
+        User $user,
+        PlatformBroadcastService $broadcasts,
+        UserNotificationService $notifications,
+    ): RedirectResponse {
+        $validated = $request->validate([
+            'notification_title' => ['required', 'string', 'max:160'],
+            'notification_body' => ['required', 'string', 'max:10000'],
+        ], [], [
+            'notification_title' => __('coin.admin.user_notification.title_field'),
+            'notification_body' => __('coin.admin.user_notification.body_field'),
+        ]);
+
+        /** @var Admin $admin */
+        $admin = $request->user('admin');
+
+        $broadcasts->sendToUser(
+            $admin,
+            $user,
+            $validated['notification_title'],
+            $validated['notification_body'],
+        );
+
+        $notifications->notifyInAppMessageReceived($user, $validated['notification_title']);
+
+        return $this->adminSuccess('coin.admin.flash.user_notification_sent', 'admin.users.show', $user);
     }
 }

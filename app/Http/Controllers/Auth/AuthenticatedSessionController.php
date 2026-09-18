@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Services\LoginTwoFactorService;
+use App\Services\UserLoginRecorder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -31,7 +32,7 @@ class AuthenticatedSessionController extends Controller
     /**
      * Handle an incoming authentication request.
      */
-    public function store(LoginRequest $request, LoginTwoFactorService $twoFactor): RedirectResponse
+    public function store(LoginRequest $request, LoginTwoFactorService $twoFactor, UserLoginRecorder $loginRecorder): RedirectResponse
     {
         $user = $request->validateCredentials();
 
@@ -42,8 +43,8 @@ class AuthenticatedSessionController extends Controller
         }
 
         Auth::login($user, $request->boolean('remember'));
-        $user->update(['last_login_at' => now()]);
         $request->session()->regenerate();
+        $loginRecorder->record($user, $request);
 
         return redirect()->intended(route('dashboard', absolute: false));
     }

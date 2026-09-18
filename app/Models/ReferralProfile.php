@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Support\MoneyFormat;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class ReferralProfile extends Model
 {
@@ -30,6 +31,25 @@ class ReferralProfile extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function invitations(): HasMany
+    {
+        return $this->hasMany(ReferralInvitation::class, 'referrer_user_id', 'user_id');
+    }
+
+    /** Matches the «Приглашённые» tab (email invites + link registrations). */
+    public function invitationsCount(): int
+    {
+        return (int) $this->invitations()->count();
+    }
+
+    /** Users who registered with this referrer's link. */
+    public function registeredReferralsCount(): int
+    {
+        return User::query()
+            ->where('referred_by_user_id', $this->user_id)
+            ->count();
     }
 
     /** Active investments (contracts) held by direct referrals. */

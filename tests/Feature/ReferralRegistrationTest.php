@@ -133,4 +133,34 @@ class ReferralRegistrationTest extends TestCase
             'registered_user_id' => null,
         ]);
     }
+
+    public function test_sync_reconciles_invited_count_with_invitation_records(): void
+    {
+        $referrer = User::factory()->create();
+        $profile = ReferralProfile::query()->create([
+            'user_id' => $referrer->id,
+            'code' => 'COIN-SYNC1',
+            'invited_count' => 5,
+            'level1_users' => 5,
+        ]);
+
+        $invited = User::factory()->create([
+            'email' => 'synced@example.com',
+            'referred_by_user_id' => $referrer->id,
+        ]);
+
+        app(ReferralService::class)->syncInvitationRecords();
+
+        $profile->refresh();
+
+        $this->assertSame(1, $profile->invited_count);
+        $this->assertSame(1, $profile->level1_users);
+        $this->assertSame(1, $profile->invitationsCount());
+        $this->assertDatabaseHas('referral_invitations', [
+            'referrer_user_id' => $referrer->id,
+            'email' => 'synced@example.com',
+            'registered_user_id' => $invited->id,
+            'channel' => ReferralInvitation::CHANNEL_LINK,
+        ]);
+    }
 }

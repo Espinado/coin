@@ -33,6 +33,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'reject.web.on.admin' => \App\Http\Middleware\RejectWebGuardOnAdmin::class,
             'broadcast.auth' => \App\Http\Middleware\AuthenticateBroadcasting::class,
             'user.not-blocked' => \App\Http\Middleware\EnsureUserNotBlocked::class,
+            'record.user.login' => \App\Http\Middleware\RecordUserLogin::class,
             'admin.ability' => \App\Http\Middleware\EnsureAdminAbility::class,
         ]);
 

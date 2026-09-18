@@ -192,7 +192,7 @@
               <button wire:click="setSection(5)" style="background: none; border: 0; padding: 0; font-family: 'JetBrains Mono', monospace; font-size: 10.5px; letter-spacing: 0.1em; color: oklch(0.88 0.11 195); cursor: pointer;">{{ mb_strtoupper(__('coin.actions.open')) }}</button>
             </div>
             <div style="margin-top: 18px; display: flex; align-items: baseline; gap: 10px;">
-              <span style="font-family: 'JetBrains Mono', monospace; font-size: 28px; color: #f0fbff;">{{ $referral?->invited_count ?? 0 }}</span>
+              <span style="font-family: 'JetBrains Mono', monospace; font-size: 28px; color: #f0fbff;">{{ $referral?->invitationsCount() ?? 0 }}</span>
               <span style="font-size: 12.5px; color: rgba(214,238,248,0.72);">{{ __('coin.overview.invited') }}</span>
             </div>
             <div style="margin-top: 16px; display: flex; flex-direction: column; gap: 12px; font-size: 13px;">

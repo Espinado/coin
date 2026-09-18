@@ -71,6 +71,9 @@ Route::middleware(['admin.domain', 'reject.web.on.admin'])->group(function () {
         Route::patch('users/{user}', [UserController::class, 'update'])
             ->middleware('admin.ability:manage_users')
             ->name('admin.users.update');
+        Route::post('users/{user}/notifications', [UserController::class, 'sendNotification'])
+            ->middleware('admin.ability:manage_users')
+            ->name('admin.users.notifications.store');
 
         Route::get('deposits', [DepositController::class, 'index'])->name('admin.deposits.index');
         Route::get('deposits/{deposit}', [DepositController::class, 'show'])->name('admin.deposits.show');
