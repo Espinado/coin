@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Services\EmailVerificationCodeService;
 use App\Support\MoneyFormat;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -78,6 +79,11 @@ class User extends Authenticatable implements MustVerifyEmail
     public function hasEmailTwoFactorEnabled(): bool
     {
         return (bool) $this->email_two_factor_enabled;
+    }
+
+    public function sendEmailVerificationNotification(): void
+    {
+        app(EmailVerificationCodeService::class)->sendCode($this);
     }
 
     public function wantsNotification(string $type): bool

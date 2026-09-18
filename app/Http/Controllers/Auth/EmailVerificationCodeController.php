@@ -7,19 +7,22 @@ use App\Services\EmailVerificationCodeService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
-class EmailVerificationNotificationController extends Controller
+class EmailVerificationCodeController extends Controller
 {
-    /**
-     * Send a new email verification notification.
-     */
     public function store(Request $request, EmailVerificationCodeService $verification): RedirectResponse
     {
         if ($request->user()->hasVerifiedEmail()) {
             return redirect()->intended(route('dashboard', absolute: false));
         }
 
-        $verification->sendCode($request->user());
+        $request->validate([
+            'code' => ['required', 'string', 'digits:6'],
+        ], [], [
+            'code' => __('coin.auth.verify_email_code'),
+        ]);
 
-        return back()->with('status', 'verification-code-sent');
+        $verification->verify($request->user(), $request->string('code')->toString(), $request);
+
+        return redirect()->intended(route('dashboard', absolute: false).'?verified=1');
     }
 }
