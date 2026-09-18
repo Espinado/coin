@@ -44,8 +44,8 @@
     </div>
 
     <div class="admin-card" style="margin-top:16px;">
-        <h2 style="margin:0;font-size:20px;font-weight:600;">{{ __('coin.admin.legal.title') }}</h2>
-        <p style="margin:8px 0 0;font-size:14px;color:rgba(232,237,245,0.72);">{{ __('coin.admin.legal.sub') }}</p>
+        <h2 style="margin:0;font-size:20px;font-weight:600;">{{ __('coin.admin.legal_info.title') }}</h2>
+        <p style="margin:8px 0 0;font-size:14px;color:rgba(232,237,245,0.72);">{{ __('coin.admin.legal_info.sub') }}</p>
     </div>
 
     <div class="admin-card" style="margin-top:16px;">
@@ -68,7 +68,7 @@
             @endforeach
 
             <div style="grid-column:1/-1;">
-                <button type="submit" class="admin-btn admin-btn-primary">{{ __('coin.admin.legal.save') }}</button>
+                <button type="submit" class="admin-btn admin-btn-primary">{{ __('coin.admin.legal_info.save') }}</button>
             </div>
         </form>
     </div>

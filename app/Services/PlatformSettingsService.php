@@ -168,13 +168,13 @@ class PlatformSettingsService
     public function legalDefinitions(): array
     {
         return [
-            'company_name' => ['label' => __('coin.admin.legal.company_name'), 'type' => 'text', 'default' => self::LEGAL_DEFAULTS['company_name']],
-            'company_legal_address' => ['label' => __('coin.admin.legal.legal_address'), 'type' => 'textarea', 'default' => self::LEGAL_DEFAULTS['company_legal_address']],
-            'company_physical_address' => ['label' => __('coin.admin.legal.physical_address'), 'type' => 'textarea', 'default' => self::LEGAL_DEFAULTS['company_physical_address']],
-            'company_registration_number' => ['label' => __('coin.admin.legal.registration_number'), 'type' => 'text', 'default' => self::LEGAL_DEFAULTS['company_registration_number']],
-            'company_license_number' => ['label' => __('coin.admin.legal.license_number'), 'type' => 'text', 'default' => self::LEGAL_DEFAULTS['company_license_number']],
-            'company_phone' => ['label' => __('coin.admin.legal.phone'), 'type' => 'text', 'default' => self::LEGAL_DEFAULTS['company_phone']],
-            'company_email' => ['label' => __('coin.admin.legal.email'), 'type' => 'email', 'default' => self::LEGAL_DEFAULTS['company_email']],
+            'company_name' => ['label' => __('coin.admin.legal_info.company_name'), 'type' => 'text', 'default' => self::LEGAL_DEFAULTS['company_name']],
+            'company_legal_address' => ['label' => __('coin.admin.legal_info.legal_address'), 'type' => 'textarea', 'default' => self::LEGAL_DEFAULTS['company_legal_address']],
+            'company_physical_address' => ['label' => __('coin.admin.legal_info.physical_address'), 'type' => 'textarea', 'default' => self::LEGAL_DEFAULTS['company_physical_address']],
+            'company_registration_number' => ['label' => __('coin.admin.legal_info.registration_number'), 'type' => 'text', 'default' => self::LEGAL_DEFAULTS['company_registration_number']],
+            'company_license_number' => ['label' => __('coin.admin.legal_info.license_number'), 'type' => 'text', 'default' => self::LEGAL_DEFAULTS['company_license_number']],
+            'company_phone' => ['label' => __('coin.admin.legal_info.phone'), 'type' => 'text', 'default' => self::LEGAL_DEFAULTS['company_phone']],
+            'company_email' => ['label' => __('coin.admin.legal_info.email'), 'type' => 'email', 'default' => self::LEGAL_DEFAULTS['company_email']],
         ];
     }
 }
