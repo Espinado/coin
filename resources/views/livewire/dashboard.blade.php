@@ -527,10 +527,10 @@
             @if($this->depositCreditPreview && $depositCurrency !== $this->walletCurrency)
             <p style="margin-top:10px;font-size:12px;line-height:1.5;color:rgba(214,238,248,0.72);">{{ __('coin.wallet.deposit_credit_preview', ['amount' => $this->depositCreditPreview]) }}</p>
             @endif
-            <div style="display: flex; gap: 7px; margin-top: 12px;">
-              <button type="button" wire:click="setDepositPreset(100)" style="padding: 6px 12px; border-radius: 8px; border: 1px solid rgba(150,235,250,0.16); background: transparent; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: rgba(214,238,248,0.78); cursor: pointer;">100 {{ $depositCurrency }}</button>
-              <button type="button" wire:click="setDepositPreset(500)" style="padding: 6px 12px; border-radius: 8px; border: 1px solid rgba(150,235,250,0.16); background: transparent; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: rgba(214,238,248,0.78); cursor: pointer;">500 {{ $depositCurrency }}</button>
-              <button type="button" wire:click="setDepositPreset(1000)" style="padding: 6px 12px; border-radius: 8px; border: 1px solid rgba(150,235,250,0.16); background: transparent; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: rgba(214,238,248,0.78); cursor: pointer;">1 000 {{ $depositCurrency }}</button>
+            <div class="coin-deposit-presets">
+              <button type="button" wire:click="setDepositPreset(100)" class="coin-deposit-presets__btn coin-btn-quiet">100 {{ $depositCurrency }}</button>
+              <button type="button" wire:click="setDepositPreset(500)" class="coin-deposit-presets__btn coin-btn-quiet">500 {{ $depositCurrency }}</button>
+              <button type="button" wire:click="setDepositPreset(1000)" class="coin-deposit-presets__btn coin-btn-quiet">1 000 {{ $depositCurrency }}</button>
             </div>
             <button type="button" wire:click="openTopUpPaymentModal" wire:loading.attr="disabled" wire:target="openTopUpPaymentModal" style="width: 100%; margin-top: 20px; padding: 12px; border-radius: 10px; border: 1px solid oklch(0.86 0.11 195 / 0.5); background: linear-gradient(140deg, oklch(0.86 0.12 192), oklch(0.66 0.13 205)); color: #04121f; font-family: inherit; font-size: 13.5px; font-weight: 600; cursor: pointer;">
               <span wire:loading.remove wire:target="openTopUpPaymentModal">{{ __('coin.wallet.add_funds') }}</span>

@@ -641,6 +641,29 @@ html.coin-nav-open .coin-nav-mobile {
   filter: brightness(1.06);
 }
 
+.coin-deposit-presets {
+  display: flex;
+  gap: 7px;
+  margin-top: 12px;
+  flex-wrap: nowrap;
+}
+
+.coin-deposit-presets__btn {
+  flex: 1 1 0;
+  min-width: 0;
+  padding: 6px 6px;
+  border-radius: 8px;
+  border: 1px solid rgba(150, 235, 250, 0.16);
+  background: transparent;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10.5px;
+  line-height: 1.2;
+  color: rgba(214, 238, 248, 0.78);
+  cursor: pointer;
+  white-space: nowrap;
+  text-align: center;
+}
+
 .coin-plan-calculator,
 #coin-plan-calculator {
   position: relative;
