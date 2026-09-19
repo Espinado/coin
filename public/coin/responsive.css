@@ -642,6 +642,21 @@ html.coin-nav-open .coin-nav-mobile {
   filter: brightness(1.06);
 }
 
+.coin-notification-item {
+  font-family: inherit;
+  font-weight: 400 !important;
+  box-shadow: none !important;
+}
+
+.coin-notification-item:hover {
+  background: rgba(150, 235, 250, 0.05) !important;
+  filter: none !important;
+}
+
+.coin-notification-item--selected {
+  background: rgba(150, 235, 250, 0.06) !important;
+}
+
 .coin-wallet-actions-grid {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.1fr);
