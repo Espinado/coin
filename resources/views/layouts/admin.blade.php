@@ -102,7 +102,7 @@
                 }
             });
         </script>
-    @endhasSection
+    @endif
     @stack('scripts')
     @auth('admin')
         @vite(['resources/js/admin-support-realtime.js'])
