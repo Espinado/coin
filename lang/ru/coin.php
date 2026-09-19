@@ -1183,4 +1183,21 @@ return [
             'faq' => 'FAQ',
         ],
     ],
+
+    'voximplant' => [
+        'title' => 'Звонок пользователю',
+        'hint' => 'Подключитесь через браузер и позвоните клиенту, либо запустите серверный тестовый звонок через Voximplant.',
+        'connect' => 'Подключиться',
+        'call_browser' => 'Позвонить из браузера',
+        'call_api' => 'Тестовый звонок API',
+        'hangup' => 'Завершить',
+        'not_configured' => 'Voximplant не настроен. Заполните переменные VOXIMPLANT_* и выполните php artisan voximplant:setup.',
+        'no_phone' => 'У пользователя не указан телефон для звонка.',
+        'caller_id_missing' => 'Caller ID не задан. Арендуйте номер в Voximplant и укажите VOXIMPLANT_CALLER_ID.',
+        'api_call_started' => 'Voximplant запустил звонок на :phone.',
+        'status_idle' => 'Нажмите «Подключиться», чтобы подготовить звонок из браузера.',
+        'status_connecting' => 'Подключение к Voximplant…',
+        'status_ready' => 'Готово. Можно звонить.',
+        'status_calling' => 'Идёт набор номера…',
+    ],
 ];

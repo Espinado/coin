@@ -10,6 +10,7 @@ export default defineConfig({
                 'resources/js/admin-support.js',
                 'resources/js/admin-support-realtime.js',
                 'resources/js/guest-support.js',
+                'resources/js/admin-vox-call.js',
             ],
             refresh: true,
         }),

@@ -22,6 +22,51 @@
                 </div>
             </div>
 
+            @if ($voximplantReady)
+                <div class="admin-card" style="margin-top:16px;">
+                    <h2 style="margin:0 0 10px;font-size:16px;font-weight:600;">{{ __('coin.voximplant.title') }}</h2>
+                    <p style="margin:0 0 16px;font-size:13px;line-height:1.55;color:rgba(232,237,245,0.72);">
+                        {{ __('coin.voximplant.hint') }}
+                    </p>
+
+                    @if ($voximplantDestination)
+                        <div
+                            id="admin-vox-call"
+                            data-username="{{ $voximplantUsername }}"
+                            data-destination="{{ $voximplantDestination }}"
+                            data-caller-id="{{ $voximplantCallerId }}"
+                            data-one-time-key-url="{{ route('admin.voximplant.one-time-key') }}"
+                            data-status-connecting="{{ __('coin.voximplant.status_connecting') }}"
+                            data-status-ready="{{ __('coin.voximplant.status_ready') }}"
+                            data-status-calling="{{ __('coin.voximplant.status_calling') }}"
+                            data-status-no-phone="{{ __('coin.voximplant.no_phone') }}"
+                        >
+                            <div style="font-size:13px;margin-bottom:12px;">
+                                <span style="color:rgba(232,237,245,0.62);">{{ __('coin.admin.phone') }}:</span>
+                                <span style="font-family:'JetBrains Mono',monospace;">{{ $voximplantDestination }}</span>
+                            </div>
+                            <div data-vox-status style="margin-bottom:12px;font-size:13px;color:rgba(232,237,245,0.78);">
+                                {{ __('coin.voximplant.status_idle') }}
+                            </div>
+                            <div style="display:flex;flex-wrap:wrap;gap:10px;">
+                                <button type="button" class="admin-btn admin-btn-primary" data-vox-connect>{{ __('coin.voximplant.connect') }}</button>
+                                <button type="button" class="admin-btn admin-btn-primary" data-vox-call hidden>{{ __('coin.voximplant.call_browser') }}</button>
+                                <button type="button" class="admin-btn" data-vox-hangup hidden>{{ __('coin.voximplant.hangup') }}</button>
+                                <form method="POST" action="{{ route('admin.users.call', $user) }}" style="margin:0;">
+                                    @csrf
+                                    <button type="submit" class="admin-btn">{{ __('coin.voximplant.call_api') }}</button>
+                                </form>
+                            </div>
+                            @if ($voximplantCallerId === '')
+                                <p style="margin:12px 0 0;font-size:12.5px;color:rgba(255,180,84,0.9);">{{ __('coin.voximplant.caller_id_missing') }}</p>
+                            @endif
+                        </div>
+                    @else
+                        <p style="margin:0;font-size:13px;color:rgba(232,237,245,0.62);">{{ __('coin.voximplant.no_phone') }}</p>
+                    @endif
+                </div>
+            @endif
+
             <div class="admin-card" style="margin-top:16px;">
                 <h2 style="margin:0 0 16px;font-size:16px;font-weight:600;">{{ __('coin.admin.account_controls') }}</h2>
                 <form method="POST" action="{{ route('admin.users.update', $user) }}" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
@@ -126,3 +171,9 @@
         </div>
     </div>
 @endsection
+
+@if ($voximplantReady && $voximplantDestination)
+    @push('scripts')
+        @vite(['resources/js/admin-vox-call.js'])
+    @endpush
+@endif

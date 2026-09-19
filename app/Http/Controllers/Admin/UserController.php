@@ -10,6 +10,7 @@ use App\Models\User;
 use App\Models\Wallet;
 use App\Services\PlatformBroadcastService;
 use App\Services\UserNotificationService;
+use App\Services\Voximplant\VoximplantCallService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -58,7 +59,7 @@ class UserController extends Controller
         ]);
     }
 
-    public function show(User $user): View
+    public function show(User $user, VoximplantCallService $voximplant): View
     {
         $user->load([
             'wallet',
@@ -79,6 +80,10 @@ class UserController extends Controller
             'kycStatuses' => User::kycStatuses(),
             'referralVolume' => (float) $user->referralCommissionsEarned->sum('purchase_amount'),
             'referralEarnings' => (float) $user->referralCommissionsEarned->sum('commission_amount'),
+            'voximplantReady' => $voximplant->isReady(),
+            'voximplantDestination' => $voximplant->normalizeDestination($user),
+            'voximplantUsername' => $voximplant->sdkUsername(),
+            'voximplantCallerId' => (string) config('voximplant.caller_id', ''),
         ]);
     }
 

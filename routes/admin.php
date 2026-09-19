@@ -18,6 +18,7 @@ use App\Http\Controllers\Admin\SettingsController;
 use App\Http\Controllers\Admin\SupportTicketController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\WithdrawalController;
+use App\Http\Controllers\Admin\VoximplantCallController;
 use App\Http\Controllers\SessionExpiredController;
 use Illuminate\Support\Facades\Broadcast;
 use Illuminate\Support\Facades\Route;
@@ -77,6 +78,11 @@ Route::middleware(['admin.domain', 'reject.web.on.admin'])->group(function () {
         Route::post('users/{user}/notifications', [UserController::class, 'sendNotification'])
             ->middleware('admin.ability:manage_users')
             ->name('admin.users.notifications.store');
+        Route::post('users/{user}/call', [VoximplantCallController::class, 'store'])
+            ->middleware('admin.ability:manage_users')
+            ->name('admin.users.call');
+        Route::post('voximplant/one-time-key', [VoximplantCallController::class, 'oneTimeKey'])
+            ->name('admin.voximplant.one-time-key');
 
         Route::get('deposits', [DepositController::class, 'index'])->name('admin.deposits.index');
         Route::get('deposits/{deposit}', [DepositController::class, 'show'])->name('admin.deposits.show');
