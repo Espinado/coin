@@ -41,7 +41,7 @@
     @endauth
     @vite(['resources/js/app.js'])
     @livewireScripts
-    <script src="{{ asset('coin/page-navigate.js') }}" defer></script>
+    <script src="{{ asset('coin/page-navigate.js') }}?v={{ file_exists(public_path('coin/page-navigate.js')) ? filemtime(public_path('coin/page-navigate.js')) : 1 }}" defer></script>
     <script src="{{ asset('coin/mobile.js') }}?v={{ file_exists(public_path('coin/mobile.js')) ? filemtime(public_path('coin/mobile.js')) : 1 }}" defer></script>
 </body>
 </html>

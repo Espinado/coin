@@ -15,9 +15,7 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        background: rgba(4, 16, 28, 0.84);
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
+        background: rgba(4, 16, 28, 0.92);
     }
     .coin-page-loading-overlay[hidden] { display: none !important; }
     html.coin-page-navigating .coin-page-loading-overlay { display: flex !important; }
@@ -57,19 +55,38 @@
     }
     .admin-shell .coin-page-loading-label { color: rgba(232, 237, 245, 0.9); }
     @keyframes coinPageSpin { to { transform: rotate(360deg); } }
-    @media (max-width: 768px) {
-        .coin-page-loading-overlay {
-            backdrop-filter: none;
-            -webkit-backdrop-filter: none;
-        }
-    }
 </style>
 <script>
 (function () {
+    var overlay = document.getElementById('coin-page-loading-overlay');
+
+    function hide() {
+        document.documentElement.classList.remove('coin-page-navigating');
+        document.documentElement.classList.remove('coin-nav-open');
+
+        if (overlay) {
+            overlay.hidden = true;
+        }
+
+        try {
+            sessionStorage.removeItem('coinPageNavigating');
+        } catch (_) {}
+    }
+
     try {
-        if (sessionStorage.getItem('coinPageNavigating') === '1') {
+        if (sessionStorage.getItem('coinPageNavigating') === '1' && overlay) {
+            overlay.hidden = false;
             document.documentElement.classList.add('coin-page-navigating');
         }
     } catch (_) {}
+
+    if (document.readyState === 'complete') {
+        hide();
+    } else {
+        window.addEventListener('load', hide, { once: true });
+    }
+
+    document.addEventListener('DOMContentLoaded', hide, { once: true });
+    window.setTimeout(hide, 5000);
 })();
 </script>

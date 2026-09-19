@@ -3,6 +3,7 @@
     var overlay = null;
     var pending = 0;
     var waitingForFullLoad = false;
+    var hideScheduled = false;
 
     function getOverlay() {
         if (!overlay) {
@@ -38,9 +39,35 @@
         } catch (_) {}
     }
 
+    function scheduleHideAfterNavigation() {
+        if (hideScheduled) {
+            return;
+        }
+
+        hideScheduled = true;
+
+        function finish() {
+            waitingForFullLoad = false;
+            hideOverlay();
+        }
+
+        if (document.readyState === 'complete') {
+            requestAnimationFrame(finish);
+        } else {
+            window.addEventListener('load', finish, { once: true });
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            requestAnimationFrame(finish);
+        }, { once: true });
+
+        window.setTimeout(finish, 5000);
+    }
+
     function markFullPageNavigation() {
         waitingForFullLoad = true;
         pending++;
+        hideScheduled = false;
 
         try {
             sessionStorage.setItem(STORAGE_KEY, '1');
@@ -108,12 +135,18 @@
     }
 
     function boot() {
-        if (sessionStorage.getItem(STORAGE_KEY) === '1') {
+        var hadPendingNav = false;
+
+        try {
+            hadPendingNav = sessionStorage.getItem(STORAGE_KEY) === '1';
+        } catch (_) {}
+
+        if (hadPendingNav) {
             waitingForFullLoad = true;
             showOverlay();
+            scheduleHideAfterNavigation();
         }
 
-        window.addEventListener('load', hideOverlay);
         window.addEventListener('pageshow', function (event) {
             if (event.persisted) {
                 hideOverlay();

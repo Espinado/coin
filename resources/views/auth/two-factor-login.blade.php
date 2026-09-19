@@ -10,7 +10,7 @@
 
             <x-auth-session-status class="coin-auth-status" :status="session('status')" />
 
-            <form method="POST" action="{{ route('login.two-factor') }}">
+            <form method="POST" action="{{ route('login.two-factor') }}" data-no-page-spinner>
                 @csrf
 
                 <div style="margin-top: 26px;">
