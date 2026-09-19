@@ -28,15 +28,25 @@ class DepositService
             throw new RuntimeException('Unsupported top-up currency.');
         }
 
-        $this->exchangeRates->assertMinDeposit($amount, $currency);
+        $lockedBtcPerUsdt = null;
+        $lockedUsdtPerBtc = null;
+
+        if ($currency === 'BTC') {
+            $lockedUsdtPerBtc = $this->exchangeRates->fetchLiveUsdtPerBtc();
+            $lockedBtcPerUsdt = $this->exchangeRates->btcPerUsdtFromUsdtRate($lockedUsdtPerBtc);
+            $this->exchangeRates->assertMinDeposit($amount, $currency, $lockedBtcPerUsdt);
+        } else {
+            $this->exchangeRates->assertMinDeposit($amount, $currency);
+        }
 
         $method ??= (string) config('coin.payments.driver', 'mock');
 
-        $deposit = DB::transaction(function () use ($user, $amount, $currency, $method) {
+        $deposit = DB::transaction(function () use ($user, $amount, $currency, $method, $lockedBtcPerUsdt) {
             return Deposit::query()->create([
                 'user_id' => $user->id,
                 'amount' => $amount,
                 'currency' => $currency,
+                'exchange_rate' => $lockedBtcPerUsdt,
                 'status' => Deposit::STATUS_PENDING,
                 'method' => $method,
             ]);
@@ -94,7 +104,13 @@ class DepositService
             $wallet = $this->wallets->ensureWallet($user);
             $paymentAmount = (float) $deposit->amount;
             $paymentCurrency = strtoupper((string) ($deposit->currency ?: 'USDT'));
-            $conversion = $this->exchangeRates->convertToBase($paymentAmount, $paymentCurrency);
+            $lockedBtcPerUsdt = $paymentCurrency === 'BTC' && $deposit->exchange_rate
+                ? (float) $deposit->exchange_rate
+                : null;
+
+            $conversion = $lockedBtcPerUsdt !== null
+                ? $this->exchangeRates->convertToBase($paymentAmount, $paymentCurrency, $lockedBtcPerUsdt)
+                : $this->exchangeRates->convertToBaseAtLiveRate($paymentAmount, $paymentCurrency);
             $creditedAmount = $conversion['amount'];
             $walletCurrency = $this->wallets->currencyFor($wallet);
 

@@ -233,6 +233,7 @@ class AdminModuleTest extends TestCase
         $this->actingAs($this->admin, 'admin')
             ->patch('http://admin.coin.test/settings', [
                 'token_symbol' => 'USDT',
+                'min_deposit' => '10.00',
                 'min_withdrawal' => '15',
                 'network_fee' => '0.50',
                 'withdrawal_processing_hours' => '24',
@@ -240,7 +241,7 @@ class AdminModuleTest extends TestCase
                 'referral_level2_percent' => '0',
                 'kyc_required_for_withdrawal' => false,
                 'maintenance_mode' => false,
-                'btc_per_usdt' => '2',
+                'usdt_per_btc' => '80000',
                 'profit_accrual_time' => '10:30',
             ])
             ->assertRedirect();
@@ -249,6 +250,33 @@ class AdminModuleTest extends TestCase
 
         $this->assertSame(20, $settings->getInt('referral_level1_percent'));
         $this->assertSame('10:30', $settings->profitAccrualTime());
+        $this->assertSame('80000', $settings->get('usdt_per_btc'));
+        $this->assertSame('0.0000125', $settings->get('btc_per_usdt'));
+        $this->assertSame('manual', $settings->get('btc_rate_source'));
+    }
+
+    public function test_admin_can_save_manual_btc_rate_with_comma_decimal(): void
+    {
+        $this->actingAs($this->admin, 'admin')
+            ->patch('http://admin.coin.test/settings', [
+                'token_symbol' => 'USDT',
+                'min_deposit' => '10.00',
+                'min_withdrawal' => '10.00',
+                'network_fee' => '0.50',
+                'withdrawal_processing_hours' => '24',
+                'referral_level1_percent' => '20',
+                'referral_level2_percent' => '0',
+                'kyc_required_for_withdrawal' => true,
+                'maintenance_mode' => false,
+                'usdt_per_btc' => '81292,14',
+                'profit_accrual_time' => '09:00',
+            ])
+            ->assertRedirect();
+
+        $settings = app(PlatformSettingsService::class);
+
+        $this->assertSame('81292.14', $settings->get('usdt_per_btc'));
+        $this->assertGreaterThan(0, (float) $settings->get('btc_per_usdt'));
     }
 
     public function test_admin_can_save_legal_company_info(): void

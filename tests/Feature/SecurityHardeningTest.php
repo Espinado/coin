@@ -117,6 +117,7 @@ class SecurityHardeningTest extends TestCase
         $this->actingAs($viewer, 'admin')
             ->patch('http://admin.coin.test/settings', [
                 'token_symbol' => 'USDT',
+                'min_deposit' => '10.00',
                 'min_withdrawal' => '10',
                 'network_fee' => '0.50',
                 'withdrawal_processing_hours' => '24',
@@ -124,7 +125,7 @@ class SecurityHardeningTest extends TestCase
                 'referral_level2_percent' => '0',
                 'kyc_required_for_withdrawal' => false,
                 'maintenance_mode' => false,
-                'btc_per_usdt' => '2',
+                'usdt_per_btc' => '80000',
                 'profit_accrual_time' => '09:00',
             ])
             ->assertForbidden();

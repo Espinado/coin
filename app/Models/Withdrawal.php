@@ -25,6 +25,8 @@ class Withdrawal extends Model
         'reference',
         'amount',
         'currency',
+        'exchange_rate',
+        'usdt_per_btc',
         'withdrawal_type',
         'payout_address',
         'network_label',
@@ -47,6 +49,8 @@ class Withdrawal extends Model
     {
         return [
             'amount' => 'decimal:2',
+            'exchange_rate' => 'decimal:8',
+            'usdt_per_btc' => 'decimal:8',
             'sent_at' => 'datetime',
             'processed_at' => 'datetime',
         ];

@@ -181,8 +181,8 @@ class PlatformSettingsService
             'referral_level2_percent' => ['label' => 'Реферальный % (уровень 2, не использ.)', 'type' => 'number', 'default' => self::DEFAULTS['referral_level2_percent']],
             'kyc_required_for_withdrawal' => ['label' => __('coin.settings.kyc_for_payout'), 'type' => 'boolean', 'default' => self::DEFAULTS['kyc_required_for_withdrawal']],
             'maintenance_mode' => ['label' => __('coin.settings.maintenance'), 'type' => 'boolean', 'default' => self::DEFAULTS['maintenance_mode']],
-            'usdt_per_btc' => ['label' => __('coin.settings.usdt_per_btc'), 'type' => 'number', 'default' => self::DEFAULTS['usdt_per_btc']],
-            'btc_per_usdt' => ['label' => __('coin.settings.btc_per_usdt'), 'type' => 'number', 'default' => self::DEFAULTS['btc_per_usdt']],
+            'usdt_per_btc' => ['label' => __('coin.settings.usdt_per_btc'), 'type' => 'decimal', 'default' => self::DEFAULTS['usdt_per_btc']],
+            'btc_per_usdt' => ['label' => __('coin.settings.btc_per_usdt'), 'type' => 'readonly_decimal', 'default' => self::DEFAULTS['btc_per_usdt'], 'readonly' => true],
             'profit_accrual_time' => ['label' => __('coin.settings.profit_accrual_time'), 'type' => 'time', 'default' => self::DEFAULTS['profit_accrual_time']],
         ];
     }
@@ -195,6 +195,30 @@ class PlatformSettingsService
             fn (string $key) => ! in_array($key, ['reward_rate', 'epochs_per_day'], true),
             ARRAY_FILTER_USE_KEY,
         );
+    }
+
+    public static function normalizeDecimalInput(mixed $value): ?string
+    {
+        if ($value === null) {
+            return null;
+        }
+
+        $normalized = str_replace([' ', ','], ['', '.'], trim((string) $value));
+
+        if ($normalized === '' || ! is_numeric($normalized)) {
+            return null;
+        }
+
+        return $normalized;
+    }
+
+    public static function formatBtcPerUsdtFromUsdtRate(float $usdtPerBtc): string
+    {
+        if ($usdtPerBtc <= 0) {
+            return '';
+        }
+
+        return rtrim(rtrim(number_format(1 / $usdtPerBtc, 16, '.', ''), '0'), '.');
     }
 
     /** @return array<string, array{label: string, type: string, default: string}> */

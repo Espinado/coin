@@ -905,7 +905,7 @@ class Dashboard extends Component
         $amount = (float) str_replace([',', ' '], '', $this->depositAmount);
 
         try {
-            app(ExchangeRateService::class)->assertMinDeposit($amount, $this->depositCurrency);
+            app(ExchangeRateService::class)->assertMinDepositAtLiveRate($amount, $this->depositCurrency);
         } catch (\RuntimeException $exception) {
             throw ValidationException::withMessages([
                 'depositAmount' => [$exception->getMessage()],

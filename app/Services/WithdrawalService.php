@@ -20,6 +20,7 @@ class WithdrawalService
     public function __construct(
         private PlatformSettingsService $settings,
         private UserNotificationService $notifications,
+        private ExchangeRateService $exchangeRates,
     ) {}
 
     public function createForUser(User $user, float $amount, ?string $payoutAddress = null): Withdrawal
@@ -44,7 +45,10 @@ class WithdrawalService
             throw new RuntimeException('Insufficient available balance.');
         }
 
-        return DB::transaction(function () use ($user, $wallet, $amount, $payoutAddress) {
+        $liveUsdtPerBtc = $this->exchangeRates->fetchLiveUsdtPerBtc();
+        $liveBtcPerUsdt = $this->exchangeRates->btcPerUsdtFromUsdtRate($liveUsdtPerBtc);
+
+        return DB::transaction(function () use ($user, $wallet, $amount, $payoutAddress, $liveBtcPerUsdt, $liveUsdtPerBtc) {
             $wallet->decrement('available', $amount);
             $wallet->increment('pending', $amount);
 
@@ -53,6 +57,8 @@ class WithdrawalService
                 'reference' => 'WD-'.Str::upper(Str::random(8)),
                 'amount' => $amount,
                 'currency' => $wallet->currency ?: (string) config('coin.wallet.base_currency', 'USDT'),
+                'exchange_rate' => $liveBtcPerUsdt,
+                'usdt_per_btc' => $liveUsdtPerBtc,
                 'withdrawal_type' => 'available_balance',
                 'payout_address' => $payoutAddress ?? $wallet->payout_address ?? '—',
                 'network_label' => $wallet->network_label,

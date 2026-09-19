@@ -2,12 +2,15 @@
 
 namespace App\Services;
 
+use App\Services\ExchangeRates\CoinMarketCapClient;
 use RuntimeException;
+use Throwable;
 
 class ExchangeRateService
 {
     public function __construct(
         private PlatformSettingsService $settings,
+        private CoinMarketCapClient $coinMarketCap,
     ) {}
 
     public function baseCurrency(): string
@@ -15,8 +18,13 @@ class ExchangeRateService
         return (string) config('coin.wallet.base_currency', 'USDT');
     }
 
-    /** USDT price of 1 BTC (CoinMarketCap or manual fallback). */
+    /** USDT price of 1 BTC from platform settings (hourly sync / manual). */
     public function usdtPerBtc(): float
+    {
+        return $this->storedUsdtPerBtc();
+    }
+
+    public function storedUsdtPerBtc(): float
     {
         $rate = $this->settings->getFloat('usdt_per_btc');
 
@@ -39,16 +47,48 @@ class ExchangeRateService
         return 0;
     }
 
-    /** How many BTC equal 1 USDT. */
+    /** How many BTC equal 1 USDT from stored settings. */
     public function btcPerUsdt(): float
     {
-        $usdtPerBtc = $this->usdtPerBtc();
+        return $this->btcPerUsdtFromUsdtRate($this->storedUsdtPerBtc());
+    }
 
+    public function btcPerUsdtFromUsdtRate(float $usdtPerBtc): float
+    {
         if ($usdtPerBtc > 0) {
             return 1 / $usdtPerBtc;
         }
 
         return 2.0;
+    }
+
+    /** Fetch current BTC/USDT from CoinMarketCap, fallback to stored settings. */
+    public function fetchLiveUsdtPerBtc(): float
+    {
+        if (config('coin.exchange_rates.coinmarketcap.enabled')) {
+            try {
+                $live = $this->coinMarketCap->fetchBtcPriceInUsdt();
+
+                if ($live > 0) {
+                    return $live;
+                }
+            } catch (Throwable) {
+                // Fall back to the last stored hourly rate.
+            }
+        }
+
+        $stored = $this->storedUsdtPerBtc();
+
+        if ($stored > 0) {
+            return $stored;
+        }
+
+        throw new RuntimeException('BTC exchange rate is unavailable.');
+    }
+
+    public function fetchLiveBtcPerUsdt(): float
+    {
+        return $this->btcPerUsdtFromUsdtRate($this->fetchLiveUsdtPerBtc());
     }
 
     public function btcRateUpdatedAt(): ?string
@@ -70,9 +110,9 @@ class ExchangeRateService
     }
 
     /**
-     * @return array{amount: float, rate: ?float, base_currency: string}
+     * @return array{amount: float, rate: ?float, usdt_per_btc: ?float, base_currency: string}
      */
-    public function convertToBase(float $amount, string $fromCurrency): array
+    public function convertToBase(float $amount, string $fromCurrency, ?float $btcPerUsdt = null, ?float $usdtPerBtc = null): array
     {
         $from = strtoupper(trim($fromCurrency));
         $base = $this->baseCurrency();
@@ -85,21 +125,35 @@ class ExchangeRateService
             return [
                 'amount' => round($amount, 2),
                 'rate' => null,
+                'usdt_per_btc' => null,
                 'base_currency' => $base,
             ];
         }
 
         if ($from === 'BTC') {
-            $rate = $this->btcPerUsdt();
+            $resolvedUsdtPerBtc = $usdtPerBtc ?? ($btcPerUsdt !== null && $btcPerUsdt > 0 ? 1 / $btcPerUsdt : 0);
+            $rate = $btcPerUsdt ?? ($resolvedUsdtPerBtc > 0 ? 1 / $resolvedUsdtPerBtc : $this->btcPerUsdt());
 
             return [
                 'amount' => round($amount / $rate, 2),
                 'rate' => $rate,
+                'usdt_per_btc' => $resolvedUsdtPerBtc > 0 ? $resolvedUsdtPerBtc : ($rate > 0 ? 1 / $rate : null),
                 'base_currency' => $base,
             ];
         }
 
         throw new RuntimeException("Unsupported deposit currency: {$fromCurrency}");
+    }
+
+    public function convertToBaseAtLiveRate(float $amount, string $fromCurrency): array
+    {
+        if (strtoupper(trim($fromCurrency)) === 'BTC') {
+            $usdtPerBtc = $this->fetchLiveUsdtPerBtc();
+
+            return $this->convertToBase($amount, $fromCurrency, null, $usdtPerBtc);
+        }
+
+        return $this->convertToBase($amount, $fromCurrency);
     }
 
     public function previewLabel(float $amount, string $fromCurrency): string
@@ -114,7 +168,7 @@ class ExchangeRateService
         return $this->settings->minDeposit();
     }
 
-    public function minDepositAmountIn(string $currency): float
+    public function minDepositAmountIn(string $currency, ?float $btcPerUsdt = null): float
     {
         $minUsdt = $this->minDepositUsdt();
         $from = strtoupper(trim($currency));
@@ -124,15 +178,17 @@ class ExchangeRateService
         }
 
         if ($from === 'BTC') {
-            return round($minUsdt * $this->btcPerUsdt(), 8);
+            $rate = $btcPerUsdt ?? $this->btcPerUsdt();
+
+            return round($minUsdt * $rate, 8);
         }
 
         throw new RuntimeException("Unsupported deposit currency: {$currency}");
     }
 
-    public function formatMinDepositLabel(string $currency): string
+    public function formatMinDepositLabel(string $currency, ?float $btcPerUsdt = null): string
     {
-        $amount = $this->minDepositAmountIn($currency);
+        $amount = $this->minDepositAmountIn($currency, $btcPerUsdt);
         $symbol = strtoupper(trim($currency));
         $formatted = $symbol === 'BTC'
             ? rtrim(rtrim(number_format($amount, 8, '.', ''), '0'), '.')
@@ -141,20 +197,33 @@ class ExchangeRateService
         return $formatted.' '.$symbol;
     }
 
-    public function assertMinDeposit(float $amount, string $currency): void
+    public function assertMinDeposit(float $amount, string $currency, ?float $btcPerUsdt = null): void
     {
         if ($amount <= 0) {
             throw new RuntimeException(__('coin.wallet.min_deposit_error', [
-                'min' => $this->formatMinDepositLabel($currency),
+                'min' => $this->formatMinDepositLabel($currency, $btcPerUsdt),
             ]));
         }
 
-        $converted = $this->convertToBase($amount, $currency);
+        $converted = $btcPerUsdt !== null
+            ? $this->convertToBase($amount, $currency, $btcPerUsdt)
+            : $this->convertToBase($amount, $currency);
 
         if ($converted['amount'] + 0.00000001 < $this->minDepositUsdt()) {
             throw new RuntimeException(__('coin.wallet.min_deposit_error', [
-                'min' => $this->formatMinDepositLabel($currency),
+                'min' => $this->formatMinDepositLabel($currency, $btcPerUsdt),
             ]));
         }
+    }
+
+    public function assertMinDepositAtLiveRate(float $amount, string $currency): void
+    {
+        if (strtoupper(trim($currency)) === 'BTC') {
+            $this->assertMinDeposit($amount, $currency, $this->fetchLiveBtcPerUsdt());
+
+            return;
+        }
+
+        $this->assertMinDeposit($amount, $currency);
     }
 }

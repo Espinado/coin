@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Services\PlatformSettingsService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
 class SettingsController extends Controller
@@ -28,6 +29,10 @@ class SettingsController extends Controller
         $rules = [];
 
         foreach ($definitions as $key => $definition) {
+            if (($definition['readonly'] ?? false) === true) {
+                continue;
+            }
+
             if ($definition['type'] === 'boolean') {
                 $rules[$key] = ['sometimes', 'boolean'];
             } elseif ($definition['type'] === 'time') {
@@ -36,8 +41,8 @@ class SettingsController extends Controller
                 $rules[$key] = ['required', 'string', 'max:12'];
             } elseif ($key === 'epochs_per_day') {
                 $rules[$key] = ['required', 'integer', 'min:1', 'max:24'];
-            } elseif (in_array($key, ['btc_per_usdt', 'usdt_per_btc'], true)) {
-                $rules[$key] = ['nullable', 'numeric', 'gt:0'];
+            } elseif ($key === 'usdt_per_btc') {
+                $rules[$key] = ['nullable', 'string', 'max:32'];
             } else {
                 $rules[$key] = ['required', 'numeric', 'min:0'];
             }
@@ -48,6 +53,34 @@ class SettingsController extends Controller
         foreach ($definitions as $key => $definition) {
             if ($definition['type'] === 'boolean') {
                 $validated[$key] = $request->boolean($key);
+            }
+        }
+
+        if (array_key_exists('usdt_per_btc', $validated)) {
+            $previousRate = $settings->get('usdt_per_btc');
+            $rawRate = trim((string) ($validated['usdt_per_btc'] ?? ''));
+            $normalizedRate = $rawRate === ''
+                ? null
+                : PlatformSettingsService::normalizeDecimalInput($rawRate);
+
+            if ($rawRate !== '' && ($normalizedRate === null || (float) $normalizedRate <= 0)) {
+                throw ValidationException::withMessages([
+                    'usdt_per_btc' => [__('coin.settings.usdt_per_btc_invalid')],
+                ]);
+            }
+
+            if ($normalizedRate === null) {
+                $validated['usdt_per_btc'] = '';
+                $validated['btc_per_usdt'] = '';
+            } else {
+                $usdtPerBtc = (float) $normalizedRate;
+                $validated['usdt_per_btc'] = $normalizedRate;
+                $validated['btc_per_usdt'] = PlatformSettingsService::formatBtcPerUsdtFromUsdtRate($usdtPerBtc);
+
+                if ($previousRate === '' || abs($usdtPerBtc - (float) $previousRate) > 0.00000001) {
+                    $validated['btc_rate_source'] = 'manual';
+                    $validated['btc_rate_updated_at'] = now()->toIso8601String();
+                }
             }
         }
 
