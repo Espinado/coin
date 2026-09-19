@@ -25,7 +25,9 @@ Schedule::command('coin:accrue-daily-profits')
     ->withoutOverlapping();
 
 if (config('coin.exchange_rates.coinmarketcap.enabled')) {
+    $refreshMinutes = max(1, (int) config('coin.exchange_rates.coinmarketcap.refresh_minutes'));
+
     Schedule::command('coin:refresh-btc-rate')
-        ->everyMinutes((int) config('coin.exchange_rates.coinmarketcap.refresh_minutes'))
+        ->cron(sprintf('*/%d * * * *', $refreshMinutes))
         ->withoutOverlapping();
 }
