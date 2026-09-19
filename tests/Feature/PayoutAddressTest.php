@@ -15,7 +15,7 @@ class PayoutAddressTest extends TestCase
 {
     use RefreshDatabase;
 
-    public const VALID_TRON_ADDRESS = 'TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t';
+    public const VALID_TRON_ADDRESS = 'TMYBKvQ5qFtp2xqiB8jEGy4vsUPmZ7c9GG';
 
     protected function setUp(): void
     {

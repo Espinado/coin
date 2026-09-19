@@ -18,6 +18,7 @@ class TronAddressValidatorTest extends TestCase
 
     public function test_accepts_known_valid_tron_mainnet_address(): void
     {
+        $this->assertTrue($this->validator->isValid('TMYBKvQ5qFtp2xqiB8jEGy4vsUPmZ7c9GG'));
         $this->assertTrue($this->validator->isValid('TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t'));
     }
 

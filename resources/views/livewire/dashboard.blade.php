@@ -527,6 +527,9 @@
             @if($this->depositCreditPreview && $depositCurrency !== $this->walletCurrency)
             <p style="margin-top:10px;font-size:12px;line-height:1.5;color:rgba(214,238,248,0.72);">{{ __('coin.wallet.deposit_credit_preview', ['amount' => $this->depositCreditPreview]) }}</p>
             @endif
+            @if($depositCurrency === 'BTC')
+            <p style="margin-top:10px;font-size:12px;line-height:1.5;color:rgba(214,238,248,0.62);">{{ __('coin.wallet.btc_deposit_address_hint') }}</p>
+            @endif
             <div style="margin-top: 14px; display: flex; justify-content: space-between; gap: 14px; font-size: 12.5px;">
               <span style="color: rgba(214,238,248,0.72); min-width: 0;">{{ __('coin.wallet.min_top_up') }}</span>
               <span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">{{ $this->depositMinLabel }}</span>

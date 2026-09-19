@@ -26,13 +26,13 @@
       @if($walletModalMode === 'save')
         <div>
           <label style="display: block; font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.12em; color: rgba(214,238,248,0.65);">{{ mb_strtoupper(__('coin.wallet.payout_address')) }} · {{ $this->payoutNetworkLabel }}</label>
-          <input type="text" wire:model="payoutAddressInput" autocomplete="off" spellcheck="false" placeholder="T..." style="width: 100%; box-sizing: border-box; margin-top: 8px; padding: 12px 14px; border-radius: 10px; border: 1px solid rgba(150,235,250,0.18); background: rgba(4,16,28,0.7); color: #f0fbff; font-family: 'JetBrains Mono', monospace; font-size: 13px;" />
+          <input type="text" wire:model="payoutAddressInput" autocomplete="off" spellcheck="false" placeholder="{{ __('coin.profile.payout_address_placeholder') }}" style="width: 100%; box-sizing: border-box; margin-top: 8px; padding: 12px 14px; border-radius: 10px; border: 1px solid rgba(150,235,250,0.18); background: rgba(4,16,28,0.7); color: #f0fbff; font-family: 'JetBrains Mono', monospace; font-size: 13px;" />
           @error('payoutAddressInput')<p style="margin-top: 8px; font-size: 12px; color: #ff8f8f;">{{ $message }}</p>@enderror
         </div>
 
         <div>
           <label style="display: block; font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.12em; color: rgba(214,238,248,0.65);">{{ mb_strtoupper(__('coin.profile.payout_address_confirm')) }}</label>
-          <input type="text" wire:model="payoutAddressConfirm" autocomplete="off" spellcheck="false" placeholder="T..." style="width: 100%; box-sizing: border-box; margin-top: 8px; padding: 12px 14px; border-radius: 10px; border: 1px solid rgba(150,235,250,0.18); background: rgba(4,16,28,0.7); color: #f0fbff; font-family: 'JetBrains Mono', monospace; font-size: 13px;" />
+          <input type="text" wire:model="payoutAddressConfirm" autocomplete="off" spellcheck="false" placeholder="{{ __('coin.profile.payout_address_placeholder') }}" style="width: 100%; box-sizing: border-box; margin-top: 8px; padding: 12px 14px; border-radius: 10px; border: 1px solid rgba(150,235,250,0.18); background: rgba(4,16,28,0.7); color: #f0fbff; font-family: 'JetBrains Mono', monospace; font-size: 13px;" />
           @error('payoutAddressConfirm')<p style="margin-top: 8px; font-size: 12px; color: #ff8f8f;">{{ $message }}</p>@enderror
         </div>
       @endif
