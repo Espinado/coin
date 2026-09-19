@@ -93,4 +93,26 @@ class SessionIdleTimeoutTest extends TestCase
 
         $this->assertGuest();
     }
+
+    public function test_expired_csrf_admin_login_redirects_to_login_form(): void
+    {
+        $this->post('http://admin.coin.test/login', [
+            '_token' => 'invalid',
+            'email' => 'staff@coin.test',
+            'password' => 'secret1234',
+        ])
+            ->assertRedirect(route('admin.login', ['cancel' => 1]))
+            ->assertSessionHas('status', __('coin.auth.session_expired'));
+    }
+
+    public function test_expired_csrf_user_login_redirects_to_login_form(): void
+    {
+        $this->post('http://coin.test/login', [
+            '_token' => 'invalid',
+            'email' => 'user@coin.test',
+            'password' => 'secret1234',
+        ])
+            ->assertRedirect(route('login', ['cancel' => 1]))
+            ->assertSessionHas('status', __('coin.auth.session_expired'));
+    }
 }

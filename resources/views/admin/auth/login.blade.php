@@ -18,9 +18,9 @@
                 <div style="margin-top:16px;padding:12px 14px;border-radius:10px;border:1px solid rgba(255,180,84,0.35);background:rgba(255,180,84,0.08);font-size:13px;">
                     {{ session('status') }}
                 </div>
-            @elseif (request('idle') && ! $errors->any())
+            @elseif ((request('idle') || request('cancel')) && ! $errors->any())
                 <div style="margin-top:16px;padding:12px 14px;border-radius:10px;border:1px solid rgba(255,180,84,0.35);background:rgba(255,180,84,0.08);font-size:13px;">
-                    {{ __('coin.auth.idle_logout', ['minutes' => config('coin.session.idle_minutes', 15)]) }}
+                    {{ request('cancel') ? __('coin.auth.session_expired') : __('coin.auth.idle_logout', ['minutes' => config('coin.session.idle_minutes', 15)]) }}
                 </div>
             @endif
 
@@ -50,3 +50,31 @@
         </div>
     </div>
 @endsection
+
+@push('scripts')
+    <script>
+        (function () {
+            var params = new URLSearchParams(window.location.search);
+
+            if (! params.has('idle') && ! params.has('cancel')) {
+                try {
+                    sessionStorage.removeItem('coin_admin_login_refreshed');
+                } catch (_) {}
+
+                return;
+            }
+
+            var flag = 'coin_admin_login_refreshed';
+
+            try {
+                if (sessionStorage.getItem(flag) === window.location.search) {
+                    return;
+                }
+
+                sessionStorage.setItem(flag, window.location.search);
+            } catch (_) {}
+
+            window.location.replace(window.location.href);
+        })();
+    </script>
+@endpush

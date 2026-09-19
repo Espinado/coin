@@ -68,11 +68,45 @@ return Application::configure(basePath: dirname(__DIR__))
                 return null;
             }
 
-            $isAdminHost = $request->getHost() === config('coin.admin_domain');
+            $host = $request->getHost();
+            $isAdminHost = $host === config('coin.admin_domain');
+            $isUserHost = $host === config('coin.user_domain');
+
+            if (! $isAdminHost && ! $isUserHost) {
+                return null;
+            }
+
             $loginRoute = $isAdminHost ? 'admin.login' : 'login';
             $idleMessage = __('coin.auth.idle_logout', [
                 'minutes' => SessionIdleTracker::idleMinutes(),
             ]);
+            $sessionExpiredMessage = __('coin.auth.session_expired');
+
+            $isLoginAttempt = $request->is('login*')
+                || $request->routeIs(
+                    'admin.login',
+                    'admin.login.store',
+                    'admin.login.two-factor',
+                    'admin.login.two-factor.store',
+                    'admin.login.two-factor.resend',
+                    'login',
+                    'login.store',
+                    'login.two-factor',
+                    'login.two-factor.store',
+                    'login.two-factor.resend',
+                );
+
+            if ($isLoginAttempt) {
+                if ($isAdminHost) {
+                    app(AdminLoginTwoFactorService::class)->clearChallenge($request);
+                } else {
+                    app(LoginTwoFactorService::class)->clearChallenge($request);
+                }
+
+                return redirect()
+                    ->route($loginRoute, ['cancel' => 1])
+                    ->with('status', $sessionExpiredMessage);
+            }
 
             if ($request->is('logout') || $request->headers->has('X-Livewire')) {
                 return redirect()
@@ -80,22 +114,8 @@ return Application::configure(basePath: dirname(__DIR__))
                     ->with('status', $idleMessage);
             }
 
-            if (! $request->is('login', 'login/two-factor', 'login/two-factor/resend')) {
-                return null;
-            }
-
-            if ($isAdminHost) {
-                app(AdminLoginTwoFactorService::class)->clearChallenge($request);
-
-                return redirect()
-                    ->route('admin.login', ['cancel' => 1])
-                    ->with('status', __('coin.auth.session_expired'));
-            }
-
-            app(LoginTwoFactorService::class)->clearChallenge($request);
-
             return redirect()
-                ->route('login', ['cancel' => 1])
-                ->with('status', __('coin.auth.session_expired'));
+                ->route($loginRoute, ['idle' => 1])
+                ->with('status', $idleMessage);
         });
     })->create();
