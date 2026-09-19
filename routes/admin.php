@@ -121,6 +121,9 @@ Route::middleware(['admin.domain', 'reject.web.on.admin'])->group(function () {
         Route::patch('settings', [SettingsController::class, 'update'])
             ->middleware('admin.ability:manage_settings')
             ->name('admin.settings.update');
+        Route::post('settings/refresh-btc-rate', [SettingsController::class, 'refreshBtcRate'])
+            ->middleware('admin.ability:manage_settings')
+            ->name('admin.settings.refresh-btc-rate');
         Route::patch('settings/legal', [SettingsController::class, 'updateLegal'])
             ->middleware('admin.ability:manage_settings')
             ->name('admin.settings.legal.update');

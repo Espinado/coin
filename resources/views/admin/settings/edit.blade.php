@@ -12,6 +12,12 @@
         <p style="margin:8px 0 0;font-size:14px;color:rgba(232,237,245,0.72);">{{ __('coin.admin.settings_sub') }}</p>
     </div>
 
+    @if($cmcRateSyncEnabled ?? false)
+        <form id="refresh-btc-rate-form" method="POST" action="{{ route('admin.settings.refresh-btc-rate') }}" hidden>
+            @csrf
+        </form>
+    @endif
+
     <div class="admin-card" style="margin-top:16px;">
         <form method="POST" action="{{ route('admin.settings.update') }}" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;">
             @csrf
@@ -33,24 +39,29 @@
                     @elseif($key === 'token_symbol')
                         <input type="text" name="{{ $key }}" value="{{ old($key, $values[$key] ?? $definition['default']) }}"
                             style="width:100%;box-sizing:border-box;margin-top:8px;padding:10px 12px;border-radius:10px;border:1px solid rgba(255,255,255,0.12);background:#070a10;color:#e8edf5;">
-                    @elseif($definition['type'] === 'decimal')
-                        <input type="text" inputmode="decimal" name="{{ $key }}" value="{{ old($key, $values[$key] ?? $definition['default']) }}" autocomplete="off"
-                            style="width:100%;box-sizing:border-box;margin-top:8px;padding:10px 12px;border-radius:10px;border:1px solid rgba(255,255,255,0.12);background:#070a10;color:#e8edf5;">
-                        @if($key === 'usdt_per_btc')
-                            <p style="margin:6px 0 0;font-size:12px;color:rgba(232,237,245,0.55);">{{ __('coin.settings.usdt_per_btc_hint') }}</p>
-                            @if(filled($values['btc_rate_updated_at'] ?? null))
-                                <p style="margin:4px 0 0;font-size:12px;color:rgba(232,237,245,0.45);">
-                                    {{ __('coin.settings.btc_rate_meta', [
-                                        'source' => __('coin.settings.btc_rate_source.'.($values['btc_rate_source'] ?? 'manual')),
-                                        'updated_at' => \Illuminate\Support\Carbon::parse($values['btc_rate_updated_at'])->timezone(config('app.timezone'))->format('d.m.Y H:i'),
-                                    ]) }}
-                                </p>
-                            @endif
-                        @endif
                     @elseif($definition['type'] === 'readonly_decimal')
-                        <input type="text" readonly tabindex="-1" value="{{ old($key, $values[$key] ?? $definition['default']) }}"
+                        @if($key === 'usdt_per_btc')
+                        <div style="display:flex;gap:8px;align-items:stretch;margin-top:8px;">
+                            <input type="text" readonly tabindex="-1" value="{{ $values[$key] ?? $definition['default'] }}"
+                                style="flex:1;min-width:0;box-sizing:border-box;padding:10px 12px;border-radius:10px;border:1px solid rgba(255,255,255,0.08);background:rgba(255,255,255,0.04);color:rgba(232,237,245,0.72);cursor:default;">
+                            @if($cmcRateSyncEnabled ?? false)
+                            <button type="submit" form="refresh-btc-rate-form" class="admin-btn" style="height:100%;white-space:nowrap;">{{ __('coin.settings.refresh_btc_rate') }}</button>
+                            @endif
+                        </div>
+                        <p style="margin:6px 0 0;font-size:12px;color:rgba(232,237,245,0.55);">{{ __('coin.settings.usdt_per_btc_hint') }}</p>
+                        @if(filled($values['btc_rate_updated_at'] ?? null))
+                            <p style="margin:4px 0 0;font-size:12px;color:rgba(232,237,245,0.45);">
+                                {{ __('coin.settings.btc_rate_meta', [
+                                    'source' => __('coin.settings.btc_rate_source.'.($values['btc_rate_source'] ?? 'coinmarketcap')),
+                                    'updated_at' => \Illuminate\Support\Carbon::parse($values['btc_rate_updated_at'])->timezone(config('app.timezone'))->format('d.m.Y H:i'),
+                                ]) }}
+                            </p>
+                        @endif
+                        @else
+                        <input type="text" readonly tabindex="-1" value="{{ $values[$key] ?? $definition['default'] }}"
                             style="width:100%;box-sizing:border-box;margin-top:8px;padding:10px 12px;border-radius:10px;border:1px solid rgba(255,255,255,0.08);background:rgba(255,255,255,0.04);color:rgba(232,237,245,0.72);cursor:default;">
                         <p style="margin:6px 0 0;font-size:12px;color:rgba(232,237,245,0.55);">{{ __('coin.settings.btc_per_usdt_hint') }}</p>
+                        @endif
                     @else
                         <input type="number" name="{{ $key }}" value="{{ old($key, $values[$key] ?? $definition['default']) }}" step="{{ in_array($key, ['reward_rate', 'min_deposit', 'min_withdrawal', 'network_fee'], true) ? '0.0001' : '1' }}"
                             style="width:100%;box-sizing:border-box;margin-top:8px;padding:10px 12px;border-radius:10px;border:1px solid rgba(255,255,255,0.12);background:#070a10;color:#e8edf5;">

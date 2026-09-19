@@ -19,6 +19,7 @@ use Database\Seeders\CoinDemoSeeder;
 use Database\Seeders\PlanSeeder;
 use Database\Seeders\PlatformSettingsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
 use Tests\TestCase;
 
@@ -241,7 +242,6 @@ class AdminModuleTest extends TestCase
                 'referral_level2_percent' => '0',
                 'kyc_required_for_withdrawal' => false,
                 'maintenance_mode' => false,
-                'usdt_per_btc' => '80000',
                 'profit_accrual_time' => '10:30',
             ])
             ->assertRedirect();
@@ -250,13 +250,48 @@ class AdminModuleTest extends TestCase
 
         $this->assertSame(20, $settings->getInt('referral_level1_percent'));
         $this->assertSame('10:30', $settings->profitAccrualTime());
-        $this->assertSame('80000', $settings->get('usdt_per_btc'));
-        $this->assertSame('0.0000125', $settings->get('btc_per_usdt'));
-        $this->assertSame('manual', $settings->get('btc_rate_source'));
     }
 
-    public function test_admin_can_save_manual_btc_rate_with_comma_decimal(): void
+    public function test_admin_can_refresh_btc_rate_from_coinmarketcap(): void
     {
+        config([
+            'coin.exchange_rates.coinmarketcap.api_key' => 'test-cmc-key',
+            'coin.exchange_rates.coinmarketcap.base_url' => 'https://pro-api.coinmarketcap.com',
+            'coin.exchange_rates.coinmarketcap.enabled' => true,
+        ]);
+
+        Http::fake([
+            'pro-api.coinmarketcap.com/v3/cryptocurrency/quotes/latest*' => Http::response([
+                'data' => [[
+                    'id' => 1,
+                    'symbol' => 'BTC',
+                    'quote' => [[
+                        'symbol' => 'USDT',
+                        'price' => 82000,
+                    ]],
+                ]],
+            ]),
+        ]);
+
+        $this->actingAs($this->admin, 'admin')
+            ->post('http://admin.coin.test/settings/refresh-btc-rate')
+            ->assertRedirect(route('admin.settings.edit'))
+            ->assertSessionHas('status_type', 'success');
+
+        $settings = app(PlatformSettingsService::class);
+
+        $this->assertSame('82000', $settings->get('usdt_per_btc'));
+        $this->assertSame('coinmarketcap', $settings->get('btc_rate_source'));
+    }
+
+    public function test_admin_cannot_save_manual_btc_rate_via_settings_form(): void
+    {
+        app(PlatformSettingsService::class)->setMany([
+            'usdt_per_btc' => '50000',
+            'btc_per_usdt' => '0.00002',
+            'btc_rate_source' => 'coinmarketcap',
+        ]);
+
         $this->actingAs($this->admin, 'admin')
             ->patch('http://admin.coin.test/settings', [
                 'token_symbol' => 'USDT',
@@ -275,8 +310,8 @@ class AdminModuleTest extends TestCase
 
         $settings = app(PlatformSettingsService::class);
 
-        $this->assertSame('81292.14', $settings->get('usdt_per_btc'));
-        $this->assertGreaterThan(0, (float) $settings->get('btc_per_usdt'));
+        $this->assertSame('50000', $settings->get('usdt_per_btc'));
+        $this->assertSame('0.00002', $settings->get('btc_per_usdt'));
     }
 
     public function test_admin_can_save_legal_company_info(): void
