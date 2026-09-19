@@ -968,6 +968,355 @@ html.coin-nav-open .coin-nav-mobile {
   animation: coinSupportPulse 2s ease-in-out infinite;
 }
 
+/* ——— Dashboard support section ——— */
+
+.coin-support-section {
+  padding: 28px 32px 40px;
+  display: grid;
+  grid-template-columns: minmax(0, 340px) minmax(0, 1fr);
+  gap: 16px;
+  align-items: start;
+}
+
+.coin-support-panel {
+  padding: 22px;
+  border-radius: 16px;
+  border: 1px solid rgba(150, 235, 250, 0.12);
+  background: rgba(150, 235, 250, 0.035);
+  box-sizing: border-box;
+}
+
+.coin-support-panel--grow {
+  flex: 1;
+}
+
+.coin-support-panel--center {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 16px;
+  min-height: 280px;
+}
+
+.coin-support-panel-title {
+  font-size: 17px;
+  font-weight: 600;
+}
+
+.coin-support-panel-hint {
+  margin: 8px 0 0;
+  font-size: 13px;
+  line-height: 1.55;
+  color: rgba(214, 238, 248, 0.72);
+}
+
+.coin-support-sidebar-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.coin-support-sidebar-title {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.coin-support-ticket-list {
+  margin-top: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.coin-support-ticket {
+  text-align: left;
+  padding: 14px 16px;
+  border-radius: 12px;
+  border: 1px solid rgba(150, 235, 250, 0.12);
+  background: rgba(150, 235, 250, 0.03);
+  color: inherit;
+  font-family: inherit;
+  cursor: pointer;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.coin-support-ticket--active {
+  border-color: oklch(0.86 0.11 195 / 0.45);
+  background: oklch(0.6 0.13 200 / 0.18);
+}
+
+.coin-support-ticket--unread {
+  border-color: oklch(0.82 0.18 35 / 0.45);
+  background: oklch(0.72 0.16 35 / 0.1);
+}
+
+.coin-support-ticket__head {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: baseline;
+}
+
+.coin-support-ticket__subject {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.coin-support-ticket--unread .coin-support-ticket__subject {
+  font-weight: 700;
+}
+
+.coin-support-ticket__status {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+}
+
+.coin-support-ticket__meta,
+.coin-support-ticket__date {
+  margin-top: 6px;
+  font-size: 12px;
+  color: rgba(214, 238, 248, 0.62);
+}
+
+.coin-support-ticket__meta {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10.5px;
+  color: rgba(214, 238, 248, 0.66);
+}
+
+.coin-support-empty {
+  padding: 16px;
+  border-radius: 12px;
+  border: 1px dashed rgba(150, 235, 250, 0.18);
+  font-size: 13px;
+  color: rgba(214, 238, 248, 0.72);
+}
+
+.coin-support-empty--dashed {
+  padding: 18px;
+  border-radius: 14px;
+}
+
+.coin-support-main {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-height: 520px;
+  min-width: 0;
+}
+
+.coin-support-status-bar {
+  padding: 16px 20px;
+  border-radius: 14px;
+  border: 1px solid rgba(150, 235, 250, 0.14);
+  background: rgba(150, 235, 250, 0.05);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.coin-support-status-bar__left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.coin-support-status-dot {
+  flex: none;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: oklch(0.85 0.15 160);
+  box-shadow: 0 0 12px oklch(0.85 0.15 160);
+  animation: dbPulse 2.4s infinite;
+}
+
+.coin-support-status-title {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.coin-support-status-subtitle {
+  margin-top: 4px;
+  font-size: 12.5px;
+  color: rgba(214, 238, 248, 0.68);
+}
+
+.coin-support-ticket .coin-support-badge {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 700;
+  min-width: 18px;
+  text-align: center;
+  padding: 2px 6px;
+  border-radius: 999px;
+  background: linear-gradient(140deg, oklch(0.88 0.2 35), oklch(0.72 0.22 25));
+  color: #1a0a04;
+}
+
+.coin-support-badge--large {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: linear-gradient(140deg, oklch(0.88 0.2 35), oklch(0.72 0.22 25));
+  color: #1a0a04;
+}
+
+.coin-support-form {
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.coin-support-field {
+  min-width: 0;
+}
+
+.coin-support-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9.5px;
+  letter-spacing: 0.12em;
+  color: rgba(214, 238, 248, 0.68);
+}
+
+.coin-support-input {
+  width: 100%;
+  box-sizing: border-box;
+  margin-top: 8px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(150, 235, 250, 0.16);
+  background: rgba(4, 16, 28, 0.6);
+  color: #eafcff;
+  font-size: 14px;
+  font-family: inherit;
+}
+
+.coin-support-textarea {
+  resize: vertical;
+  min-height: 120px;
+}
+
+.coin-support-error {
+  margin-top: 8px;
+  font-size: 12.5px;
+  color: oklch(0.78 0.16 25);
+}
+
+.coin-support-form-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.coin-support-btn {
+  padding: 11px 18px;
+  border-radius: 10px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+
+.coin-support-btn--compact {
+  padding: 8px 12px;
+  font-size: 12.5px;
+  white-space: nowrap;
+}
+
+.coin-support-btn--primary {
+  border: 1px solid oklch(0.86 0.11 195 / 0.5);
+  background: linear-gradient(140deg, oklch(0.86 0.12 192), oklch(0.66 0.13 205));
+  color: #04121f;
+}
+
+.coin-support-btn--secondary {
+  border: 1px solid rgba(150, 235, 250, 0.2);
+  background: rgba(150, 235, 250, 0.06);
+  color: #e6f4fa;
+  font-weight: 400;
+}
+
+.coin-support-btn--self-start {
+  align-self: flex-start;
+}
+
+.coin-support-ticket-head__ref {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  color: rgba(214, 238, 248, 0.66);
+}
+
+.coin-support-ticket-head__title {
+  margin-top: 10px;
+  font-size: 20px;
+  font-weight: 600;
+  word-break: break-word;
+}
+
+.coin-support-ticket-head__meta {
+  margin-top: 6px;
+  font-size: 13px;
+  color: rgba(214, 238, 248, 0.72);
+}
+
+.coin-support-chat {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+
+.coin-support-thread {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  flex: 1;
+  max-height: 420px;
+  overflow-y: auto;
+  padding-right: 4px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.coin-support-message {
+  padding: 16px 18px;
+  border-radius: 14px;
+  border: 1px solid rgba(150, 235, 250, 0.12);
+  background: rgba(150, 235, 250, 0.03);
+}
+
+.coin-support-message--admin {
+  background: oklch(0.6 0.13 200 / 0.12);
+}
+
+.coin-support-message__head {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 12px;
+  color: rgba(214, 238, 248, 0.66);
+  flex-wrap: wrap;
+}
+
+.coin-support-message__body {
+  margin-top: 10px;
+  font-size: 14px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
 @keyframes coinSupportPulse {
   0%,
   100% {
@@ -1138,8 +1487,13 @@ html.coin-nav-open .coin-nav-mobile {
   }
 
   .coin-dashboard [style*="grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr)"],
-  .coin-dashboard [style*="grid-template-columns: minmax(0, 1fr) minmax(0, 340px)"] {
+  .coin-dashboard [style*="grid-template-columns: minmax(0, 1fr) minmax(0, 340px)"],
+  .coin-dashboard [style*="grid-template-columns: minmax(0, 340px) minmax(0, 1fr)"] {
     grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  .coin-support-section {
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .coin-dashboard [style*="grid-template-columns: repeat(4, minmax(0, 1fr))"],
@@ -1455,6 +1809,48 @@ html.coin-nav-open .coin-nav-mobile {
 
   .coin-dashboard section[style*="padding: 28px 32px"] {
     padding: 20px 16px 32px !important;
+  }
+
+  .coin-support-section {
+    padding: 20px 16px 32px;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+  }
+
+  .coin-support-main {
+    min-height: 0;
+  }
+
+  .coin-support-section--create .coin-support-sidebar {
+    display: none;
+  }
+
+  .coin-support-panel {
+    padding: 16px;
+  }
+
+  .coin-support-sidebar-head {
+    flex-wrap: wrap;
+  }
+
+  .coin-support-form-actions {
+    flex-direction: column;
+  }
+
+  .coin-support-form-actions .coin-support-btn {
+    width: 100%;
+  }
+
+  .coin-support-thread {
+    max-height: min(50dvh, 420px);
+  }
+
+  .coin-support-ticket-head__title {
+    font-size: 17px;
+  }
+
+  .coin-support-status-bar {
+    padding: 14px 16px;
   }
 
   .coin-dashboard [style*="flex-wrap: wrap"] button {
