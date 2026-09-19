@@ -33,10 +33,15 @@ return [
     'wallet' => [
         'base_currency' => env('COIN_WALLET_BASE_CURRENCY', 'USDT'),
         'payout_network' => env('COIN_WALLET_PAYOUT_NETWORK', 'TRC-20'),
+        'btc_payout_network' => env('COIN_WALLET_BTC_PAYOUT_NETWORK', 'Bitcoin'),
     ],
 
     'deposits' => [
         'auto_confirm_mock' => env('COIN_DEPOSITS_AUTO_CONFIRM_MOCK', false),
+        'currencies' => ['USDT', 'BTC'],
+    ],
+
+    'withdrawals' => [
         'currencies' => ['USDT', 'BTC'],
     ],
 

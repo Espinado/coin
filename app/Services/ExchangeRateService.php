@@ -226,4 +226,91 @@ class ExchangeRateService
 
         $this->assertMinDeposit($amount, $currency);
     }
+
+    public function minWithdrawalUsdt(): float
+    {
+        return $this->settings->minWithdrawal();
+    }
+
+    public function minWithdrawalAmountIn(string $currency, ?float $btcPerUsdt = null): float
+    {
+        return $this->minDepositAmountIn($currency, $btcPerUsdt);
+    }
+
+    public function formatMinWithdrawalLabel(string $currency, ?float $btcPerUsdt = null): string
+    {
+        $minUsdt = $this->minWithdrawalUsdt();
+        $from = strtoupper(trim($currency));
+
+        if ($from === $this->baseCurrency()) {
+            return number_format($minUsdt, 2, '.', '').' '.$from;
+        }
+
+        if ($from === 'BTC') {
+            $rate = $btcPerUsdt ?? $this->btcPerUsdt();
+            $amount = round($minUsdt * $rate, 8);
+
+            return rtrim(rtrim(number_format($amount, 8, '.', ''), '0'), '.').' BTC';
+        }
+
+        throw new RuntimeException("Unsupported withdrawal currency: {$currency}");
+    }
+
+    public function assertMinWithdrawal(float $amount, string $currency, ?float $btcPerUsdt = null): void
+    {
+        if ($amount <= 0) {
+            throw new RuntimeException(__('coin.wallet.min_withdrawal_error', [
+                'min' => $this->formatMinWithdrawalLabel($currency, $btcPerUsdt),
+            ]));
+        }
+
+        $converted = $btcPerUsdt !== null
+            ? $this->convertToBase($amount, $currency, $btcPerUsdt)
+            : $this->convertToBase($amount, $currency);
+
+        if ($converted['amount'] + 0.00000001 < $this->minWithdrawalUsdt()) {
+            throw new RuntimeException(__('coin.wallet.min_withdrawal_error', [
+                'min' => $this->formatMinWithdrawalLabel($currency, $btcPerUsdt),
+            ]));
+        }
+    }
+
+    public function assertMinWithdrawalAtLiveRate(float $amount, string $currency): void
+    {
+        if (strtoupper(trim($currency)) === 'BTC') {
+            $this->assertMinWithdrawal($amount, $currency, $this->fetchLiveBtcPerUsdt());
+
+            return;
+        }
+
+        $this->assertMinWithdrawal($amount, $currency);
+    }
+
+    public function withdrawDebitPreviewLabel(float $amount, string $fromCurrency): string
+    {
+        $converted = $this->convertToBase($amount, $fromCurrency);
+
+        return number_format($converted['amount'], 2, '.', ',').' '.$converted['base_currency'];
+    }
+
+    public function convertFromBase(float $amountUsdt, string $toCurrency, ?float $btcPerUsdt = null): float
+    {
+        $to = strtoupper(trim($toCurrency));
+
+        if ($amountUsdt <= 0) {
+            return 0;
+        }
+
+        if ($to === $this->baseCurrency()) {
+            return round($amountUsdt, 2);
+        }
+
+        if ($to === 'BTC') {
+            $rate = $btcPerUsdt ?? $this->btcPerUsdt();
+
+            return round($amountUsdt * $rate, 8);
+        }
+
+        throw new RuntimeException("Unsupported withdrawal currency: {$toCurrency}");
+    }
 }

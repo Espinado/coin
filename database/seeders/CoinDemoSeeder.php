@@ -61,6 +61,8 @@ class CoinDemoSeeder extends Seeder
             'payout_address' => 'TMYBKvQ5qFtp2xqiB8jEGy4vsUPmZ7c9GG',
             'pending_note' => null,
             'network_label' => 'TRC-20',
+            'btc_payout_address' => 'bc1qqhza20mal9tdar863pzrlpjgfx6kdhyfssccpf',
+            'btc_network_label' => 'Bitcoin',
             'min_withdrawal_label' => number_format($settings->minWithdrawal(), 2, '.', ''),
         ]);
 

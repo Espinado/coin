@@ -1,18 +1,21 @@
 @if($paymentModal && $paymentModal !== 'topup')
 @php
-  $currency = $wallet?->currency ?? config('coin.wallet.base_currency', 'USDT');
   $isInvestment = $paymentModal === 'investment';
   $isPlanChange = $paymentModal === 'plan_change';
   $isPayout = $paymentModal === 'payout';
+  $currency = $isPayout ? $withdrawCurrency : ($wallet?->currency ?? config('coin.wallet.base_currency', 'USDT'));
   $isMockDriver = config('coin.payments.driver', 'mock') === 'mock';
   $changingContract = $isPlanChange ? $this->changingContract : null;
   $amount = $isPlanChange
     ? number_format($this->planChangeTopUp, 2, '.', ',')
     : ($isInvestment
       ? number_format((float) $power, 0, '.', ',')
-      : number_format((float) $withdrawAmount, 2, '.', ','));
+      : ($withdrawCurrency === 'BTC'
+        ? rtrim(rtrim(number_format((float) $withdrawAmount, 8, '.', ','), '0'), '.')
+        : number_format((float) $withdrawAmount, 2, '.', ',')));
   $planName = $this->planName;
-  $payoutAddress = $wallet?->payout_address;
+  $payoutAddress = $isPayout ? $this->withdrawPayoutAddress : $wallet?->payout_address;
+  $payoutNetworkLabel = $isPayout ? $this->withdrawPayoutNetworkLabel : $wallet?->network_label;
   $successTitle = $isPlanChange
     ? ($paymentModalStep === 'pending_approval'
       ? __('coin.payment_modal.plan_change_pending_title')
@@ -103,7 +106,10 @@
           <div style="display: flex; justify-content: space-between; gap: 12px;"><span style="color: rgba(214,238,248,0.72);">{{ __('coin.payment_modal.payment_method') }}</span><span style="text-align: right;">{{ __('coin.payment_modal.available_balance') }}</span></div>
           @else
           <div style="display: flex; justify-content: space-between; gap: 12px;"><span style="color: rgba(214,238,248,0.72);">{{ __('coin.payment_modal.destination') }}</span><span style="font-family: 'JetBrains Mono', monospace; font-size: 11px; text-align: right; word-break: break-all; max-width: 220px;">{{ $payoutAddress }}</span></div>
-          <div style="display: flex; justify-content: space-between; gap: 12px;"><span style="color: rgba(214,238,248,0.72);">{{ __('coin.wallet.network') }}</span><span style="font-family: 'JetBrains Mono', monospace; text-align: right;">{{ $wallet?->network_label }}</span></div>
+          <div style="display: flex; justify-content: space-between; gap: 12px;"><span style="color: rgba(214,238,248,0.72);">{{ __('coin.wallet.network') }}</span><span style="font-family: 'JetBrains Mono', monospace; text-align: right;">{{ $payoutNetworkLabel }}</span></div>
+          @if($isPayout && $withdrawCurrency === 'BTC' && $this->withdrawDebitPreview)
+          <div style="display: flex; justify-content: space-between; gap: 12px;"><span style="color: rgba(214,238,248,0.72);">{{ __('coin.wallet.withdraw_debit_preview_label') }}</span><span style="font-family: 'JetBrains Mono', monospace; text-align: right;">{{ $this->withdrawDebitPreview }}</span></div>
+          @endif
           <div style="display: flex; justify-content: space-between; gap: 12px;"><span style="color: rgba(214,238,248,0.72);">{{ __('coin.wallet.network_fee') }}</span><span style="font-family: 'JetBrains Mono', monospace; text-align: right;">0.40 {{ $currency }}</span></div>
           @endif
           @if(! $isPlanChange || $this->planChangeTopUp > 0)

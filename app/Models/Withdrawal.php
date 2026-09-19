@@ -24,6 +24,7 @@ class Withdrawal extends Model
         'user_id',
         'reference',
         'amount',
+        'base_amount',
         'currency',
         'exchange_rate',
         'usdt_per_btc',
@@ -48,7 +49,8 @@ class Withdrawal extends Model
     protected function casts(): array
     {
         return [
-            'amount' => 'decimal:2',
+            'amount' => 'decimal:8',
+            'base_amount' => 'decimal:2',
             'exchange_rate' => 'decimal:8',
             'usdt_per_btc' => 'decimal:8',
             'sent_at' => 'datetime',
@@ -159,6 +161,12 @@ class Withdrawal extends Model
     public function formattedAmount(): string
     {
         return MoneyFormat::amount($this->amount, $this->currency);
+    }
+
+    /** USDT amount reserved from the user's balance. */
+    public function ledgerAmount(): float
+    {
+        return (float) ($this->base_amount ?? $this->amount);
     }
 
     public static function pendingCountForAdmin(): int

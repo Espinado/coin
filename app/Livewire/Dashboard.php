@@ -18,6 +18,7 @@ use App\Services\UserInAppNotificationService;
 use App\Services\DepositService;
 use App\Services\ExchangeRateService;
 use App\Services\Payment\PaymentGatewayInterface;
+use App\Rules\BitcoinPayoutAddress;
 use App\Rules\TronPayoutAddress;
 use App\Services\Payment\PaymentSimulatorService;
 use App\Services\PayoutAddressService;
@@ -28,6 +29,7 @@ use App\Services\ReferralService;
 use App\Services\SupportTicketService;
 use App\Services\UserActiveSessionService;
 use App\Services\WithdrawalService;
+use App\Support\BitcoinAddressValidator;
 use App\Support\TronAddressValidator;
 use Carbon\Carbon;
 use Illuminate\Contracts\View\View;
@@ -145,6 +147,10 @@ class Dashboard extends Component
     public string $depositCurrency = 'USDT';
 
     public string $withdrawAmount = '';
+
+    public string $withdrawCurrency = 'USDT';
+
+    public string $walletModalCurrency = 'USDT';
 
     public ?string $paymentModal = null;
 
@@ -354,6 +360,7 @@ class Dashboard extends Component
         $this->profileTelegram = (string) ($this->user->telegram ?? '');
         $this->profileCountry = (string) ($this->user->country_code ?? '');
         $this->depositCurrency = (string) (config('coin.deposits.currencies')[0] ?? 'USDT');
+        $this->withdrawCurrency = (string) (config('coin.withdrawals.currencies')[0] ?? 'USDT');
         $this->selectedPlanId = $this->primaryPlan?->id
             ?? $this->plans->first(fn (Plan $plan) => ! $plan->isEnterprise())?->id;
         $this->power = (int) ($this->primaryPlan?->min_deposit ?? $this->selectedPlan?->calculatorMinAmount() ?? 1200);
@@ -585,7 +592,20 @@ class Dashboard extends Component
     public function setWithdrawMax(): void
     {
         $this->wallet = $this->user->fresh(['wallet'])->wallet;
-        $this->withdrawAmount = number_format(max(0, $this->walletAvailableAmount()), 2, '.', '');
+        $available = max(0, $this->walletAvailableAmount());
+
+        if ($this->withdrawCurrency === 'BTC') {
+            try {
+                $btc = app(ExchangeRateService::class)->convertFromBase($available, 'BTC');
+                $this->withdrawAmount = rtrim(rtrim(number_format($btc, 8, '.', ''), '0'), '.');
+            } catch (\Throwable) {
+                $this->withdrawAmount = '0';
+            }
+
+            return;
+        }
+
+        $this->withdrawAmount = number_format($available, 2, '.', '');
     }
 
     public function getAvailableBalanceFormattedProperty(): string
@@ -779,6 +799,12 @@ class Dashboard extends Component
         return config('coin.deposits.currencies', ['USDT', 'BTC']);
     }
 
+    /** @return list<string> */
+    public function getWithdrawCurrenciesProperty(): array
+    {
+        return config('coin.withdrawals.currencies', ['USDT', 'BTC']);
+    }
+
     public function getDepositCreditPreviewProperty(): ?string
     {
         $amount = (float) str_replace([',', ' '], '', $this->depositAmount);
@@ -797,6 +823,44 @@ class Dashboard extends Component
     public function getDepositMinLabelProperty(): string
     {
         return app(ExchangeRateService::class)->formatMinDepositLabel($this->depositCurrency);
+    }
+
+    public function getWithdrawDebitPreviewProperty(): ?string
+    {
+        $amount = (float) str_replace([',', ' '], '', $this->withdrawAmount);
+
+        if ($amount <= 0 || $this->withdrawCurrency === $this->walletCurrency) {
+            return null;
+        }
+
+        try {
+            return app(ExchangeRateService::class)->withdrawDebitPreviewLabel($amount, $this->withdrawCurrency);
+        } catch (\Throwable) {
+            return null;
+        }
+    }
+
+    public function getWithdrawMinLabelProperty(): string
+    {
+        return app(ExchangeRateService::class)->formatMinWithdrawalLabel($this->withdrawCurrency);
+    }
+
+    public function getWithdrawPayoutAddressProperty(): ?string
+    {
+        return app(PayoutAddressService::class)->addressFor($this->wallet, $this->withdrawCurrency);
+    }
+
+    public function getWithdrawPayoutNetworkLabelProperty(): string
+    {
+        return app(PayoutAddressService::class)->networkLabelFor($this->withdrawCurrency);
+    }
+
+    public function getWithdrawPayoutAddressValidProperty(): bool
+    {
+        return app(PayoutAddressService::class)->isValidForCurrency(
+            $this->withdrawPayoutAddress,
+            $this->withdrawCurrency,
+        );
     }
 
     public function getPlanNameProperty(): string
@@ -998,10 +1062,24 @@ class Dashboard extends Component
         $this->resetPaymentModal();
 
         $this->validate([
-            'withdrawAmount' => ['required', 'numeric', 'min:1'],
+            'withdrawAmount' => $this->withdrawCurrency === 'BTC'
+                ? ['required', 'numeric', 'gt:0']
+                : ['required', 'numeric', 'min:1'],
         ], [], [
             'withdrawAmount' => 'amount',
         ]);
+
+        try {
+            app(ExchangeRateService::class)->assertMinWithdrawalAtLiveRate(
+                (float) $this->withdrawAmount,
+                $this->withdrawCurrency,
+            );
+            app(PayoutAddressService::class)->assertWalletReady($this->wallet, $this->withdrawCurrency);
+        } catch (\RuntimeException $exception) {
+            $this->addError('withdrawAmount', $exception->getMessage());
+
+            return;
+        }
 
         $this->paymentModal = 'payout';
         $this->paymentModalStep = 'review';
@@ -1019,7 +1097,7 @@ class Dashboard extends Component
         $amount = (float) $this->withdrawAmount;
 
         try {
-            $withdrawal = $withdrawals->createForUser($this->user, $amount);
+            $withdrawal = $withdrawals->createForUser($this->user, $amount, $this->withdrawCurrency);
 
             $this->paymentModalReference = $withdrawal->reference;
             $this->pendingWithdrawalId = $withdrawal->id;
@@ -1220,20 +1298,24 @@ class Dashboard extends Component
         return app(UserActiveSessionService::class)->summaryForUser($this->user);
     }
 
-    public function openWalletModal(): void
+    public function openWalletModal(string $currency = 'USDT'): void
     {
         $this->resetActionFeedback();
+        $this->walletModalCurrency = strtoupper(trim($currency));
         $this->walletModalMode = 'save';
-        $this->payoutAddressInput = (string) ($this->wallet?->payout_address ?? '');
+        $this->payoutAddressInput = $this->walletModalCurrency === 'BTC'
+            ? (string) ($this->wallet?->btc_payout_address ?? '')
+            : (string) ($this->wallet?->payout_address ?? '');
         $this->payoutAddressConfirm = '';
         $this->payoutAddressPassword = '';
         $this->resetErrorBag('payoutAddressInput', 'payoutAddressConfirm', 'payoutAddressPassword');
         $this->walletModalOpen = true;
     }
 
-    public function openDisconnectWalletModal(): void
+    public function openDisconnectWalletModal(string $currency = 'USDT'): void
     {
         $this->resetActionFeedback();
+        $this->walletModalCurrency = strtoupper(trim($currency));
         $this->walletModalMode = 'disconnect';
         $this->payoutAddressInput = '';
         $this->payoutAddressConfirm = '';
@@ -1246,6 +1328,7 @@ class Dashboard extends Component
     {
         $this->walletModalOpen = false;
         $this->walletModalMode = 'save';
+        $this->walletModalCurrency = 'USDT';
         $this->payoutAddressInput = '';
         $this->payoutAddressConfirm = '';
         $this->payoutAddressPassword = '';
@@ -1256,8 +1339,12 @@ class Dashboard extends Component
     {
         $this->resetActionFeedback();
 
+        $addressRule = $this->walletModalCurrency === 'BTC'
+            ? new BitcoinPayoutAddress
+            : new TronPayoutAddress;
+
         $this->validate([
-            'payoutAddressInput' => ['required', 'string', new TronPayoutAddress],
+            'payoutAddressInput' => ['required', 'string', $addressRule],
             'payoutAddressConfirm' => ['required', 'same:payoutAddressInput'],
             'payoutAddressPassword' => ['required', 'string'],
         ], [], [
@@ -1268,10 +1355,16 @@ class Dashboard extends Component
 
         $this->assertCurrentUserPassword($this->payoutAddressPassword, 'payoutAddressPassword');
 
-        $payoutAddresses->saveForUser($this->user, $this->payoutAddressInput);
+        $currency = $this->walletModalCurrency;
+        $payoutAddresses->saveForUser($this->user, $this->payoutAddressInput, $currency);
         $this->closeWalletModal();
         $this->reloadPortfolioData();
-        $this->setActionFeedback(__('coin.messages.payout_address_saved'), 'success');
+        $this->setActionFeedback(
+            $currency === 'BTC'
+                ? __('coin.messages.btc_payout_address_saved')
+                : __('coin.messages.payout_address_saved'),
+            'success',
+        );
     }
 
     public function disconnectPayoutAddress(PayoutAddressService $payoutAddresses): void
@@ -1286,20 +1379,31 @@ class Dashboard extends Component
 
         $this->assertCurrentUserPassword($this->payoutAddressPassword, 'payoutAddressPassword');
 
-        $payoutAddresses->clearForUser($this->user);
+        $currency = $this->walletModalCurrency;
+        $payoutAddresses->clearForUser($this->user, $currency);
         $this->closeWalletModal();
         $this->reloadPortfolioData();
-        $this->setActionFeedback(__('coin.messages.payout_address_removed'), 'success');
+        $this->setActionFeedback(
+            $currency === 'BTC'
+                ? __('coin.messages.btc_payout_address_removed')
+                : __('coin.messages.payout_address_removed'),
+            'success',
+        );
     }
 
-    public function getWalletPayoutAddressValidProperty(): bool
+    public function getWalletUsdtPayoutAddressValidProperty(): bool
     {
         return app(TronAddressValidator::class)->isValid($this->wallet?->payout_address);
     }
 
+    public function getWalletBtcPayoutAddressValidProperty(): bool
+    {
+        return app(BitcoinAddressValidator::class)->isValid($this->wallet?->btc_payout_address);
+    }
+
     public function getPayoutNetworkLabelProperty(): string
     {
-        return app(PayoutAddressService::class)->networkLabel();
+        return app(PayoutAddressService::class)->networkLabelFor($this->walletModalCurrency);
     }
 
     /** @return list<array{id: string, label: string, ip: ?string, last_active: string, is_current: bool}> */

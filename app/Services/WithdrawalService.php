@@ -24,9 +24,10 @@ class WithdrawalService
         private PayoutAddressService $payoutAddresses,
     ) {}
 
-    public function createForUser(User $user, float $amount, ?string $payoutAddress = null): Withdrawal
+    public function createForUser(User $user, float $amount, string $currency = PayoutAddressService::CURRENCY_USDT, ?string $payoutAddress = null): Withdrawal
     {
         $wallet = $user->wallet ?? throw new RuntimeException('User has no wallet.');
+        $currency = strtoupper(trim($currency));
 
         if ($user->is_blocked) {
             throw new RuntimeException('Account is blocked.');
@@ -36,35 +37,49 @@ class WithdrawalService
             throw new RuntimeException('KYC approval is required before requesting a payout.');
         }
 
+        if ($amount <= 0) {
+            throw new RuntimeException('Amount must be greater than zero.');
+        }
+
         $min = $this->settings->minWithdrawal();
-
-        if ($amount < $min) {
-            throw new RuntimeException("Minimum payout is {$min}.");
-        }
-
-        if ((float) $wallet->available < $amount) {
-            throw new RuntimeException('Insufficient available balance.');
-        }
-
-        $this->payoutAddresses->assertWalletReady($wallet);
-
         $liveUsdtPerBtc = $this->exchangeRates->fetchLiveUsdtPerBtc();
         $liveBtcPerUsdt = $this->exchangeRates->btcPerUsdtFromUsdtRate($liveUsdtPerBtc);
 
-        return DB::transaction(function () use ($user, $wallet, $amount, $payoutAddress, $liveBtcPerUsdt, $liveUsdtPerBtc) {
-            $wallet->decrement('available', $amount);
-            $wallet->increment('pending', $amount);
+        if ($currency === PayoutAddressService::CURRENCY_BTC) {
+            $ledgerUsdt = $this->exchangeRates->convertToBase($amount, 'BTC', $liveBtcPerUsdt)['amount'];
+            $payoutAmount = round($amount, 8);
+        } else {
+            $ledgerUsdt = round($amount, 2);
+            $payoutAmount = $ledgerUsdt;
+            $currency = PayoutAddressService::CURRENCY_USDT;
+        }
+
+        if ($ledgerUsdt < $min) {
+            throw new RuntimeException("Minimum payout is {$min}.");
+        }
+
+        if ((float) $wallet->available < $ledgerUsdt) {
+            throw new RuntimeException('Insufficient available balance.');
+        }
+
+        $this->payoutAddresses->assertWalletReady($wallet, $currency);
+        $resolved = $this->payoutAddresses->resolveFor($wallet, $currency);
+
+        return DB::transaction(function () use ($user, $wallet, $ledgerUsdt, $payoutAmount, $currency, $payoutAddress, $resolved, $liveBtcPerUsdt, $liveUsdtPerBtc) {
+            $wallet->decrement('available', $ledgerUsdt);
+            $wallet->increment('pending', $ledgerUsdt);
 
             $withdrawal = Withdrawal::query()->create([
                 'user_id' => $user->id,
                 'reference' => 'WD-'.Str::upper(Str::random(8)),
-                'amount' => $amount,
-                'currency' => $wallet->currency ?: (string) config('coin.wallet.base_currency', 'USDT'),
+                'amount' => $payoutAmount,
+                'base_amount' => $ledgerUsdt,
+                'currency' => $currency,
                 'exchange_rate' => $liveBtcPerUsdt,
                 'usdt_per_btc' => $liveUsdtPerBtc,
                 'withdrawal_type' => 'available_balance',
-                'payout_address' => $payoutAddress ?? $wallet->payout_address ?? '—',
-                'network_label' => $wallet->network_label,
+                'payout_address' => $payoutAddress ?? $resolved['address'],
+                'network_label' => $resolved['network_label'],
                 'status' => Withdrawal::STATUS_PENDING,
             ]);
 
@@ -100,19 +115,19 @@ class WithdrawalService
             }
 
             $wallet = $withdrawal->user->wallet ?? throw new RuntimeException('User has no wallet.');
-            $amount = (float) $withdrawal->amount;
+            $ledgerAmount = $withdrawal->ledgerAmount();
             $wasPending = $previous === Withdrawal::STATUS_PENDING;
             $wasCommitted = in_array($previous, Withdrawal::committedStatuses(), true);
             $willCommit = in_array($status, Withdrawal::committedStatuses(), true);
 
             if ($status === Withdrawal::STATUS_REJECTED) {
                 if ($wasPending) {
-                    $this->releasePending($wallet, $amount);
+                    $this->releasePending($wallet, $ledgerAmount);
                 } elseif ($wasCommitted) {
-                    $this->restoreCommittedFunds($wallet, $amount);
+                    $this->restoreCommittedFunds($wallet, $ledgerAmount);
                 }
             } elseif ($willCommit && $wasPending) {
-                $this->commitWithdrawalFunds($wallet, $amount);
+                $this->commitWithdrawalFunds($wallet, $ledgerAmount);
             }
 
             if ($status === Withdrawal::STATUS_PAID && $previous !== Withdrawal::STATUS_PAID) {
@@ -130,7 +145,7 @@ class WithdrawalService
 
             if ($status === Withdrawal::STATUS_PAID && $previous !== Withdrawal::STATUS_PAID) {
                 $fee = $this->settings->getFloat('network_fee');
-                $net = max(0, $amount - $fee);
+                $net = max(0, $ledgerAmount - $fee);
                 $currency = $withdrawal->currency ?: $this->settings->tokenSymbol();
 
                 $this->notifications->notifyWithdrawalPaid(
@@ -169,7 +184,7 @@ class WithdrawalService
 
             if ($withdrawal->status === Withdrawal::STATUS_PENDING) {
                 $wallet = $withdrawal->user->wallet ?? throw new RuntimeException('User has no wallet.');
-                $this->commitWithdrawalFunds($wallet, (float) $withdrawal->amount);
+                $this->commitWithdrawalFunds($wallet, $withdrawal->ledgerAmount());
 
                 $withdrawal->update([
                     'status' => Withdrawal::STATUS_PROCESSING,
@@ -250,7 +265,8 @@ class WithdrawalService
             $withdrawal = $withdrawal->fresh(['user.wallet', 'processedByAdmin']);
 
             $fee = $this->settings->getFloat('network_fee');
-            $net = max(0, (float) $withdrawal->amount - $fee);
+            $ledgerAmount = $withdrawal->ledgerAmount();
+            $net = max(0, $ledgerAmount - $fee);
             $currency = $withdrawal->currency ?: $this->settings->tokenSymbol();
 
             $this->notifications->notifyWithdrawalPaid(
@@ -294,9 +310,9 @@ class WithdrawalService
             return;
         }
 
-        $amount = (float) $withdrawal->amount;
+        $ledgerAmount = $withdrawal->ledgerAmount();
         $fee = $this->settings->getFloat('network_fee');
-        $net = max(0, $amount - $fee);
+        $net = max(0, $ledgerAmount - $fee);
         $symbol = $this->settings->tokenSymbol();
         $sortOrder = (int) WalletTransaction::query()->where('user_id', $withdrawal->user_id)->max('sort_order') + 1;
 

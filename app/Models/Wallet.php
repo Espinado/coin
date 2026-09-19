@@ -19,6 +19,8 @@ class Wallet extends Model
         'payout_address',
         'pending_note',
         'network_label',
+        'btc_payout_address',
+        'btc_network_label',
         'min_withdrawal_label',
     ];
 

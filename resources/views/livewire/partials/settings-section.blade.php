@@ -147,10 +147,10 @@
       <h2 style="{{ $cardTitle }}">{{ __('coin.profile.connected_wallet') }}</h2>
       <div style="{{ $cardBody }}; gap: 16px;">
         <div style="{{ $innerRow }}; border-style: dashed;">
-          <div style="{{ $fieldLabel }}">{{ mb_strtoupper(__('coin.profile.primary_payouts')) }} · {{ $this->payoutNetworkLabel }}</div>
+          <div style="{{ $fieldLabel }}">{{ mb_strtoupper(__('coin.profile.usdt_payout_wallet')) }} · {{ app(\App\Services\PayoutAddressService::class)->networkLabelFor('USDT') }}</div>
           @if(filled($wallet?->payout_address))
             <div style="margin-top: 9px; font-family: 'JetBrains Mono', monospace; font-size: 13px; word-break: break-all;">{{ $wallet->payout_address }}</div>
-            @if($this->walletPayoutAddressValid)
+            @if($this->walletUsdtPayoutAddressValid)
               <div style="margin-top: 10px; display: flex; align-items: center; gap: 7px; font-family: 'JetBrains Mono', monospace; font-size: 10.5px; color: oklch(0.88 0.14 160);">
                 <span style="width: 6px; height: 6px; border-radius: 50%; background: oklch(0.85 0.15 160);"></span>{{ mb_strtoupper(__('coin.profile.confirmed')) }}
               </div>
@@ -162,8 +162,27 @@
           @endif
         </div>
         <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px;">
-          <button type="button" wire:click="openWalletModal" style="{{ $btnPrimary }}; width: 100%; text-align: center; align-self: stretch;">{{ filled($wallet?->payout_address) ? __('coin.profile.change_address') : __('coin.profile.add_address') }}</button>
-          <button type="button" wire:click="openDisconnectWalletModal" @disabled(! filled($wallet?->payout_address)) style="{{ $btnPrimary }}; width: 100%; text-align: center; align-self: stretch; opacity: {{ filled($wallet?->payout_address) ? '1' : '0.45' }};">{{ __('coin.profile.disconnect') }}</button>
+          <button type="button" wire:click="openWalletModal('USDT')" style="{{ $btnPrimary }}; width: 100%; text-align: center; align-self: stretch;">{{ filled($wallet?->payout_address) ? __('coin.profile.change_address') : __('coin.profile.add_address') }}</button>
+          <button type="button" wire:click="openDisconnectWalletModal('USDT')" @disabled(! filled($wallet?->payout_address)) style="{{ $btnPrimary }}; width: 100%; text-align: center; align-self: stretch; opacity: {{ filled($wallet?->payout_address) ? '1' : '0.45' }};">{{ __('coin.profile.disconnect') }}</button>
+        </div>
+        <div style="{{ $innerRow }}; border-style: dashed;">
+          <div style="{{ $fieldLabel }}">{{ mb_strtoupper(__('coin.profile.btc_payout_wallet')) }} · {{ app(\App\Services\PayoutAddressService::class)->networkLabelFor('BTC') }}</div>
+          @if(filled($wallet?->btc_payout_address))
+            <div style="margin-top: 9px; font-family: 'JetBrains Mono', monospace; font-size: 13px; word-break: break-all;">{{ $wallet->btc_payout_address }}</div>
+            @if($this->walletBtcPayoutAddressValid)
+              <div style="margin-top: 10px; display: flex; align-items: center; gap: 7px; font-family: 'JetBrains Mono', monospace; font-size: 10.5px; color: oklch(0.88 0.14 160);">
+                <span style="width: 6px; height: 6px; border-radius: 50%; background: oklch(0.85 0.15 160);"></span>{{ mb_strtoupper(__('coin.profile.confirmed')) }}
+              </div>
+            @else
+              <div style="margin-top: 10px; font-size: 12px; color: #ff8f8f;">{{ __('coin.wallet.btc_payout_address_invalid') }}</div>
+            @endif
+          @else
+            <div style="margin-top: 9px; font-size: 13px; color: rgba(214,238,248,0.68);">{{ __('coin.profile.btc_payout_address_empty') }}</div>
+          @endif
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px;">
+          <button type="button" wire:click="openWalletModal('BTC')" style="{{ $btnPrimary }}; width: 100%; text-align: center; align-self: stretch;">{{ filled($wallet?->btc_payout_address) ? __('coin.profile.change_address') : __('coin.profile.add_address') }}</button>
+          <button type="button" wire:click="openDisconnectWalletModal('BTC')" @disabled(! filled($wallet?->btc_payout_address)) style="{{ $btnPrimary }}; width: 100%; text-align: center; align-self: stretch; opacity: {{ filled($wallet?->btc_payout_address) ? '1' : '0.45' }};">{{ __('coin.profile.disconnect') }}</button>
         </div>
         <div style="{{ $innerRow }}; display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-top: auto;">
           <div>

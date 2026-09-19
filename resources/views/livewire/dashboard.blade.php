@@ -550,15 +550,28 @@
           <div class="coin-wallet-action-card">
             <div style="font-size: 15px; font-weight: 600;">{{ __('coin.wallet.payout_title') }}</div>
             <div style="margin-top: 5px; font-size: 12.5px; color: rgba(214,238,248,0.7);">{{ __('coin.wallet.payout_sub') }}</div>
-            <div style="margin-top: 20px; display: flex; align-items: center; justify-content: space-between; gap: 12px;">
+            <div style="margin-top: 20px; font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.12em; color: rgba(214,238,248,0.68);">{{ mb_strtoupper(__('coin.wallet.withdraw_currency')) }}</div>
+            <div style="margin-top: 9px; display: flex; gap: 8px; flex-wrap: wrap;">
+              @foreach($this->withdrawCurrencies as $currencyOption)
+              <button type="button" wire:click="$set('withdrawCurrency', '{{ $currencyOption }}')" style="padding: 8px 12px; border-radius: 8px; border: 1px solid {{ $withdrawCurrency === $currencyOption ? 'oklch(0.86 0.11 195 / 0.55)' : 'rgba(150,235,250,0.16)' }}; background: {{ $withdrawCurrency === $currencyOption ? 'oklch(0.6 0.13 200 / 0.22)' : 'transparent' }}; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: rgba(214,238,248,0.88); cursor: pointer;">{{ $currencyOption }}</button>
+              @endforeach
+            </div>
+            <div style="margin-top: 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px;">
               <div style="font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.12em; color: rgba(214,238,248,0.68);">{{ mb_strtoupper(__('coin.amount')) }}</div>
               <button type="button" wire:click="setWithdrawMax" wire:loading.attr="disabled" wire:target="setWithdrawMax" style="border:0;background:transparent;color:oklch(0.88 0.11 195);font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.08em;cursor:pointer;padding:0;">{{ mb_strtoupper(__('coin.wallet.max')) }}</button>
             </div>
             <div style="margin-top: 9px; padding: 13px 15px; border-radius: 11px; border: 1px solid rgba(150,235,250,0.16); background: rgba(4,16,28,0.6); display: flex; justify-content: space-between; font-family: 'JetBrains Mono', monospace; font-size: 15px;">
-              <input type="text" inputmode="decimal" wire:model="withdrawAmount" wire:key="withdraw-amount-{{ $withdrawAmount }}" placeholder="0.00" autocomplete="off" style="flex:1;min-width:0;border:0;background:transparent;color:#f0fbff;outline:none;font-family:inherit;font-size:15px;" />
-              <span style="flex:none;margin-left:12px;color:rgba(214,238,248,0.78);">{{ $this->walletCurrency }}</span>
+              <input type="text" inputmode="decimal" wire:model="withdrawAmount" wire:key="withdraw-amount-{{ $withdrawCurrency }}-{{ $withdrawAmount }}" placeholder="0.00" autocomplete="off" style="flex:1;min-width:0;border:0;background:transparent;color:#f0fbff;outline:none;font-family:inherit;font-size:15px;" />
+              <span style="flex:none;margin-left:12px;color:rgba(214,238,248,0.78);">{{ $withdrawCurrency }}</span>
             </div>
             @error('withdrawAmount')<p style="margin-top:8px;font-size:12px;color:#ff8f8f;">{{ $message }}</p>@enderror
+            @if($this->withdrawDebitPreview && $withdrawCurrency !== $this->walletCurrency)
+            <p style="margin-top:10px;font-size:12px;line-height:1.5;color:rgba(214,238,248,0.72);">{{ __('coin.wallet.withdraw_debit_preview', ['amount' => $this->withdrawDebitPreview]) }}</p>
+            @endif
+            <div style="margin-top: 14px; display: flex; justify-content: space-between; gap: 14px; font-size: 12.5px;">
+              <span style="color: rgba(214,238,248,0.72); min-width: 0;">{{ __('coin.wallet.min_payout') }}</span>
+              <span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">{{ $this->withdrawMinLabel }}</span>
+            </div>
             <div style="margin-top: 16px; display: flex; flex-direction: column; gap: 11px; font-size: 12.5px;">
               <div style="display: flex; justify-content: space-between; gap: 14px;"><span style="color: rgba(214,238,248,0.72); min-width: 0;">{{ __('coin.wallet.network_fee') }}</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">{{ $this->networkFeeLabel }}</span></div>
               <div style="display: flex; justify-content: space-between; gap: 14px;"><span style="color: rgba(214,238,248,0.72); min-width: 0;">{{ __('coin.wallet.processing_time') }}</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">~2 h</span></div>
@@ -572,13 +585,21 @@
             <div style="font-size: 15px; font-weight: 600;">{{ __('coin.wallet.payout_details') }}</div>
             <div style="margin-top: 5px; font-size: 12.5px; color: rgba(214,238,248,0.7);">{{ __('coin.wallet.payout_details_sub') }}</div>
             <div style="margin-top: 20px; padding: 14px 16px; border-radius: 12px; border: 1px dashed rgba(150,235,250,0.22); background: rgba(150,235,250,0.03);">
-              <div style="font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.12em; color: rgba(214,238,248,0.68);">{{ mb_strtoupper(__('coin.wallet.primary_wallet')) }}</div>
-              <div style="margin-top: 9px; font-family: 'JetBrains Mono', monospace; font-size: 13px; color: #eafcff; word-break: break-all;">{{ $wallet?->payout_address }}</div>
-              <div style="margin-top: 9px; display: flex; align-items: center; gap: 7px; font-family: 'JetBrains Mono', monospace; font-size: 10.5px; color: oklch(0.88 0.14 160);"><span style="width: 6px; height: 6px; border-radius: 50%; background: oklch(0.85 0.15 160);"></span>{{ mb_strtoupper(__('coin.wallet.confirmed')) }}</div>
+              <div style="font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.12em; color: rgba(214,238,248,0.68);">{{ mb_strtoupper(__('coin.wallet.payout_wallet_for', ['currency' => $withdrawCurrency])) }} · {{ $this->withdrawPayoutNetworkLabel }}</div>
+              @if(filled($this->withdrawPayoutAddress))
+                <div style="margin-top: 9px; font-family: 'JetBrains Mono', monospace; font-size: 13px; color: #eafcff; word-break: break-all;">{{ $this->withdrawPayoutAddress }}</div>
+                @if($this->withdrawPayoutAddressValid)
+                  <div style="margin-top: 9px; display: flex; align-items: center; gap: 7px; font-family: 'JetBrains Mono', monospace; font-size: 10.5px; color: oklch(0.88 0.14 160);"><span style="width: 6px; height: 6px; border-radius: 50%; background: oklch(0.85 0.15 160);"></span>{{ mb_strtoupper(__('coin.wallet.confirmed')) }}</div>
+                @else
+                  <div style="margin-top: 9px; font-size: 12px; color: #ff8f8f;">{{ $withdrawCurrency === 'BTC' ? __('coin.wallet.btc_payout_address_invalid') : __('coin.wallet.payout_address_invalid') }}</div>
+                @endif
+              @else
+                <div style="margin-top: 9px; font-size: 13px; color: rgba(214,238,248,0.68);">{{ $withdrawCurrency === 'BTC' ? __('coin.wallet.btc_payout_address_missing') : __('coin.wallet.payout_address_missing') }}</div>
+              @endif
             </div>
             <div style="margin-top: 14px; display: flex; flex-direction: column; gap: 11px; font-size: 12.5px;">
-              <div style="display: flex; justify-content: space-between; gap: 14px;"><span style="color: rgba(214,238,248,0.72); min-width: 0;">{{ __('coin.wallet.network') }}</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">{{ $wallet?->network_label }}</span></div>
-              <div style="display: flex; justify-content: space-between; gap: 14px;"><span style="color: rgba(214,238,248,0.72); min-width: 0;">{{ __('coin.wallet.min_payout') }}</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">{{ $wallet?->min_withdrawal_label }} {{ $this->walletCurrency }}</span></div>
+              <div style="display: flex; justify-content: space-between; gap: 14px;"><span style="color: rgba(214,238,248,0.72); min-width: 0;">{{ __('coin.wallet.network') }}</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">{{ $this->withdrawPayoutNetworkLabel }}</span></div>
+              <div style="display: flex; justify-content: space-between; gap: 14px;"><span style="color: rgba(214,238,248,0.72); min-width: 0;">{{ __('coin.wallet.min_payout') }}</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">{{ $this->withdrawMinLabel }}</span></div>
             </div>
             <div class="coin-wallet-action-card__footer">
               <button wire:click="setSection(6)" style="width: 100%; padding: 12px; border-radius: 10px; border: 1px solid rgba(150,235,250,0.2); background: rgba(150,235,250,0.06); color: #e6f4fa; font-family: inherit; font-size: 13.5px; font-weight: 500; cursor: pointer;">{{ __('coin.wallet.manage_addresses') }}</button>
