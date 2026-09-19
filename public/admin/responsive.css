@@ -183,8 +183,21 @@ body {
 
 .admin-content--auth {
     max-width: 420px;
-    padding: 28px;
-    padding-top: 40px;
+    padding: 0 28px 28px;
+}
+
+.admin-shell > .admin-topbar {
+    display: flex;
+    justify-content: center;
+    max-width: 420px;
+    margin: 0 auto;
+    padding: 48px 28px 20px;
+    box-sizing: border-box;
+}
+
+.admin-shell > .admin-topbar .admin-topbar-brand {
+    justify-content: center;
+    text-align: center;
 }
 
 .admin-grid-4,
@@ -358,7 +371,7 @@ body {
 
 .admin-auth-wrap {
     max-width: 420px;
-    margin: 80px auto 0;
+    margin: 0 auto;
     width: 100%;
 }
 
@@ -580,8 +593,9 @@ body {
         justify-content: space-between;
     }
 
-    .admin-auth-wrap {
-        margin-top: 40px;
+    .admin-shell > .admin-topbar {
+        padding-top: 32px;
+        padding-bottom: 16px;
     }
 
     .admin-table-scroll table {

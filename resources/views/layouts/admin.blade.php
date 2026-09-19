@@ -34,6 +34,8 @@
         .admin-sidebar-brand__logo,
         .admin-topbar-brand__logo { max-width: 100%; max-height: 44px; height: auto; width: auto; object-fit: contain; }
         .admin-topbar-brand { max-width: min(340px, 72vw); }
+        .admin-shell > .admin-topbar { display: flex; justify-content: center; max-width: 420px; margin: 0 auto; padding: 48px 28px 20px; box-sizing: border-box; }
+        .admin-shell > .admin-topbar .admin-topbar-brand { justify-content: center; text-align: center; }
     </style>
     @stack('head')
     @auth('admin')
