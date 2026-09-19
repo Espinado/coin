@@ -21,16 +21,14 @@ class DepositService
 
     public function createPending(User $user, float $amount, string $currency = 'USDT', ?string $method = null): Deposit
     {
-        if ($amount <= 0) {
-            throw new RuntimeException('Top-up amount must be greater than zero.');
-        }
-
         $currency = strtoupper(trim($currency));
         $allowed = config('coin.deposits.currencies', ['USDT', 'BTC']);
 
         if (! in_array($currency, $allowed, true)) {
             throw new RuntimeException('Unsupported top-up currency.');
         }
+
+        $this->exchangeRates->assertMinDeposit($amount, $currency);
 
         $method ??= (string) config('coin.payments.driver', 'mock');
 

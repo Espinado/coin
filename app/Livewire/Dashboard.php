@@ -16,6 +16,7 @@ use App\Models\UserNotification;
 use App\Services\DashboardDataService;
 use App\Services\UserInAppNotificationService;
 use App\Services\DepositService;
+use App\Services\ExchangeRateService;
 use App\Services\Payment\PaymentGatewayInterface;
 use App\Services\Payment\PaymentSimulatorService;
 use App\Services\PlanChangeRequestService;
@@ -768,10 +769,15 @@ class Dashboard extends Component
         }
 
         try {
-            return app(\App\Services\ExchangeRateService::class)->previewLabel($amount, $this->depositCurrency);
+            return app(ExchangeRateService::class)->previewLabel($amount, $this->depositCurrency);
         } catch (\Throwable) {
             return null;
         }
+    }
+
+    public function getDepositMinLabelProperty(): string
+    {
+        return app(ExchangeRateService::class)->formatMinDepositLabel($this->depositCurrency);
     }
 
     public function getPlanNameProperty(): string
@@ -886,14 +892,24 @@ class Dashboard extends Component
         $this->resetPaymentModal();
 
         $this->validate([
-            'depositAmount' => ['required', 'numeric', 'min:1'],
+            'depositAmount' => ['required', 'numeric', 'min:0.01'],
         ], [], [
             'depositAmount' => 'amount',
         ]);
 
+        $amount = (float) str_replace([',', ' '], '', $this->depositAmount);
+
+        try {
+            app(ExchangeRateService::class)->assertMinDeposit($amount, $this->depositCurrency);
+        } catch (\RuntimeException $exception) {
+            throw ValidationException::withMessages([
+                'depositAmount' => [$exception->getMessage()],
+            ]);
+        }
+
         $this->paymentModal = 'topup';
         $this->paymentModalStep = 'gateway';
-        $this->pendingTopUpAmount = (float) $this->depositAmount;
+        $this->pendingTopUpAmount = $amount;
     }
 
     public function proceedToTopUpPayment(DepositService $deposits, PaymentGatewayInterface $gateway): void

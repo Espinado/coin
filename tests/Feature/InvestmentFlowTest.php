@@ -139,17 +139,17 @@ class InvestmentFlowTest extends TestCase
     {
         $buyer = User::factory()->create();
 
-        app(DepositService::class)->createPending($buyer, 4, 'BTC');
+        app(DepositService::class)->createPending($buyer, 20, 'BTC');
 
         $buyer->refresh();
 
         $this->assertSame('USDT', $buyer->wallet->currency);
-        $this->assertSame('2.00', number_format((float) $buyer->wallet->available, 2, '.', ''));
+        $this->assertSame('10.00', number_format((float) $buyer->wallet->available, 2, '.', ''));
 
         $deposit = $buyer->deposits()->firstOrFail();
-        $this->assertSame('4.00', number_format((float) $deposit->amount, 2, '.', ''));
+        $this->assertSame('20.00', number_format((float) $deposit->amount, 2, '.', ''));
         $this->assertSame('BTC', $deposit->currency);
-        $this->assertSame('2.00', number_format((float) $deposit->credited_amount, 2, '.', ''));
+        $this->assertSame('10.00', number_format((float) $deposit->credited_amount, 2, '.', ''));
         $this->assertSame('USDT', $deposit->credited_currency);
         $this->assertSame('2.00000000', number_format((float) $deposit->exchange_rate, 8, '.', ''));
     }

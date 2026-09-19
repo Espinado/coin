@@ -13,6 +13,7 @@ class PlatformSettingsSeeder extends Seeder
             'reward_rate' => '0.0042',
             'epochs_per_day' => '3',
             'token_symbol' => 'USDT',
+            'min_deposit' => '10.00',
             'min_withdrawal' => '10.00',
             'network_fee' => '0.50',
             'withdrawal_processing_hours' => '24',

@@ -66,4 +66,53 @@ class ExchangeRateService
 
         return number_format($converted['amount'], 2, '.', ',').' '.$converted['base_currency'];
     }
+
+    public function minDepositUsdt(): float
+    {
+        return $this->settings->minDeposit();
+    }
+
+    public function minDepositAmountIn(string $currency): float
+    {
+        $minUsdt = $this->minDepositUsdt();
+        $from = strtoupper(trim($currency));
+
+        if ($from === $this->baseCurrency()) {
+            return $minUsdt;
+        }
+
+        if ($from === 'BTC') {
+            return round($minUsdt * $this->btcPerUsdt(), 8);
+        }
+
+        throw new RuntimeException("Unsupported deposit currency: {$currency}");
+    }
+
+    public function formatMinDepositLabel(string $currency): string
+    {
+        $amount = $this->minDepositAmountIn($currency);
+        $symbol = strtoupper(trim($currency));
+        $formatted = $symbol === 'BTC'
+            ? rtrim(rtrim(number_format($amount, 8, '.', ''), '0'), '.')
+            : number_format($amount, 2, '.', '');
+
+        return $formatted.' '.$symbol;
+    }
+
+    public function assertMinDeposit(float $amount, string $currency): void
+    {
+        if ($amount <= 0) {
+            throw new RuntimeException(__('coin.wallet.min_deposit_error', [
+                'min' => $this->formatMinDepositLabel($currency),
+            ]));
+        }
+
+        $converted = $this->convertToBase($amount, $currency);
+
+        if ($converted['amount'] + 0.00000001 < $this->minDepositUsdt()) {
+            throw new RuntimeException(__('coin.wallet.min_deposit_error', [
+                'min' => $this->formatMinDepositLabel($currency),
+            ]));
+        }
+    }
 }

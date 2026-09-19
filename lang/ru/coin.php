@@ -145,6 +145,8 @@ return [
         'network' => 'Сеть',
         'network_fee' => 'Комиссия сети',
         'processing_time' => 'Срок обработки',
+        'min_top_up' => 'Мин. пополнение',
+        'min_deposit_error' => 'Минимальная сумма пополнения — :min.',
         'min_payout' => 'Мин. вывод',
         'manage_addresses' => 'Управление адресами',
         'pending_settlement' => 'Ожидает зачисления',
@@ -995,6 +997,7 @@ return [
 
     'settings' => [
         'token_symbol' => 'Символ валюты (USDT)',
+        'min_top_up' => 'Минимальная сумма пополнения (USDT)',
         'min_payout' => 'Минимальная сумма вывода',
         'network_fee' => 'Комиссия сети',
         'payout_hours' => 'Обработка вывода (часы)',

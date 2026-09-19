@@ -527,6 +527,10 @@
             @if($this->depositCreditPreview && $depositCurrency !== $this->walletCurrency)
             <p style="margin-top:10px;font-size:12px;line-height:1.5;color:rgba(214,238,248,0.72);">{{ __('coin.wallet.deposit_credit_preview', ['amount' => $this->depositCreditPreview]) }}</p>
             @endif
+            <div style="margin-top: 14px; display: flex; justify-content: space-between; gap: 14px; font-size: 12.5px;">
+              <span style="color: rgba(214,238,248,0.72); min-width: 0;">{{ __('coin.wallet.min_top_up') }}</span>
+              <span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">{{ $this->depositMinLabel }}</span>
+            </div>
             <div class="coin-deposit-presets">
               <button type="button" wire:click="setDepositPreset(100)" class="coin-deposit-presets__btn coin-btn-quiet">100 {{ $depositCurrency }}</button>
               <button type="button" wire:click="setDepositPreset(500)" class="coin-deposit-presets__btn coin-btn-quiet">500 {{ $depositCurrency }}</button>

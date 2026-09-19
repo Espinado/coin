@@ -14,6 +14,7 @@ class PlatformSettingsService
         'reward_rate' => '0.0042',
         'epochs_per_day' => '3',
         'token_symbol' => 'USDT',
+        'min_deposit' => '10.00',
         'min_withdrawal' => '10.00',
         'network_fee' => '0.50',
         'withdrawal_processing_hours' => '24',
@@ -121,6 +122,11 @@ class PlatformSettingsService
         return $this->get('token_symbol');
     }
 
+    public function minDeposit(): float
+    {
+        return $this->getFloat('min_deposit');
+    }
+
     public function minWithdrawal(): float
     {
         return $this->getFloat('min_withdrawal');
@@ -164,6 +170,7 @@ class PlatformSettingsService
             'reward_rate' => ['label' => 'Ставка награды (устар.)', 'type' => 'number', 'default' => self::DEFAULTS['reward_rate']],
             'epochs_per_day' => ['label' => 'Эпох в день (устар.)', 'type' => 'number', 'default' => self::DEFAULTS['epochs_per_day']],
             'token_symbol' => ['label' => __('coin.settings.token_symbol'), 'type' => 'text', 'default' => self::DEFAULTS['token_symbol']],
+            'min_deposit' => ['label' => __('coin.settings.min_top_up'), 'type' => 'number', 'default' => self::DEFAULTS['min_deposit']],
             'min_withdrawal' => ['label' => __('coin.settings.min_payout'), 'type' => 'number', 'default' => self::DEFAULTS['min_withdrawal']],
             'network_fee' => ['label' => __('coin.settings.network_fee'), 'type' => 'number', 'default' => self::DEFAULTS['network_fee']],
             'withdrawal_processing_hours' => ['label' => __('coin.settings.payout_hours'), 'type' => 'number', 'default' => self::DEFAULTS['withdrawal_processing_hours']],

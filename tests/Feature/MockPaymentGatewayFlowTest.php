@@ -56,6 +56,24 @@ class MockPaymentGatewayFlowTest extends TestCase
         $this->assertSame('120.00', number_format((float) $user->wallet->available, 2, '.', ''));
     }
 
+    public function test_deposit_below_minimum_is_rejected(): void
+    {
+        $user = User::factory()->create();
+
+        $this->expectException(\RuntimeException::class);
+
+        app(DepositService::class)->createPending($user, 5, 'USDT');
+    }
+
+    public function test_btc_deposit_below_usdt_minimum_is_rejected(): void
+    {
+        $user = User::factory()->create();
+
+        $this->expectException(\RuntimeException::class);
+
+        app(DepositService::class)->createPending($user, 10, 'BTC');
+    }
+
     public function test_withdrawal_processing_triggers_mock_gateway_payout_and_ipn(): void
     {
         $admin = Admin::query()->create([
