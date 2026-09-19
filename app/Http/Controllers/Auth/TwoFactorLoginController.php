@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Support\SessionIdleTracker;
 use App\Services\Auth\AuthAuditLogger;
 use App\Services\Auth\AuthFailureStage;
 use App\Services\EmailVerificationAccess;
@@ -102,6 +103,7 @@ class TwoFactorLoginController extends Controller
 
         Auth::login($user, $remember);
         $request->session()->regenerate();
+        SessionIdleTracker::markNow($request);
         app(UserLoginRecorder::class)->record($user, $request);
 
         return redirect()->intended(route('dashboard', absolute: false));

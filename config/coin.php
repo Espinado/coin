@@ -84,4 +84,8 @@ return [
         'invitation_ttl_hours' => (int) env('COIN_ADMIN_INVITATION_TTL_HOURS', 72),
     ],
 
+    'session' => [
+        'idle_minutes' => max(1, (int) env('COIN_SESSION_IDLE_MINUTES', 15)),
+    ],
+
 ];

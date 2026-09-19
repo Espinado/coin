@@ -4,6 +4,11 @@
     <meta charset="utf-8">
     @include('partials.coin-ios-meta')
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    @auth
+    <meta name="coin-session-idle-minutes" content="{{ config('coin.session.idle_minutes', 15) }}">
+    <meta name="coin-logout-url" content="{{ route('logout') }}">
+    <meta name="coin-idle-redirect" content="{{ route('login') }}">
+    @endauth
     <title>{{ $title ?? \App\Support\PlatformBrand::name() }}</title>
     <link rel="icon" href="{{ asset('cloudflops/logo-mark.png') }}" type="image/png" />
     @livewireStyles

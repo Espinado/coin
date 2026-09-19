@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
+use App\Support\SessionIdleTracker;
 use App\Services\EmailVerificationAccess;
 use App\Services\LoginTwoFactorService;
 use App\Services\UserLoginRecorder;
@@ -62,6 +63,7 @@ class AuthenticatedSessionController extends Controller
 
         Auth::login($user, $request->boolean('remember'));
         $request->session()->regenerate();
+        SessionIdleTracker::markNow($request);
         $loginRecorder->record($user, $request);
 
         return redirect()->intended(route('dashboard', absolute: false));

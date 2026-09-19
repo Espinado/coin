@@ -1073,6 +1073,11 @@ return [
         'profit_accrual_time_hint' => 'Ежедневно в указанное время (:timezone).',
     ],
 
+    'validation' => [
+        'phone_required' => 'Укажите номер телефона.',
+        'phone_invalid' => 'Некорректный номер телефона. Укажите от 10 до 15 цифр.',
+    ],
+
     'auth' => [
         'sign_in' => 'Вход в аккаунт',
         'sign_up' => 'Регистрация',
@@ -1081,6 +1086,8 @@ return [
         'name_placeholder' => 'Как к вам обращаться',
         'email' => 'E-mail',
         'email_placeholder' => 'you@example.com',
+        'phone' => 'Телефон',
+        'phone_placeholder' => '+7 900 123-45-67',
         'password' => 'Пароль',
         'password_placeholder' => 'Введите пароль',
         'password_new_placeholder' => 'Минимум 8 символов',
@@ -1103,6 +1110,7 @@ return [
         'two_factor_expired' => 'Время ввода кода истекло. Вернитесь на страницу входа и авторизуйтесь заново — мы отправим новый код.',
         'two_factor_cancelled' => 'Ввод кода отменён. Войдите снова — мы отправим новый код.',
         'session_expired' => 'Сессия истекла. Войдите снова — при двухфакторной авторизации мы отправим новый код.',
+        'idle_logout' => 'Сессия завершена из‑за неактивности (:minutes мин). Войдите снова.',
         'two_factor_mail_subject' => 'Код для входа в CloudFlops',
         'two_factor_mail_title' => 'Подтверждение входа',
         'two_factor_mail_intro' => 'Здравствуйте, :name!',

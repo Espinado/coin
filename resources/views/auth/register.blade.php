@@ -23,6 +23,12 @@
                 </div>
 
                 <div style="margin-top: 18px;">
+                    <label for="phone" style="display: block; font-size: 12.5px; color: rgba(230,244,250,0.78);">{{ __('coin.auth.phone') }}</label>
+                    <input id="phone" type="tel" name="phone" value="{{ old('phone') }}" required autocomplete="tel" inputmode="tel" placeholder="{{ __('coin.auth.phone_placeholder') }}" style="width: 100%; box-sizing: border-box; margin-top: 9px; padding: 14px 16px; border-radius: 12px; border: 1px solid rgba(150,235,250,0.18); background: rgba(4,16,28,0.7); color: #f0fbff; font-family: inherit; font-size: 14.5px;" />
+                    @error('phone')<div class="coin-auth-error">{{ $message }}</div>@enderror
+                </div>
+
+                <div style="margin-top: 18px;">
                     <label for="password" style="display: block; font-size: 12.5px; color: rgba(230,244,250,0.78);">{{ __('coin.auth.password') }}</label>
                     <div style="position: relative; margin-top: 9px;">
                         <input id="password" type="password" name="password" required autocomplete="new-password" class="js-password-input" placeholder="{{ __('coin.auth.password_new_placeholder') }}" style="width: 100%; box-sizing: border-box; padding: 14px 92px 14px 16px; border-radius: 12px; border: 1px solid rgba(150,235,250,0.18); background: rgba(4,16,28,0.7); color: #f0fbff; font-family: inherit; font-size: 14.5px;" />

@@ -30,7 +30,7 @@
         </div>
         <div>
           <div style="{{ $fieldLabel }}">{{ mb_strtoupper(__('coin.profile.phone')) }}</div>
-          <input type="text" wire:model="profilePhone" style="{{ $input }}; margin-top: 8px;" />
+          <input type="tel" wire:model="profilePhone" required inputmode="tel" autocomplete="tel" placeholder="{{ __('coin.auth.phone_placeholder') }}" style="{{ $input }}; margin-top: 8px;" />
         </div>
         <div>
           <div style="{{ $fieldLabel }}">{{ mb_strtoupper(__('coin.profile.telegram')) }}</div>

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Support\SessionIdleTracker;
 use App\Services\AdminLoginTwoFactorService;
 use App\Services\Auth\AuthAuditLogger;
 use App\Services\Auth\AuthFailureStage;
@@ -92,6 +93,7 @@ class TwoFactorLoginController extends Controller
 
         Auth::guard('admin')->login($admin, $remember);
         $request->session()->regenerate();
+        SessionIdleTracker::markNow($request);
 
         $redirect = redirect()->intended(route('admin.dashboard', absolute: false));
 

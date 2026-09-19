@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Auth;
 
 use App\Models\User;
+use App\Rules\ContactPhone;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Str;
@@ -17,10 +18,18 @@ class RegisterRequest extends FormRequest
 
     protected function prepareForValidation(): void
     {
+        $merged = [];
+
         if ($this->has('email')) {
-            $this->merge([
-                'email' => Str::lower(trim($this->string('email')->toString())),
-            ]);
+            $merged['email'] = Str::lower(trim($this->string('email')->toString()));
+        }
+
+        if ($this->has('phone')) {
+            $merged['phone'] = ContactPhone::normalize($this->string('phone')->toString());
+        }
+
+        if ($merged !== []) {
+            $this->merge($merged);
         }
     }
 
@@ -44,6 +53,7 @@ class RegisterRequest extends FormRequest
                     }
                 },
             ],
+            'phone' => ['required', 'string', 'max:32', new ContactPhone],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ];
     }

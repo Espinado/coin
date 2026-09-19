@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\User;
+use App\Support\SessionIdleTracker;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -24,6 +25,7 @@ class EmailVerificationAccess
     ): RedirectResponse {
         Auth::login($user, $remember);
         $request->session()->regenerate();
+        SessionIdleTracker::markNow($request);
         $this->sendCodeIfNeeded($user);
 
         return redirect()

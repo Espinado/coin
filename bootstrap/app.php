@@ -30,6 +30,10 @@ return Application::configure(basePath: dirname(__DIR__))
             'webhooks/ccapi',
         ]);
 
+        $middleware->web(append: [
+            \App\Http\Middleware\EnforceIdleSessionTimeout::class,
+        ]);
+
         $middleware->alias([
             'user.domain' => \App\Http\Middleware\EnsureUserDomain::class,
             'admin.domain' => \App\Http\Middleware\EnsureAdminDomain::class,

@@ -1,4 +1,5 @@
 import './bootstrap';
+import './session-idle';
 import { hasEchoKey, initEcho } from './echo';
 import { reverbLog } from './reverb-debug';
 import { showIncomingMessageToast, showSupportToast } from './support-toast';

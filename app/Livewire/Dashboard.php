@@ -19,6 +19,7 @@ use App\Services\DepositService;
 use App\Services\ExchangeRateService;
 use App\Services\Payment\PaymentGatewayInterface;
 use App\Rules\BitcoinPayoutAddress;
+use App\Rules\ContactPhone;
 use App\Rules\TronPayoutAddress;
 use App\Services\Payment\PaymentSimulatorService;
 use App\Services\PayoutAddressService;
@@ -1479,17 +1480,17 @@ class Dashboard extends Component
         $this->resetActionFeedback();
 
         $validated = $this->validate([
-            'profilePhone' => ['nullable', 'string', 'max:32'],
+            'profilePhone' => ['required', 'string', 'max:32', new ContactPhone],
             'profileTelegram' => ['nullable', 'string', 'max:64'],
             'profileCountry' => ['nullable', 'string', 'size:2'],
         ], [], [
-            'profilePhone' => 'phone',
+            'profilePhone' => __('coin.profile.phone'),
             'profileTelegram' => 'telegram',
             'profileCountry' => 'country',
         ]);
 
         $this->user->update([
-            'phone' => $validated['profilePhone'] ?: null,
+            'phone' => ContactPhone::normalize($validated['profilePhone']),
             'telegram' => $validated['profileTelegram'] ?: null,
             'country_code' => $validated['profileCountry'] ? strtoupper($validated['profileCountry']) : null,
         ]);

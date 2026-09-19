@@ -54,6 +54,7 @@ class ReferralRegistrationTest extends TestCase
             ->post('/register', [
                 'name' => 'Invited User',
                 'email' => 'invited@example.com',
+                'phone' => '+79001234567',
                 'password' => 'password',
                 'password_confirmation' => 'password',
             ]);
@@ -81,6 +82,7 @@ class ReferralRegistrationTest extends TestCase
             ->post('/register', [
                 'name' => 'Solo User',
                 'email' => 'solo@example.com',
+                'phone' => '+79001234567',
                 'password' => 'password',
                 'password_confirmation' => 'password',
             ]);
@@ -107,6 +109,7 @@ class ReferralRegistrationTest extends TestCase
             ->post('/register', [
                 'name' => 'Linked User',
                 'email' => 'linked@example.com',
+                'phone' => '+79001234567',
                 'password' => 'password',
                 'password_confirmation' => 'password',
             ]);

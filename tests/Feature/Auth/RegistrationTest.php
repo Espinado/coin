@@ -21,6 +21,7 @@ class RegistrationTest extends TestCase
         $response = $this->post('/register', [
             'name' => 'Test User',
             'email' => 'test@example.com',
+            'phone' => '+79001234567',
             'password' => 'password',
             'password_confirmation' => 'password',
         ]);
@@ -28,6 +29,10 @@ class RegistrationTest extends TestCase
         $this->assertAuthenticated();
         $response->assertRedirect(route('verification.notice', absolute: false));
         $response->assertSessionHas('status', __('coin.auth.verify_email_registration_sent'));
+        $this->assertDatabaseHas('users', [
+            'email' => 'test@example.com',
+            'phone' => '+79001234567',
+        ]);
     }
 
     public function test_users_can_register_with_mixed_case_email(): void
@@ -35,6 +40,7 @@ class RegistrationTest extends TestCase
         $response = $this->post('/register', [
             'name' => 'Test User',
             'email' => 'MixedCase@Example.com',
+            'phone' => '+79001234567',
             'password' => 'password',
             'password_confirmation' => 'password',
         ]);
@@ -51,6 +57,7 @@ class RegistrationTest extends TestCase
         $this->post('/register', [
             'name' => 'First User',
             'email' => 'test@example.com',
+            'phone' => '+79001234567',
             'password' => 'password',
             'password_confirmation' => 'password',
         ])->assertRedirect(route('verification.notice', absolute: false));
@@ -60,6 +67,7 @@ class RegistrationTest extends TestCase
         $response = $this->post('/register', [
             'name' => 'Second User',
             'email' => 'TEST@example.com',
+            'phone' => '+79007654321',
             'password' => 'password',
             'password_confirmation' => 'password',
         ]);
@@ -73,11 +81,39 @@ class RegistrationTest extends TestCase
         $this->post('/register', [
             'name' => 'Test User',
             'email' => 'test@example.com',
+            'phone' => '+79001234567',
             'password' => 'password',
             'password_confirmation' => 'password',
         ]);
 
         $this->get(route('dashboard', absolute: false))
             ->assertRedirect(route('verification.notice', absolute: false));
+    }
+
+    public function test_registration_requires_phone(): void
+    {
+        $response = $this->post('/register', [
+            'name' => 'Test User',
+            'email' => 'test@example.com',
+            'password' => 'password',
+            'password_confirmation' => 'password',
+        ]);
+
+        $response->assertSessionHasErrors('phone');
+        $this->assertGuest();
+    }
+
+    public function test_registration_rejects_invalid_phone(): void
+    {
+        $response = $this->post('/register', [
+            'name' => 'Test User',
+            'email' => 'test@example.com',
+            'phone' => '123',
+            'password' => 'password',
+            'password_confirmation' => 'password',
+        ]);
+
+        $response->assertSessionHasErrors('phone');
+        $this->assertGuest();
     }
 }

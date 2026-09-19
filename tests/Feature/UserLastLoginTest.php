@@ -25,6 +25,7 @@ class UserLastLoginTest extends TestCase
         $this->post('/register', [
             'name' => 'Evgen',
             'email' => 'evgenfit@gmail.com',
+            'phone' => '+79001234567',
             'password' => 'password',
             'password_confirmation' => 'password',
         ])->assertRedirect(route('verification.notice', absolute: false));
