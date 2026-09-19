@@ -57,7 +57,7 @@
             @if($ticket->status !== \App\Models\SupportTicket::STATUS_CLOSED)
                 <div class="admin-card" style="margin-top:16px;">
                     <h2 style="margin:0 0 14px;font-size:16px;font-weight:600;">Reply</h2>
-                    <form id="support-reply-form" method="POST" action="{{ route('admin.support.reply', $ticket) }}" style="display:flex;flex-direction:column;gap:12px;">
+                    <form id="support-reply-form" method="POST" action="{{ route('admin.support.reply', $ticket) }}" data-no-page-spinner style="display:flex;flex-direction:column;gap:12px;">
                         @csrf
                         <textarea id="support-reply-body" name="body" rows="5" required maxlength="5000" placeholder="Write a reply to the user..."
                             style="width:100%;box-sizing:border-box;padding:12px 14px;border-radius:10px;border:1px solid rgba(255,255,255,0.12);background:#070a10;color:#e8edf5;resize:vertical;">{{ old('body') }}</textarea>

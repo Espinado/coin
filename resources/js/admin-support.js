@@ -57,6 +57,8 @@ if (config?.ticketId) {
 
                 showSupportToast(errorMessage, 'error');
             } finally {
+                window.coinHidePageOverlay?.();
+
                 if (submitButton) {
                     submitButton.disabled = false;
                 }

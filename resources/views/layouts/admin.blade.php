@@ -85,7 +85,7 @@
     @auth('admin')
         @vite(['resources/js/admin-support-realtime.js'])
     @endauth
-    <script src="{{ asset('coin/page-navigate.js') }}" defer></script>
+    <script src="{{ asset('coin/page-navigate.js') }}?v={{ file_exists(public_path('coin/page-navigate.js')) ? filemtime(public_path('coin/page-navigate.js')) : 1 }}" defer></script>
     @auth('admin')
         @unless(View::hasSection('topbar'))
             <script>

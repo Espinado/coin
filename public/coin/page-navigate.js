@@ -162,10 +162,20 @@
         }, true);
 
         document.addEventListener('submit', function (event) {
-            if (shouldHandleForm(event.target)) {
-                markFullPageNavigation();
+            var form = event.target;
+
+            if (!shouldHandleForm(form)) {
+                return;
             }
-        }, true);
+
+            window.setTimeout(function () {
+                if (event.defaultPrevented) {
+                    return;
+                }
+
+                markFullPageNavigation();
+            }, 0);
+        });
 
         document.addEventListener('livewire:navigate', function () {
             pending++;
@@ -184,6 +194,8 @@
             });
         });
     }
+
+    window.coinHidePageOverlay = hideOverlay;
 
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', boot);
