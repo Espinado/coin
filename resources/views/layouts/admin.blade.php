@@ -42,6 +42,19 @@
     @endauth
 </head>
 <body @class(['admin-shell', 'admin-shell--sidebar' => auth('admin')->check() && ! View::hasSection('topbar')])>
+    <script>
+    (function () {
+        document.documentElement.classList.remove('coin-page-navigating');
+        document.documentElement.classList.remove('admin-sidebar-open');
+        var pageOverlay = document.getElementById('coin-page-loading-overlay');
+        if (pageOverlay) {
+            pageOverlay.hidden = true;
+        }
+        try {
+            sessionStorage.removeItem('coinPageNavigating');
+        } catch (_) {}
+    })();
+    </script>
     @include('partials.page-loading-overlay')
 
     @hasSection('topbar')
@@ -116,6 +129,20 @@
                                 setOpen(false);
                             }
                         });
+                    });
+
+                    setOpen(false);
+
+                    document.addEventListener('keydown', function (event) {
+                        if (event.key === 'Escape') {
+                            setOpen(false);
+                        }
+                    });
+
+                    window.addEventListener('resize', function () {
+                        if (window.innerWidth > 1024) {
+                            setOpen(false);
+                        }
                     });
                 })();
             </script>

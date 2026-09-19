@@ -457,11 +457,15 @@ body {
     }
 
     .admin-sidebar-overlay {
-        display: block;
+        display: none;
         position: fixed;
         inset: 0;
         background: rgba(0, 0, 0, 0.55);
         z-index: 110;
+    }
+
+    html.admin-sidebar-open .admin-sidebar-overlay {
+        display: block;
     }
 
     .admin-sidebar {

@@ -24,7 +24,7 @@
                 </div>
             @endif
 
-            <form method="POST" action="{{ route('admin.invite.store', ['token' => $token]) }}" style="margin-top:24px;display:flex;flex-direction:column;gap:16px;">
+            <form method="POST" action="{{ route('admin.invite.store', ['token' => $token]) }}" data-no-page-spinner style="margin-top:24px;display:flex;flex-direction:column;gap:16px;">
                 @csrf
 
                 <div>

@@ -20,7 +20,7 @@
                 </div>
             @endif
 
-            <form method="POST" action="{{ route('admin.login.store') }}" style="margin-top:24px;display:flex;flex-direction:column;gap:16px;">
+            <form method="POST" action="{{ route('admin.login.store') }}" data-no-page-spinner style="margin-top:24px;display:flex;flex-direction:column;gap:16px;">
                 @csrf
 
                 <div>
