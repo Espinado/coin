@@ -69,7 +69,6 @@
         @auth('admin')
             <div class="admin-app">
                 <div class="admin-sidebar-overlay" id="admin-sidebar-overlay" hidden></div>
-                @include('admin.partials.sidebar')
                 <div class="admin-main">
                     <header class="admin-main-header">
                         <button type="button" class="admin-sidebar-toggle" id="admin-sidebar-toggle" aria-expanded="false" aria-controls="admin-sidebar">
@@ -82,6 +81,7 @@
                         @yield('content')
                     </main>
                 </div>
+                @include('admin.partials.sidebar')
             </div>
         @else
             <div class="admin-shell">
@@ -109,6 +109,7 @@
 
                     function setOpen(open) {
                         root.classList.toggle('admin-sidebar-open', open);
+                        document.body.style.overflow = open ? 'hidden' : '';
                         toggle?.setAttribute('aria-expanded', open ? 'true' : 'false');
                         if (overlay) {
                             overlay.hidden = ! open;

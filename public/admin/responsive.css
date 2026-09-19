@@ -468,23 +468,47 @@ body {
         display: block;
     }
 
+    .admin-app {
+        display: block;
+    }
+
+    .admin-main {
+        width: 100%;
+        min-height: 100vh;
+        min-height: 100dvh;
+    }
+
     .admin-sidebar {
         position: fixed;
         top: 0;
         left: 0;
+        width: min(288px, 88vw);
         height: 100vh;
         height: 100dvh;
         padding-top: var(--coin-safe-top);
         padding-bottom: var(--coin-safe-bottom);
-        transform: translateX(-105%);
-        transition: transform 0.22s ease;
+        transform: translate3d(-100%, 0, 0);
+        -webkit-transform: translate3d(-100%, 0, 0);
+        transition: transform 0.22s ease, visibility 0.22s ease;
         box-shadow: 16px 0 40px rgba(0, 0, 0, 0.35);
         overflow-y: auto;
         -webkit-overflow-scrolling: touch;
+        visibility: hidden;
+        pointer-events: none;
+        background: #0c0f14;
+        isolation: isolate;
+        will-change: transform;
+    }
+
+    html.admin-sidebar-open {
+        overflow: hidden;
     }
 
     html.admin-sidebar-open .admin-sidebar {
-        transform: translateX(0);
+        transform: translate3d(0, 0, 0);
+        -webkit-transform: translate3d(0, 0, 0);
+        visibility: visible;
+        pointer-events: auto;
     }
 }
 
