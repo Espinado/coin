@@ -180,9 +180,9 @@ class PlatformSettingsService
             'referral_level1_percent' => ['label' => __('coin.settings.referral_percent'), 'type' => 'number', 'default' => self::DEFAULTS['referral_level1_percent']],
             'referral_level2_percent' => ['label' => 'Реферальный % (уровень 2, не использ.)', 'type' => 'number', 'default' => self::DEFAULTS['referral_level2_percent']],
             'kyc_required_for_withdrawal' => ['label' => __('coin.settings.kyc_for_payout'), 'type' => 'boolean', 'default' => self::DEFAULTS['kyc_required_for_withdrawal']],
-            'maintenance_mode' => ['label' => __('coin.settings.maintenance'), 'type' => 'boolean', 'default' => self::DEFAULTS['maintenance_mode']],
             'usdt_per_btc' => ['label' => __('coin.settings.usdt_per_btc'), 'type' => 'readonly_decimal', 'default' => self::DEFAULTS['usdt_per_btc'], 'readonly' => true],
             'btc_per_usdt' => ['label' => __('coin.settings.btc_per_usdt'), 'type' => 'readonly_decimal', 'default' => self::DEFAULTS['btc_per_usdt'], 'readonly' => true],
+            'maintenance_mode' => ['label' => __('coin.settings.maintenance'), 'type' => 'boolean', 'default' => self::DEFAULTS['maintenance_mode']],
             'profit_accrual_time' => ['label' => __('coin.settings.profit_accrual_time'), 'type' => 'time', 'default' => self::DEFAULTS['profit_accrual_time']],
         ];
     }

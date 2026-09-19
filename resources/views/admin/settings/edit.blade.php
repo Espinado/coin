@@ -19,7 +19,7 @@
     @endif
 
     <div class="admin-card" style="margin-top:16px;">
-        <form method="POST" action="{{ route('admin.settings.update') }}" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;">
+        <form method="POST" action="{{ route('admin.settings.update') }}" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;align-items:start;">
             @csrf
             @method('PATCH')
 
