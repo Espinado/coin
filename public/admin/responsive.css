@@ -278,8 +278,11 @@ body {
 }
 
 .admin-list-toolbar input[type="search"] {
-    flex: 1 1 220px;
-    min-width: 0;
+    flex: 1 1 auto;
+    min-width: 220px;
+    max-width: 100%;
+    height: 42px;
+    line-height: 1.2;
 }
 
 .admin-list-toolbar select {
@@ -556,6 +559,12 @@ body {
     .admin-list-toolbar label,
     .admin-list-toolbar .admin-btn {
         width: 100%;
+    }
+
+    .admin-list-toolbar input[type="search"] {
+        flex: 0 0 auto;
+        min-width: 0;
+        height: 42px;
     }
 
     .admin-list-toolbar label {

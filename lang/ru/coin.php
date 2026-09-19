@@ -782,6 +782,7 @@ return [
         'search_placeholder_deposits' => 'ID, e-mail…',
         'search_placeholder_payouts' => 'Номер, e-mail…',
         'search_placeholder_support' => 'Номер, тема, e-mail…',
+        'support_ticket_not_found' => 'Обращение не найдено. Возможно, оно было удалено.',
         'search_placeholder_plans' => 'Название, slug…',
         'search_placeholder_accruals' => 'E-mail, источник…',
         'deposit_status_pending' => 'Ожидает',

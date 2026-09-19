@@ -161,7 +161,10 @@ Route::middleware(['admin.domain', 'reject.web.on.admin'])->group(function () {
         Route::get('support/unread-count', [SupportTicketController::class, 'unreadCount'])
             ->name('admin.support.unread-count');
         Route::get('support/{ticket}', [SupportTicketController::class, 'show'])
-            ->name('admin.support.show');
+            ->name('admin.support.show')
+            ->missing(fn () => redirect()
+                ->route('admin.support.index')
+                ->with('status', __('coin.admin.support_ticket_not_found')));
         Route::post('support/{ticket}/reply', [SupportTicketController::class, 'reply'])
             ->middleware('admin.ability:manage_support')
             ->name('admin.support.reply');

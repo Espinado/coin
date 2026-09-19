@@ -253,4 +253,18 @@ class SupportTicketTest extends TestCase
             ->get('http://admin.coin.test/support')
             ->assertRedirect('http://admin.coin.test/login');
     }
+
+    public function test_admin_missing_support_ticket_redirects_to_index(): void
+    {
+        $admin = Admin::query()->create([
+            'name' => 'Support Admin',
+            'email' => 'missing-ticket-admin@coin.test',
+            'password' => Hash::make('password'),
+        ]);
+
+        $this->actingAs($admin, 'admin')
+            ->get('http://admin.coin.test/support/999999')
+            ->assertRedirect(route('admin.support.index', absolute: false))
+            ->assertSessionHas('status', __('coin.admin.support_ticket_not_found'));
+    }
 }
