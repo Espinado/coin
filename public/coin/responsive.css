@@ -175,9 +175,7 @@ html.coin-nav-open .coin-burger span:nth-child(3) {
   position: fixed;
   inset: 0;
   z-index: 90;
-  background: rgba(4, 16, 28, 0.72);
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
+  background: rgba(4, 16, 28, 0.88);
 }
 
 html.coin-nav-open .coin-nav-overlay {
@@ -293,6 +291,9 @@ html.coin-nav-open .coin-nav-overlay {
 .coin-header {
   flex-wrap: wrap;
   gap: 12px !important;
+  background: rgba(6, 20, 35, 0.75);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
 }
 
 .coin-header-brand {
@@ -1173,6 +1174,14 @@ html.coin-nav-open .coin-nav-mobile {
       14px
       calc(16px + var(--coin-safe-left)) !important;
     flex-wrap: nowrap !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    background: rgba(6, 20, 35, 0.98) !important;
+  }
+
+  html.coin-nav-open .coin-header {
+    position: relative;
+    z-index: 130 !important;
   }
 
   .coin-nav-desktop {
@@ -1367,39 +1376,71 @@ html.coin-nav-open .coin-nav-mobile {
   }
 
   .coin-nav-overlay {
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
-    background: rgba(4, 16, 28, 0.88) !important;
+    background: rgba(4, 16, 28, 0.92) !important;
+  }
+
+  html.coin-nav-open .coin-dashboard .coin-nav-overlay {
+    left: min(288px, 86vw);
+    right: 0;
+  }
+
+  html.coin-nav-open .coin-landing .coin-nav-overlay {
+    left: 0;
+    right: min(320px, 88vw);
   }
 
   .coin-sidebar {
     position: fixed !important;
     top: 0 !important;
     left: 0 !important;
-    z-index: 120 !important;
+    z-index: 140 !important;
     width: min(288px, 86vw) !important;
     height: 100vh !important;
     height: 100dvh !important;
     margin: 0 !important;
     padding-top: calc(22px + var(--coin-safe-top)) !important;
     padding-bottom: calc(16px + var(--coin-safe-bottom)) !important;
-    transform: translateX(-100%);
+    transform: translate3d(-100%, 0, 0);
     box-shadow: 8px 0 40px rgba(0, 0, 0, 0.35);
     overflow-y: auto !important;
     -webkit-overflow-scrolling: touch;
     background: #04101c !important;
     isolation: isolate;
+    contain: layout style paint;
+    will-change: transform;
+    -webkit-transform: translate3d(-100%, 0, 0);
   }
 
   html.coin-nav-open .coin-sidebar {
-    transform: translateX(0);
+    transform: translate3d(0, 0, 0);
+    -webkit-transform: translate3d(0, 0, 0);
+  }
+
+  html.coin-nav-open .coin-nav-overlay,
+  html.coin-nav-open .coin-header,
+  html.coin-nav-open .coin-nav-mobile,
+  html.coin-nav-open .coin-sidebar,
+  html.coin-nav-open .coin-page-loading-overlay {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    filter: none !important;
   }
 
   .coin-nav-mobile {
-    z-index: 120 !important;
+    z-index: 140 !important;
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
     background: #061423 !important;
+    transform: translate3d(100%, 0, 0);
+    -webkit-transform: translate3d(100%, 0, 0);
+    isolation: isolate;
+    contain: layout style paint;
+    will-change: transform;
+  }
+
+  html.coin-nav-open .coin-nav-mobile {
+    transform: translate3d(0, 0, 0);
+    -webkit-transform: translate3d(0, 0, 0);
   }
 
   .coin-dash-header {

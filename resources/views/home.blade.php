@@ -12,7 +12,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
     <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="{{ asset('coin/responsive.css') }}?v={{ file_exists(public_path('coin/responsive.css')) ? filemtime(public_path('coin/responsive.css')) : 1 }}" />
-    <script src="{{ asset('coin/mobile.js') }}" defer></script>
+    <script src="{{ asset('coin/mobile.js') }}?v={{ file_exists(public_path('coin/mobile.js')) ? filemtime(public_path('coin/mobile.js')) : 1 }}" defer></script>
     <script src="{{ asset('coin/landing-plans.js') }}?v={{ file_exists(public_path('coin/landing-plans.js')) ? filemtime(public_path('coin/landing-plans.js')) : 1 }}" defer></script>
     <script src="{{ asset('coin/landing-scroll-top.js') }}?v={{ file_exists(public_path('coin/landing-scroll-top.js')) ? filemtime(public_path('coin/landing-scroll-top.js')) : 1 }}" defer></script>
     <script src="{{ asset('coin/landing-faq.js') }}?v={{ file_exists(public_path('coin/landing-faq.js')) ? filemtime(public_path('coin/landing-faq.js')) : 1 }}" defer></script>
@@ -48,7 +48,7 @@
   <div style="position: absolute; top: -240px; right: -80px; width: 820px; height: 660px; border-radius: 50%; background: radial-gradient(closest-side, oklch(0.62 0.13 198 / 0.28), transparent 72%); filter: blur(30px); pointer-events: none;"></div>
 
   <div class="coin-nav-overlay"></div>
-  <header class="coin-header" data-screen-label="Header" style="position: relative; z-index: 20; display: flex; align-items: center; justify-content: space-between; padding: 22px 72px; border-bottom: 1px solid rgba(150,235,250,0.1); background: rgba(6,20,35,0.75); backdrop-filter: blur(14px);">
+  <header class="coin-header" data-screen-label="Header" style="position: relative; z-index: 20; display: flex; align-items: center; justify-content: space-between; padding: 22px 72px; border-bottom: 1px solid rgba(150,235,250,0.1);">
     <div class="coin-header-brand" style="display: flex; align-items: center;">
       <img src="{{ \App\Support\PlatformBrand::logo('horizontal') }}" alt="CloudFlops" class="coin-brand-logo" />
     </div>
@@ -61,18 +61,19 @@
       <a href="/dashboard" style="font-size: 14px; color: rgba(230,244,250,0.78);">Личный кабинет</a>
       <a href="#faq" style="font-size: 14px; color: rgba(230,244,250,0.78);">Вопросы</a>
     </nav>
-    <nav class="coin-nav coin-nav-mobile">
-      <a href="#product" style="font-size: 14px; color: rgba(230,244,250,0.78);">Продукт</a>
-      <a href="#how" style="font-size: 14px; color: rgba(230,244,250,0.78);">Как это работает</a>
-      <a href="#plans" style="font-size: 14px; color: rgba(230,244,250,0.78);">Планы</a>
-      <a href="#infra" style="font-size: 14px; color: rgba(230,244,250,0.78);">Безопасность</a>
-      <a href="/dashboard" style="font-size: 14px; color: rgba(230,244,250,0.78);">Личный кабинет</a>
-      <a href="#faq" style="font-size: 14px; color: rgba(230,244,250,0.78);">Вопросы</a>
-    </nav>
     <div class="coin-header-actions coin-hide-mobile" style="display: flex; align-items: center; gap: 12px;">
       <a href="/dashboard" style="padding: 11px 22px; border-radius: 11px; border: 1px solid oklch(0.86 0.11 195 / 0.5); background: linear-gradient(140deg, oklch(0.86 0.12 192), oklch(0.66 0.13 205)); color: #04121f; font-family: inherit; font-size: 14px; font-weight: 600; cursor: pointer;">Личный кабинет</a>
     </div>
   </header>
+
+  <nav class="coin-nav coin-nav-mobile">
+    <a href="#product" style="font-size: 14px; color: rgba(230,244,250,0.78);">Продукт</a>
+    <a href="#how" style="font-size: 14px; color: rgba(230,244,250,0.78);">Как это работает</a>
+    <a href="#plans" style="font-size: 14px; color: rgba(230,244,250,0.78);">Планы</a>
+    <a href="#infra" style="font-size: 14px; color: rgba(230,244,250,0.78);">Безопасность</a>
+    <a href="/dashboard" style="font-size: 14px; color: rgba(230,244,250,0.78);">Личный кабинет</a>
+    <a href="#faq" style="font-size: 14px; color: rgba(230,244,250,0.78);">Вопросы</a>
+  </nav>
 
   <section data-screen-label="Hero" style="position: relative; z-index: 5; display: grid; grid-template-columns: 1fr 540px; gap: 60px; align-items: center; padding: 72px 72px 48px;">
     <div>

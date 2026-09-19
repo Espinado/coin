@@ -1,6 +1,5 @@
 <div x-data x-effect="document.documentElement.classList.toggle('coin-nav-open', @js($menuOpen)); document.documentElement.classList.toggle('coin-modal-open', @js(filled($paymentModal) || filled($contractDetailsId)))">
 <div class="coin-shell">
-  <div class="coin-nav-overlay" wire:click="closeMenu"></div>
   <aside class="coin-sidebar">
     <div class="coin-sidebar-nav">
     <a href="{{ route('home') }}" class="coin-sidebar-brand">
@@ -51,6 +50,7 @@
   </aside>
 
   <div class="coin-dashboard">
+  <div class="coin-nav-overlay" wire:click="closeMenu"></div>
   <main class="coin-main">
     <header class="coin-dash-header" style="display: flex; align-items: center; gap: 20px; padding: 20px 32px; border-bottom: 1px solid rgba(150,235,250,0.1); background: rgba(4,16,28,0.4);">
       <button type="button" class="coin-burger" wire:click="toggleMenu" aria-label="{{ __('coin.nav.open_menu') }}"><span></span><span></span><span></span></button>

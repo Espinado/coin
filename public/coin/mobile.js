@@ -12,7 +12,11 @@
   document.addEventListener('keydown', closeOnEscape);
 
   document.addEventListener('click', function (e) {
-    if (e.target.closest('.coin-burger')) {
+    var burger = e.target.closest('.coin-burger');
+    if (burger) {
+      if (burger.hasAttribute('wire:click') || burger.closest('[wire\\:id]')) {
+        return;
+      }
       document.documentElement.classList.toggle('coin-nav-open');
       return;
     }

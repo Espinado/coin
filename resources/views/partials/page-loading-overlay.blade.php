@@ -57,6 +57,12 @@
     }
     .admin-shell .coin-page-loading-label { color: rgba(232, 237, 245, 0.9); }
     @keyframes coinPageSpin { to { transform: rotate(360deg); } }
+    @media (max-width: 768px) {
+        .coin-page-loading-overlay {
+            backdrop-filter: none;
+            -webkit-backdrop-filter: none;
+        }
+    }
 </style>
 <script>
 (function () {
