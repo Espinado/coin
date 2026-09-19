@@ -15,10 +15,10 @@
     </div>
     <button wire:click="setSection(1)" style="padding: 10px 16px; border-radius: 10px; border: 1px solid rgba(150,235,250,0.2); background: rgba(150,235,250,0.06); color: #e6f4fa; font-family: inherit; font-size: 13px; font-weight: 500; cursor: pointer;">{{ __('coin.invest.renew') }}</button>
   </div>
-  <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 20px; margin-top: 24px;">
-    <div><div style="font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.12em; color: rgba(214,238,248,0.68);">{{ mb_strtoupper(__('coin.contract.principal')) }}</div><div style="margin-top: 9px; font-size: 14px;">{{ $contract->formattedPrincipal() }}</div></div>
-    <div><div style="font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.12em; color: rgba(214,238,248,0.68);">{{ mb_strtoupper(__('coin.contract.profit_accrued')) }}</div><div style="margin-top: 9px; font-size: 14px; color: oklch(0.9 0.12 192);">{{ $contract->formattedAccrued() }}</div></div>
-    <div><div style="font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.12em; color: rgba(214,238,248,0.68);">{{ mb_strtoupper(__('coin.contract.maturity')) }}</div><div style="margin-top: 9px; font-size: 14px;">{{ $contract->formattedEndsAt() }}</div></div>
-    <div><div style="font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.12em; color: rgba(214,238,248,0.68);">{{ mb_strtoupper(__('coin.contract.progress')) }}</div><div style="margin-top: 9px; font-size: 14px;">100%</div></div>
+  <div class="coin-contract-stats-grid coin-contract-stats-grid--4">
+    <div class="coin-contract-stat"><div class="coin-contract-stat__label">{{ mb_strtoupper(__('coin.contract.principal')) }}</div><div class="coin-contract-stat__value">{{ $contract->formattedPrincipal() }}</div></div>
+    <div class="coin-contract-stat"><div class="coin-contract-stat__label">{{ mb_strtoupper(__('coin.contract.profit_accrued')) }}</div><div class="coin-contract-stat__value coin-contract-stat__value--accent">{{ $contract->formattedAccrued() }}</div></div>
+    <div class="coin-contract-stat"><div class="coin-contract-stat__label">{{ mb_strtoupper(__('coin.contract.maturity')) }}</div><div class="coin-contract-stat__value">{{ $contract->formattedEndsAt() }}</div></div>
+    <div class="coin-contract-stat"><div class="coin-contract-stat__label">{{ mb_strtoupper(__('coin.contract.progress')) }}</div><div class="coin-contract-stat__value">100%</div></div>
   </div>
 </div>
