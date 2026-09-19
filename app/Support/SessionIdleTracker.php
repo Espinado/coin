@@ -50,7 +50,7 @@ class SessionIdleTracker
 
     public static function shouldTouch(Request $request): bool
     {
-        if ($request->is('login', 'login/*', 'logout', 'register', 'register/*', 'forgot-password', 'reset-password/*')) {
+        if ($request->is('login', 'login/*', 'logout', 'session-expired', 'register', 'register/*', 'forgot-password', 'reset-password/*')) {
             return false;
         }
 
@@ -91,5 +91,20 @@ class SessionIdleTracker
     public static function logoutRouteForGuard(?string $guard): string
     {
         return $guard === 'admin' ? route('admin.login') : route('login');
+    }
+
+    public static function idleLoginRedirect(?string $guard): \Illuminate\Http\RedirectResponse
+    {
+        return redirect(self::idleLoginRoute($guard))
+            ->with('status', __('coin.auth.idle_logout', [
+                'minutes' => self::idleMinutes(),
+            ]));
+    }
+
+    public static function idleLoginRoute(?string $guard): string
+    {
+        return $guard === 'admin'
+            ? route('admin.login', ['idle' => 1])
+            : route('login', ['idle' => 1]);
     }
 }

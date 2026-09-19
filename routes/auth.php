@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
+use App\Http\Controllers\SessionExpiredController;
 use App\Http\Controllers\Auth\TwoFactorLoginController;
 use App\Http\Controllers\Auth\ConfirmablePasswordController;
 use App\Http\Controllers\Auth\EmailVerificationCodeController;
@@ -13,6 +14,8 @@ use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Auth\VerifyEmailController;
 use Illuminate\Support\Facades\Route;
+
+Route::get('session-expired', SessionExpiredController::class)->name('session.expired');
 
 Route::middleware(['guest', 'auth.page.no-cache'])->group(function () {
     Route::get('register', [RegisteredUserController::class, 'create'])

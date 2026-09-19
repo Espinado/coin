@@ -23,14 +23,11 @@ class EnforceIdleSessionTimeout
             $request->session()->invalidate();
             $request->session()->regenerateToken();
 
-            if ($request->expectsJson() || $request->headers->has('X-Livewire')) {
+            if ($request->expectsJson()) {
                 return response('', 401);
             }
 
-            return redirect(SessionIdleTracker::logoutRouteForGuard($guard))
-                ->with('status', __('coin.auth.idle_logout', [
-                    'minutes' => SessionIdleTracker::idleMinutes(),
-                ]));
+            return SessionIdleTracker::idleLoginRedirect($guard);
         }
 
         if (SessionIdleTracker::shouldTouch($request)) {

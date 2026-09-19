@@ -16,28 +16,8 @@ function markActivityCookie() {
     document.cookie = `${ACTIVITY_COOKIE}=${value}; path=/; SameSite=Lax; max-age=120`;
 }
 
-function performLogout(logoutUrl) {
-    const csrf = readMeta('csrf-token');
-
-    if (! logoutUrl || ! csrf) {
-        window.location.assign(readMeta('coin-idle-redirect') || '/login');
-
-        return;
-    }
-
-    const form = document.createElement('form');
-    form.method = 'POST';
-    form.action = logoutUrl;
-    form.style.display = 'none';
-
-    const token = document.createElement('input');
-    token.type = 'hidden';
-    token.name = '_token';
-    token.value = csrf;
-    form.appendChild(token);
-
-    document.body.appendChild(form);
-    form.submit();
+function redirectToLoginAfterIdle() {
+    window.location.assign(readMeta('coin-idle-redirect') || '/session-expired');
 }
 
 export function bootSessionIdleWatcher() {
@@ -47,7 +27,6 @@ export function bootSessionIdleWatcher() {
         return;
     }
 
-    const logoutUrl = readMeta('coin-logout-url');
     const timeoutMs = minutes * 60 * 1000;
     let timerId = null;
 
@@ -58,7 +37,7 @@ export function bootSessionIdleWatcher() {
             window.clearTimeout(timerId);
         }
 
-        timerId = window.setTimeout(() => performLogout(logoutUrl), timeoutMs);
+        timerId = window.setTimeout(redirectToLoginAfterIdle, timeoutMs);
     };
 
     ACTIVITY_EVENTS.forEach((eventName) => {
@@ -73,7 +52,7 @@ export function bootSessionIdleWatcher() {
         const lastActivity = readActivityCookieMs();
 
         if (lastActivity !== null && Date.now() - lastActivity >= timeoutMs) {
-            performLogout(logoutUrl);
+            redirectToLoginAfterIdle();
 
             return;
         }
@@ -88,6 +67,14 @@ export function bootSessionIdleWatcher() {
 
         window.Livewire.hook('commit', ({ succeed }) => {
             succeed(() => resetTimer());
+        });
+
+        window.Livewire.hook('request', ({ fail }) => {
+            fail(({ status }) => {
+                if (status === 401 || status === 419) {
+                    redirectToLoginAfterIdle();
+                }
+            });
         });
     };
 

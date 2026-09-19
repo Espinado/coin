@@ -18,6 +18,7 @@ use App\Http\Controllers\Admin\SettingsController;
 use App\Http\Controllers\Admin\SupportTicketController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\WithdrawalController;
+use App\Http\Controllers\SessionExpiredController;
 use Illuminate\Support\Facades\Broadcast;
 use Illuminate\Support\Facades\Route;
 
@@ -26,6 +27,8 @@ Route::middleware(['admin.domain', 'reject.web.on.admin'])->group(function () {
 
     Route::any('register', fn () => abort(404));
     Route::any('reset-password/{token?}', fn () => abort(404));
+
+    Route::get('session-expired', SessionExpiredController::class)->name('admin.session.expired');
 
     Route::middleware(['guest:admin', 'auth.page.no-cache'])->group(function () {
         Route::get('login', [AuthenticatedSessionController::class, 'create'])

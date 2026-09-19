@@ -18,6 +18,10 @@
                 <div style="margin-top:16px;padding:12px 14px;border-radius:10px;border:1px solid rgba(255,180,84,0.35);background:rgba(255,180,84,0.08);font-size:13px;">
                     {{ session('status') }}
                 </div>
+            @elseif (request('idle') && ! $errors->any())
+                <div style="margin-top:16px;padding:12px 14px;border-radius:10px;border:1px solid rgba(255,180,84,0.35);background:rgba(255,180,84,0.08);font-size:13px;">
+                    {{ __('coin.auth.idle_logout', ['minutes' => config('coin.session.idle_minutes', 15)]) }}
+                </div>
             @endif
 
             <form method="POST" action="{{ route('admin.login.store') }}" data-no-page-spinner style="margin-top:24px;display:flex;flex-direction:column;gap:16px;">

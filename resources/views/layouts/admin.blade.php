@@ -6,8 +6,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     @auth('admin')
     <meta name="coin-session-idle-minutes" content="{{ config('coin.session.idle_minutes', 15) }}">
-    <meta name="coin-logout-url" content="{{ route('admin.logout') }}">
-    <meta name="coin-idle-redirect" content="{{ route('admin.login') }}">
+    <meta name="coin-idle-redirect" content="{{ route('admin.session.expired') }}">
     @endauth
     <title>@yield('title', \App\Support\PlatformBrand::adminName())</title>
     <link rel="icon" href="{{ asset('cloudflops/logo-mark.png') }}" type="image/png" />

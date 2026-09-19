@@ -5,6 +5,7 @@ use Illuminate\Auth\Middleware\RedirectIfAuthenticated;
 use Illuminate\Foundation\Application;
 use App\Services\AdminLoginTwoFactorService;
 use App\Services\LoginTwoFactorService;
+use App\Support\SessionIdleTracker;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Request;
@@ -67,11 +68,21 @@ return Application::configure(basePath: dirname(__DIR__))
                 return null;
             }
 
+            $isAdminHost = $request->getHost() === config('coin.admin_domain');
+            $loginRoute = $isAdminHost ? 'admin.login' : 'login';
+            $idleMessage = __('coin.auth.idle_logout', [
+                'minutes' => SessionIdleTracker::idleMinutes(),
+            ]);
+
+            if ($request->is('logout') || $request->headers->has('X-Livewire')) {
+                return redirect()
+                    ->route($loginRoute, ['idle' => 1])
+                    ->with('status', $idleMessage);
+            }
+
             if (! $request->is('login', 'login/two-factor', 'login/two-factor/resend')) {
                 return null;
             }
-
-            $isAdminHost = $request->getHost() === config('coin.admin_domain');
 
             if ($isAdminHost) {
                 app(AdminLoginTwoFactorService::class)->clearChallenge($request);

@@ -9,6 +9,8 @@
 
             @if (session('status') && ! $errors->any())
                 <x-auth-session-status class="coin-auth-status" :status="session('status')" />
+            @elseif (request('idle') && ! $errors->any())
+                <x-auth-session-status class="coin-auth-status" :status="__('coin.auth.idle_logout', ['minutes' => config('coin.session.idle_minutes', 15)])" />
             @endif
 
             <form method="POST" action="{{ route('login') }}" data-no-page-spinner>

@@ -33,7 +33,7 @@ class SessionIdleTimeoutTest extends TestCase
                 SessionIdleTracker::SESSION_KEY => now()->subMinutes(20)->toIso8601String(),
             ])
             ->get('http://coin.test/dashboard')
-            ->assertRedirect(route('login'))
+            ->assertRedirect(route('login', ['idle' => 1]))
             ->assertSessionHas('status', __('coin.auth.idle_logout', ['minutes' => 15]));
 
         $this->assertGuest();
@@ -66,9 +66,31 @@ class SessionIdleTimeoutTest extends TestCase
                 SessionIdleTracker::SESSION_KEY => now()->subMinutes(20)->toIso8601String(),
             ])
             ->get('http://admin.coin.test/dashboard')
-            ->assertRedirect(route('admin.login'))
+            ->assertRedirect(route('admin.login', ['idle' => 1]))
             ->assertSessionHas('status', __('coin.auth.idle_logout', ['minutes' => 15]));
 
         $this->assertGuest('admin');
+    }
+
+    public function test_expired_csrf_logout_redirects_to_login(): void
+    {
+        $user = User::factory()->create();
+
+        $this->actingAs($user)
+            ->post('http://coin.test/logout', ['_token' => 'invalid'])
+            ->assertRedirect(route('login', ['idle' => 1]))
+            ->assertSessionHas('status', __('coin.auth.idle_logout', ['minutes' => 15]));
+    }
+
+    public function test_session_expired_route_logs_out_and_redirects_to_login(): void
+    {
+        $user = User::factory()->create();
+
+        $this->actingAs($user)
+            ->get('http://coin.test/session-expired')
+            ->assertRedirect(route('login', ['idle' => 1]))
+            ->assertSessionHas('status', __('coin.auth.idle_logout', ['minutes' => 15]));
+
+        $this->assertGuest();
     }
 }
