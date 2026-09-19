@@ -18,7 +18,9 @@ use App\Services\UserInAppNotificationService;
 use App\Services\DepositService;
 use App\Services\ExchangeRateService;
 use App\Services\Payment\PaymentGatewayInterface;
+use App\Rules\TronPayoutAddress;
 use App\Services\Payment\PaymentSimulatorService;
+use App\Services\PayoutAddressService;
 use App\Services\PlanChangeRequestService;
 use App\Services\PlanPurchaseService;
 use App\Services\PlatformSettingsService;
@@ -26,6 +28,7 @@ use App\Services\ReferralService;
 use App\Services\SupportTicketService;
 use App\Services\UserActiveSessionService;
 use App\Services\WithdrawalService;
+use App\Support\TronAddressValidator;
 use Carbon\Carbon;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Collection;
@@ -156,6 +159,16 @@ class Dashboard extends Component
     public bool $sessionsModalOpen = false;
 
     public string $sessionsRevokePassword = '';
+
+    public bool $walletModalOpen = false;
+
+    public string $walletModalMode = 'save';
+
+    public string $payoutAddressInput = '';
+
+    public string $payoutAddressConfirm = '';
+
+    public string $payoutAddressPassword = '';
 
     public ?int $changingContractId = null;
 
@@ -1205,6 +1218,88 @@ class Dashboard extends Component
     public function getActiveSessionsSummaryProperty(): string
     {
         return app(UserActiveSessionService::class)->summaryForUser($this->user);
+    }
+
+    public function openWalletModal(): void
+    {
+        $this->resetActionFeedback();
+        $this->walletModalMode = 'save';
+        $this->payoutAddressInput = (string) ($this->wallet?->payout_address ?? '');
+        $this->payoutAddressConfirm = '';
+        $this->payoutAddressPassword = '';
+        $this->resetErrorBag('payoutAddressInput', 'payoutAddressConfirm', 'payoutAddressPassword');
+        $this->walletModalOpen = true;
+    }
+
+    public function openDisconnectWalletModal(): void
+    {
+        $this->resetActionFeedback();
+        $this->walletModalMode = 'disconnect';
+        $this->payoutAddressInput = '';
+        $this->payoutAddressConfirm = '';
+        $this->payoutAddressPassword = '';
+        $this->resetErrorBag('payoutAddressInput', 'payoutAddressConfirm', 'payoutAddressPassword');
+        $this->walletModalOpen = true;
+    }
+
+    public function closeWalletModal(): void
+    {
+        $this->walletModalOpen = false;
+        $this->walletModalMode = 'save';
+        $this->payoutAddressInput = '';
+        $this->payoutAddressConfirm = '';
+        $this->payoutAddressPassword = '';
+        $this->resetErrorBag('payoutAddressInput', 'payoutAddressConfirm', 'payoutAddressPassword');
+    }
+
+    public function savePayoutAddress(PayoutAddressService $payoutAddresses): void
+    {
+        $this->resetActionFeedback();
+
+        $this->validate([
+            'payoutAddressInput' => ['required', 'string', new TronPayoutAddress],
+            'payoutAddressConfirm' => ['required', 'same:payoutAddressInput'],
+            'payoutAddressPassword' => ['required', 'string'],
+        ], [], [
+            'payoutAddressInput' => __('coin.wallet.payout_address'),
+            'payoutAddressConfirm' => __('coin.profile.payout_address_confirm'),
+            'payoutAddressPassword' => __('coin.profile.sessions_password'),
+        ]);
+
+        $this->assertCurrentUserPassword($this->payoutAddressPassword, 'payoutAddressPassword');
+
+        $payoutAddresses->saveForUser($this->user, $this->payoutAddressInput);
+        $this->closeWalletModal();
+        $this->reloadPortfolioData();
+        $this->setActionFeedback(__('coin.messages.payout_address_saved'), 'success');
+    }
+
+    public function disconnectPayoutAddress(PayoutAddressService $payoutAddresses): void
+    {
+        $this->resetActionFeedback();
+
+        $this->validate([
+            'payoutAddressPassword' => ['required', 'string'],
+        ], [], [
+            'payoutAddressPassword' => __('coin.profile.sessions_password'),
+        ]);
+
+        $this->assertCurrentUserPassword($this->payoutAddressPassword, 'payoutAddressPassword');
+
+        $payoutAddresses->clearForUser($this->user);
+        $this->closeWalletModal();
+        $this->reloadPortfolioData();
+        $this->setActionFeedback(__('coin.messages.payout_address_removed'), 'success');
+    }
+
+    public function getWalletPayoutAddressValidProperty(): bool
+    {
+        return app(TronAddressValidator::class)->isValid($this->wallet?->payout_address);
+    }
+
+    public function getPayoutNetworkLabelProperty(): string
+    {
+        return app(PayoutAddressService::class)->networkLabel();
     }
 
     /** @return list<array{id: string, label: string, ip: ?string, last_active: string, is_current: bool}> */

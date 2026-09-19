@@ -32,6 +32,7 @@ return [
 
     'wallet' => [
         'base_currency' => env('COIN_WALLET_BASE_CURRENCY', 'USDT'),
+        'payout_network' => env('COIN_WALLET_PAYOUT_NETWORK', 'TRC-20'),
     ],
 
     'deposits' => [

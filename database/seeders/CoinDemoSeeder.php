@@ -58,7 +58,7 @@ class CoinDemoSeeder extends Seeder
             'locked_balance' => 0,
             'pending' => 0,
             'usd_estimate_label' => '≈ $0',
-            'payout_address' => '0x7c4b912a9f8833e2d1b0c8a4f',
+            'payout_address' => 'TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t',
             'pending_note' => null,
             'network_label' => 'TRC-20',
             'min_withdrawal_label' => number_format($settings->minWithdrawal(), 2, '.', ''),

@@ -82,7 +82,12 @@ class MockPaymentGatewayFlowTest extends TestCase
             'password' => Hash::make('secret1234'),
         ]);
         $user = User::factory()->create();
-        $user->wallet->update(['available' => 500, 'balance' => 500]);
+        $user->wallet->update([
+            'available' => 500,
+            'balance' => 500,
+            'payout_address' => PayoutAddressTest::VALID_TRON_ADDRESS,
+            'network_label' => 'TRC-20',
+        ]);
 
         $withdrawal = app(WithdrawalService::class)->createForUser($user, 100);
         $withdrawal = app(WithdrawalService::class)->dispatchViaGateway($withdrawal, $admin);
@@ -97,7 +102,13 @@ class MockPaymentGatewayFlowTest extends TestCase
     public function test_user_can_simulate_payout_via_gateway_from_pending_withdrawal(): void
     {
         $user = User::factory()->create();
-        $user->wallet->update(['available' => 300, 'balance' => 300, 'pending' => 0]);
+        $user->wallet->update([
+            'available' => 300,
+            'balance' => 300,
+            'pending' => 0,
+            'payout_address' => PayoutAddressTest::VALID_TRON_ADDRESS,
+            'network_label' => 'TRC-20',
+        ]);
 
         $withdrawal = app(WithdrawalService::class)->createForUser($user, 80);
         $withdrawal = app(WithdrawalService::class)->simulatePayoutViaGateway($withdrawal);

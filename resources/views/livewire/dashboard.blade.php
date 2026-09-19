@@ -1,4 +1,4 @@
-<div x-data x-effect="document.documentElement.classList.toggle('coin-nav-open', @js($menuOpen)); document.documentElement.classList.toggle('coin-modal-open', @js(filled($paymentModal) || filled($contractDetailsId) || $sessionsModalOpen))">
+<div x-data x-effect="document.documentElement.classList.toggle('coin-nav-open', @js($menuOpen)); document.documentElement.classList.toggle('coin-modal-open', @js(filled($paymentModal) || filled($contractDetailsId) || $sessionsModalOpen || $walletModalOpen))">
 <div class="coin-shell">
   <aside class="coin-sidebar">
     <div class="coin-sidebar-nav">
@@ -635,6 +635,7 @@
 @include('livewire.partials.payment-modal')
 @include('livewire.partials.contract-details-modal')
 @include('livewire.partials.sessions-modal')
+@include('livewire.partials.wallet-address-modal')
 </div>
 
 </div>

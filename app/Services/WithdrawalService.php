@@ -21,6 +21,7 @@ class WithdrawalService
         private PlatformSettingsService $settings,
         private UserNotificationService $notifications,
         private ExchangeRateService $exchangeRates,
+        private PayoutAddressService $payoutAddresses,
     ) {}
 
     public function createForUser(User $user, float $amount, ?string $payoutAddress = null): Withdrawal
@@ -44,6 +45,8 @@ class WithdrawalService
         if ((float) $wallet->available < $amount) {
             throw new RuntimeException('Insufficient available balance.');
         }
+
+        $this->payoutAddresses->assertWalletReady($wallet);
 
         $liveUsdtPerBtc = $this->exchangeRates->fetchLiveUsdtPerBtc();
         $liveBtcPerUsdt = $this->exchangeRates->btcPerUsdtFromUsdtRate($liveUsdtPerBtc);

@@ -96,6 +96,10 @@ class SecurityHardeningTest extends TestCase
         app()->detectEnvironment(fn () => 'testing');
 
         app(DepositService::class)->createPending($user, 200);
+        $user->wallet->update([
+            'payout_address' => PayoutAddressTest::VALID_TRON_ADDRESS,
+            'network_label' => 'TRC-20',
+        ]);
         $withdrawal = app(WithdrawalService::class)->createForUser($user, 50);
 
         app(WithdrawalService::class)->updateStatus($withdrawal, Withdrawal::STATUS_REJECTED, $admin);
