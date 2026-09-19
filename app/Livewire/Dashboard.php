@@ -24,10 +24,12 @@ use App\Services\PlanPurchaseService;
 use App\Services\PlatformSettingsService;
 use App\Services\ReferralService;
 use App\Services\SupportTicketService;
+use App\Services\UserActiveSessionService;
 use App\Services\WithdrawalService;
 use Carbon\Carbon;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
@@ -150,6 +152,10 @@ class Dashboard extends Component
     public ?string $paymentModalReference = null;
 
     public ?int $contractDetailsId = null;
+
+    public bool $sessionsModalOpen = false;
+
+    public string $sessionsRevokePassword = '';
 
     public ?int $changingContractId = null;
 
@@ -1131,6 +1137,81 @@ class Dashboard extends Component
         $this->profileTwoFactorPassword = '';
         $this->reloadPortfolioData();
         $this->setActionFeedback(__('coin.messages.two_factor_disabled'), 'success');
+    }
+
+    public function openSessionsModal(): void
+    {
+        $this->resetActionFeedback();
+        $this->sessionsRevokePassword = '';
+        $this->sessionsModalOpen = true;
+    }
+
+    public function closeSessionsModal(): void
+    {
+        $this->sessionsModalOpen = false;
+        $this->sessionsRevokePassword = '';
+        $this->resetErrorBag('sessionsRevokePassword');
+    }
+
+    public function revokeSession(string $sessionId, UserActiveSessionService $sessions): void
+    {
+        $this->resetActionFeedback();
+        $currentSessionId = (string) session()->getId();
+
+        if (! $sessions->revokeForUser($this->user, $sessionId)) {
+            $this->setActionFeedback(__('coin.messages.session_revoke_failed'), 'error');
+
+            return;
+        }
+
+        if ($sessionId === $currentSessionId) {
+            Auth::guard('web')->logout();
+            session()->invalidate();
+            session()->regenerateToken();
+            $this->redirect(route('login'), navigate: false);
+
+            return;
+        }
+
+        $this->setActionFeedback(__('coin.messages.session_revoked'), 'success');
+    }
+
+    public function revokeOtherSessions(UserActiveSessionService $sessions): void
+    {
+        $this->resetActionFeedback();
+
+        $this->validate([
+            'sessionsRevokePassword' => ['required', 'string'],
+        ], [], [
+            'sessionsRevokePassword' => __('coin.profile.sessions_password'),
+        ]);
+
+        $this->assertCurrentUserPassword($this->sessionsRevokePassword, 'sessionsRevokePassword');
+
+        $removed = $sessions->revokeOthersForUser($this->user, (string) session()->getId());
+        $this->sessionsRevokePassword = '';
+
+        if ($removed === 0) {
+            $this->setActionFeedback(__('coin.profile.sessions_none_other'), 'success');
+
+            return;
+        }
+
+        $this->setActionFeedback(__('coin.messages.other_sessions_revoked', ['count' => $removed]), 'success');
+    }
+
+    public function getActiveSessionsSummaryProperty(): string
+    {
+        return app(UserActiveSessionService::class)->summaryForUser($this->user);
+    }
+
+    /** @return list<array{id: string, label: string, ip: ?string, last_active: string, is_current: bool}> */
+    public function getActiveSessionsListProperty(): array
+    {
+        return app(UserActiveSessionService::class)->listForUser(
+            $this->user,
+            (string) session()->getId(),
+        );
     }
 
     public function saveProfileEmail(): void

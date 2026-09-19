@@ -27,7 +27,7 @@ Route::middleware(['admin.domain', 'reject.web.on.admin'])->group(function () {
     Route::any('register', fn () => abort(404));
     Route::any('reset-password/{token?}', fn () => abort(404));
 
-    Route::middleware('guest:admin')->group(function () {
+    Route::middleware(['guest:admin', 'auth.page.no-cache'])->group(function () {
         Route::get('login', [AuthenticatedSessionController::class, 'create'])
             ->name('admin.login');
 

@@ -87,9 +87,9 @@
         <div style="{{ $innerRow }}; display: flex; align-items: center; justify-content: space-between; gap: 16px;">
           <div>
             <div style="font-size: 13.5px;">{{ __('coin.profile.active_sessions') }}</div>
-            <div style="margin-top: 4px; {{ $hint }}">{{ __('coin.profile.sessions_devices') }}</div>
+            <div style="margin-top: 4px; {{ $hint }}">{{ $this->activeSessionsSummary }}</div>
           </div>
-          <button type="button" style="{{ $btnPrimary }}; padding: 8px 14px; font-size: 12.5px;">{{ __('coin.profile.review') }}</button>
+          <button type="button" wire:click="openSessionsModal" style="{{ $btnPrimary }}; padding: 8px 14px; font-size: 12.5px;">{{ __('coin.profile.review') }}</button>
         </div>
       </div>
     </div>

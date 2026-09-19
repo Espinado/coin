@@ -21,6 +21,10 @@ class AuthenticatedSessionController extends Controller
     {
         if ($request->boolean('cancel')) {
             $twoFactor->clearChallenge($request);
+
+            if (! $request->session()->has('status')) {
+                $request->session()->flash('status', __('coin.auth.two_factor_cancelled'));
+            }
         }
 
         if ($twoFactor->hasPendingChallenge($request)) {

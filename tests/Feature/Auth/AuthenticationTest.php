@@ -90,6 +90,25 @@ class AuthenticationTest extends TestCase
         $response->assertSee(__('coin.auth.login_email_not_found'), false);
     }
 
+    public function test_login_cancel_clears_two_factor_challenge(): void
+    {
+        Mail::fake();
+
+        $user = User::factory()->withEmailTwoFactor()->create();
+
+        $this->post('/login', [
+            'email' => $user->email,
+            'password' => 'password',
+        ])->assertRedirect(route('login.two-factor', absolute: false));
+
+        $this->get('/login?cancel=1')
+            ->assertOk()
+            ->assertSee(__('coin.auth.two_factor_cancelled'), false);
+
+        $this->get('/login/two-factor')
+            ->assertRedirect(route('login', absolute: false));
+    }
+
     public function test_two_factor_challenge_expires_and_restarts_from_login(): void
     {
         Mail::fake();

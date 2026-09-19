@@ -45,4 +45,6 @@
             </p>
         </div>
     </div>
+
+    @include('partials.auth-two-factor-back-handler', ['cancelUrl' => route('admin.login', ['cancel' => 1])])
 @endsection

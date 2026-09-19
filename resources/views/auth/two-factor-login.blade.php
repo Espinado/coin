@@ -32,4 +32,6 @@
             </div>
         </div>
     </div>
+
+    @include('partials.auth-two-factor-back-handler', ['cancelUrl' => route('login', ['cancel' => 1])])
 </x-coin-auth-layout>

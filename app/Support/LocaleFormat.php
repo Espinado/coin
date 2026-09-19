@@ -40,6 +40,17 @@ final class LocaleFormat
         return $date->locale(app()->getLocale())->isoFormat('D MMM · HH:mm');
     }
 
+    public static function shortMonthDay(CarbonInterface|string|null $value): string
+    {
+        $date = self::parse($value);
+
+        if (! $date) {
+            return '—';
+        }
+
+        return $date->locale(app()->getLocale())->isoFormat('D MMM');
+    }
+
     private static function parse(CarbonInterface|string|null $value): ?Carbon
     {
         if ($value instanceof CarbonInterface) {

@@ -94,6 +94,15 @@
     @endif
 
     @include('admin.partials.sweetalert')
+    @hasSection('topbar')
+        <script>
+            window.addEventListener('pageshow', function (event) {
+                if (event.persisted) {
+                    window.location.reload();
+                }
+            });
+        </script>
+    @endhasSection
     @stack('scripts')
     @auth('admin')
         @vite(['resources/js/admin-support-realtime.js'])

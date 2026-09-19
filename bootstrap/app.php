@@ -3,9 +3,12 @@
 use Illuminate\Auth\Middleware\Authenticate;
 use Illuminate\Auth\Middleware\RedirectIfAuthenticated;
 use Illuminate\Foundation\Application;
+use App\Services\AdminLoginTwoFactorService;
+use App\Services\LoginTwoFactorService;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Request;
+use Illuminate\Session\TokenMismatchException;
 use Illuminate\Support\Facades\Route;
 
 return Application::configure(basePath: dirname(__DIR__))
@@ -35,6 +38,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'user.not-blocked' => \App\Http\Middleware\EnsureUserNotBlocked::class,
             'record.user.login' => \App\Http\Middleware\RecordUserLogin::class,
             'admin.ability' => \App\Http\Middleware\EnsureAdminAbility::class,
+            'auth.page.no-cache' => \App\Http\Middleware\PreventAuthPageCache::class,
         ]);
 
         Authenticate::redirectUsing(function (Request $request) {
@@ -54,5 +58,29 @@ return Application::configure(basePath: dirname(__DIR__))
         });
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+        $exceptions->render(function (TokenMismatchException $e, Request $request) {
+            if (! $request->isMethod('POST')) {
+                return null;
+            }
+
+            if (! $request->is('login', 'login/two-factor', 'login/two-factor/resend')) {
+                return null;
+            }
+
+            $isAdminHost = $request->getHost() === config('coin.admin_domain');
+
+            if ($isAdminHost) {
+                app(AdminLoginTwoFactorService::class)->clearChallenge($request);
+
+                return redirect()
+                    ->route('admin.login', ['cancel' => 1])
+                    ->with('status', __('coin.auth.session_expired'));
+            }
+
+            app(LoginTwoFactorService::class)->clearChallenge($request);
+
+            return redirect()
+                ->route('login', ['cancel' => 1])
+                ->with('status', __('coin.auth.session_expired'));
+        });
     })->create();
