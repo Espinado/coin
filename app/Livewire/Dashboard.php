@@ -898,8 +898,10 @@ class Dashboard extends Component
         $this->resetPaymentModal();
 
         $this->validate([
-            'depositAmount' => ['required', 'numeric', 'min:0.01'],
-        ], [], [
+            'depositAmount' => ['required', 'numeric', 'gt:0'],
+        ], [
+            'depositAmount.gt' => __('coin.wallet.deposit_amount_positive'),
+        ], [
             'depositAmount' => 'amount',
         ]);
 

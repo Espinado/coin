@@ -93,6 +93,29 @@ class LiveExchangeRateTest extends TestCase
         $this->assertSame('0.00001230', number_format((float) $withdrawal->exchange_rate, 8, '.', ''));
     }
 
+    public function test_btc_deposit_allows_fractional_amount_when_usdt_equivalent_meets_minimum(): void
+    {
+        Http::fake([
+            'pro-api.coinmarketcap.com/v3/cryptocurrency/quotes/latest*' => Http::response([
+                'data' => [[
+                    'id' => 1,
+                    'symbol' => 'BTC',
+                    'quote' => [[
+                        'symbol' => 'USDT',
+                        'price' => 81264.15,
+                    ]],
+                ]],
+            ]),
+        ]);
+
+        $rates = app(ExchangeRateService::class);
+
+        $rates->assertMinDepositAtLiveRate(0.0006, 'BTC');
+
+        $this->expectException(\RuntimeException::class);
+        $rates->assertMinDepositAtLiveRate(0.0001, 'BTC');
+    }
+
     public function test_fetch_live_rate_falls_back_to_stored_settings(): void
     {
         config(['coin.exchange_rates.coinmarketcap.enabled' => false]);

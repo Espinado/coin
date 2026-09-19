@@ -147,6 +147,7 @@ return [
         'processing_time' => 'Срок обработки',
         'min_top_up' => 'Мин. пополнение',
         'min_deposit_error' => 'Минимальная сумма пополнения — :min.',
+        'deposit_amount_positive' => 'Укажите сумму больше нуля.',
         'min_payout' => 'Мин. вывод',
         'manage_addresses' => 'Управление адресами',
         'pending_settlement' => 'Ожидает зачисления',
