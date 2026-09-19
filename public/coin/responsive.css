@@ -1533,10 +1533,10 @@ html.coin-nav-open .coin-nav-mobile {
     grid-template-columns: minmax(0, 1fr);
   }
 
-  .coin-dashboard [style*="grid-template-columns: repeat(4, minmax(0, 1fr))"],
-  .coin-dashboard [style*="grid-template-columns: repeat(3, minmax(0, 1fr))"],
-  .coin-dashboard [style*="grid-template-columns: repeat(5, minmax(0, 1fr))"],
-  .coin-dashboard [style*="grid-template-columns: repeat(6, minmax(0, 1fr))"] {
+  .coin-dashboard [style*="grid-template-columns: repeat(4, minmax(0, 1fr))"]:not(.coin-contract-stats-grid),
+  .coin-dashboard [style*="grid-template-columns: repeat(3, minmax(0, 1fr))"]:not(.coin-contract-stats-grid),
+  .coin-dashboard [style*="grid-template-columns: repeat(5, minmax(0, 1fr))"]:not(.coin-contract-stats-grid),
+  .coin-dashboard [style*="grid-template-columns: repeat(6, minmax(0, 1fr))"]:not(.coin-contract-stats-grid) {
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
   }
 
@@ -1557,12 +1557,12 @@ html.coin-nav-open .coin-nav-mobile {
 }
 
 @media (max-width: 768px) {
-  .coin-dashboard [style*="grid-template-columns: repeat(4, minmax(0, 1fr))"],
-  .coin-dashboard [style*="grid-template-columns: repeat(3, minmax(0, 1fr))"],
-  .coin-dashboard [style*="grid-template-columns: repeat(2, minmax(0, 1fr))"],
-  .coin-dashboard [style*="grid-template-columns: repeat(5, minmax(0, 1fr))"],
-  .coin-dashboard [style*="grid-template-columns: repeat(6, minmax(0, 1fr))"],
-  .coin-dashboard [style*="grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.1fr)"],
+  .coin-dashboard [style*="grid-template-columns: repeat(4, minmax(0, 1fr))"]:not(.coin-contract-stats-grid),
+  .coin-dashboard [style*="grid-template-columns: repeat(3, minmax(0, 1fr))"]:not(.coin-contract-stats-grid),
+  .coin-dashboard [style*="grid-template-columns: repeat(2, minmax(0, 1fr))"]:not(.coin-contract-stats-grid),
+  .coin-dashboard [style*="grid-template-columns: repeat(5, minmax(0, 1fr))"]:not(.coin-contract-stats-grid),
+  .coin-dashboard [style*="grid-template-columns: repeat(6, minmax(0, 1fr))"]:not(.coin-contract-stats-grid),
+  .coin-dashboard [style*="grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.1fr)"]:not(.coin-contract-stats-grid),
   .coin-wallet-actions-grid {
     grid-template-columns: minmax(0, 1fr) !important;
   }

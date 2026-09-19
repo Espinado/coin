@@ -31,6 +31,45 @@
       input[type="range"] { accent-color: oklch(0.8 0.13 192); }
       .coin-sidebar-brand__logo { max-width: 100%; max-height: 52px; height: auto; width: auto; object-fit: contain; }
       .coin-brand-logo { width: min(260px, 54vw); height: auto; max-height: 56px; display: block; object-fit: contain; }
+      .coin-contract-stats-grid {
+        display: grid;
+        grid-template-columns: repeat(6, minmax(0, 1fr));
+        gap: 20px;
+        margin-top: 24px;
+      }
+      .coin-contract-stats-grid--4 {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+      }
+      .coin-contract-stat { min-width: 0; }
+      .coin-contract-stat__label {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 9.5px;
+        letter-spacing: 0.12em;
+        color: rgba(214, 238, 248, 0.68);
+        line-height: 1.35;
+        word-break: break-word;
+      }
+      .coin-contract-stat__value {
+        margin-top: 9px;
+        font-size: 14px;
+        line-height: 1.35;
+        word-break: break-word;
+      }
+      .coin-contract-stat__value--accent { color: oklch(0.9 0.12 192); }
+      @media (max-width: 1024px) {
+        .coin-contract-stats-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+        .coin-contract-stats-grid--4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      }
+      @media (max-width: 768px) {
+        .coin-contract-stats-grid,
+        .coin-contract-stats-grid--4 {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 14px 12px;
+        }
+        .coin-contract-card { padding: 16px !important; }
+        .coin-contract-card__actions { width: 100%; flex-direction: column; }
+        .coin-contract-card__actions button { width: 100%; box-sizing: border-box; }
+      }
     </style>
 </head>
 <body>
