@@ -39,6 +39,15 @@ return [
         'currencies' => ['USDT', 'BTC'],
     ],
 
+    'exchange_rates' => [
+        'coinmarketcap' => [
+            'enabled' => filled(env('CMC_API_KEY')),
+            'api_key' => env('CMC_API_KEY'),
+            'base_url' => env('CMC_API_BASE_URL', 'https://pro-api.coinmarketcap.com'),
+            'refresh_minutes' => max(5, (int) env('CMC_RATE_REFRESH_MINUTES', 15)),
+        ],
+    ],
+
     'payments' => [
         'driver' => env('COIN_PAYMENT_DRIVER', 'mock'),
 

@@ -780,6 +780,11 @@ class Dashboard extends Component
         return app(ExchangeRateService::class)->formatMinDepositLabel($this->depositCurrency);
     }
 
+    public function getDepositBtcRateLabelProperty(): ?string
+    {
+        return app(ExchangeRateService::class)->formatBtcMarketRateLabel();
+    }
+
     public function getPlanNameProperty(): string
     {
         return $this->selectedPlan?->displayName() ?? '—';

@@ -15,16 +15,58 @@ class ExchangeRateService
         return (string) config('coin.wallet.base_currency', 'USDT');
     }
 
-    /** How many BTC equal 1 USDT (demo default: 2 BTC per 1 USDT). */
-    public function btcPerUsdt(): float
+    /** USDT price of 1 BTC (CoinMarketCap or manual fallback). */
+    public function usdtPerBtc(): float
     {
-        $rate = $this->settings->getFloat('btc_per_usdt');
+        $rate = $this->settings->getFloat('usdt_per_btc');
 
-        if ($rate <= 0) {
-            $rate = $this->settings->getFloat('btc_per_usd');
+        if ($rate > 0) {
+            return $rate;
         }
 
-        return $rate > 0 ? $rate : 2.0;
+        $legacyBtcPerUsdt = $this->settings->getFloat('btc_per_usdt');
+
+        if ($legacyBtcPerUsdt > 0) {
+            return 1 / $legacyBtcPerUsdt;
+        }
+
+        $legacyBtcPerUsd = $this->settings->getFloat('btc_per_usd');
+
+        if ($legacyBtcPerUsd > 0) {
+            return 1 / $legacyBtcPerUsd;
+        }
+
+        return 0;
+    }
+
+    /** How many BTC equal 1 USDT. */
+    public function btcPerUsdt(): float
+    {
+        $usdtPerBtc = $this->usdtPerBtc();
+
+        if ($usdtPerBtc > 0) {
+            return 1 / $usdtPerBtc;
+        }
+
+        return 2.0;
+    }
+
+    public function btcRateUpdatedAt(): ?string
+    {
+        $value = trim($this->settings->get('btc_rate_updated_at'));
+
+        return $value !== '' ? $value : null;
+    }
+
+    public function formatBtcMarketRateLabel(): ?string
+    {
+        $usdtPerBtc = $this->usdtPerBtc();
+
+        if ($usdtPerBtc <= 0) {
+            return null;
+        }
+
+        return number_format($usdtPerBtc, 2, '.', ',').' USDT';
     }
 
     /**

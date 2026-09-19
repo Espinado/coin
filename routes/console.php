@@ -23,3 +23,9 @@ Schedule::command('coin:accrue-daily-profits')
     ->dailyAt($profitAccrualTime)
     ->timezone($profitAccrualTimezone)
     ->withoutOverlapping();
+
+if (config('coin.exchange_rates.coinmarketcap.enabled')) {
+    Schedule::command('coin:refresh-btc-rate')
+        ->everyMinutes((int) config('coin.exchange_rates.coinmarketcap.refresh_minutes'))
+        ->withoutOverlapping();
+}

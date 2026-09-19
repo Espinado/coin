@@ -524,6 +524,9 @@
               <span style="color: rgba(214,238,248,0.78);">{{ $depositCurrency }}</span>
             </div>
             @error('depositAmount')<p style="margin-top:8px;font-size:12px;color:#ff8f8f;">{{ $message }}</p>@enderror
+            @if($this->depositBtcRateLabel)
+            <p style="margin-top:10px;font-size:12px;line-height:1.5;color:rgba(214,238,248,0.72);">{{ __('coin.wallet.deposit_btc_rate', ['rate' => $this->depositBtcRateLabel]) }}</p>
+            @endif
             @if($this->depositCreditPreview && $depositCurrency !== $this->walletCurrency)
             <p style="margin-top:10px;font-size:12px;line-height:1.5;color:rgba(214,238,248,0.72);">{{ __('coin.wallet.deposit_credit_preview', ['amount' => $this->depositCreditPreview]) }}</p>
             @endif

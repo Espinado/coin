@@ -23,6 +23,9 @@ class PlatformSettingsService
         'kyc_required_for_withdrawal' => '0',
         'maintenance_mode' => '0',
         'btc_per_usdt' => '2',
+        'usdt_per_btc' => '',
+        'btc_rate_updated_at' => '',
+        'btc_rate_source' => 'manual',
         'profit_accrual_time' => '09:00',
     ];
 
@@ -178,6 +181,7 @@ class PlatformSettingsService
             'referral_level2_percent' => ['label' => 'Реферальный % (уровень 2, не использ.)', 'type' => 'number', 'default' => self::DEFAULTS['referral_level2_percent']],
             'kyc_required_for_withdrawal' => ['label' => __('coin.settings.kyc_for_payout'), 'type' => 'boolean', 'default' => self::DEFAULTS['kyc_required_for_withdrawal']],
             'maintenance_mode' => ['label' => __('coin.settings.maintenance'), 'type' => 'boolean', 'default' => self::DEFAULTS['maintenance_mode']],
+            'usdt_per_btc' => ['label' => __('coin.settings.usdt_per_btc'), 'type' => 'number', 'default' => self::DEFAULTS['usdt_per_btc']],
             'btc_per_usdt' => ['label' => __('coin.settings.btc_per_usdt'), 'type' => 'number', 'default' => self::DEFAULTS['btc_per_usdt']],
             'profit_accrual_time' => ['label' => __('coin.settings.profit_accrual_time'), 'type' => 'time', 'default' => self::DEFAULTS['profit_accrual_time']],
         ];

@@ -36,8 +36,8 @@ class SettingsController extends Controller
                 $rules[$key] = ['required', 'string', 'max:12'];
             } elseif ($key === 'epochs_per_day') {
                 $rules[$key] = ['required', 'integer', 'min:1', 'max:24'];
-            } elseif ($key === 'btc_per_usdt') {
-                $rules[$key] = ['required', 'numeric', 'gt:0'];
+            } elseif (in_array($key, ['btc_per_usdt', 'usdt_per_btc'], true)) {
+                $rules[$key] = ['nullable', 'numeric', 'gt:0'];
             } else {
                 $rules[$key] = ['required', 'numeric', 'min:0'];
             }
