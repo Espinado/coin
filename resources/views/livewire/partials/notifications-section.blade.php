@@ -24,7 +24,7 @@
               wire:click="openNotification({{ $notification->id }})"
               wire:key="notification-row-{{ $notification->id }}"
               class="coin-btn-quiet coin-notification-item {{ (int) $selectedNotificationId === (int) $notification->id ? 'coin-notification-item--selected' : '' }}"
-              style="width: 100%; text-align: left; padding: 14px 16px; border-radius: 12px; border: 1px solid {{ (int) $selectedNotificationId === (int) $notification->id ? 'rgba(150,235,250,0.28)' : 'rgba(150,235,250,0.12)' }}; background: {{ (int) $selectedNotificationId === (int) $notification->id ? 'rgba(150,235,250,0.06)' : 'rgba(150,235,250,0.03)' }}; color: inherit; cursor: pointer;"
+              style="width: 100%; text-align: left; padding: 14px 16px; border-radius: 12px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.03); color: inherit; cursor: pointer;"
             >
               <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 10px;">
                 <div style="min-width: 0;">
