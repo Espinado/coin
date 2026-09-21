@@ -1,6 +1,6 @@
-<div style="padding: 22px; border-radius: 16px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.035);">
-  <div style="font-size: 15px; font-weight: 600;">{{ __('coin.overview.plan_breakdown') }}</div>
-  <div style="margin-top: 4px; font-size: 12.5px; color: rgba(214,238,248,0.7);">{{ __('coin.overview.plan_breakdown_sub') }}</div>
+<div class="coin-dash-panel">
+  <div class="coin-dash-panel__title">{{ __('coin.overview.plan_breakdown') }}</div>
+  <div class="coin-dash-panel__sub">{{ __('coin.overview.plan_breakdown_sub') }}</div>
   <div style="margin-top: 20px; display: flex; flex-direction: column; gap: 12px;">
     @forelse($plans as $plan)
       @php

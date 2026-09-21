@@ -21,7 +21,13 @@
       return;
     }
 
-    if (e.target.closest('.coin-nav-overlay') || e.target.closest('.coin-nav-mobile a')) {
+    if (
+      e.target.closest('.coin-nav-overlay')
+      || e.target.closest('.coin-nav-mobile-close')
+      || e.target.closest('.coin-nav-mobile a')
+      || e.target.closest('.coin-landing-drawer__link')
+      || e.target.closest('.coin-landing-drawer__cta')
+    ) {
       closeNav();
     }
   });

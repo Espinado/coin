@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\LegalPage;
 use App\Models\Plan;
+use App\Services\LandingStatsService;
 use App\Services\PlatformSettingsService;
 use App\Support\LandingPlans;
 use Illuminate\Database\Eloquent\Collection;
@@ -11,7 +12,7 @@ use Illuminate\Http\Response;
 
 class HomeController extends Controller
 {
-    public function __invoke(PlatformSettingsService $settings): Response
+    public function __invoke(PlatformSettingsService $settings, LandingStatsService $landingStats): Response
     {
         /** @var Collection<int, Plan> $allActive */
         $allActive = Plan::query()
@@ -20,6 +21,7 @@ class HomeController extends Controller
             ->get();
 
         $landingPlans = $allActive->reject(fn (Plan $plan) => $plan->isEnterprise())->values();
+        $stats = $landingStats->forLanding($landingPlans, $allActive->count());
 
         $faqPage = LegalPage::query()
             ->where('slug', LegalPage::SLUG_FAQ)
@@ -29,7 +31,8 @@ class HomeController extends Controller
         return response()
             ->view('home', [
                 'plans' => $landingPlans,
-                'activePlanCount' => $allActive->count(),
+                'activePlanCount' => $stats['active_plan_count'],
+                'landingStats' => $stats,
                 'landingPlansPayload' => LandingPlans::calculatorPayload($landingPlans),
                 'legalPages' => LegalPage::query()->published()->ordered()->get(),
                 'faqPage' => $faqPage,

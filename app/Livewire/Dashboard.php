@@ -658,7 +658,59 @@ class Dashboard extends Component
 
     public function getTotalAllocatedTflopsProperty(): string
     {
-        return $this->totalLockedBalance;
+        $total = (int) $this->activeContracts->sum('tflops');
+
+        if ($total <= 0) {
+            $total = (int) ($this->user->active_tflops ?? 0);
+        }
+
+        return number_format($total, 0, '.', ' ');
+    }
+
+    public function getActivePowerSubtitleProperty(): string
+    {
+        $nodes = trim((string) ($this->user->nodes_label ?? ''));
+
+        if ($nodes !== '' && $nodes !== '—') {
+            return __('coin.overview.power_nodes', [
+                'count' => $this->activeContractCount,
+                'nodes' => $nodes,
+            ]);
+        }
+
+        return __('coin.invest.active_count_line', ['count' => $this->activeContractCount]);
+    }
+
+    public function getPrimaryPlanTitleProperty(): string
+    {
+        return $this->primaryPlan?->displayName() ?? '—';
+    }
+
+    public function getPrimaryPlanSubtitleProperty(): string
+    {
+        if ($this->primaryPlan === null) {
+            return __('coin.overview.no_active_plan');
+        }
+
+        return __('coin.overview.active_plan_sub', [
+            'term' => $this->primaryPlan->formattedDuration(),
+            'infra' => $this->primaryPlan->displayInfra(),
+        ]);
+    }
+
+    public function getEpochHeaderLabelProperty(): string
+    {
+        $label = trim((string) ($this->user->epoch_label ?? ''));
+
+        return $label !== '' ? $label : __('coin.overview.epoch_default');
+    }
+
+    public function getDailyRewardHintProperty(): string
+    {
+        return __('coin.overview.daily_reward_hint', [
+            'symbol' => $this->walletCurrency,
+            'epochs' => $this->epochsPerDay,
+        ]);
     }
 
     public function getTotalLockedBalanceProperty(): string
