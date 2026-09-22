@@ -506,9 +506,65 @@ html.coin-nav-open .coin-nav-mobile {
   max-width: 1296px;
   margin: 0 auto;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr));
+  grid-template-columns: minmax(0, 1fr);
   gap: clamp(36px, 5vw, 60px);
   align-items: center;
+}
+
+.coin-landing-hero__copy {
+  min-width: 0;
+}
+
+.coin-landing-hero__visual {
+  display: none;
+  min-width: 0;
+}
+
+.coin-landing-hero__visual-card {
+  padding: 26px;
+  border-radius: 22px;
+  border: 1px solid rgba(150, 235, 250, 0.16);
+  background: linear-gradient(170deg, rgba(20, 55, 80, 0.7), rgba(6, 20, 35, 0.85));
+  box-shadow: 0 40px 90px -50px #000;
+}
+
+.coin-landing-btn {
+  display: inline-block;
+  padding: 16px 28px;
+  border-radius: 13px;
+  border: 1px solid transparent;
+  font-family: inherit;
+  font-size: 15.5px;
+  font-weight: 500;
+  line-height: 1.2;
+  cursor: pointer;
+  text-decoration: none;
+  box-sizing: border-box;
+  text-align: center;
+}
+
+.coin-landing-btn--primary {
+  border-color: oklch(0.86 0.11 195 / 0.5);
+  background: linear-gradient(140deg, oklch(0.86 0.12 192), oklch(0.66 0.13 205));
+  color: #04121f;
+  font-weight: 600;
+  box-shadow: 0 20px 50px -22px oklch(0.8 0.13 195 / 0.7);
+}
+
+.coin-landing-btn--outline {
+  border-color: oklch(0.86 0.11 195 / 0.45);
+  background: transparent;
+  color: #e6f4fa;
+}
+
+@media (min-width: 1024px) {
+  .coin-landing-hero__grid {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+
+  .coin-landing-hero__visual {
+    display: block;
+  }
 }
 
 .coin-landing-hero__title {
@@ -3072,11 +3128,17 @@ html.coin-nav-open .coin-nav-mobile {
     gap: 32px !important;
   }
 
-  .coin-landing-hero__actions a {
-    flex: 1 1 auto;
-    min-width: min(100%, 220px);
-    text-align: center;
-    box-sizing: border-box;
+  .coin-landing-hero__visual {
+    display: none !important;
+  }
+
+  .coin-landing-hero__actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .coin-landing-hero__actions .coin-landing-btn {
+    width: 100%;
   }
 
   .coin-landing [style*="grid-template-columns: 1fr 540px"],

@@ -1,6 +1,6 @@
 <section class="coin-landing-hero" data-screen-label="Hero">
   <div class="coin-landing-hero__grid">
-    <div>
+    <div class="coin-landing-hero__copy">
       <div style="display: inline-flex; align-items: center; gap: 10px; padding: 7px 14px; border-radius: 999px; border: 1px solid rgba(150,235,250,0.2); background: rgba(150,235,250,0.06); font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.14em; color: oklch(0.88 0.11 195);">
         <span style="width: 6px; height: 6px; border-radius: 50%; background: oklch(0.85 0.15 160); animation: paiPulse 2.4s infinite;"></span>ПЛАТФОРМА AI-ВЫЧИСЛЕНИЙ
       </div>
@@ -12,8 +12,8 @@
       @include('partials.landing-hero-stats')
     </div>
 
-    <div style="position: relative;">
-      <div style="padding: 26px; border-radius: 22px; border: 1px solid rgba(150,235,250,0.16); background: linear-gradient(170deg, rgba(20,55,80,0.7), rgba(6,20,35,0.85)); box-shadow: 0 40px 90px -50px #000;">
+    <div class="coin-landing-hero__visual">
+      <div class="coin-landing-hero__visual-card">
         <div style="display: flex; align-items: center; justify-content: space-between;">
           <span style="font-family: 'JetBrains Mono', monospace; font-size: 10.5px; letter-spacing: 0.14em; color: rgba(230,244,250,0.72);">ВЫЧИСЛИТЕЛЬНАЯ ИНФРАСТРУКТУРА</span>
           <span style="display: flex; align-items: center; gap: 7px; font-family: 'JetBrains Mono', monospace; font-size: 10.5px; color: oklch(0.88 0.14 160);"><span style="width: 6px; height: 6px; border-radius: 50%; background: oklch(0.85 0.15 160); animation: paiPulse 2.2s infinite;"></span>РАБОТАЕТ</span>
