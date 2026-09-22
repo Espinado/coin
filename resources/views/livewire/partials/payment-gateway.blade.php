@@ -12,7 +12,7 @@
           $creditPreview = null;
       }
   }
-  $isMockDriver = config('coin.payments.driver', 'mock') === 'mock';
+  $isMockDriver = ! app(\App\Services\PlatformSettingsService::class)->usesLivePaymentGateway();
   $canDismiss = ! in_array($paymentModalStep, ['processing'], true);
 @endphp
 <div

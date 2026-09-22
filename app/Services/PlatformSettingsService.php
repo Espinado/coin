@@ -21,6 +21,7 @@ class PlatformSettingsService
         'referral_level1_percent' => '20',
         'referral_level2_percent' => '0',
         'kyc_required_for_withdrawal' => '0',
+        'payment_gate_enabled' => '0',
         'maintenance_mode' => '0',
         'btc_per_usdt' => '2',
         'usdt_per_btc' => '',
@@ -166,6 +167,28 @@ class PlatformSettingsService
         return (string) config('coin.profit_accrual.schedule_timezone', 'Europe/Riga');
     }
 
+    public function paymentGateEnabled(): bool
+    {
+        return $this->getBool('payment_gate_enabled');
+    }
+
+    public function usesLivePaymentGateway(): bool
+    {
+        return $this->paymentGateEnabled()
+            && (string) config('coin.payments.driver', 'mock') === 'ccapi';
+    }
+
+    public function assertPaymentGateEnabled(): void
+    {
+        if (! $this->paymentGateEnabled()) {
+            throw new \RuntimeException(__('coin.wallet.payment_gate_disabled'));
+        }
+
+        if ($this->usesLivePaymentGateway() && ! filled((string) config('coin.payments.ccapi.api_key'))) {
+            throw new \RuntimeException(__('coin.wallet.payment_gate_ccapi_missing'));
+        }
+    }
+
     /** @return array<string, array{label: string, type: string, default: string}> */
     public function definitions(): array
     {
@@ -180,6 +203,7 @@ class PlatformSettingsService
             'referral_level1_percent' => ['label' => __('coin.settings.referral_percent'), 'type' => 'number', 'default' => self::DEFAULTS['referral_level1_percent']],
             'referral_level2_percent' => ['label' => 'Реферальный % (уровень 2, не использ.)', 'type' => 'number', 'default' => self::DEFAULTS['referral_level2_percent']],
             'kyc_required_for_withdrawal' => ['label' => __('coin.settings.kyc_for_payout'), 'type' => 'boolean', 'default' => self::DEFAULTS['kyc_required_for_withdrawal']],
+            'payment_gate_enabled' => ['label' => __('coin.settings.payment_gate'), 'type' => 'boolean', 'default' => self::DEFAULTS['payment_gate_enabled']],
             'usdt_per_btc' => ['label' => __('coin.settings.usdt_per_btc'), 'type' => 'readonly_decimal', 'default' => self::DEFAULTS['usdt_per_btc'], 'readonly' => true],
             'btc_per_usdt' => ['label' => __('coin.settings.btc_per_usdt'), 'type' => 'readonly_decimal', 'default' => self::DEFAULTS['btc_per_usdt'], 'readonly' => true],
             'maintenance_mode' => ['label' => __('coin.settings.maintenance'), 'type' => 'boolean', 'default' => self::DEFAULTS['maintenance_mode']],

@@ -17,6 +17,7 @@ class DepositService
     public function __construct(
         private WalletService $wallets,
         private ExchangeRateService $exchangeRates,
+        private PlatformSettingsService $settings,
     ) {}
 
     public function createPending(User $user, float $amount, string $currency = 'USDT', ?string $method = null): Deposit
@@ -61,6 +62,8 @@ class DepositService
 
     public function initiateWithGateway(User $user, float $amount, string $currency, PaymentGatewayInterface $gateway): Deposit
     {
+        $this->settings->assertPaymentGateEnabled();
+
         $driver = (string) config('coin.payments.driver', 'mock');
         $deposit = $this->createPending($user, $amount, $currency, $driver);
 

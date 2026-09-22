@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Listeners\LogAuthLockout;
 use App\Services\Payment\CcapiIpnVerifier;
+use App\Services\PlatformSettingsService;
 use App\Services\Payment\CryptoCurrencyApiClient;
 use App\Services\Payment\CryptoCurrencyApiGateway;
 use App\Services\Payment\MockPaymentGateway;
@@ -33,6 +34,12 @@ class AppServiceProvider extends ServiceProvider
         });
 
         $this->app->singleton(PaymentGatewayInterface::class, function ($app) {
+            $settings = $app->make(PlatformSettingsService::class);
+
+            if (! $settings->paymentGateEnabled()) {
+                return $app->make(MockPaymentGateway::class);
+            }
+
             $driver = (string) config('coin.payments.driver', 'mock');
 
             return match ($driver) {

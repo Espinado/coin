@@ -400,10 +400,15 @@
               <button type="button" wire:click="setDepositPreset(1000)" class="coin-deposit-presets__btn coin-btn-quiet">1 000 {{ $depositCurrency }}</button>
             </div>
             <div class="coin-wallet-action-card__footer">
+              @if($this->paymentGateEnabled)
               <button type="button" wire:click="openTopUpPaymentModal" wire:loading.attr="disabled" wire:target="openTopUpPaymentModal" style="width: 100%; padding: 12px; border-radius: 10px; border: 1px solid oklch(0.86 0.11 195 / 0.5); background: linear-gradient(140deg, oklch(0.86 0.12 192), oklch(0.66 0.13 205)); color: #04121f; font-family: inherit; font-size: 13.5px; font-weight: 600; cursor: pointer;">
                 <span wire:loading.remove wire:target="openTopUpPaymentModal">{{ __('coin.wallet.add_funds') }}</span>
                 <span wire:loading wire:target="openTopUpPaymentModal">{{ __('coin.payment_modal.confirming') }}</span>
               </button>
+              @else
+              <p style="margin: 0 0 12px; font-size: 12px; line-height: 1.5; color: rgba(214,238,248,0.62);">{{ __('coin.wallet.payment_gate_disabled_hint') }}</p>
+              <button type="button" disabled style="width: 100%; padding: 12px; border-radius: 10px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.04); color: rgba(214,238,248,0.45); font-family: inherit; font-size: 13.5px; font-weight: 600; cursor: not-allowed;">{{ __('coin.wallet.add_funds') }}</button>
+              @endif
             </div>
           </div>
 
@@ -437,7 +442,12 @@
               <div style="display: flex; justify-content: space-between; gap: 14px;"><span style="color: rgba(214,238,248,0.72); min-width: 0;">{{ __('coin.wallet.processing_time') }}</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">~2 h</span></div>
             </div>
             <div class="coin-wallet-action-card__footer">
+              @if($this->paymentGateEnabled)
               <button type="button" wire:click="openPayoutPaymentModal" style="width: 100%; padding: 12px; border-radius: 10px; border: 1px solid rgba(150,235,250,0.2); background: rgba(150,235,250,0.06); color: #e6f4fa; font-family: inherit; font-size: 13.5px; font-weight: 500; cursor: pointer;">{{ __('coin.wallet.request_payout') }}</button>
+              @else
+              <p style="margin: 0 0 12px; font-size: 12px; line-height: 1.5; color: rgba(214,238,248,0.62);">{{ __('coin.wallet.payment_gate_disabled_hint') }}</p>
+              <button type="button" disabled style="width: 100%; padding: 12px; border-radius: 10px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.04); color: rgba(214,238,248,0.45); font-family: inherit; font-size: 13.5px; font-weight: 500; cursor: not-allowed;">{{ __('coin.wallet.request_payout') }}</button>
+              @endif
             </div>
           </div>
 

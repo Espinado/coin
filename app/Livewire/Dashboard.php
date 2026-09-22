@@ -858,6 +858,16 @@ class Dashboard extends Component
         return config('coin.withdrawals.currencies', ['USDT', 'BTC']);
     }
 
+    public function getPaymentGateEnabledProperty(): bool
+    {
+        return app(PlatformSettingsService::class)->paymentGateEnabled();
+    }
+
+    public function getUsesLivePaymentGatewayProperty(): bool
+    {
+        return app(PlatformSettingsService::class)->usesLivePaymentGateway();
+    }
+
     public function getDepositCreditPreviewProperty(): ?string
     {
         $amount = (float) str_replace([',', ' '], '', $this->depositAmount);
@@ -1027,6 +1037,12 @@ class Dashboard extends Component
         $this->resetActionFeedback();
         $this->resetPaymentModal();
 
+        if (! $this->paymentGateEnabled) {
+            throw ValidationException::withMessages([
+                'depositAmount' => [__('coin.wallet.payment_gate_disabled')],
+            ]);
+        }
+
         $this->validate([
             'depositAmount' => ['required', 'numeric', 'gt:0'],
         ], [
@@ -1080,7 +1096,7 @@ class Dashboard extends Component
             return;
         }
 
-        if ((string) config('coin.payments.driver', 'mock') !== 'mock') {
+        if ($this->usesLivePaymentGateway) {
             return;
         }
 
@@ -1113,6 +1129,12 @@ class Dashboard extends Component
     {
         $this->resetActionFeedback();
         $this->resetPaymentModal();
+
+        if (! $this->paymentGateEnabled) {
+            throw ValidationException::withMessages([
+                'withdrawAmount' => [__('coin.wallet.payment_gate_disabled')],
+            ]);
+        }
 
         $this->validate([
             'withdrawAmount' => $this->withdrawCurrency === 'BTC'
@@ -1155,7 +1177,7 @@ class Dashboard extends Component
             $this->paymentModalReference = $withdrawal->reference;
             $this->pendingWithdrawalId = $withdrawal->id;
 
-            if ((string) config('coin.payments.driver', 'mock') === 'mock') {
+            if (! $this->usesLivePaymentGateway) {
                 $this->paymentModalStep = 'payout_gateway';
 
                 return;
@@ -1178,7 +1200,7 @@ class Dashboard extends Component
             return;
         }
 
-        if ((string) config('coin.payments.driver', 'mock') !== 'mock') {
+        if ($this->usesLivePaymentGateway) {
             return;
         }
 

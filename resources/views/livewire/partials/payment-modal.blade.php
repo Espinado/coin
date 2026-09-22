@@ -4,7 +4,7 @@
   $isPlanChange = $paymentModal === 'plan_change';
   $isPayout = $paymentModal === 'payout';
   $currency = $isPayout ? $withdrawCurrency : ($wallet?->currency ?? config('coin.wallet.base_currency', 'USDT'));
-  $isMockDriver = config('coin.payments.driver', 'mock') === 'mock';
+  $isMockDriver = ! app(\App\Services\PlatformSettingsService::class)->usesLivePaymentGateway();
   $changingContract = $isPlanChange ? $this->changingContract : null;
   $amount = $isPlanChange
     ? number_format($this->planChangeTopUp, 2, '.', ',')
