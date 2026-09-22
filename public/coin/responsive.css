@@ -1491,7 +1491,7 @@ html.coin-nav-open .coin-nav-mobile {
 .coin-wallet-action-card {
   display: flex;
   flex-direction: column;
-  height: 100%;
+  min-width: 0;
   padding: 24px;
   border-radius: 16px;
   border: 1px solid rgba(150, 235, 250, 0.12);
@@ -1499,8 +1499,62 @@ html.coin-nav-open .coin-nav-mobile {
 }
 
 .coin-wallet-action-card__footer {
-  margin-top: auto;
-  padding-top: 20px;
+  margin-top: 20px;
+  padding-top: 0;
+}
+
+@media (min-width: 1025px) {
+  .coin-wallet-action-card {
+    height: 100%;
+  }
+
+  .coin-wallet-action-card__footer {
+    margin-top: auto;
+    padding-top: 20px;
+  }
+}
+
+.coin-wallet-transactions-panel {
+  padding: 24px;
+  border-radius: 16px;
+  border: 1px solid rgba(150, 235, 250, 0.12);
+  background: rgba(150, 235, 250, 0.035);
+  min-width: 0;
+}
+
+.coin-wallet-transactions-table {
+  min-width: 640px;
+}
+
+.coin-wallet-transactions-table__head,
+.coin-wallet-transactions-table__row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr) minmax(0, 1.4fr) minmax(0, 0.8fr) minmax(0, 0.8fr);
+  align-items: center;
+  font-size: 13px;
+}
+
+.coin-wallet-transactions-table__head {
+  padding: 16px 0 12px;
+  border-bottom: 1px solid rgba(150, 235, 250, 0.1);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9.5px;
+  letter-spacing: 0.12em;
+  color: rgba(214, 238, 248, 0.66);
+}
+
+.coin-wallet-transactions-table__row {
+  padding: 13px 0;
+  border-bottom: 1px solid rgba(150, 235, 250, 0.07);
+}
+
+.coin-wallet-transactions-table__row:last-child {
+  border-bottom: 0;
+}
+
+.coin-wallet-transactions-table__head span:last-child,
+.coin-wallet-transactions-table__row span:last-child {
+  text-align: right;
 }
 
 .coin-deposit-presets {
@@ -2946,6 +3000,10 @@ html.coin-nav-open .coin-nav-mobile {
   .coin-contract-stats-grid--4 {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+
+  .coin-wallet-actions-grid {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
 }
 
 @media (max-width: 768px) {
@@ -2967,6 +3025,15 @@ html.coin-nav-open .coin-nav-mobile {
   .coin-dash-quick-actions__btn {
     flex: 1 1 calc(50% - 8px);
     min-width: 0;
+  }
+
+  .coin-deposit-presets {
+    flex-wrap: wrap;
+  }
+
+  .coin-deposit-presets__btn {
+    flex: 1 1 calc(33.333% - 7px);
+    min-width: 88px;
   }
 }
 
