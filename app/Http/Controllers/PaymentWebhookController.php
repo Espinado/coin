@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\PaymentWebhookLog;
 use App\Services\Payment\PaymentGatewayException;
-use App\Services\Payment\PaymentGatewayInterface;
+use App\Services\Payment\CryptoCurrencyApiGateway;
 use App\Services\Payment\PaymentIpnService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -13,7 +13,7 @@ class PaymentWebhookController extends Controller
 {
     public function handleCcapi(
         Request $request,
-        PaymentGatewayInterface $gateway,
+        CryptoCurrencyApiGateway $gateway,
         PaymentIpnService $ipnService,
     ): Response {
         try {

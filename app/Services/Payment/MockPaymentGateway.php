@@ -61,9 +61,9 @@ class MockPaymentGateway implements PaymentGatewayInterface
             throw new PaymentGatewayException('mock_ipn_empty_payload');
         }
 
-        $apiKey = (string) config('coin.payments.ccapi.api_key', 'mock-api-key');
+        $apiKey = (string) config('coin.payments.ccapi.api_key', '');
 
-        if ($apiKey !== '' && isset($payload['sign']) && ! $this->ipnVerifier->verify($payload, $apiKey)) {
+        if ($apiKey === '' || ! isset($payload['sign']) || ! $this->ipnVerifier->verify($payload, $apiKey)) {
             throw new PaymentGatewayException('mock_ipn_invalid_signature');
         }
 

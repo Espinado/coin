@@ -23,7 +23,7 @@ class PaymentWebhookTest extends TestCase
 
         config([
             'coin.user_domain' => 'coin.test',
-            'coin.payments.driver' => 'mock',
+            'coin.payments.driver' => 'ccapi',
             'coin.payments.ccapi.api_key' => $this->apiKey,
             'coin.payments.ccapi.min_confirmations' => 1,
             'coin.deposits.auto_confirm_mock' => false,
@@ -154,6 +154,52 @@ class PaymentWebhookTest extends TestCase
         $log = PaymentWebhookLog::query()->where('deposit_id', $deposit->id)->first();
         $this->assertNotNull($log);
         $this->assertStringContainsString('Amount mismatch', (string) $log->processing_result);
+    }
+
+    public function test_ccapi_webhook_rejects_unsigned_payload_even_with_mock_driver(): void
+    {
+        $payload = [
+            'type' => 'in',
+            'chain' => 'tron',
+            'amount' => '100.000000',
+            'confirmation' => 1,
+            'label' => 'deposit:1',
+        ];
+
+        config(['coin.payments.driver' => 'mock']);
+
+        $this->postJson('http://coin.test/webhooks/ccapi', $payload)->assertForbidden();
+    }
+
+    public function test_ccapi_webhook_rejects_wrong_payment_address(): void
+    {
+        $user = User::factory()->create();
+        $deposit = Deposit::query()->create([
+            'user_id' => $user->id,
+            'amount' => 100,
+            'currency' => 'USDT',
+            'status' => Deposit::STATUS_PENDING,
+            'method' => 'ccapi',
+            'payment_address' => 'TExpectedAddress123',
+            'gateway_network' => 'trx',
+        ]);
+        $deposit->update(['gateway_uniq_id' => Deposit::gatewayUniqId($deposit->id)]);
+        $deposit->refresh();
+
+        $payload = $this->signedDepositPayload($deposit, 'wrong-addr-tx', 1);
+        $payload['to'] = 'TWrongAddress999';
+
+        $this->postJson('http://coin.test/webhooks/ccapi', $payload)->assertOk();
+
+        $deposit->refresh();
+        $user->refresh();
+
+        $this->assertSame(Deposit::STATUS_PENDING, $deposit->status);
+        $this->assertSame('0.00', number_format((float) $user->wallet->available, 2, '.', ''));
+
+        $log = PaymentWebhookLog::query()->where('deposit_id', $deposit->id)->first();
+        $this->assertNotNull($log);
+        $this->assertStringContainsString('Payment address mismatch', (string) $log->processing_result);
     }
 
     public function test_duplicate_ipn_does_not_double_credit_deposit(): void

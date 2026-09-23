@@ -20,20 +20,24 @@ class PaymentIpnService
 
     public function handle(VerifiedIpnEvent $event): PaymentWebhookLog
     {
-        $log = PaymentWebhookLog::query()->create([
-            'gateway' => (string) config('coin.payments.driver', 'mock'),
-            'event_type' => $event->type,
-            'payload' => $event->raw,
-            'signature_valid' => true,
-            'idempotency_key' => $event->idempotencyKey(),
-        ]);
-
-        if ($this->wasAlreadyProcessed($event)) {
-            return $this->finish($log, PaymentWebhookLog::RESULT_DUPLICATE, 'Duplicate IPN ignored.');
-        }
-
         try {
-            $result = DB::transaction(function () use ($event, $log) {
+            return DB::transaction(function () use ($event) {
+                if ($this->wasAlreadyProcessed($event)) {
+                    return $this->createAuditLog(
+                        $event,
+                        PaymentWebhookLog::RESULT_DUPLICATE,
+                        'Duplicate IPN ignored.',
+                    );
+                }
+
+                $log = PaymentWebhookLog::query()->create([
+                    'gateway' => (string) config('coin.payments.driver', 'mock'),
+                    'event_type' => $event->type,
+                    'payload' => $event->raw,
+                    'signature_valid' => true,
+                    'idempotency_key' => $event->idempotencyKey(),
+                ]);
+
                 if ($event->isIncomingPayment()) {
                     return $this->handleIncomingPayment($event, $log);
                 }
@@ -45,10 +49,12 @@ class PaymentIpnService
                 return $this->finish($log, PaymentWebhookLog::RESULT_IGNORED, 'Unsupported IPN type.');
             });
         } catch (RuntimeException $exception) {
-            return $this->finish($log, PaymentWebhookLog::RESULT_FAILED, $exception->getMessage());
+            return $this->createAuditLog(
+                $event,
+                PaymentWebhookLog::RESULT_FAILED,
+                $exception->getMessage(),
+            );
         }
-
-        return $result;
     }
 
     private function handleIncomingPayment(VerifiedIpnEvent $event, PaymentWebhookLog $log): PaymentWebhookLog
@@ -59,13 +65,26 @@ class PaymentIpnService
             return $this->finish($log, PaymentWebhookLog::RESULT_IGNORED, 'Awaiting confirmations.');
         }
 
-        $deposit = $this->resolveDeposit($event);
+        $depositReference = $this->resolveDepositReference($event);
+
+        if ($depositReference === null) {
+            return $this->finish($log, PaymentWebhookLog::RESULT_IGNORED, 'Deposit not found for IPN label.');
+        }
+
+        $deposit = Deposit::query()
+            ->whereKey($depositReference)
+            ->lockForUpdate()
+            ->first();
 
         if ($deposit === null) {
             return $this->finish($log, PaymentWebhookLog::RESULT_IGNORED, 'Deposit not found for IPN label.');
         }
 
         $log->update(['deposit_id' => $deposit->id]);
+
+        if ($this->wasAlreadyProcessed($event)) {
+            return $this->finish($log, PaymentWebhookLog::RESULT_DUPLICATE, 'Duplicate IPN ignored.');
+        }
 
         if ($deposit->status === Deposit::STATUS_CONFIRMED) {
             return $this->finish($log, PaymentWebhookLog::RESULT_DUPLICATE, 'Deposit already confirmed.');
@@ -75,13 +94,19 @@ class PaymentIpnService
             return $this->finish($log, PaymentWebhookLog::RESULT_IGNORED, 'Deposit is not pending.');
         }
 
+        $validationError = $this->validateDepositAgainstIpn($event, $deposit);
+
+        if ($validationError !== null) {
+            return $this->finish($log, PaymentWebhookLog::RESULT_IGNORED, $validationError);
+        }
+
         $deposit->update([
             'txid' => $event->txid,
             'received_amount' => $event->amount,
         ]);
 
         if (! $this->receivedAmountMatchesDeposit($event, $deposit)) {
-            $this->deposits->reject($deposit->fresh(), null);
+            $this->deposits->reject($deposit, null);
 
             return $this->finish(
                 $log,
@@ -95,7 +120,7 @@ class PaymentIpnService
             );
         }
 
-        $this->deposits->confirm($deposit->fresh(), null);
+        $this->deposits->confirm($deposit, null);
 
         return $this->finish($log, PaymentWebhookLog::RESULT_PROCESSED, 'Deposit confirmed from IPN.');
     }
@@ -122,6 +147,42 @@ class PaymentIpnService
         );
     }
 
+    private function validateDepositAgainstIpn(VerifiedIpnEvent $event, Deposit $deposit): ?string
+    {
+        if ($deposit->method === 'mock') {
+            if (app()->environment(['local', 'testing'])) {
+                return null;
+            }
+
+            return 'Mock deposits cannot be confirmed from webhook in production.';
+        }
+
+        if ($deposit->method !== 'ccapi') {
+            return 'Deposit method is not ccapi.';
+        }
+
+        $expectedAddress = trim((string) $deposit->payment_address);
+        $receivedAddress = trim((string) ($event->to ?? ''));
+
+        if ($expectedAddress !== '' && $receivedAddress !== ''
+            && strcasecmp($expectedAddress, $receivedAddress) !== 0) {
+            return 'Payment address mismatch.';
+        }
+
+        $expectedCurrency = strtoupper((string) $deposit->currency);
+        $incomingAsset = strtoupper(trim((string) ($event->token ?? '')));
+
+        if ($incomingAsset === '') {
+            $incomingAsset = strtoupper(trim((string) ($event->currency ?? '')));
+        }
+
+        if ($incomingAsset !== '' && $expectedCurrency !== $incomingAsset) {
+            return 'Currency/token mismatch.';
+        }
+
+        return null;
+    }
+
     private function handleOutgoingPayment(VerifiedIpnEvent $event, PaymentWebhookLog $log): PaymentWebhookLog
     {
         $minConfirmations = (int) config('coin.payments.ccapi.min_confirmations', 1);
@@ -130,7 +191,16 @@ class PaymentIpnService
             return $this->finish($log, PaymentWebhookLog::RESULT_IGNORED, 'Awaiting payout confirmations.');
         }
 
-        $withdrawal = $this->resolveWithdrawal($event);
+        $withdrawalReference = $this->resolveWithdrawalReference($event);
+
+        if ($withdrawalReference === null) {
+            return $this->finish($log, PaymentWebhookLog::RESULT_IGNORED, 'Withdrawal not found for IPN label.');
+        }
+
+        $withdrawal = Withdrawal::query()
+            ->whereKey($withdrawalReference)
+            ->lockForUpdate()
+            ->first();
 
         if ($withdrawal === null) {
             return $this->finish($log, PaymentWebhookLog::RESULT_IGNORED, 'Withdrawal not found for IPN label.');
@@ -147,7 +217,7 @@ class PaymentIpnService
         }
 
         $this->withdrawals->markPaidFromGateway(
-            $withdrawal->fresh(),
+            $withdrawal,
             $event->txid,
             (string) $event->confirmation,
         );
@@ -155,35 +225,41 @@ class PaymentIpnService
         return $this->finish($log, PaymentWebhookLog::RESULT_PROCESSED, 'Withdrawal marked paid from IPN.');
     }
 
-    private function resolveDeposit(VerifiedIpnEvent $event): ?Deposit
+    private function resolveDepositReference(VerifiedIpnEvent $event): ?int
     {
         $reference = $this->parseReference($event->label, 'deposit');
 
         if ($reference !== null) {
-            return Deposit::query()->find($reference);
+            return (int) $reference;
         }
 
         if ($event->gatewayRequestId !== null) {
-            return Deposit::query()
+            $depositId = Deposit::query()
                 ->where('gateway_uniq_id', $event->gatewayRequestId)
-                ->first();
+                ->value('id');
+
+            return $depositId !== null ? (int) $depositId : null;
         }
 
         return null;
     }
 
-    private function resolveWithdrawal(VerifiedIpnEvent $event): ?Withdrawal
+    private function resolveWithdrawalReference(VerifiedIpnEvent $event): ?int
     {
         $reference = $this->parseReference($event->label, 'withdrawal');
 
         if ($reference !== null) {
-            return Withdrawal::query()->where('reference', $reference)->first();
+            return Withdrawal::query()
+                ->where('reference', $reference)
+                ->value('id');
         }
 
         if ($event->gatewayRequestId !== null) {
-            return Withdrawal::query()
+            $withdrawalId = Withdrawal::query()
                 ->where('gateway_request_id', $event->gatewayRequestId)
-                ->first();
+                ->value('id');
+
+            return $withdrawalId !== null ? (int) $withdrawalId : null;
         }
 
         return null;
@@ -210,8 +286,21 @@ class PaymentIpnService
     {
         return PaymentWebhookLog::query()
             ->where('idempotency_key', $event->idempotencyKey())
-            ->where('processing_result', PaymentWebhookLog::RESULT_PROCESSED)
+            ->where('processing_result', 'like', PaymentWebhookLog::RESULT_PROCESSED.':%')
             ->exists();
+    }
+
+    private function createAuditLog(VerifiedIpnEvent $event, string $result, string $message): PaymentWebhookLog
+    {
+        return PaymentWebhookLog::query()->create([
+            'gateway' => (string) config('coin.payments.driver', 'mock'),
+            'event_type' => $event->type,
+            'payload' => $event->raw,
+            'signature_valid' => true,
+            'idempotency_key' => $event->idempotencyKey(),
+            'processing_result' => PaymentWebhookLog::formatProcessingResult($result, $message),
+            'processed_at' => now(),
+        ]);
     }
 
     private function finish(PaymentWebhookLog $log, string $result, string $message): PaymentWebhookLog

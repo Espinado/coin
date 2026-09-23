@@ -97,12 +97,16 @@ class DepositService
 
     public function confirm(Deposit $deposit, ?Admin $admin = null): Deposit
     {
-        if ($deposit->status !== Deposit::STATUS_PENDING) {
-            throw new RuntimeException('Only pending top-ups can be confirmed.');
-        }
-
         return DB::transaction(function () use ($deposit, $admin) {
-            $deposit->refresh();
+            $deposit = Deposit::query()
+                ->whereKey($deposit->id)
+                ->lockForUpdate()
+                ->firstOrFail();
+
+            if ($deposit->status !== Deposit::STATUS_PENDING) {
+                throw new RuntimeException('Only pending top-ups can be confirmed.');
+            }
+
             $user = $deposit->user;
             $wallet = $this->wallets->ensureWallet($user);
             $paymentAmount = (float) $deposit->amount;
@@ -161,16 +165,23 @@ class DepositService
 
     public function reject(Deposit $deposit, ?Admin $admin = null): Deposit
     {
-        if ($deposit->status !== Deposit::STATUS_PENDING) {
-            throw new RuntimeException('Only pending top-ups can be rejected.');
-        }
+        return DB::transaction(function () use ($deposit, $admin) {
+            $deposit = Deposit::query()
+                ->whereKey($deposit->id)
+                ->lockForUpdate()
+                ->firstOrFail();
 
-        $deposit->update([
+            if ($deposit->status !== Deposit::STATUS_PENDING) {
+                throw new RuntimeException('Only pending top-ups can be rejected.');
+            }
+
+            $deposit->update([
             'status' => Deposit::STATUS_REJECTED,
             'confirmed_by' => $admin?->id,
             'confirmed_at' => now(),
-        ]);
+            ]);
 
-        return $deposit->fresh(['user']);
+            return $deposit->fresh(['user']);
+        });
     }
 }
