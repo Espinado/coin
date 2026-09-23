@@ -57,12 +57,14 @@ class WithdrawalController extends Controller
     {
         $withdrawal->load(['user.wallet', 'user.contracts.plan', 'processedByAdmin']);
 
-        $pollLogs = PaymentWebhookLog::query()
-            ->where('withdrawal_id', $withdrawal->id)
-            ->where('event_type', 'payout_poll')
-            ->orderByDesc('id')
-            ->limit(15)
-            ->get();
+        $pollLogs = $withdrawal->status === Withdrawal::STATUS_PROCESSING
+            ? PaymentWebhookLog::query()
+                ->where('withdrawal_id', $withdrawal->id)
+                ->where('event_type', 'payout_poll')
+                ->orderByDesc('id')
+                ->limit(15)
+                ->get()
+            : collect();
 
         return view('admin.withdrawals.show', [
             'withdrawal' => $withdrawal,

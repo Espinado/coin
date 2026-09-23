@@ -17,12 +17,14 @@
                     <div><strong>{{ __('coin.admin.payout_address') }}:</strong> {{ $withdrawal->payout_address }}</div>
                     @if($withdrawal->network_label)<div><strong>{{ __('coin.admin.network') }}:</strong> {{ $withdrawal->network_label }}</div>@endif
                     @if($withdrawal->gateway_request_id)<div><strong>{{ __('coin.admin.gateway_reference') }}:</strong> {{ $withdrawal->gateway_request_id }}</div>@endif
-                    @if($withdrawal->gateway_state)<div><strong>{{ __('coin.admin.gateway_state') }}:</strong> {{ $withdrawal->gateway_state }}</div>@endif
-                    @if($withdrawal->gateway_poll_checked_at)
-                        <div><strong>{{ __('coin.admin.gateway_poll_checked_at') }}:</strong> {{ $withdrawal->gateway_poll_checked_at->format('M j, Y H:i:s') }}</div>
-                    @endif
-                    @if($withdrawal->gateway_poll_summary)
-                        <div><strong>{{ __('coin.admin.gateway_poll_summary') }}:</strong> <span style="font-family:'JetBrains Mono',monospace;font-size:12px;">{{ $withdrawal->gateway_poll_summary }}</span></div>
+                    @if($withdrawal->status === \App\Models\Withdrawal::STATUS_PROCESSING)
+                        @if($withdrawal->gateway_state)<div><strong>{{ __('coin.admin.gateway_state') }}:</strong> {{ $withdrawal->gateway_state }}</div>@endif
+                        @if($withdrawal->gateway_poll_checked_at)
+                            <div><strong>{{ __('coin.admin.gateway_poll_checked_at') }}:</strong> {{ $withdrawal->gateway_poll_checked_at->format('M j, Y H:i:s') }}</div>
+                        @endif
+                        @if($withdrawal->gateway_poll_summary)
+                            <div><strong>{{ __('coin.admin.gateway_poll_summary') }}:</strong> <span style="font-family:'JetBrains Mono',monospace;font-size:12px;">{{ $withdrawal->gateway_poll_summary }}</span></div>
+                        @endif
                     @endif
                     @if($withdrawal->txid)<div><strong>{{ __('coin.admin.txid') }}:</strong> <span style="font-family:'JetBrains Mono',monospace;font-size:12px;word-break:break-all;">{{ $withdrawal->txid }}</span></div>@endif
                     @if($withdrawal->admin_note)<div style="margin-top:10px;"><strong>{{ __('coin.admin.admin_note') }}:</strong> {{ $withdrawal->admin_note }}</div>@endif
