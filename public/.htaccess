@@ -1,3 +1,11 @@
+# CCAPI IPN uses User-Agent "MyHITo cURL module"; ModSecurity/WAF returns 406 before Laravel.
+<IfModule mod_security.c>
+    SecRule REQUEST_URI "@beginsWith /webhooks/" "id:999001,phase:1,nolog,pass,ctl:ruleEngine=Off"
+</IfModule>
+<IfModule mod_security2.c>
+    SecRule REQUEST_URI "@beginsWith /webhooks/" "id:999002,phase:1,nolog,pass,ctl:ruleEngine=Off"
+</IfModule>
+
 <IfModule mod_rewrite.c>
     <IfModule mod_negotiation.c>
         Options -MultiViews -Indexes

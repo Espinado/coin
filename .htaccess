@@ -1,3 +1,11 @@
+# CCAPI IPN: allow User-Agent "MyHITo cURL module" (ModSecurity returns 406 otherwise).
+<IfModule mod_security.c>
+    SecRule REQUEST_URI "@beginsWith /webhooks/" "id:999001,phase:1,nolog,pass,ctl:ruleEngine=Off"
+</IfModule>
+<IfModule mod_security2.c>
+    SecRule REQUEST_URI "@beginsWith /webhooks/" "id:999002,phase:1,nolog,pass,ctl:ruleEngine=Off"
+</IfModule>
+
 <IfModule mod_rewrite.c>
     RewriteEngine On
     RewriteRule ^(.*)$ public/$1 [L]
