@@ -21,6 +21,7 @@ use Database\Seeders\PlatformSettingsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
+use Tests\Feature\PayoutAddressTest;
 use Tests\TestCase;
 
 class AdminModuleTest extends TestCase
@@ -69,7 +70,7 @@ class AdminModuleTest extends TestCase
         $this->assertSame(User::KYC_PENDING, $user->kyc_status);
     }
 
-    public function test_admin_withdrawal_status_update(): void
+    public function test_admin_approves_withdrawal_via_gateway(): void
     {
         Event::fake([WithdrawalUpdated::class]);
 
@@ -89,8 +90,7 @@ class AdminModuleTest extends TestCase
         $balanceBeforeApproval = (float) $wallet->balance;
 
         $this->actingAs($this->admin, 'admin')
-            ->patch('http://admin.coin.test/withdrawals/'.$withdrawal->id.'/status', [
-                'status' => Withdrawal::STATUS_PAID,
+            ->post('http://admin.coin.test/withdrawals/'.$withdrawal->id.'/approve', [
                 'admin_note' => 'Sent on-chain.',
             ])
             ->assertRedirect();
@@ -98,6 +98,7 @@ class AdminModuleTest extends TestCase
         $withdrawal->refresh();
         $wallet->refresh();
         $this->assertSame(Withdrawal::STATUS_PAID, $withdrawal->status);
+        $this->assertNotEmpty($withdrawal->gateway_request_id);
         $this->assertSame($balanceBeforeApproval - 50, (float) $wallet->balance);
         $this->assertSame(0.0, (float) $wallet->pending);
 
@@ -107,7 +108,7 @@ class AdminModuleTest extends TestCase
         });
     }
 
-    public function test_admin_marks_withdrawal_paid_and_emails_user(): void
+    public function test_admin_approve_sends_payout_email_in_mock_mode(): void
     {
         Mail::fake();
 
@@ -119,16 +120,32 @@ class AdminModuleTest extends TestCase
         $withdrawal = app(\App\Services\WithdrawalService::class)->createForUser($user, 50);
 
         $this->actingAs($this->admin, 'admin')
-            ->patch('http://admin.coin.test/withdrawals/'.$withdrawal->id.'/status', [
-                'status' => Withdrawal::STATUS_PAID,
-                'admin_note' => 'Sent on-chain.',
-            ])
+            ->post('http://admin.coin.test/withdrawals/'.$withdrawal->id.'/approve')
             ->assertRedirect();
 
         Mail::assertSent(UserEventNotificationMail::class, function (UserEventNotificationMail $mail) use ($user): bool {
             return $mail->hasTo($user->email)
                 && $mail->subjectLine === __('coin.notifications.mail.payout_subject');
         });
+    }
+
+    public function test_admin_cannot_mark_withdrawal_paid_manually(): void
+    {
+        $user = User::query()->where('email', 'test@test.lv')->firstOrFail();
+
+        app(DepositService::class)->createPending($user, 200);
+        $user->refresh();
+
+        $withdrawal = app(\App\Services\WithdrawalService::class)->createForUser($user, 50);
+
+        $this->actingAs($this->admin, 'admin')
+            ->patch('http://admin.coin.test/withdrawals/'.$withdrawal->id.'/status', [
+                'status' => Withdrawal::STATUS_PAID,
+            ])
+            ->assertRedirect()
+            ->assertSessionHas('status', __('coin.admin.withdrawal_paid_requires_ipn'));
+
+        $this->assertSame(Withdrawal::STATUS_PENDING, $withdrawal->fresh()->status);
     }
 
     public function test_admin_cannot_change_closed_withdrawal_status(): void
@@ -141,9 +158,7 @@ class AdminModuleTest extends TestCase
         $withdrawal = app(\App\Services\WithdrawalService::class)->createForUser($user, 50);
 
         $this->actingAs($this->admin, 'admin')
-            ->patch('http://admin.coin.test/withdrawals/'.$withdrawal->id.'/status', [
-                'status' => Withdrawal::STATUS_PAID,
-            ])
+            ->post('http://admin.coin.test/withdrawals/'.$withdrawal->id.'/approve')
             ->assertRedirect();
 
         $response = $this->actingAs($this->admin, 'admin')
@@ -154,6 +169,37 @@ class AdminModuleTest extends TestCase
         $response->assertRedirect();
         $response->assertSessionHas('status', __('coin.admin.withdrawal_closed'));
         $this->assertSame(Withdrawal::STATUS_PAID, $withdrawal->fresh()->status);
+    }
+
+    public function test_live_withdrawal_approve_leaves_processing_until_ipn(): void
+    {
+        config([
+            'coin.payments.driver' => 'ccapi',
+            'coin.payments.ccapi.api_key' => 'test-key',
+            'coin.payments.mock.auto_complete_payout' => false,
+        ]);
+
+        app(PlatformSettingsService::class)->setMany(['payment_gate_enabled' => true]);
+
+        Http::fake([
+            '*' => Http::response(['result' => '12345'], 200),
+        ]);
+
+        $user = User::factory()->create();
+        $user->wallet->update([
+            'available' => 500,
+            'balance' => 500,
+            'payout_address' => PayoutAddressTest::VALID_TRON_ADDRESS,
+            'network_label' => 'TRC-20',
+        ]);
+
+        $withdrawal = app(\App\Services\WithdrawalService::class)->createForUser($user, 50);
+        $admin = Admin::query()->firstOrFail();
+
+        $withdrawal = app(\App\Services\WithdrawalService::class)->approveAndDispatch($withdrawal, $admin);
+
+        $this->assertSame(Withdrawal::STATUS_PROCESSING, $withdrawal->status);
+        $this->assertSame('12345', $withdrawal->gateway_request_id);
     }
 
     public function test_admin_plan_crud(): void

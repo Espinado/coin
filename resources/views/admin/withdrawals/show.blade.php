@@ -4,7 +4,7 @@
 
 @section('content')
     @if (session('status'))
-        <div class="admin-card" style="margin-bottom:16px;border-color:rgba(255,180,84,0.35);">{{ session('status') }}</div>
+        <div class="admin-card" style="margin-bottom:16px;border-color:{{ session('status_type') === 'error' ? 'rgba(255,143,143,0.35)' : 'rgba(120,230,180,0.35)' }};">{{ session('status') }}</div>
     @endif
 
     <div style="display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:16px;align-items:start;">
@@ -16,6 +16,8 @@
                 <div style="margin-top:16px;font-size:13px;line-height:1.7;">
                     <div><strong>{{ __('coin.admin.payout_address') }}:</strong> {{ $withdrawal->payout_address }}</div>
                     @if($withdrawal->network_label)<div><strong>{{ __('coin.admin.network') }}:</strong> {{ $withdrawal->network_label }}</div>@endif
+                    @if($withdrawal->gateway_request_id)<div><strong>{{ __('coin.admin.gateway_reference') }}:</strong> {{ $withdrawal->gateway_request_id }}</div>@endif
+                    @if($withdrawal->txid)<div><strong>{{ __('coin.admin.txid') }}:</strong> <span style="font-family:'JetBrains Mono',monospace;font-size:12px;word-break:break-all;">{{ $withdrawal->txid }}</span></div>@endif
                     @if($withdrawal->admin_note)<div style="margin-top:10px;"><strong>{{ __('coin.admin.admin_note') }}:</strong> {{ $withdrawal->admin_note }}</div>@endif
                 </div>
             </div>
@@ -27,18 +29,25 @@
                     @if($withdrawal->processed_at)
                         <p style="margin:10px 0 0;font-size:12.5px;color:rgba(232,237,245,0.58);">{{ __('coin.admin.withdrawal_closed_at', ['date' => $withdrawal->processed_at->format('M j, Y H:i')]) }}</p>
                     @endif
+                @elseif($withdrawal->status === \App\Models\Withdrawal::STATUS_PROCESSING)
+                    <p style="margin:0;font-size:13px;line-height:1.65;color:rgba(232,237,245,0.72);">{{ __('coin.admin.withdrawal_processing_hint') }}</p>
                 @else
-                    <form method="POST" action="{{ route('admin.withdrawals.status', $withdrawal) }}" style="display:flex;flex-direction:column;gap:12px;">
+                    <form method="POST" action="{{ route('admin.withdrawals.approve', $withdrawal) }}" style="display:flex;flex-direction:column;gap:12px;margin-bottom:18px;">
                         @csrf
-                        @method('PATCH')
-                        <select name="status" style="padding:10px 12px;border-radius:10px;border:1px solid rgba(255,255,255,0.12);background:#070a10;color:#e8edf5;">
-                            @foreach($statuses as $value => $label)
-                                <option value="{{ $value }}" @selected($withdrawal->adminStatus() === $value)>{{ $label }}</option>
-                            @endforeach
-                        </select>
+                        <p style="margin:0;font-size:13px;line-height:1.65;color:rgba(232,237,245,0.72);">{{ __('coin.admin.withdrawal_approve_hint') }}</p>
                         <textarea name="admin_note" rows="3" placeholder="{{ __('coin.admin.audit_note_placeholder') }}"
                             style="width:100%;box-sizing:border-box;padding:12px 14px;border-radius:10px;border:1px solid rgba(255,255,255,0.12);background:#070a10;color:#e8edf5;">{{ old('admin_note', $withdrawal->admin_note) }}</textarea>
-                        <button type="submit" class="admin-btn admin-btn-primary" style="align-self:flex-start;">{{ __('coin.admin.save_status') }}</button>
+                        <button type="submit" class="admin-btn admin-btn-primary" style="align-self:flex-start;">{{ __('coin.admin.approve_payout') }}</button>
+                    </form>
+
+                    <form method="POST" action="{{ route('admin.withdrawals.status', $withdrawal) }}" style="display:flex;flex-direction:column;gap:12px;padding-top:18px;border-top:1px solid rgba(255,255,255,0.08);">
+                        @csrf
+                        @method('PATCH')
+                        <input type="hidden" name="status" value="{{ \App\Models\Withdrawal::STATUS_REJECTED }}">
+                        <p style="margin:0;font-size:13px;line-height:1.65;color:rgba(232,237,245,0.72);">{{ __('coin.admin.withdrawal_reject_hint') }}</p>
+                        <textarea name="admin_note" rows="3" placeholder="{{ __('coin.admin.audit_note_placeholder') }}"
+                            style="width:100%;box-sizing:border-box;padding:12px 14px;border-radius:10px;border:1px solid rgba(255,255,255,0.12);background:#070a10;color:#e8edf5;">{{ old('admin_note') }}</textarea>
+                        <button type="submit" class="admin-btn" style="align-self:flex-start;border-color:rgba(255,143,143,0.35);color:#ffb4b4;">{{ __('coin.admin.reject_payout') }}</button>
                     </form>
                 @endif
             </div>

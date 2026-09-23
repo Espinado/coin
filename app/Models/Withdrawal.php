@@ -91,15 +91,10 @@ class Withdrawal extends Model
     /** @return array<string, list<string>> */
     public static function allowedTransitions(): array
     {
-        $openTargets = [
-            self::STATUS_PAID,
-            self::STATUS_REJECTED,
-        ];
-
         return [
-            self::STATUS_PENDING => $openTargets,
-            self::STATUS_APPROVED => $openTargets,
-            self::STATUS_PROCESSING => $openTargets,
+            self::STATUS_PENDING => [self::STATUS_REJECTED],
+            self::STATUS_APPROVED => [self::STATUS_REJECTED],
+            self::STATUS_PROCESSING => [],
             self::STATUS_PAID => [],
             self::STATUS_REJECTED => [],
         ];

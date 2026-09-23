@@ -89,10 +89,35 @@ class WithdrawalService
         });
     }
 
+    public function approveAndDispatch(Withdrawal $withdrawal, Admin $admin, ?string $note = null): Withdrawal
+    {
+        return DB::transaction(function () use ($withdrawal, $admin, $note) {
+            $withdrawal->refresh();
+
+            if (! in_array($withdrawal->status, [Withdrawal::STATUS_PENDING, Withdrawal::STATUS_APPROVED], true)) {
+                throw new RuntimeException(__('coin.admin.withdrawal_approve_pending_only'));
+            }
+
+            if ($note !== null && $note !== '') {
+                $withdrawal->update([
+                    'admin_note' => $note,
+                    'processed_by' => $admin->id,
+                ]);
+                $withdrawal->refresh();
+            }
+
+            return $this->dispatchViaGateway($withdrawal, $admin);
+        });
+    }
+
     public function updateStatus(Withdrawal $withdrawal, string $status, Admin $admin, ?string $note = null): Withdrawal
     {
         if (! array_key_exists($status, Withdrawal::adminStatuses())) {
             throw new RuntimeException('Invalid withdrawal status.');
+        }
+
+        if ($status === Withdrawal::STATUS_PAID) {
+            throw new RuntimeException(__('coin.admin.withdrawal_paid_requires_ipn'));
         }
 
         return DB::transaction(function () use ($withdrawal, $status, $admin, $note) {
@@ -121,6 +146,12 @@ class WithdrawalService
             $willCommit = in_array($status, Withdrawal::committedStatuses(), true);
 
             if ($status === Withdrawal::STATUS_REJECTED) {
+                if ($previous === Withdrawal::STATUS_PROCESSING
+                    && $withdrawal->gateway_request_id !== null
+                    && $this->settings->usesLivePaymentGateway()) {
+                    throw new RuntimeException(__('coin.admin.withdrawal_reject_after_dispatch_blocked'));
+                }
+
                 if ($wasPending) {
                     $this->releasePending($wallet, $ledgerAmount);
                 } elseif ($wasCommitted) {
@@ -130,31 +161,14 @@ class WithdrawalService
                 $this->commitWithdrawalFunds($wallet, $ledgerAmount);
             }
 
-            if ($status === Withdrawal::STATUS_PAID && $previous !== Withdrawal::STATUS_PAID) {
-                $this->recordPayoutTransaction($withdrawal, $wallet);
-            }
-
             $withdrawal->update([
                 'status' => $status,
                 'processed_by' => $admin->id,
                 'admin_note' => $note ?? $withdrawal->admin_note,
-                'processed_at' => in_array($status, [Withdrawal::STATUS_PAID, Withdrawal::STATUS_REJECTED], true) ? now() : $withdrawal->processed_at,
+                'processed_at' => $status === Withdrawal::STATUS_REJECTED ? now() : $withdrawal->processed_at,
             ]);
 
             $withdrawal = $withdrawal->fresh(['user.wallet', 'processedByAdmin']);
-
-            if ($status === Withdrawal::STATUS_PAID && $previous !== Withdrawal::STATUS_PAID) {
-                $fee = $this->settings->getFloat('network_fee');
-                $net = max(0, $ledgerAmount - $fee);
-                $currency = $withdrawal->currency ?: $this->settings->tokenSymbol();
-
-                $this->notifications->notifyWithdrawalPaid(
-                    $withdrawal->user,
-                    $withdrawal,
-                    $net,
-                    $currency,
-                );
-            }
 
             WithdrawalUpdated::dispatch($withdrawal);
 

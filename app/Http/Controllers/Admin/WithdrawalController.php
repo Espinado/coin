@@ -62,6 +62,32 @@ class WithdrawalController extends Controller
         ]);
     }
 
+    public function approve(Request $request, Withdrawal $withdrawal, WithdrawalService $withdrawals): RedirectResponse
+    {
+        $validated = $request->validate([
+            'admin_note' => ['nullable', 'string', 'max:2000'],
+        ]);
+
+        try {
+            $withdrawal = $withdrawals->approveAndDispatch(
+                $withdrawal,
+                $request->user('admin'),
+                $validated['admin_note'] ?? null,
+            );
+        } catch (RuntimeException $exception) {
+            return redirect()
+                ->route('admin.withdrawals.show', $withdrawal)
+                ->with('status', $exception->getMessage())
+                ->with('status_type', 'error');
+        }
+
+        $flashKey = $withdrawal->status === Withdrawal::STATUS_PAID
+            ? 'coin.admin.withdrawal_approved_paid'
+            : 'coin.admin.withdrawal_approved_processing';
+
+        return $this->adminSuccess($flashKey, 'admin.withdrawals.show', ['withdrawal' => $withdrawal]);
+    }
+
     public function updateStatus(Request $request, Withdrawal $withdrawal, WithdrawalService $withdrawals): RedirectResponse
     {
         $validated = $request->validate([
@@ -78,11 +104,11 @@ class WithdrawalController extends Controller
             );
         } catch (RuntimeException $exception) {
             return redirect()
-                ->route('admin.withdrawals.index')
+                ->route('admin.withdrawals.show', $withdrawal)
                 ->with('status', $exception->getMessage())
                 ->with('status_type', 'error');
         }
 
-        return $this->adminSuccess('coin.admin.payout_status_updated', 'admin.withdrawals.index');
+        return $this->adminSuccess('coin.admin.payout_status_updated', 'admin.withdrawals.show', ['withdrawal' => $withdrawal]);
     }
 }

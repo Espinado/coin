@@ -89,6 +89,9 @@ Route::middleware(['admin.domain', 'reject.web.on.admin'])->group(function () {
 
         Route::get('withdrawals', [WithdrawalController::class, 'index'])->name('admin.withdrawals.index');
         Route::get('withdrawals/{withdrawal}', [WithdrawalController::class, 'show'])->name('admin.withdrawals.show');
+        Route::post('withdrawals/{withdrawal}/approve', [WithdrawalController::class, 'approve'])
+            ->middleware('admin.ability:manage_withdrawals')
+            ->name('admin.withdrawals.approve');
         Route::patch('withdrawals/{withdrawal}/status', [WithdrawalController::class, 'updateStatus'])
             ->middleware('admin.ability:manage_withdrawals')
             ->name('admin.withdrawals.status');
