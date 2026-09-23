@@ -1076,6 +1076,7 @@ return [
         'payment_gate' => 'Live-платежи (CryptoCurrencyAPI)',
         'payment_gate_hint' => 'Выключено — тестовый режим (mock, симуляция IPN). Включено — реальные пополнения и выводы через CCAPI (COIN_PAYMENT_DRIVER=ccapi и CCAPI_API_KEY).',
         'maintenance' => 'Режим обслуживания',
+        'maintenance_hint' => 'Пользовательский сайт покажет страницу «Профилактические работы». Админка и webhooks CCAPI остаются доступны.',
         'usdt_per_btc' => 'Курс BTC: 1 BTC в USDT (CoinMarketCap)',
         'refresh_btc_rate' => 'Обновить курс',
         'usdt_per_btc_hint' => 'Только из CoinMarketCap. Автообновление — раз в час или по кнопке. Для пополнения и вывода используется live-курс.',
@@ -1088,6 +1089,12 @@ return [
         ],
         'profit_accrual_time' => 'Время начисления прибыли',
         'profit_accrual_time_hint' => 'Ежедневно в указанное время (:timezone).',
+    ],
+
+    'maintenance' => [
+        'eyebrow' => 'Техническое обслуживание',
+        'title' => 'Профилактические работы',
+        'body' => 'Извините, на сайте проходят профилактические работы. Пожалуйста, зайдите позже.',
     ],
 
     'validation' => [

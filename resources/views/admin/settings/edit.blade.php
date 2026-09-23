@@ -34,6 +34,8 @@
                         </label>
                         @if($key === 'payment_gate_enabled')
                         <p style="margin:6px 0 0;font-size:12px;color:rgba(232,237,245,0.55);">{{ __('coin.settings.payment_gate_hint') }}</p>
+                        @elseif($key === 'maintenance_mode')
+                        <p style="margin:6px 0 0;font-size:12px;color:rgba(232,237,245,0.55);">{{ __('coin.settings.maintenance_hint') }}</p>
                         @endif
                     @elseif($definition['type'] === 'time')
                         <input type="time" name="{{ $key }}" value="{{ old($key, $values[$key] ?? $definition['default']) }}"

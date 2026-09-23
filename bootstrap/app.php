@@ -45,6 +45,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'record.user.login' => \App\Http\Middleware\RecordUserLogin::class,
             'admin.ability' => \App\Http\Middleware\EnsureAdminAbility::class,
             'auth.page.no-cache' => \App\Http\Middleware\PreventAuthPageCache::class,
+            'platform.maintenance' => \App\Http\Middleware\EnsurePlatformNotInMaintenance::class,
         ]);
 
         Authenticate::redirectUsing(function (Request $request) {

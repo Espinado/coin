@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Broadcast;
 use Illuminate\Support\Facades\Route;
 
 Route::domain(config('coin.user_domain'))
-    ->middleware('user.domain')
+    ->middleware(['user.domain', 'platform.maintenance'])
     ->group(function () {
         Route::get('/', HomeController::class)->name('home');
 
