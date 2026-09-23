@@ -35,6 +35,8 @@ class CryptoCurrencyApiGateway implements PaymentGatewayInterface
             $params['token'] = $network['token'];
         }
 
+        $params = array_merge($params, $this->giveForwardParams());
+
         $result = $this->client->call($network['network'], '.give', $params);
 
         if (! is_array($result) || empty($result['address'])) {
@@ -118,6 +120,24 @@ class CryptoCurrencyApiGateway implements PaymentGatewayInterface
         }
 
         return VerifiedIpnEvent::fromPayload($payload);
+    }
+
+    /** @return array<string, string> */
+    private function giveForwardParams(): array
+    {
+        $forwardTo = trim((string) config('coin.payments.ccapi.forward_to', ''));
+
+        if ($forwardTo === '') {
+            return [];
+        }
+
+        $params = ['to' => $forwardTo];
+
+        $forwardFrom = trim((string) config('coin.payments.ccapi.forward_from', ''));
+
+        $params['from'] = $forwardFrom !== '' ? $forwardFrom : $forwardTo;
+
+        return $params;
     }
 
     /** @return array{network: string, token: string} */

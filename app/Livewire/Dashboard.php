@@ -1105,18 +1105,61 @@ class Dashboard extends Component
 
             $simulator->simulateDepositIpn($deposit);
 
-            $this->depositAmount = '';
-            $this->pendingTopUpAmount = null;
-            $this->pendingDepositId = null;
-            $this->pendingPaymentAddress = null;
-            $this->reloadPortfolioData();
-            $this->paymentModalReference = 'TOP-'.$deposit->id;
-            $this->paymentModalStep = 'success';
+            $this->finishTopUpPaymentSuccess($deposit);
         } catch (\RuntimeException $exception) {
             $this->paymentModalStep = 'error';
             $this->paymentModalError = $exception->getMessage();
             $this->addError('depositAmount', $exception->getMessage());
         }
+    }
+
+    public function pollTopUpPaymentStatus(): void
+    {
+        if ($this->paymentModal !== 'topup' || $this->paymentModalStep !== 'payment' || ! $this->usesLivePaymentGateway) {
+            return;
+        }
+
+        if ($this->pendingDepositId === null) {
+            return;
+        }
+
+        $deposit = Deposit::query()
+            ->whereKey($this->pendingDepositId)
+            ->where('user_id', $this->user->id)
+            ->first();
+
+        if ($deposit === null) {
+            return;
+        }
+
+        if ($deposit->status === Deposit::STATUS_CONFIRMED) {
+            $this->finishTopUpPaymentSuccess($deposit);
+
+            return;
+        }
+
+        if ($deposit->status === Deposit::STATUS_REJECTED) {
+            $this->paymentModalStep = 'error';
+            $this->paymentModalError = __('coin.crypto_gateway.deposit_rejected');
+
+            return;
+        }
+
+        if ($deposit->expires_at !== null && $deposit->expires_at->isPast()) {
+            $this->paymentModalStep = 'error';
+            $this->paymentModalError = __('coin.crypto_gateway.deposit_expired');
+        }
+    }
+
+    private function finishTopUpPaymentSuccess(Deposit $deposit): void
+    {
+        $this->depositAmount = '';
+        $this->pendingTopUpAmount = null;
+        $this->pendingDepositId = null;
+        $this->pendingPaymentAddress = null;
+        $this->reloadPortfolioData();
+        $this->paymentModalReference = 'TOP-'.$deposit->id;
+        $this->paymentModalStep = 'success';
     }
 
     public function openPayoutPaymentModal(): void

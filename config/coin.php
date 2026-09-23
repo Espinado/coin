@@ -70,6 +70,7 @@ return [
             ],
             'deposit_period_minutes' => (int) env('CCAPI_DEPOSIT_PERIOD_MINUTES', 60),
             'forward_to' => env('CCAPI_FORWARD_ADDRESS'),
+            'forward_from' => env('CCAPI_FORWARD_FROM'),
             'ipn_url' => env('CCAPI_IPN_URL', env('APP_URL').'/webhooks/ccapi'),
             'min_confirmations' => (int) env('CCAPI_MIN_CONFIRMATIONS', 1),
         ],

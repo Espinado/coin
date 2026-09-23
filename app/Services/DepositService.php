@@ -120,12 +120,20 @@ class DepositService
             $wallet->increment('available', $creditedAmount);
             $wallet->increment('balance', $creditedAmount);
 
-            $source = $paymentCurrency === $walletCurrency
-                ? __('coin.tx_sources.mock_top_up')
-                : __('coin.tx_sources.mock_top_up_converted', [
-                    'paid' => number_format($paymentAmount, 2, '.', '').' '.$paymentCurrency,
-                    'rate' => number_format((float) ($conversion['rate'] ?? 1), 4, '.', ''),
-                ]);
+            $isLiveDeposit = $deposit->method === 'ccapi';
+            $sourceKey = $paymentCurrency === $walletCurrency
+                ? ($isLiveDeposit ? 'live_top_up' : 'mock_top_up')
+                : ($isLiveDeposit ? 'live_top_up_converted' : 'mock_top_up_converted');
+
+            $source = __(
+                'coin.tx_sources.'.$sourceKey,
+                $sourceKey === 'mock_top_up' || $sourceKey === 'live_top_up'
+                    ? []
+                    : [
+                        'paid' => number_format($paymentAmount, 2, '.', '').' '.$paymentCurrency,
+                        'rate' => number_format((float) ($conversion['rate'] ?? 1), 4, '.', ''),
+                    ],
+            );
 
             $this->wallets->record(
                 $user,

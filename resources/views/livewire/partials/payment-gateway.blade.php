@@ -18,6 +18,7 @@
 <div
   class="coin-payment-overlay"
   style="position: fixed; inset: 0; z-index: 9999; overflow-y: auto;"
+  @if(! $isMockDriver && $paymentModalStep === 'payment' && $pendingDepositId) wire:poll.3s="pollTopUpPaymentStatus" @endif
   @if($canDismiss && $paymentModalStep !== 'payment') wire:click="closePaymentModal" wire:keydown.escape.window="closePaymentModal" @endif
 >
   @if($paymentModalStep === 'gateway')

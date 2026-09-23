@@ -66,6 +66,11 @@ class PaymentWebhookTest extends TestCase
             'event_type' => 'in',
             'signature_valid' => true,
         ]);
+
+        $this->assertDatabaseHas('wallet_transactions', [
+            'user_id' => $user->id,
+            'source' => __('coin.tx_sources.live_top_up'),
+        ]);
     }
 
     public function test_ccapi_webhook_rejects_invalid_signature(): void
