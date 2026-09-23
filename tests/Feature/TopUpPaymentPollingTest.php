@@ -80,6 +80,35 @@ class TopUpPaymentPollingTest extends TestCase
             ->assertSet('paymentModalError', __('coin.crypto_gateway.deposit_rejected'));
     }
 
+    public function test_poll_shows_amount_mismatch_message_when_received_amount_differs(): void
+    {
+        $user = User::factory()->create();
+        $deposit = Deposit::query()->create([
+            'user_id' => $user->id,
+            'amount' => 100,
+            'currency' => 'USDT',
+            'received_amount' => 50,
+            'status' => Deposit::STATUS_REJECTED,
+            'method' => 'ccapi',
+            'payment_address' => 'TAddrMismatch',
+            'gateway_uniq_id' => Deposit::gatewayUniqId(102),
+            'gateway_network' => 'trx',
+        ]);
+
+        Livewire::actingAs($user)
+            ->test(Dashboard::class)
+            ->set('paymentModal', 'topup')
+            ->set('paymentModalStep', 'payment')
+            ->set('pendingDepositId', $deposit->id)
+            ->call('pollTopUpPaymentStatus')
+            ->assertSet('paymentModalStep', 'error')
+            ->assertSet('paymentModalError', __('coin.crypto_gateway.deposit_amount_mismatch', [
+                'expected' => '100.00',
+                'received' => '50.00',
+                'currency' => 'USDT',
+            ]));
+    }
+
     public function test_poll_is_ignored_in_mock_mode(): void
     {
         app(PlatformSettingsService::class)->setMany(['payment_gate_enabled' => false]);

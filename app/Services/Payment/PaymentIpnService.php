@@ -80,9 +80,46 @@ class PaymentIpnService
             'received_amount' => $event->amount,
         ]);
 
+        if (! $this->receivedAmountMatchesDeposit($event, $deposit)) {
+            $this->deposits->reject($deposit->fresh(), null);
+
+            return $this->finish(
+                $log,
+                PaymentWebhookLog::RESULT_IGNORED,
+                sprintf(
+                    'Amount mismatch: received %s, expected %s %s.',
+                    number_format((float) ($event->amount ?? 0), 6, '.', ''),
+                    number_format((float) $deposit->amount, 2, '.', ''),
+                    strtoupper((string) $deposit->currency),
+                ),
+            );
+        }
+
         $this->deposits->confirm($deposit->fresh(), null);
 
         return $this->finish($log, PaymentWebhookLog::RESULT_PROCESSED, 'Deposit confirmed from IPN.');
+    }
+
+    public static function receivedAmountMatchesDepositAmount(
+        ?float $received,
+        float $expectedAmount,
+        ?float $tolerance = null,
+    ): bool {
+        if ($received === null || $received <= 0) {
+            return false;
+        }
+
+        $tolerance ??= max(0, (float) config('coin.payments.ccapi.amount_tolerance', 0));
+
+        return abs($received - $expectedAmount) <= $tolerance;
+    }
+
+    private function receivedAmountMatchesDeposit(VerifiedIpnEvent $event, Deposit $deposit): bool
+    {
+        return self::receivedAmountMatchesDepositAmount(
+            $event->amount,
+            (float) $deposit->amount,
+        );
     }
 
     private function handleOutgoingPayment(VerifiedIpnEvent $event, PaymentWebhookLog $log): PaymentWebhookLog

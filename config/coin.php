@@ -73,6 +73,8 @@ return [
             'forward_from' => env('CCAPI_FORWARD_FROM'),
             'ipn_url' => env('CCAPI_IPN_URL', env('APP_URL').'/webhooks/ccapi'),
             'min_confirmations' => (int) env('CCAPI_MIN_CONFIRMATIONS', 1),
+            // IPN amount must match deposit.amount within this tolerance (0 = exact).
+            'amount_tolerance' => (float) env('CCAPI_AMOUNT_TOLERANCE', 0),
         ],
     ],
 

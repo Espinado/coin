@@ -94,6 +94,68 @@ class PaymentWebhookTest extends TestCase
         ]);
     }
 
+    public function test_ccapi_webhook_rejects_underpaid_deposit(): void
+    {
+        $user = User::factory()->create();
+        $deposit = Deposit::query()->create([
+            'user_id' => $user->id,
+            'amount' => 100,
+            'currency' => 'USDT',
+            'status' => Deposit::STATUS_PENDING,
+            'method' => 'ccapi',
+            'payment_address' => 'TMockUnderpay',
+            'gateway_network' => 'trx',
+        ]);
+        $deposit->update(['gateway_uniq_id' => Deposit::gatewayUniqId($deposit->id)]);
+        $deposit->refresh();
+
+        $payload = $this->signedDepositPayload($deposit, 'underpay-tx-1', 1, '50.000000');
+
+        $this->postJson('http://coin.test/webhooks/ccapi', $payload)->assertOk();
+
+        $deposit->refresh();
+        $user->refresh();
+
+        $this->assertSame(Deposit::STATUS_REJECTED, $deposit->status);
+        $this->assertSame('50.00000000', number_format((float) $deposit->received_amount, 8, '.', ''));
+        $this->assertSame('0.00', number_format((float) $user->wallet->available, 2, '.', ''));
+
+        $log = PaymentWebhookLog::query()->where('deposit_id', $deposit->id)->first();
+        $this->assertNotNull($log);
+        $this->assertStringContainsString('Amount mismatch', (string) $log->processing_result);
+    }
+
+    public function test_ccapi_webhook_rejects_overpaid_deposit(): void
+    {
+        $user = User::factory()->create();
+        $deposit = Deposit::query()->create([
+            'user_id' => $user->id,
+            'amount' => 100,
+            'currency' => 'USDT',
+            'status' => Deposit::STATUS_PENDING,
+            'method' => 'ccapi',
+            'payment_address' => 'TMockOverpay',
+            'gateway_network' => 'trx',
+        ]);
+        $deposit->update(['gateway_uniq_id' => Deposit::gatewayUniqId($deposit->id)]);
+        $deposit->refresh();
+
+        $payload = $this->signedDepositPayload($deposit, 'overpay-tx-1', 1, '150.000000');
+
+        $this->postJson('http://coin.test/webhooks/ccapi', $payload)->assertOk();
+
+        $deposit->refresh();
+        $user->refresh();
+
+        $this->assertSame(Deposit::STATUS_REJECTED, $deposit->status);
+        $this->assertSame('150.00000000', number_format((float) $deposit->received_amount, 8, '.', ''));
+        $this->assertSame('0.00', number_format((float) $user->wallet->available, 2, '.', ''));
+
+        $log = PaymentWebhookLog::query()->where('deposit_id', $deposit->id)->first();
+        $this->assertNotNull($log);
+        $this->assertStringContainsString('Amount mismatch', (string) $log->processing_result);
+    }
+
     public function test_duplicate_ipn_does_not_double_credit_deposit(): void
     {
         $user = User::factory()->create();
@@ -165,8 +227,12 @@ class PaymentWebhookTest extends TestCase
     }
 
     /** @return array<string, mixed> */
-    private function signedDepositPayload(Deposit $deposit, string $txid, int $confirmation): array
-    {
+    private function signedDepositPayload(
+        Deposit $deposit,
+        string $txid,
+        int $confirmation,
+        ?string $amount = null,
+    ): array {
         $payload = [
             'cryptocurrencyapi.net' => 3,
             'chain' => 'tron',
@@ -176,7 +242,7 @@ class PaymentWebhookTest extends TestCase
             'from' => '',
             'to' => $deposit->payment_address,
             'token' => 'USDT',
-            'amount' => number_format((float) $deposit->amount, 6, '.', ''),
+            'amount' => $amount ?? number_format((float) $deposit->amount, 6, '.', ''),
             'fee' => '0.000000',
             'txid' => $txid,
             'pos' => 0,

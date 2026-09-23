@@ -18,6 +18,7 @@ use App\Services\UserInAppNotificationService;
 use App\Services\DepositService;
 use App\Services\ExchangeRateService;
 use App\Services\Payment\PaymentGatewayInterface;
+use App\Services\Payment\PaymentIpnService;
 use App\Rules\BitcoinPayoutAddress;
 use App\Rules\ContactPhone;
 use App\Rules\TronPayoutAddress;
@@ -587,6 +588,10 @@ class Dashboard extends Component
 
     public function setDepositPreset(int|string $amount): void
     {
+        if ($this->isTopUpPaymentLocked()) {
+            return;
+        }
+
         $this->depositAmount = number_format(max(0, (float) $amount), 2, '.', '');
     }
 
@@ -1034,6 +1039,10 @@ class Dashboard extends Component
 
     public function openTopUpPaymentModal(): void
     {
+        if ($this->isTopUpPaymentLocked()) {
+            return;
+        }
+
         $this->resetActionFeedback();
         $this->resetPaymentModal();
 
@@ -1069,10 +1078,20 @@ class Dashboard extends Component
         $this->paymentModalError = null;
         $this->paymentModalStep = 'processing';
 
-        $amount = $this->pendingTopUpAmount ?? (float) $this->depositAmount;
+        if ($this->pendingTopUpAmount === null) {
+            $this->paymentModalStep = 'error';
+            $this->paymentModalError = __('coin.crypto_gateway.deposit_session_expired');
+
+            return;
+        }
 
         try {
-            $deposit = $deposits->initiateWithGateway($this->user, $amount, $this->depositCurrency, $gateway);
+            $deposit = $deposits->initiateWithGateway(
+                $this->user,
+                $this->pendingTopUpAmount,
+                $this->depositCurrency,
+                $gateway,
+            );
 
             $this->pendingDepositId = $deposit->id;
             $this->pendingPaymentAddress = $deposit->payment_address;
@@ -1140,7 +1159,7 @@ class Dashboard extends Component
 
         if ($deposit->status === Deposit::STATUS_REJECTED) {
             $this->paymentModalStep = 'error';
-            $this->paymentModalError = __('coin.crypto_gateway.deposit_rejected');
+            $this->paymentModalError = $this->topUpRejectionMessage($deposit);
 
             return;
         }
@@ -1756,6 +1775,16 @@ class Dashboard extends Component
         $this->closePaymentModal();
     }
 
+    public function restartTopUpAfterFailure(): void
+    {
+        if ($this->paymentModal !== 'topup') {
+            return;
+        }
+
+        $this->depositAmount = '';
+        $this->resetPaymentModal();
+    }
+
     public function closePaymentModal(): void
     {
         if ($this->paymentModalStep === 'processing') {
@@ -1768,8 +1797,29 @@ class Dashboard extends Component
 
         if ($wasTopUp) {
             $this->depositAmount = '';
-            $this->pendingTopUpAmount = null;
         }
+    }
+
+    public function isTopUpPaymentLocked(): bool
+    {
+        return $this->paymentModal === 'topup';
+    }
+
+    private function topUpRejectionMessage(Deposit $deposit): string
+    {
+        if ($deposit->received_amount !== null
+            && ! PaymentIpnService::receivedAmountMatchesDepositAmount(
+                (float) $deposit->received_amount,
+                (float) $deposit->amount,
+            )) {
+            return __('coin.crypto_gateway.deposit_amount_mismatch', [
+                'expected' => number_format((float) $deposit->amount, 2, '.', ''),
+                'received' => number_format((float) $deposit->received_amount, 2, '.', ''),
+                'currency' => strtoupper((string) $deposit->currency),
+            ]);
+        }
+
+        return __('coin.crypto_gateway.deposit_rejected');
     }
 
     public function openContractDetails(int $contractId): void

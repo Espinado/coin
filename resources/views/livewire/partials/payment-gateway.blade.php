@@ -1,7 +1,7 @@
 @if($paymentModal === 'topup')
 @php
   $currency = $depositCurrency ?: 'USDT';
-  $rawAmount = (float) ($pendingTopUpAmount ?? $depositAmount);
+  $rawAmount = (float) ($pendingTopUpAmount ?? 0);
   $amount = number_format($rawAmount, 2, '.', ',');
   $walletCurrency = $wallet?->currency ?? config('coin.wallet.base_currency', 'USDT');
   $creditPreview = null;
@@ -124,7 +124,7 @@
         <div style="margin-top: 20px; font-size: 20px; font-weight: 600; color: #f0fbff;">{{ __('coin.payment_modal.failed') }}</div>
         <div style="margin-top: 8px; font-size: 13.5px; line-height: 1.55; color: rgba(214,238,248,0.75);">{{ $paymentModalError ?? __('coin.payment_modal.try_again') }}</div>
         <div style="display: flex; gap: 10px; margin-top: 22px;">
-          <button type="button" wire:click="$set('paymentModalStep', 'gateway')" style="flex: 1; padding: 12px; border-radius: 10px; border: 1px solid oklch(0.86 0.11 195 / 0.5); background: linear-gradient(140deg, oklch(0.86 0.12 192), oklch(0.66 0.13 205)); color: #04121f; font-family: inherit; font-size: 13.5px; font-weight: 600; cursor: pointer;">{{ __('coin.payment_modal.try_again') }}</button>
+          <button type="button" wire:click="restartTopUpAfterFailure" style="flex: 1; padding: 12px; border-radius: 10px; border: 1px solid oklch(0.86 0.11 195 / 0.5); background: linear-gradient(140deg, oklch(0.86 0.12 192), oklch(0.66 0.13 205)); color: #04121f; font-family: inherit; font-size: 13.5px; font-weight: 600; cursor: pointer;">{{ __('coin.payment_modal.try_again') }}</button>
           <button type="button" wire:click="closePaymentModal" style="flex: 1; padding: 12px; border-radius: 10px; border: 1px solid rgba(150,235,250,0.2); background: rgba(150,235,250,0.06); color: #e6f4fa; font-family: inherit; font-size: 13.5px; cursor: pointer;">{{ __('coin.close') }}</button>
         </div>
       </div>
