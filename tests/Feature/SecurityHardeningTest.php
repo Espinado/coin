@@ -33,7 +33,7 @@ class SecurityHardeningTest extends TestCase
         $this->seed(PlatformSettingsSeeder::class);
     }
 
-    public function test_admin_cannot_manually_confirm_ccapi_deposit(): void
+    public function test_admin_cannot_manually_confirm_deposit_via_removed_route(): void
     {
         $admin = Admin::query()->firstOrFail();
         $user = User::factory()->create();
@@ -49,13 +49,24 @@ class SecurityHardeningTest extends TestCase
 
         $this->actingAs($admin, 'admin')
             ->post("http://admin.coin.test/deposits/{$deposit->id}/confirm")
-            ->assertRedirect(route('admin.deposits.index', absolute: false));
+            ->assertNotFound();
+    }
 
-        $deposit->refresh();
-        $user->refresh();
+    public function test_deposit_service_rejects_admin_confirm(): void
+    {
+        $admin = Admin::query()->firstOrFail();
+        $user = User::factory()->create();
+        $deposit = Deposit::query()->create([
+            'user_id' => $user->id,
+            'amount' => 100,
+            'currency' => 'USDT',
+            'status' => Deposit::STATUS_PENDING,
+            'method' => 'mock',
+        ]);
 
-        $this->assertSame(Deposit::STATUS_PENDING, $deposit->status);
-        $this->assertSame('0.00', number_format((float) $user->wallet->available, 2, '.', ''));
+        $this->expectException(\RuntimeException::class);
+
+        app(DepositService::class)->confirm($deposit, $admin);
     }
 
     public function test_mock_deposit_does_not_auto_confirm_in_production(): void

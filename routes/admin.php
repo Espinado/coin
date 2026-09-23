@@ -86,12 +86,6 @@ Route::middleware(['admin.domain', 'reject.web.on.admin'])->group(function () {
 
         Route::get('deposits', [DepositController::class, 'index'])->name('admin.deposits.index');
         Route::get('deposits/{deposit}', [DepositController::class, 'show'])->name('admin.deposits.show');
-        Route::post('deposits/{deposit}/confirm', [DepositController::class, 'confirm'])
-            ->middleware('admin.ability:manage_deposits')
-            ->name('admin.deposits.confirm');
-        Route::post('deposits/{deposit}/reject', [DepositController::class, 'reject'])
-            ->middleware('admin.ability:manage_deposits')
-            ->name('admin.deposits.reject');
 
         Route::get('withdrawals', [WithdrawalController::class, 'index'])->name('admin.withdrawals.index');
         Route::get('withdrawals/{withdrawal}', [WithdrawalController::class, 'show'])->name('admin.withdrawals.show');

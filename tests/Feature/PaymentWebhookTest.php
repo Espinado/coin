@@ -212,6 +212,62 @@ class PaymentWebhookTest extends TestCase
         $this->assertStringContainsString('payment window expired', strtolower((string) $log->processing_result));
     }
 
+    public function test_ccapi_webhook_rejects_gateway_reference_mismatch(): void
+    {
+        $user = User::factory()->create();
+        $deposit = Deposit::query()->create([
+            'user_id' => $user->id,
+            'amount' => 100,
+            'currency' => 'USDT',
+            'status' => Deposit::STATUS_PENDING,
+            'method' => 'ccapi',
+            'payment_address' => 'TGatewayRef123',
+            'gateway_uniq_id' => 'deposit:wrong',
+            'gateway_network' => 'trx',
+        ]);
+
+        $deposit->update([
+            'gateway_uniq_id' => 'deposit:wrong',
+        ]);
+
+        $payload = $this->signedDepositPayload($deposit, 'gateway-ref-tx', 1);
+
+        $this->postJson('http://coin.test/webhooks/ccapi', $payload)->assertOk();
+
+        $this->assertSame(Deposit::STATUS_PENDING, $deposit->fresh()->status);
+        $this->assertSame('0.00', number_format((float) $user->fresh()->wallet->available, 2, '.', ''));
+
+        $log = PaymentWebhookLog::query()->where('deposit_id', $deposit->id)->first();
+        $this->assertNotNull($log);
+        $this->assertStringContainsString('gateway reference mismatch', strtolower((string) $log->processing_result));
+    }
+
+    public function test_ccapi_webhook_rejects_missing_txid(): void
+    {
+        $user = User::factory()->create();
+        $deposit = Deposit::query()->create([
+            'user_id' => $user->id,
+            'amount' => 100,
+            'currency' => 'USDT',
+            'status' => Deposit::STATUS_PENDING,
+            'method' => 'ccapi',
+            'payment_address' => 'TNoTxidAddress',
+            'gateway_network' => 'trx',
+        ]);
+        $deposit->update(['gateway_uniq_id' => Deposit::gatewayUniqId($deposit->id)]);
+        $deposit->refresh();
+
+        $payload = $this->signedDepositPayload($deposit, '', 1);
+
+        $this->postJson('http://coin.test/webhooks/ccapi', $payload)->assertOk();
+
+        $this->assertSame(Deposit::STATUS_PENDING, $deposit->fresh()->status);
+
+        $log = PaymentWebhookLog::query()->where('deposit_id', $deposit->id)->first();
+        $this->assertNotNull($log);
+        $this->assertStringContainsString('missing transaction id', strtolower((string) $log->processing_result));
+    }
+
     public function test_ccapi_webhook_rejects_wrong_payment_address(): void
     {
         $user = User::factory()->create();

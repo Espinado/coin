@@ -107,8 +107,8 @@ class DepositService
                 throw new RuntimeException('Only pending top-ups can be confirmed.');
             }
 
-            if ($deposit->method === 'ccapi' && $admin !== null) {
-                throw new RuntimeException(__('coin.admin.ccapi_deposit_manual_confirm_blocked'));
+            if ($admin !== null) {
+                throw new RuntimeException(__('coin.admin.deposit_manual_action_blocked'));
             }
 
             $user = $deposit->user;
@@ -179,6 +179,10 @@ class DepositService
 
             if ($deposit->status !== Deposit::STATUS_PENDING) {
                 throw new RuntimeException('Only pending top-ups can be rejected.');
+            }
+
+            if ($admin !== null) {
+                throw new RuntimeException(__('coin.admin.deposit_manual_action_blocked'));
             }
 
             $deposit->update([

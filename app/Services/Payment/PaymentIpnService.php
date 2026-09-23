@@ -94,7 +94,7 @@ class PaymentIpnService
             return $this->finish($log, PaymentWebhookLog::RESULT_IGNORED, 'Deposit is not pending.');
         }
 
-        $validationError = $this->validateDepositAgainstIpn($event, $deposit);
+        $validationError = self::validateDepositAgainstIpn($event, $deposit);
 
         if ($validationError !== null) {
             return $this->finish($log, PaymentWebhookLog::RESULT_IGNORED, $validationError);
@@ -147,7 +147,7 @@ class PaymentIpnService
         );
     }
 
-    private function validateDepositAgainstIpn(VerifiedIpnEvent $event, Deposit $deposit): ?string
+    public static function validateDepositAgainstIpn(VerifiedIpnEvent $event, Deposit $deposit): ?string
     {
         if ($deposit->method === 'mock') {
             if (app()->environment(['local', 'testing'])) {
@@ -165,26 +165,76 @@ class PaymentIpnService
             return 'Deposit payment window expired.';
         }
 
+        $expectedLabel = Deposit::gatewayUniqId($deposit->id);
+
+        if ($deposit->gateway_uniq_id !== null && $deposit->gateway_uniq_id !== $expectedLabel) {
+            return 'Deposit gateway reference mismatch.';
+        }
+
+        if ($event->label !== null && $event->label !== '' && $event->label !== $expectedLabel) {
+            return 'Deposit label mismatch.';
+        }
+
+        if ($event->gatewayRequestId !== null && $event->gatewayRequestId !== '' && $event->gatewayRequestId !== $expectedLabel) {
+            return 'Gateway request id mismatch.';
+        }
+
+        $expectedChain = self::chainForGatewayNetwork($deposit->gateway_network);
+
+        if ($expectedChain !== '' && strcasecmp(trim($event->chain), $expectedChain) !== 0) {
+            return 'Blockchain network mismatch.';
+        }
+
         $expectedAddress = trim((string) $deposit->payment_address);
         $receivedAddress = trim((string) ($event->to ?? ''));
 
-        if ($expectedAddress !== '' && $receivedAddress !== ''
-            && strcasecmp($expectedAddress, $receivedAddress) !== 0) {
+        if ($expectedAddress === '') {
+            return 'Deposit has no payment address.';
+        }
+
+        if ($receivedAddress === '') {
+            return 'IPN missing payment address.';
+        }
+
+        if (strcasecmp($expectedAddress, $receivedAddress) !== 0) {
             return 'Payment address mismatch.';
         }
 
-        $expectedCurrency = strtoupper((string) $deposit->currency);
-        $incomingAsset = strtoupper(trim((string) ($event->token ?? '')));
-
-        if ($incomingAsset === '') {
-            $incomingAsset = strtoupper(trim((string) ($event->currency ?? '')));
+        if ($event->txid === null || trim($event->txid) === '') {
+            return 'IPN missing transaction id.';
         }
 
-        if ($incomingAsset !== '' && $expectedCurrency !== $incomingAsset) {
-            return 'Currency/token mismatch.';
+        $expectedCurrency = strtoupper((string) $deposit->currency);
+        $networkConfig = config('coin.payments.ccapi.networks.'.$expectedCurrency);
+
+        if (! is_array($networkConfig)) {
+            return 'Unsupported deposit currency.';
+        }
+
+        $expectedToken = strtoupper(trim((string) ($networkConfig['token'] ?? '')));
+
+        if ($expectedToken !== '') {
+            $incomingToken = strtoupper(trim((string) ($event->token ?? '')));
+
+            if ($incomingToken !== $expectedToken) {
+                return 'Currency/token mismatch.';
+            }
+        } elseif (strcasecmp(trim((string) ($event->currency ?? '')), $expectedCurrency) !== 0) {
+            return 'Currency mismatch.';
         }
 
         return null;
+    }
+
+    private static function chainForGatewayNetwork(?string $network): string
+    {
+        return match ($network) {
+            'btc' => 'bitcoin',
+            'eth' => 'ethereum',
+            'bnb' => 'bsc',
+            'trx', null, '' => 'tron',
+            default => '',
+        };
     }
 
     private function handleOutgoingPayment(VerifiedIpnEvent $event, PaymentWebhookLog $log): PaymentWebhookLog
