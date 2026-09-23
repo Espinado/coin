@@ -107,9 +107,15 @@ class DepositService
                 throw new RuntimeException('Only pending top-ups can be confirmed.');
             }
 
+            if ($deposit->method === 'ccapi' && $admin !== null) {
+                throw new RuntimeException(__('coin.admin.ccapi_deposit_manual_confirm_blocked'));
+            }
+
             $user = $deposit->user;
             $wallet = $this->wallets->ensureWallet($user);
-            $paymentAmount = (float) $deposit->amount;
+            $paymentAmount = $deposit->method === 'ccapi' && $deposit->received_amount !== null
+                ? (float) $deposit->received_amount
+                : (float) $deposit->amount;
             $paymentCurrency = strtoupper((string) ($deposit->currency ?: 'USDT'));
             $lockedBtcPerUsdt = $paymentCurrency === 'BTC' && $deposit->exchange_rate
                 ? (float) $deposit->exchange_rate

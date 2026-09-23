@@ -33,6 +33,31 @@ class SecurityHardeningTest extends TestCase
         $this->seed(PlatformSettingsSeeder::class);
     }
 
+    public function test_admin_cannot_manually_confirm_ccapi_deposit(): void
+    {
+        $admin = Admin::query()->firstOrFail();
+        $user = User::factory()->create();
+        $deposit = Deposit::query()->create([
+            'user_id' => $user->id,
+            'amount' => 100,
+            'currency' => 'USDT',
+            'status' => Deposit::STATUS_PENDING,
+            'method' => 'ccapi',
+            'payment_address' => 'TAdminBlockTest',
+            'gateway_network' => 'trx',
+        ]);
+
+        $this->actingAs($admin, 'admin')
+            ->post("http://admin.coin.test/deposits/{$deposit->id}/confirm")
+            ->assertRedirect(route('admin.deposits.index', absolute: false));
+
+        $deposit->refresh();
+        $user->refresh();
+
+        $this->assertSame(Deposit::STATUS_PENDING, $deposit->status);
+        $this->assertSame('0.00', number_format((float) $user->wallet->available, 2, '.', ''));
+    }
+
     public function test_mock_deposit_does_not_auto_confirm_in_production(): void
     {
         config(['coin.deposits.auto_confirm_mock' => true]);

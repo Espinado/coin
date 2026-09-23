@@ -161,6 +161,10 @@ class PaymentIpnService
             return 'Deposit method is not ccapi.';
         }
 
+        if ($deposit->expires_at !== null && $deposit->expires_at->isPast()) {
+            return 'Deposit payment window expired.';
+        }
+
         $expectedAddress = trim((string) $deposit->payment_address);
         $receivedAddress = trim((string) ($event->to ?? ''));
 

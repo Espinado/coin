@@ -156,6 +156,16 @@ class PaymentWebhookTest extends TestCase
         $this->assertStringContainsString('Amount mismatch', (string) $log->processing_result);
     }
 
+    public function test_webhook_rejects_non_ccapi_ip_in_production(): void
+    {
+        app()->detectEnvironment(fn () => 'production');
+        config(['coin.payments.ccapi.webhook_ips' => ['168.119.158.209']]);
+
+        $this->postJson('http://coin.test/webhooks/ccapi', [], [
+            'REMOTE_ADDR' => '203.0.113.10',
+        ])->assertForbidden();
+    }
+
     public function test_ccapi_webhook_rejects_unsigned_payload_even_with_mock_driver(): void
     {
         $payload = [
@@ -169,6 +179,37 @@ class PaymentWebhookTest extends TestCase
         config(['coin.payments.driver' => 'mock']);
 
         $this->postJson('http://coin.test/webhooks/ccapi', $payload)->assertForbidden();
+    }
+
+    public function test_ccapi_webhook_rejects_expired_deposit(): void
+    {
+        $user = User::factory()->create();
+        $deposit = Deposit::query()->create([
+            'user_id' => $user->id,
+            'amount' => 100,
+            'currency' => 'USDT',
+            'status' => Deposit::STATUS_PENDING,
+            'method' => 'ccapi',
+            'payment_address' => 'TExpiredAddress123',
+            'gateway_network' => 'trx',
+            'expires_at' => now()->subMinute(),
+        ]);
+        $deposit->update(['gateway_uniq_id' => Deposit::gatewayUniqId($deposit->id)]);
+        $deposit->refresh();
+
+        $payload = $this->signedDepositPayload($deposit, 'expired-tx-1', 1);
+
+        $this->postJson('http://coin.test/webhooks/ccapi', $payload)->assertOk();
+
+        $deposit->refresh();
+        $user->refresh();
+
+        $this->assertSame(Deposit::STATUS_PENDING, $deposit->status);
+        $this->assertSame('0.00', number_format((float) $user->wallet->available, 2, '.', ''));
+
+        $log = PaymentWebhookLog::query()->where('deposit_id', $deposit->id)->first();
+        $this->assertNotNull($log);
+        $this->assertStringContainsString('payment window expired', strtolower((string) $log->processing_result));
     }
 
     public function test_ccapi_webhook_rejects_wrong_payment_address(): void

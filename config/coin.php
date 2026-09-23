@@ -75,6 +75,11 @@ return [
             'min_confirmations' => (int) env('CCAPI_MIN_CONFIRMATIONS', 1),
             // IPN amount must match deposit.amount within this tolerance (0 = exact).
             'amount_tolerance' => (float) env('CCAPI_AMOUNT_TOLERANCE', 0),
+            // Comma-separated CCAPI IPN source IPs (production default applied in middleware when empty).
+            'webhook_ips' => array_values(array_filter(array_map(
+                trim(...),
+                explode(',', (string) env('CCAPI_WEBHOOK_IPS', '')),
+            ))),
         ],
     ],
 

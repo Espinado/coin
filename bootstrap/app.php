@@ -46,6 +46,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'admin.ability' => \App\Http\Middleware\EnsureAdminAbility::class,
             'auth.page.no-cache' => \App\Http\Middleware\PreventAuthPageCache::class,
             'platform.maintenance' => \App\Http\Middleware\EnsurePlatformNotInMaintenance::class,
+            'ccapi.webhook.source' => \App\Http\Middleware\EnsureCcapiWebhookSource::class,
         ]);
 
         Authenticate::redirectUsing(function (Request $request) {

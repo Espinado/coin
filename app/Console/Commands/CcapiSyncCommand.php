@@ -18,6 +18,12 @@ class CcapiSyncCommand extends Command
 
     public function handle(CryptoCurrencyApiClient $client): int
     {
+        if ($this->option('manual-confirm') && app()->environment('production')) {
+            $this->components->error('manual-confirm is disabled in production.');
+
+            return self::FAILURE;
+        }
+
         $apiKey = (string) config('coin.payments.ccapi.api_key');
         $ipnUrl = (string) config('coin.payments.ccapi.ipn_url');
 

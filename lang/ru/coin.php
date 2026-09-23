@@ -902,6 +902,7 @@ return [
         'create_plan' => 'Создать план',
         'save_plan' => 'Сохранить план',
         'top_up_confirmed' => 'Пополнение подтверждено и зачислено.',
+        'ccapi_deposit_manual_confirm_blocked' => 'CCAPI-пополнения подтверждаются только через IPN платёжного шлюза.',
         'top_up_rejected' => 'Пополнение отклонено.',
         'payout_status_updated' => 'Статус вывода обновлён.',
         'withdrawal_closed' => 'Эта выплата уже закрыта и её статус нельзя изменить.',

@@ -29,7 +29,11 @@ class SimulateCcapiIpnCommand extends Command
     public function handle(CcapiIpnPayloadBuilder $builder): int
     {
         if (! $this->allowedEnvironment()) {
-            $this->components->error('This command is restricted to local/testing. Use --force to override.');
+            $this->components->error(
+                app()->environment('production')
+                    ? 'This command is disabled in production.'
+                    : 'This command is restricted to local/testing. Use --force to override.',
+            );
 
             return self::FAILURE;
         }
@@ -256,6 +260,10 @@ class SimulateCcapiIpnCommand extends Command
 
     private function allowedEnvironment(): bool
     {
+        if (app()->environment('production')) {
+            return false;
+        }
+
         if ($this->option('force')) {
             return true;
         }
