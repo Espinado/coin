@@ -26,7 +26,11 @@ return Application::configure(basePath: dirname(__DIR__))
         },
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        $trustedProxies = config('coin.trusted_proxies', []);
+        // env() only — config is not loaded yet during middleware registration.
+        $trustedProxies = array_values(array_filter(array_map(
+            trim(...),
+            explode(',', (string) env('COIN_TRUSTED_PROXIES', '')),
+        )));
         if ($trustedProxies === ['*']) {
             $middleware->trustProxies(at: '*');
         } elseif ($trustedProxies !== []) {
