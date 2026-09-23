@@ -58,16 +58,18 @@ class WithdrawalService
             throw new RuntimeException("Minimum payout is {$min}.");
         }
 
-        if ((float) $wallet->available < $ledgerUsdt) {
-            throw new RuntimeException('Insufficient available balance.');
-        }
-
         $this->payoutAddresses->assertWalletReady($wallet, $currency);
         $resolved = $this->payoutAddresses->resolveFor($wallet, $currency);
 
         return DB::transaction(function () use ($user, $wallet, $ledgerUsdt, $payoutAmount, $currency, $payoutAddress, $resolved, $liveBtcPerUsdt, $liveUsdtPerBtc) {
-            $wallet->decrement('available', $ledgerUsdt);
-            $wallet->increment('pending', $ledgerUsdt);
+            $lockedWallet = Wallet::query()->whereKey($wallet->id)->lockForUpdate()->firstOrFail();
+
+            if ((float) $lockedWallet->available < $ledgerUsdt) {
+                throw new RuntimeException('Insufficient available balance.');
+            }
+
+            $lockedWallet->decrement('available', $ledgerUsdt);
+            $lockedWallet->increment('pending', $ledgerUsdt);
 
             $withdrawal = Withdrawal::query()->create([
                 'user_id' => $user->id,
@@ -251,6 +253,41 @@ class WithdrawalService
         }
 
         return (bool) config('coin.payments.mock.auto_complete_payout', true);
+    }
+
+    public function markFailedFromGateway(Withdrawal $withdrawal, ?string $gatewayState = null, ?string $reason = null): Withdrawal
+    {
+        return DB::transaction(function () use ($withdrawal, $gatewayState, $reason) {
+            $withdrawal->refresh();
+
+            if ($withdrawal->status === Withdrawal::STATUS_REJECTED) {
+                return $withdrawal;
+            }
+
+            if ($withdrawal->status !== Withdrawal::STATUS_PROCESSING) {
+                throw new RuntimeException('Only processing withdrawals can be marked failed from gateway.');
+            }
+
+            $wallet = $withdrawal->user->wallet ?? throw new RuntimeException('User has no wallet.');
+            $this->restoreCommittedFunds($wallet, $withdrawal->ledgerAmount());
+
+            $note = $reason ?? __('coin.admin.withdrawal_gateway_failed_note', [
+                'state' => $gatewayState ?? '?',
+            ]);
+
+            $withdrawal->update([
+                'status' => Withdrawal::STATUS_REJECTED,
+                'gateway_state' => $gatewayState ?? $withdrawal->gateway_state,
+                'admin_note' => trim(($withdrawal->admin_note ? $withdrawal->admin_note."\n" : '').$note),
+                'processed_at' => now(),
+            ]);
+
+            $withdrawal = $withdrawal->fresh(['user.wallet', 'processedByAdmin']);
+
+            WithdrawalUpdated::dispatch($withdrawal);
+
+            return $withdrawal;
+        });
     }
 
     public function markPaidFromGateway(Withdrawal $withdrawal, ?string $txid = null, ?string $gatewayState = null): Withdrawal

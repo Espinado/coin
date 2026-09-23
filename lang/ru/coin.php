@@ -946,6 +946,7 @@ return [
         'withdrawal_approve_pending_only' => 'Одобрить можно только заявку в статусе «Ожидает».',
         'withdrawal_paid_requires_ipn' => 'Статус «Выплачено» может установить только платёжный шлюз (IPN).',
         'withdrawal_reject_after_dispatch_blocked' => 'Нельзя отклонить выплату после отправки в шлюз. Дождитесь IPN или обратитесь к разработчику.',
+        'withdrawal_gateway_failed_note' => 'Шлюз сообщил об ошибке выплаты (state :state). Средства возвращены на баланс.',
         'investments' => 'Инвестиции',
         'recent_transactions' => 'Последние операции',
         'no_top_ups' => 'Пополнений пока нет.',

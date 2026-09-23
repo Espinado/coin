@@ -82,6 +82,7 @@ Route::middleware(['admin.domain', 'reject.web.on.admin'])->group(function () {
             ->middleware('admin.ability:manage_users')
             ->name('admin.users.call');
         Route::post('voximplant/one-time-key', [VoximplantCallController::class, 'oneTimeKey'])
+            ->middleware('admin.ability:manage_users')
             ->name('admin.voximplant.one-time-key');
 
         Route::get('deposits', [DepositController::class, 'index'])->name('admin.deposits.index');

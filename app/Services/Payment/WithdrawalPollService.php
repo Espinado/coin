@@ -110,8 +110,13 @@ class WithdrawalPollService
         }
 
         if ($status->isFailed()) {
-            $message = 'Gateway reported failed payout (state '.$status->state.').';
-            $this->recordPollLog($withdrawal, PaymentWebhookLog::RESULT_FAILED, $message, $status->raw);
+            $message = 'Gateway reported failed payout (state '.$status->state.'). Funds restored.';
+            $this->withdrawals->markFailedFromGateway(
+                $withdrawal->fresh(),
+                $status->state,
+                $message,
+            );
+            $this->recordPollLog($withdrawal, PaymentWebhookLog::RESULT_PROCESSED, $message, $status->raw);
             $stats['failed']++;
 
             Log::warning('withdrawal.poll.gateway_failed', [
@@ -163,12 +168,16 @@ class WithdrawalPollService
             }
         }
 
-        if (isset($raw['amount']) && $raw['amount'] !== '') {
-            return PaymentIpnService::receivedAmountMatchesDepositAmount(
-                (float) $raw['amount'],
-                (float) $withdrawal->amount,
-                currency: (string) $withdrawal->currency,
-            );
+        if (! isset($raw['amount']) || $raw['amount'] === '') {
+            return false;
+        }
+
+        if (! PaymentIpnService::receivedAmountMatchesDepositAmount(
+            (float) $raw['amount'],
+            (float) $withdrawal->amount,
+            currency: (string) $withdrawal->currency,
+        )) {
+            return false;
         }
 
         return $status->txid !== null && trim($status->txid) !== '';

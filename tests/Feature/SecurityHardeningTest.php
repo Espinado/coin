@@ -202,6 +202,25 @@ class SecurityHardeningTest extends TestCase
         app(PaymentSimulatorService::class)->simulateDepositIpn($deposit);
     }
 
+    public function test_second_withdrawal_rejected_when_balance_already_reserved(): void
+    {
+        $user = User::factory()->create();
+        $user->wallet->update([
+            'available' => 100,
+            'balance' => 100,
+            'pending' => 0,
+            'payout_address' => PayoutAddressTest::VALID_TRON_ADDRESS,
+            'network_label' => 'TRC-20',
+        ]);
+
+        app(WithdrawalService::class)->createForUser($user, 100);
+
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('Insufficient available balance.');
+
+        app(WithdrawalService::class)->createForUser($user, 100);
+    }
+
     public function test_admin_cannot_disable_payment_gate_in_production_with_ccapi_driver(): void
     {
         config(['coin.payments.driver' => 'ccapi']);

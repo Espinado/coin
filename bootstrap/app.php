@@ -26,7 +26,12 @@ return Application::configure(basePath: dirname(__DIR__))
         },
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        $middleware->trustProxies(at: '*');
+        $trustedProxies = config('coin.trusted_proxies', []);
+        if ($trustedProxies === ['*']) {
+            $middleware->trustProxies(at: '*');
+        } elseif ($trustedProxies !== []) {
+            $middleware->trustProxies(at: $trustedProxies);
+        }
 
         $middleware->validateCsrfTokens(except: [
             'webhooks/ccapi',

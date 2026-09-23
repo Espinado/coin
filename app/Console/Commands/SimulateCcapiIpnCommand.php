@@ -22,7 +22,7 @@ class SimulateCcapiIpnCommand extends Command
                             {--via=internal : Delivery: internal sub-request or http external POST}
                             {--url= : Webhook URL for --via=http (defaults to CCAPI_IPN_URL)}
                             {--dry-run : Print payload only, do not dispatch}
-                            {--force : Allow running outside local/testing}';
+                            {--force : Ignored; kept for backward compatibility}';
 
     protected $description = 'Simulate a signed CryptoCurrencyAPI IPN for local webhook testing';
 
@@ -32,7 +32,7 @@ class SimulateCcapiIpnCommand extends Command
             $this->components->error(
                 app()->environment('production')
                     ? 'This command is disabled in production.'
-                    : 'This command is restricted to local/testing. Use --force to override.',
+                    : 'This command is restricted to local/testing environments.',
             );
 
             return self::FAILURE;
@@ -260,12 +260,8 @@ class SimulateCcapiIpnCommand extends Command
 
     private function allowedEnvironment(): bool
     {
-        if (app()->environment('production')) {
-            return false;
-        }
-
         if ($this->option('force')) {
-            return true;
+            $this->warn('--force is ignored; command runs only in local/testing.');
         }
 
         return app()->environment(['local', 'testing']);

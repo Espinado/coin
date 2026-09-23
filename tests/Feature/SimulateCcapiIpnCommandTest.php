@@ -77,6 +77,30 @@ class SimulateCcapiIpnCommandTest extends TestCase
         $this->assertSame(Deposit::STATUS_PENDING, $deposit->fresh()->status);
     }
 
+    public function test_command_is_disabled_on_staging_even_with_force(): void
+    {
+        app()->detectEnvironment(fn () => 'staging');
+
+        $user = User::factory()->create();
+        $deposit = Deposit::query()->create([
+            'user_id' => $user->id,
+            'amount' => 10,
+            'currency' => 'USDT',
+            'status' => Deposit::STATUS_PENDING,
+            'method' => 'ccapi',
+            'payment_address' => 'TSimAddress',
+            'gateway_network' => 'trx',
+        ]);
+        $deposit->update(['gateway_uniq_id' => Deposit::gatewayUniqId($deposit->id)]);
+
+        $this->artisan('coin:simulate-ccapi-ipn', [
+            '--deposit' => $deposit->id,
+            '--force' => true,
+        ])->assertFailed();
+
+        $this->assertSame(Deposit::STATUS_PENDING, $deposit->fresh()->status);
+    }
+
     public function test_command_dry_run_does_not_confirm_deposit(): void
     {
         $user = User::factory()->create();

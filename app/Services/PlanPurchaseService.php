@@ -8,6 +8,7 @@ use App\Support\PlatformTerms;
 use App\Models\Contract;
 use App\Models\Plan;
 use App\Models\User;
+use App\Models\Wallet;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use RuntimeException;
@@ -42,19 +43,21 @@ class PlanPurchaseService
 
         $wallet = $this->wallets->ensureWallet($user);
 
-        if ((float) $wallet->available < $amount) {
-            throw new RuntimeException('Insufficient available balance.');
-        }
-
         return DB::transaction(function () use ($user, $plan, $amount, $wallet) {
+            $lockedWallet = Wallet::query()->whereKey($wallet->id)->lockForUpdate()->firstOrFail();
+
+            if ((float) $lockedWallet->available < $amount) {
+                throw new RuntimeException('Insufficient available balance.');
+            }
+
             $currency = (string) config('coin.wallet.base_currency', 'USDT');
             $apr = $plan->annual_profit_percent;
             $durationDays = $plan->duration_days;
             $startedAt = now();
             $endsAt = $durationDays ? $startedAt->copy()->addDays($durationDays) : null;
 
-            $wallet->decrement('available', $amount);
-            $wallet->increment('locked_balance', $amount);
+            $lockedWallet->decrement('available', $amount);
+            $lockedWallet->increment('locked_balance', $amount);
 
             $contract = Contract::query()->create([
                 'user_id' => $user->id,

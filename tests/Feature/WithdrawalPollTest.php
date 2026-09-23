@@ -117,6 +117,75 @@ class WithdrawalPollTest extends TestCase
             ->count());
     }
 
+    public function test_poll_ignores_confirmed_status_without_amount(): void
+    {
+        $user = User::factory()->create();
+        $withdrawal = Withdrawal::query()->create([
+            'user_id' => $user->id,
+            'reference' => 'WD-POLL0004',
+            'amount' => 25,
+            'currency' => 'USDT',
+            'withdrawal_type' => 'available_balance',
+            'payout_address' => 'TRecipient123',
+            'gateway_request_id' => '999',
+            'status' => Withdrawal::STATUS_PROCESSING,
+        ]);
+
+        Http::fake([
+            '*status*' => Http::response([
+                'result' => [
+                    'id' => '999',
+                    'state' => '7',
+                    'txid' => 'poll-tx-no-amount',
+                ],
+            ], 200),
+        ]);
+
+        app(WithdrawalPollService::class)->pollStuckWithdrawals();
+
+        $this->assertSame(Withdrawal::STATUS_PROCESSING, $withdrawal->fresh()->status);
+    }
+
+    public function test_poll_failed_gateway_status_restores_user_funds(): void
+    {
+        $user = User::factory()->create();
+        $user->wallet->update([
+            'available' => 450,
+            'balance' => 450,
+            'pending' => 0,
+        ]);
+
+        $withdrawal = Withdrawal::query()->create([
+            'user_id' => $user->id,
+            'reference' => 'WD-POLL0005',
+            'amount' => 50,
+            'base_amount' => 50,
+            'currency' => 'USDT',
+            'withdrawal_type' => 'available_balance',
+            'payout_address' => 'TRecipient123',
+            'gateway_request_id' => '999',
+            'status' => Withdrawal::STATUS_PROCESSING,
+        ]);
+
+        Http::fake([
+            '*status*' => Http::response([
+                'result' => [
+                    'id' => '999',
+                    'state' => '8',
+                ],
+            ], 200),
+        ]);
+
+        app(WithdrawalPollService::class)->pollStuckWithdrawals();
+
+        $withdrawal->refresh();
+        $user->refresh();
+
+        $this->assertSame(Withdrawal::STATUS_REJECTED, $withdrawal->status);
+        $this->assertSame('500.00', number_format((float) $user->wallet->available, 2, '.', ''));
+        $this->assertSame('500.00', number_format((float) $user->wallet->balance, 2, '.', ''));
+    }
+
     public function test_poll_skipped_when_mock_driver(): void
     {
         config(['coin.payments.driver' => 'mock']);

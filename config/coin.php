@@ -17,6 +17,12 @@ return [
 
     'admin_domain' => env('COIN_ADMIN_DOMAIN', 'admin.coin.test'),
 
+    // Comma-separated proxy IPs (or *). Empty = do not trust X-Forwarded-For.
+    'trusted_proxies' => array_values(array_filter(array_map(
+        trim(...),
+        explode(',', (string) env('COIN_TRUSTED_PROXIES', '')),
+    ))),
+
     'brand' => [
         'name' => env('COIN_BRAND_NAME', 'CloudFlops'),
         'admin_name' => env('COIN_ADMIN_BRAND_NAME', 'CloudFlops Admin'),
