@@ -31,6 +31,7 @@ use App\Services\ReferralService;
 use App\Services\SupportTicketService;
 use App\Services\UserActiveSessionService;
 use App\Services\WithdrawalService;
+use App\Services\WithdrawalTwoFactorService;
 use App\Support\BitcoinAddressValidator;
 use App\Support\TronAddressValidator;
 use Carbon\Carbon;
@@ -177,6 +178,10 @@ class Dashboard extends Component
     public string $payoutAddressConfirm = '';
 
     public string $payoutAddressPassword = '';
+
+    public string $payoutPassword = '';
+
+    public string $payoutVerificationCode = '';
 
     public ?int $changingContractId = null;
 
@@ -1210,22 +1215,99 @@ class Dashboard extends Component
         $this->paymentModalStep = 'review';
     }
 
-    public function confirmPayoutPayment(WithdrawalService $withdrawals): void
+    public function beginPayoutVerification(WithdrawalTwoFactorService $verification): void
     {
         if ($this->paymentModal !== 'payout' || $this->paymentModalStep !== 'review') {
             return;
         }
 
+        $this->resetErrorBag();
         $this->paymentModalError = null;
-        $this->paymentModalStep = 'processing';
 
-        $amount = (float) $this->withdrawAmount;
+        $this->validate([
+            'payoutPassword' => ['required', 'string'],
+        ], [], [
+            'payoutPassword' => __('coin.payment_modal.payout_password'),
+        ]);
 
         try {
-            $withdrawal = $withdrawals->createForUser($this->user, $amount, $this->withdrawCurrency);
+            $this->assertCurrentUserPassword($this->payoutPassword, 'payoutPassword');
+            $this->assertWithdrawalIntentIsValid();
+        } catch (ValidationException $exception) {
+            throw $exception;
+        } catch (\RuntimeException $exception) {
+            $this->addError('withdrawAmount', $exception->getMessage());
+
+            return;
+        }
+
+        $verification->beginChallenge(
+            $this->user,
+            (float) $this->withdrawAmount,
+            $this->withdrawCurrency,
+            request(),
+        );
+
+        $this->payoutPassword = '';
+        $this->payoutVerificationCode = '';
+        $this->paymentModalStep = 'payout_verify';
+    }
+
+    public function resendPayoutVerificationCode(WithdrawalTwoFactorService $verification): void
+    {
+        if ($this->paymentModal !== 'payout' || $this->paymentModalStep !== 'payout_verify') {
+            return;
+        }
+
+        $verification->sendCode($this->user, request());
+
+        $this->setActionFeedback(__('coin.auth.two_factor_resent'), 'success');
+    }
+
+    public function backToPayoutReview(WithdrawalTwoFactorService $verification): void
+    {
+        if ($this->paymentModal !== 'payout' || $this->paymentModalStep !== 'payout_verify') {
+            return;
+        }
+
+        $verification->clearChallenge(request());
+        $this->payoutVerificationCode = '';
+        $this->paymentModalStep = 'review';
+    }
+
+    public function confirmPayoutPayment(WithdrawalTwoFactorService $verification, WithdrawalService $withdrawals): void
+    {
+        if ($this->paymentModal !== 'payout' || $this->paymentModalStep !== 'payout_verify') {
+            return;
+        }
+
+        $this->resetErrorBag();
+        $this->paymentModalError = null;
+
+        $this->validate([
+            'payoutVerificationCode' => ['required', 'string', 'size:6'],
+        ], [], [
+            'payoutVerificationCode' => __('coin.auth.two_factor_code'),
+        ]);
+
+        try {
+            $intent = $verification->verify($this->payoutVerificationCode, $this->user, request());
+        } catch (ValidationException $exception) {
+            throw $exception;
+        }
+
+        $this->paymentModalStep = 'processing';
+
+        try {
+            $withdrawal = $withdrawals->createForUser(
+                $this->user,
+                $intent['amount'],
+                $intent['currency'],
+            );
 
             $this->paymentModalReference = $withdrawal->reference;
             $this->pendingWithdrawalId = $withdrawal->id;
+            $this->payoutVerificationCode = '';
 
             if (! $this->usesLivePaymentGateway) {
                 $this->paymentModalStep = 'payout_gateway';
@@ -2467,6 +2549,10 @@ class Dashboard extends Component
 
     private function resetPaymentModal(): void
     {
+        if ($this->paymentModalStep === 'payout_verify') {
+            app(WithdrawalTwoFactorService::class)->clearChallenge(request());
+        }
+
         $this->paymentModal = null;
         $this->paymentModalStep = 'review';
         $this->paymentModalError = null;
@@ -2475,6 +2561,25 @@ class Dashboard extends Component
         $this->pendingDepositId = null;
         $this->pendingPaymentAddress = null;
         $this->pendingWithdrawalId = null;
+        $this->payoutPassword = '';
+        $this->payoutVerificationCode = '';
+    }
+
+    private function assertWithdrawalIntentIsValid(): void
+    {
+        $this->validate([
+            'withdrawAmount' => $this->withdrawCurrency === 'BTC'
+                ? ['required', 'numeric', 'gt:0']
+                : ['required', 'numeric', 'min:1'],
+        ], [], [
+            'withdrawAmount' => 'amount',
+        ]);
+
+        app(ExchangeRateService::class)->assertMinWithdrawalAtLiveRate(
+            (float) $this->withdrawAmount,
+            $this->withdrawCurrency,
+        );
+        app(PayoutAddressService::class)->assertWalletReady($this->wallet, $this->withdrawCurrency);
     }
 
     private function formatAmount(float $value, int $decimals): string

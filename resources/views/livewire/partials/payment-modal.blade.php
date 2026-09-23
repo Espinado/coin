@@ -128,13 +128,42 @@
           <span wire:loading.remove wire:target="confirmInvestmentPayment">{{ __('coin.payment_modal.confirm') }}</span>
           <span wire:loading wire:target="confirmInvestmentPayment">{{ __('coin.payment_modal.confirming') }}</span>
         </button>
-        @else
-        <button type="button" wire:click="confirmPayoutPayment" wire:loading.attr="disabled" wire:target="confirmPayoutPayment" style="width: 100%; margin-top: 22px; padding: 13px; border-radius: 11px; border: 1px solid oklch(0.86 0.11 195 / 0.5); background: linear-gradient(140deg, oklch(0.86 0.12 192), oklch(0.66 0.13 205)); color: #04121f; font-family: inherit; font-size: 14px; font-weight: 600; cursor: pointer;">
-          <span wire:loading.remove wire:target="confirmPayoutPayment">{{ __('coin.payment_modal.confirm') }}</span>
-          <span wire:loading wire:target="confirmPayoutPayment">{{ __('coin.payment_modal.confirming') }}</span>
+        @elseif($isPayout)
+        <div style="margin-top: 20px;">
+          <label style="display: block; font-size: 12.5px; color: rgba(214,238,248,0.78); margin-bottom: 8px;">{{ __('coin.payment_modal.payout_password') }}</label>
+          <input type="password" wire:model="payoutPassword" autocomplete="current-password" placeholder="{{ __('coin.payment_modal.payout_password_placeholder') }}" style="width: 100%; box-sizing: border-box; padding: 12px 14px; border-radius: 10px; border: 1px solid rgba(150,235,250,0.18); background: rgba(4,16,28,0.55); color: #f0fbff; font-family: inherit; font-size: 14px;" />
+          @error('payoutPassword')<p style="margin: 8px 0 0; font-size: 12px; color: #ff8f8f;">{{ $message }}</p>@enderror
+        </div>
+        <button type="button" wire:click="beginPayoutVerification" wire:loading.attr="disabled" wire:target="beginPayoutVerification" style="width: 100%; margin-top: 22px; padding: 13px; border-radius: 11px; border: 1px solid oklch(0.86 0.11 195 / 0.5); background: linear-gradient(140deg, oklch(0.86 0.12 192), oklch(0.66 0.13 205)); color: #04121f; font-family: inherit; font-size: 14px; font-weight: 600; cursor: pointer;">
+          <span wire:loading.remove wire:target="beginPayoutVerification">{{ __('coin.payment_modal.payout_continue') }}</span>
+          <span wire:loading wire:target="beginPayoutVerification">{{ __('coin.payment_modal.confirming') }}</span>
         </button>
         @endif
         <p style="margin: 14px 0 0; font-size: 11px; line-height: 1.5; text-align: center; color: rgba(214,238,248,0.55);">{{ __('coin.payment_modal.demo_note') }}</p>
+
+      @elseif($paymentModalStep === 'payout_verify' && $isPayout)
+        <div style="font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.12em; color: rgba(214,238,248,0.66);">{{ __('coin.payment_modal.payout_verify_step') }}</div>
+        <div style="margin-top: 10px; font-size: 18px; font-weight: 600; color: #f0fbff;">{{ __('coin.payment_modal.payout_verify_title') }}</div>
+        <div style="margin-top: 8px; font-size: 13px; line-height: 1.55; color: rgba(214,238,248,0.75);">
+          {{ __('coin.payment_modal.payout_verify_sub', ['email' => $user->email]) }}
+        </div>
+        <div style="margin-top: 18px; padding: 16px; border-radius: 14px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.04); display: flex; flex-direction: column; gap: 12px; font-size: 13px;">
+          <div style="display: flex; justify-content: space-between; gap: 12px;"><span style="color: rgba(214,238,248,0.72);">{{ __('coin.payment_modal.total') }}</span><span style="font-family: 'JetBrains Mono', monospace; font-size: 15px; color: #f0fbff;">{{ $amount }} {{ $currency }}</span></div>
+          <div style="display: flex; justify-content: space-between; gap: 12px;"><span style="color: rgba(214,238,248,0.72);">{{ __('coin.payment_modal.destination') }}</span><span style="font-family: 'JetBrains Mono', monospace; font-size: 11px; text-align: right; word-break: break-all; max-width: 220px;">{{ $payoutAddress }}</span></div>
+        </div>
+        <div style="margin-top: 20px;">
+          <label style="display: block; font-size: 12.5px; color: rgba(214,238,248,0.78); margin-bottom: 8px;">{{ __('coin.auth.two_factor_code') }}</label>
+          <input type="text" wire:model="payoutVerificationCode" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="000000" style="width: 100%; box-sizing: border-box; padding: 12px 14px; border-radius: 10px; border: 1px solid rgba(150,235,250,0.18); background: rgba(4,16,28,0.55); color: #f0fbff; font-family: 'JetBrains Mono', monospace; font-size: 18px; letter-spacing: 0.2em; text-align: center;" />
+          @error('payoutVerificationCode')<p style="margin: 8px 0 0; font-size: 12px; color: #ff8f8f;">{{ $message }}</p>@enderror
+        </div>
+        <button type="button" wire:click="confirmPayoutPayment" wire:loading.attr="disabled" wire:target="confirmPayoutPayment" style="width: 100%; margin-top: 22px; padding: 13px; border-radius: 11px; border: 1px solid oklch(0.86 0.11 195 / 0.5); background: linear-gradient(140deg, oklch(0.86 0.12 192), oklch(0.66 0.13 205)); color: #04121f; font-family: inherit; font-size: 14px; font-weight: 600; cursor: pointer;">
+          <span wire:loading.remove wire:target="confirmPayoutPayment">{{ __('coin.payment_modal.payout_confirm') }}</span>
+          <span wire:loading wire:target="confirmPayoutPayment">{{ __('coin.payment_modal.confirming') }}</span>
+        </button>
+        <div style="display: flex; justify-content: space-between; gap: 12px; margin-top: 14px;">
+          <button type="button" wire:click="resendPayoutVerificationCode" wire:loading.attr="disabled" wire:target="resendPayoutVerificationCode" style="border: 0; background: transparent; color: rgba(214,238,248,0.78); font-family: inherit; font-size: 13px; cursor: pointer; text-decoration: underline; padding: 0;">{{ __('coin.auth.two_factor_resend') }}</button>
+          <button type="button" wire:click="backToPayoutReview" style="border: 0; background: transparent; color: rgba(214,238,248,0.78); font-family: inherit; font-size: 13px; cursor: pointer; text-decoration: underline; padding: 0;">{{ __('coin.payment_modal.payout_verify_back') }}</button>
+        </div>
 
       @elseif($paymentModalStep === 'payout_gateway' && $isPayout)
         <div style="font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.12em; color: rgba(214,238,248,0.66);">{{ __('coin.crypto_gateway.payout_step') }}</div>
