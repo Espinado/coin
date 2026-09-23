@@ -8,6 +8,8 @@ use App\Models\Deposit;
 use App\Models\User;
 use App\Models\Withdrawal;
 use App\Services\DepositService;
+use App\Services\Payment\PaymentSimulatorService;
+use App\Services\PlatformSettingsService;
 use App\Services\WithdrawalService;
 use App\Support\AdminRole;
 use Database\Seeders\AdminSeeder;
@@ -176,5 +178,54 @@ class SecurityHardeningTest extends TestCase
         $admin = Admin::query()->firstOrFail();
 
         $this->assertSame(AdminRole::Superadmin, $admin->adminRole());
+    }
+
+    public function test_deposit_simulation_is_blocked_in_production_for_ccapi_deposits(): void
+    {
+        config(['coin.payments.driver' => 'ccapi']);
+        app()->detectEnvironment(fn () => 'production');
+
+        $user = User::factory()->create();
+        $deposit = Deposit::query()->create([
+            'user_id' => $user->id,
+            'amount' => 100,
+            'currency' => 'USDT',
+            'status' => Deposit::STATUS_PENDING,
+            'method' => 'ccapi',
+            'payment_address' => 'TBlockedSim123',
+            'gateway_network' => 'trx',
+        ]);
+
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage(__('coin.wallet.payment_simulation_blocked'));
+
+        app(PaymentSimulatorService::class)->simulateDepositIpn($deposit);
+    }
+
+    public function test_admin_cannot_disable_payment_gate_in_production_with_ccapi_driver(): void
+    {
+        config(['coin.payments.driver' => 'ccapi']);
+        app()->detectEnvironment(fn () => 'production');
+
+        $admin = Admin::query()->firstOrFail();
+
+        $this->actingAs($admin, 'admin')
+            ->from('http://admin.coin.test/settings')
+            ->patch('http://admin.coin.test/settings', [
+                'token_symbol' => 'USDT',
+                'min_deposit' => '10.00',
+                'min_withdrawal' => '10',
+                'network_fee' => '0.50',
+                'withdrawal_processing_hours' => '24',
+                'referral_level1_percent' => '20',
+                'referral_level2_percent' => '0',
+                'kyc_required_for_withdrawal' => false,
+                'maintenance_mode' => false,
+                'payment_gate_enabled' => false,
+                'profit_accrual_time' => '09:00',
+            ])
+            ->assertSessionHasErrors('payment_gate_enabled');
+
+        $this->assertTrue(app(PlatformSettingsService::class)->paymentGateEnabled());
     }
 }

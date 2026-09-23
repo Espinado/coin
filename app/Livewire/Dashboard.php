@@ -1893,6 +1893,7 @@ class Dashboard extends Component
             && ! PaymentIpnService::receivedAmountMatchesDepositAmount(
                 (float) $deposit->received_amount,
                 (float) $deposit->amount,
+                currency: (string) $deposit->currency,
             )) {
             return __('coin.crypto_gateway.deposit_amount_mismatch', [
                 'expected' => number_format((float) $deposit->amount, 2, '.', ''),

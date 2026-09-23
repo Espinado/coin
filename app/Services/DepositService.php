@@ -64,7 +64,9 @@ class DepositService
     {
         $this->settings->assertLivePaymentGatewayReady();
 
-        $driver = (string) config('coin.payments.driver', 'mock');
+        $driver = $this->settings->paymentGateEnabled()
+            ? (string) config('coin.payments.driver', 'mock')
+            : 'mock';
         $deposit = $this->createPending($user, $amount, $currency, $driver);
 
         $intent = $gateway->createDepositIntent($deposit);

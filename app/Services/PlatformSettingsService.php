@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\PlatformSetting;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Validation\ValidationException;
 
 class PlatformSettingsService
 {
@@ -76,6 +77,7 @@ class PlatformSettingsService
     /** @param array<string, string|int|float|bool> $values */
     public function setMany(array $values): void
     {
+        $this->assertProductionPaymentGateSafety($values);
         $this->persistKeys($values, self::DEFAULTS);
     }
 
@@ -89,6 +91,28 @@ class PlatformSettingsService
     public function legalInfo(): array
     {
         return array_intersect_key($this->all(), self::LEGAL_DEFAULTS);
+    }
+
+    /** @param array<string, string|int|float|bool> $values */
+    private function assertProductionPaymentGateSafety(array $values): void
+    {
+        if (! app()->environment('production')) {
+            return;
+        }
+
+        if (! array_key_exists('payment_gate_enabled', $values)) {
+            return;
+        }
+
+        if (filter_var($values['payment_gate_enabled'], FILTER_VALIDATE_BOOL)) {
+            return;
+        }
+
+        if ((string) config('coin.payments.driver', 'mock') === 'ccapi') {
+            throw ValidationException::withMessages([
+                'payment_gate_enabled' => __('coin.admin.payment_gate_disable_blocked'),
+            ]);
+        }
     }
 
     /**

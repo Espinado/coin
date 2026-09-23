@@ -32,6 +32,8 @@ class WithdrawalTwoFactorService
 
     public function sendCode(User $user, Request $request): void
     {
+        $this->ensureResendIsNotRateLimited($request, $user);
+
         if ($this->challengeExpired($request, $user)) {
             throw ValidationException::withMessages([
                 'payoutVerificationCode' => __('coin.payment_modal.payout_verify_expired'),
@@ -53,6 +55,8 @@ class WithdrawalTwoFactorService
         Cache::put($this->cacheKey($request), $payload, now()->addMinutes(self::TTL_MINUTES));
 
         Mail::to($user->email)->send(new WithdrawalVerificationMail($user, $code));
+
+        RateLimiter::hit($this->resendThrottleKey($request, $user), 60);
     }
 
     /**
@@ -149,6 +153,27 @@ class WithdrawalTwoFactorService
     private function throttleKey(Request $request, User $user): string
     {
         return 'withdrawal-two-factor|'.$user->id.'|'.$request->session()->getId();
+    }
+
+    private function resendThrottleKey(Request $request, User $user): string
+    {
+        return 'withdrawal-two-factor-resend|'.$user->id.'|'.$request->session()->getId();
+    }
+
+    private function ensureResendIsNotRateLimited(Request $request, User $user): void
+    {
+        if (! RateLimiter::tooManyAttempts($this->resendThrottleKey($request, $user), 3)) {
+            return;
+        }
+
+        $seconds = RateLimiter::availableIn($this->resendThrottleKey($request, $user));
+
+        throw ValidationException::withMessages([
+            'payoutVerificationCode' => __('coin.auth.login_throttle', [
+                'seconds' => $seconds,
+                'minutes' => ceil($seconds / 60),
+            ]),
+        ]);
     }
 
     private function ensureIsNotRateLimited(Request $request, User $user): void

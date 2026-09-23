@@ -11,7 +11,10 @@ use App\Services\Payment\MockPaymentGateway;
 use App\Services\Payment\PaymentGatewayInterface;
 use App\View\Composers\AdminNavComposer;
 use Illuminate\Auth\Events\Lockout;
+use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\View;
@@ -63,5 +66,9 @@ class AppServiceProvider extends ServiceProvider
         View::composer('admin.partials.sidebar', AdminNavComposer::class);
 
         Event::listen(Lockout::class, LogAuthLockout::class);
+
+        RateLimiter::for('ccapi-webhook', function (Request $request) {
+            return Limit::perMinute(120)->by($request->ip() ?? 'unknown');
+        });
     }
 }

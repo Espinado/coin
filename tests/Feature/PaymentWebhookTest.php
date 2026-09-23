@@ -369,6 +369,84 @@ class PaymentWebhookTest extends TestCase
         $this->assertSame('withdraw-tx-1', $withdrawal->txid);
     }
 
+    public function test_outgoing_ipn_rejects_wrong_payout_amount(): void
+    {
+        $user = User::factory()->create();
+        $withdrawal = Withdrawal::query()->create([
+            'user_id' => $user->id,
+            'reference' => 'WD-WRONGAMT1',
+            'amount' => 25,
+            'currency' => 'USDT',
+            'withdrawal_type' => 'available_balance',
+            'payout_address' => 'TRecipient123',
+            'network_label' => 'TRC-20',
+            'gateway_request_id' => '999',
+            'status' => Withdrawal::STATUS_PROCESSING,
+        ]);
+
+        $payload = [
+            'cryptocurrencyapi.net' => 3,
+            'chain' => 'tron',
+            'currency' => 'TRX',
+            'type' => 'out',
+            'date' => now()->timestamp,
+            'to' => 'TRecipient123',
+            'token' => 'USDT',
+            'amount' => '10.000000',
+            'fee' => '0.000000',
+            'txid' => 'withdraw-tx-wrong-amount',
+            'pos' => 0,
+            'confirmation' => 7,
+            'label' => Withdrawal::gatewayUniqId($withdrawal->reference),
+            'id' => '999',
+        ];
+
+        $payload['sign'] = app(CcapiIpnVerifier::class)->sign($payload, $this->apiKey);
+
+        $this->postJson('http://coin.test/webhooks/ccapi', $payload)->assertOk();
+
+        $this->assertSame(Withdrawal::STATUS_PROCESSING, $withdrawal->fresh()->status);
+    }
+
+    public function test_outgoing_ipn_rejects_wrong_payout_address(): void
+    {
+        $user = User::factory()->create();
+        $withdrawal = Withdrawal::query()->create([
+            'user_id' => $user->id,
+            'reference' => 'WD-WRONGADDR',
+            'amount' => 25,
+            'currency' => 'USDT',
+            'withdrawal_type' => 'available_balance',
+            'payout_address' => 'TRecipient123',
+            'network_label' => 'TRC-20',
+            'gateway_request_id' => '999',
+            'status' => Withdrawal::STATUS_PROCESSING,
+        ]);
+
+        $payload = [
+            'cryptocurrencyapi.net' => 3,
+            'chain' => 'tron',
+            'currency' => 'TRX',
+            'type' => 'out',
+            'date' => now()->timestamp,
+            'to' => 'TAttackerWallet999',
+            'token' => 'USDT',
+            'amount' => '25.000000',
+            'fee' => '0.000000',
+            'txid' => 'withdraw-tx-wrong-address',
+            'pos' => 0,
+            'confirmation' => 7,
+            'label' => Withdrawal::gatewayUniqId($withdrawal->reference),
+            'id' => '999',
+        ];
+
+        $payload['sign'] = app(CcapiIpnVerifier::class)->sign($payload, $this->apiKey);
+
+        $this->postJson('http://coin.test/webhooks/ccapi', $payload)->assertOk();
+
+        $this->assertSame(Withdrawal::STATUS_PROCESSING, $withdrawal->fresh()->status);
+    }
+
     /** @return array<string, mixed> */
     private function signedDepositPayload(
         Deposit $deposit,

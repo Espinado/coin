@@ -24,7 +24,7 @@ Route::domain(config('coin.user_domain'))
         Route::get('/r/{code}', ReferralInviteController::class)->name('referral.invite');
 
         Route::post('/webhooks/ccapi', [PaymentWebhookController::class, 'handleCcapi'])
-            ->middleware('ccapi.webhook.source')
+            ->middleware(['ccapi.webhook.source', 'throttle:ccapi-webhook'])
             ->name('webhooks.ccapi');
 
         Route::post('/guest/broadcasting/auth', [GuestBroadcastAuthController::class, 'store'])

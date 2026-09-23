@@ -129,14 +129,18 @@ class PaymentIpnService
         ?float $received,
         float $expectedAmount,
         ?float $tolerance = null,
+        ?string $currency = null,
     ): bool {
         if ($received === null || $received <= 0) {
             return false;
         }
 
         $tolerance ??= max(0, (float) config('coin.payments.ccapi.amount_tolerance', 0));
+        $decimals = strtoupper((string) ($currency ?? 'USDT')) === 'BTC' ? 8 : 2;
+        $normalizedExpected = (float) number_format($expectedAmount, $decimals, '.', '');
+        $normalizedReceived = (float) number_format($received, $decimals, '.', '');
 
-        return abs($received - $expectedAmount) <= $tolerance;
+        return abs($normalizedReceived - $normalizedExpected) <= $tolerance;
     }
 
     private function receivedAmountMatchesDeposit(VerifiedIpnEvent $event, Deposit $deposit): bool
@@ -144,6 +148,7 @@ class PaymentIpnService
         return self::receivedAmountMatchesDepositAmount(
             $event->amount,
             (float) $deposit->amount,
+            currency: (string) $deposit->currency,
         );
     }
 
@@ -226,6 +231,60 @@ class PaymentIpnService
         return null;
     }
 
+    public static function validateWithdrawalAgainstIpn(VerifiedIpnEvent $event, Withdrawal $withdrawal): ?string
+    {
+        $expectedLabel = Withdrawal::gatewayUniqId($withdrawal->reference);
+
+        if ($event->label !== null && $event->label !== '' && $event->label !== $expectedLabel) {
+            return 'Withdrawal label mismatch.';
+        }
+
+        if ($withdrawal->gateway_request_id !== null
+            && $event->gatewayRequestId !== null
+            && $event->gatewayRequestId !== ''
+            && $event->gatewayRequestId !== (string) $withdrawal->gateway_request_id) {
+            return 'Withdrawal gateway request id mismatch.';
+        }
+
+        $expectedAddress = trim((string) $withdrawal->payout_address);
+        $receivedAddress = trim((string) ($event->to ?? ''));
+
+        if ($expectedAddress === '') {
+            return 'Withdrawal has no payout address.';
+        }
+
+        if ($receivedAddress === '') {
+            return 'IPN missing payout address.';
+        }
+
+        if (strcasecmp($expectedAddress, $receivedAddress) !== 0) {
+            return 'Payout address mismatch.';
+        }
+
+        if ($event->txid === null || trim($event->txid) === '') {
+            return 'IPN missing transaction id.';
+        }
+
+        $expectedCurrency = strtoupper((string) $withdrawal->currency);
+        $networkConfig = config('coin.payments.ccapi.networks.'.$expectedCurrency);
+
+        if (is_array($networkConfig)) {
+            $expectedToken = strtoupper(trim((string) ($networkConfig['token'] ?? '')));
+
+            if ($expectedToken !== '') {
+                $incomingToken = strtoupper(trim((string) ($event->token ?? '')));
+
+                if ($incomingToken !== $expectedToken) {
+                    return 'Payout currency/token mismatch.';
+                }
+            } elseif (strcasecmp(trim((string) ($event->currency ?? '')), $expectedCurrency) !== 0) {
+                return 'Payout currency mismatch.';
+            }
+        }
+
+        return null;
+    }
+
     private static function chainForGatewayNetwork(?string $network): string
     {
         return match ($network) {
@@ -268,6 +327,29 @@ class PaymentIpnService
 
         if ($withdrawal->status !== Withdrawal::STATUS_PROCESSING) {
             return $this->finish($log, PaymentWebhookLog::RESULT_IGNORED, 'Withdrawal is not processing.');
+        }
+
+        $validationError = self::validateWithdrawalAgainstIpn($event, $withdrawal);
+
+        if ($validationError !== null) {
+            return $this->finish($log, PaymentWebhookLog::RESULT_IGNORED, $validationError);
+        }
+
+        if (! self::receivedAmountMatchesDepositAmount(
+            $event->amount,
+            (float) $withdrawal->amount,
+            currency: (string) $withdrawal->currency,
+        )) {
+            return $this->finish(
+                $log,
+                PaymentWebhookLog::RESULT_IGNORED,
+                sprintf(
+                    'Payout amount mismatch: received %s, expected %s %s.',
+                    number_format((float) ($event->amount ?? 0), 6, '.', ''),
+                    number_format((float) $withdrawal->amount, strtoupper((string) $withdrawal->currency) === 'BTC' ? 8 : 2, '.', ''),
+                    strtoupper((string) $withdrawal->currency),
+                ),
+            );
         }
 
         $this->withdrawals->markPaidFromGateway(
