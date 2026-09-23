@@ -35,6 +35,14 @@ async function requestOneTimeHash(oneTimeKeyUrl, key) {
     return payload;
 }
 
+function resolveConnectionNode(nodeName) {
+    if (! nodeName) {
+        return VoxImplant.ConnectionNode.NODE_8;
+    }
+
+    return VoxImplant.ConnectionNode[nodeName] ?? nodeName;
+}
+
 async function ensureLoggedIn(root, sdk) {
     if (sdk.getClientState() === VoxImplant.ClientState.LOGGED_IN) {
         return;
@@ -50,7 +58,9 @@ async function ensureLoggedIn(root, sdk) {
     setStatus(root, root.dataset.statusConnecting || 'Connecting…');
 
     if (! sdk.alreadyInitialized) {
-        await sdk.init();
+        await sdk.init({
+            node: resolveConnectionNode(root.dataset.node),
+        });
     }
 
     if (sdk.getClientState() !== VoxImplant.ClientState.CONNECTED

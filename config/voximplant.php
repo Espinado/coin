@@ -24,6 +24,9 @@ return [
 
     'caller_id' => env('VOXIMPLANT_CALLER_ID'),
 
+    // Web SDK node — see manage.voximplant.com dashboard or GetAccountInfo (api-nodeN).
+    'node' => env('VOXIMPLANT_NODE', 'NODE_8'),
+
     'api_url' => env('VOXIMPLANT_API_URL', 'https://api.voximplant.com/platform_api'),
 
 ];

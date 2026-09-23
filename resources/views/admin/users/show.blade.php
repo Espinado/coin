@@ -35,6 +35,7 @@
                             data-username="{{ $voximplantUsername }}"
                             data-destination="{{ $voximplantDestination }}"
                             data-caller-id="{{ $voximplantCallerId }}"
+                            data-node="{{ $voximplantNode }}"
                             data-one-time-key-url="{{ route('admin.voximplant.one-time-key') }}"
                             data-status-connecting="{{ __('coin.voximplant.status_connecting') }}"
                             data-status-ready="{{ __('coin.voximplant.status_ready') }}"

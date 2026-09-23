@@ -84,6 +84,7 @@ class UserController extends Controller
             'voximplantDestination' => $voximplant->normalizeDestination($user),
             'voximplantUsername' => $voximplant->sdkUsername(),
             'voximplantCallerId' => (string) config('voximplant.caller_id', ''),
+            'voximplantNode' => (string) config('voximplant.node', 'NODE_8'),
         ]);
     }
 
