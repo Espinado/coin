@@ -178,13 +178,17 @@ class PlatformSettingsService
             && (string) config('coin.payments.driver', 'mock') === 'ccapi';
     }
 
-    public function assertPaymentGateEnabled(): void
+    public function assertLivePaymentGatewayReady(): void
     {
         if (! $this->paymentGateEnabled()) {
-            throw new \RuntimeException(__('coin.wallet.payment_gate_disabled'));
+            return;
         }
 
-        if ($this->usesLivePaymentGateway() && ! filled((string) config('coin.payments.ccapi.api_key'))) {
+        if ((string) config('coin.payments.driver', 'mock') !== 'ccapi') {
+            throw new \RuntimeException(__('coin.wallet.payment_gate_live_driver_missing'));
+        }
+
+        if (! filled((string) config('coin.payments.ccapi.api_key'))) {
             throw new \RuntimeException(__('coin.wallet.payment_gate_ccapi_missing'));
         }
     }

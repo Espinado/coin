@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Admin;
+use App\Models\Deposit;
 use App\Models\User;
 use App\Services\DepositService;
 use App\Services\Payment\MockPaymentGateway;
@@ -33,24 +34,24 @@ class PaymentGateTest extends TestCase
         $this->seed(PlatformSettingsSeeder::class);
     }
 
-    public function test_deposit_via_gateway_is_blocked_when_payment_gate_disabled(): void
+    public function test_deposit_works_in_test_mode_when_payment_gate_disabled(): void
     {
         app(PlatformSettingsService::class)->setMany(['payment_gate_enabled' => false]);
 
         $user = User::factory()->create();
 
-        $this->expectException(\RuntimeException::class);
-        $this->expectExceptionMessage(__('coin.wallet.payment_gate_disabled'));
-
-        app(DepositService::class)->initiateWithGateway(
+        $deposit = app(DepositService::class)->initiateWithGateway(
             $user,
             100,
             'USDT',
             app(MockPaymentGateway::class),
         );
+
+        $this->assertSame(Deposit::STATUS_PENDING, $deposit->status);
+        $this->assertStringStartsWith('MOCK-', $deposit->payment_address);
     }
 
-    public function test_withdrawal_is_blocked_when_payment_gate_disabled(): void
+    public function test_withdrawal_works_in_test_mode_when_payment_gate_disabled(): void
     {
         app(PlatformSettingsService::class)->setMany(['payment_gate_enabled' => false]);
 
@@ -62,10 +63,31 @@ class PaymentGateTest extends TestCase
             'network_label' => 'TRC-20',
         ]);
 
-        $this->expectException(\RuntimeException::class);
-        $this->expectExceptionMessage(__('coin.wallet.payment_gate_disabled'));
+        $withdrawal = app(WithdrawalService::class)->createForUser($user, 100);
 
-        app(WithdrawalService::class)->createForUser($user, 100);
+        $this->assertSame('100.00', number_format((float) $withdrawal->amount, 2, '.', ''));
+    }
+
+    public function test_live_deposit_requires_ccapi_when_payment_gate_enabled(): void
+    {
+        config([
+            'coin.payments.driver' => 'ccapi',
+            'coin.payments.ccapi.api_key' => '',
+        ]);
+
+        app(PlatformSettingsService::class)->setMany(['payment_gate_enabled' => true]);
+
+        $user = User::factory()->create();
+
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage(__('coin.wallet.payment_gate_ccapi_missing'));
+
+        app(DepositService::class)->initiateWithGateway(
+            $user,
+            100,
+            'USDT',
+            app(MockPaymentGateway::class),
+        );
     }
 
     public function test_admin_can_enable_payment_gate_in_settings(): void

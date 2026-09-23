@@ -26,8 +26,6 @@ class WithdrawalService
 
     public function createForUser(User $user, float $amount, string $currency = PayoutAddressService::CURRENCY_USDT, ?string $payoutAddress = null): Withdrawal
     {
-        $this->settings->assertPaymentGateEnabled();
-
         $wallet = $user->wallet ?? throw new RuntimeException('User has no wallet.');
         $currency = strtoupper(trim($currency));
 
@@ -179,7 +177,7 @@ class WithdrawalService
             return $withdrawal;
         }
 
-        $this->settings->assertPaymentGateEnabled();
+        $this->settings->assertLivePaymentGatewayReady();
 
         $autoSimulateIpn ??= $this->shouldAutoCompleteMockPayout();
 

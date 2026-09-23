@@ -1037,12 +1037,6 @@ class Dashboard extends Component
         $this->resetActionFeedback();
         $this->resetPaymentModal();
 
-        if (! $this->paymentGateEnabled) {
-            throw ValidationException::withMessages([
-                'depositAmount' => [__('coin.wallet.payment_gate_disabled')],
-            ]);
-        }
-
         $this->validate([
             'depositAmount' => ['required', 'numeric', 'gt:0'],
         ], [
@@ -1129,12 +1123,6 @@ class Dashboard extends Component
     {
         $this->resetActionFeedback();
         $this->resetPaymentModal();
-
-        if (! $this->paymentGateEnabled) {
-            throw ValidationException::withMessages([
-                'withdrawAmount' => [__('coin.wallet.payment_gate_disabled')],
-            ]);
-        }
 
         $this->validate([
             'withdrawAmount' => $this->withdrawCurrency === 'BTC'

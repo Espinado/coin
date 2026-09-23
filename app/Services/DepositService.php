@@ -62,7 +62,7 @@ class DepositService
 
     public function initiateWithGateway(User $user, float $amount, string $currency, PaymentGatewayInterface $gateway): Deposit
     {
-        $this->settings->assertPaymentGateEnabled();
+        $this->settings->assertLivePaymentGatewayReady();
 
         $driver = (string) config('coin.payments.driver', 'mock');
         $deposit = $this->createPending($user, $amount, $currency, $driver);
