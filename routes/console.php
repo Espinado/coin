@@ -29,3 +29,18 @@ if (config('coin.exchange_rates.coinmarketcap.enabled')) {
         ->hourly()
         ->withoutOverlapping();
 }
+
+Schedule::command('coin:poll-stuck-withdrawals')
+    ->everyMinute()
+    ->withoutOverlapping()
+    ->when(function (): bool {
+        if (! config('coin.payments.ccapi.poll_stuck_withdrawals', true)) {
+            return false;
+        }
+
+        if ((string) config('coin.payments.driver', 'mock') !== 'ccapi') {
+            return false;
+        }
+
+        return app(PlatformSettingsService::class)->usesLivePaymentGateway();
+    });

@@ -35,6 +35,8 @@ class Withdrawal extends Model
         'txid',
         'gateway_state',
         'sent_at',
+        'gateway_poll_checked_at',
+        'gateway_poll_summary',
         'status',
         'processed_by',
         'admin_note',
@@ -54,6 +56,7 @@ class Withdrawal extends Model
             'exchange_rate' => 'decimal:8',
             'usdt_per_btc' => 'decimal:8',
             'sent_at' => 'datetime',
+            'gateway_poll_checked_at' => 'datetime',
             'processed_at' => 'datetime',
         ];
     }

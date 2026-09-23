@@ -17,6 +17,13 @@
                     <div><strong>{{ __('coin.admin.payout_address') }}:</strong> {{ $withdrawal->payout_address }}</div>
                     @if($withdrawal->network_label)<div><strong>{{ __('coin.admin.network') }}:</strong> {{ $withdrawal->network_label }}</div>@endif
                     @if($withdrawal->gateway_request_id)<div><strong>{{ __('coin.admin.gateway_reference') }}:</strong> {{ $withdrawal->gateway_request_id }}</div>@endif
+                    @if($withdrawal->gateway_state)<div><strong>{{ __('coin.admin.gateway_state') }}:</strong> {{ $withdrawal->gateway_state }}</div>@endif
+                    @if($withdrawal->gateway_poll_checked_at)
+                        <div><strong>{{ __('coin.admin.gateway_poll_checked_at') }}:</strong> {{ $withdrawal->gateway_poll_checked_at->format('M j, Y H:i:s') }}</div>
+                    @endif
+                    @if($withdrawal->gateway_poll_summary)
+                        <div><strong>{{ __('coin.admin.gateway_poll_summary') }}:</strong> <span style="font-family:'JetBrains Mono',monospace;font-size:12px;">{{ $withdrawal->gateway_poll_summary }}</span></div>
+                    @endif
                     @if($withdrawal->txid)<div><strong>{{ __('coin.admin.txid') }}:</strong> <span style="font-family:'JetBrains Mono',monospace;font-size:12px;word-break:break-all;">{{ $withdrawal->txid }}</span></div>@endif
                     @if($withdrawal->admin_note)<div style="margin-top:10px;"><strong>{{ __('coin.admin.admin_note') }}:</strong> {{ $withdrawal->admin_note }}</div>@endif
                 </div>
@@ -31,6 +38,25 @@
                     @endif
                 @elseif($withdrawal->status === \App\Models\Withdrawal::STATUS_PROCESSING)
                     <p style="margin:0;font-size:13px;line-height:1.65;color:rgba(232,237,245,0.72);">{{ __('coin.admin.withdrawal_processing_hint') }}</p>
+                    @if($pollLogs->isNotEmpty())
+                        <div style="margin-top:18px;padding-top:18px;border-top:1px solid rgba(255,255,255,0.08);">
+                            <h3 style="margin:0 0 10px;font-size:14px;font-weight:600;">{{ __('coin.admin.gateway_poll_log') }}</h3>
+                            <div style="display:flex;flex-direction:column;gap:8px;">
+                                @foreach($pollLogs as $log)
+                                    <div style="font-size:12px;line-height:1.55;color:rgba(232,237,245,0.72);padding:10px 12px;border-radius:8px;background:rgba(255,255,255,0.03);">
+                                        <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:rgba(232,237,245,0.52);">{{ $log->processed_at?->format('M j, Y H:i:s') }}</div>
+                                        <div style="margin-top:4px;">{{ $log->processing_result }}</div>
+                                        @if(is_array($log->payload) && $log->payload !== [])
+                                            <details style="margin-top:6px;">
+                                                <summary style="cursor:pointer;color:rgba(232,237,245,0.58);">{{ __('coin.admin.gateway_poll_response') }}</summary>
+                                                <pre style="margin:8px 0 0;padding:10px;border-radius:8px;background:#070a10;overflow:auto;font-size:11px;line-height:1.45;">{{ json_encode($log->payload, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) }}</pre>
+                                            </details>
+                                        @endif
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+                    @endif
                 @else
                     <form method="POST" action="{{ route('admin.withdrawals.approve', $withdrawal) }}" style="display:flex;flex-direction:column;gap:12px;margin-bottom:18px;">
                         @csrf

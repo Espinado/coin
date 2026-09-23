@@ -80,6 +80,8 @@ return [
                 trim(...),
                 explode(',', (string) env('CCAPI_WEBHOOK_IPS', '')),
             ))),
+            // Poll CCAPI .status for withdrawals stuck in processing without IPN.
+            'poll_stuck_withdrawals' => (bool) env('CCAPI_POLL_STUCK_WITHDRAWALS', true),
         ],
     ],
 

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Admin\Concerns\AdminListQuery;
 use App\Http\Controllers\Admin\Concerns\RedirectsWithAdminFlash;
 use App\Http\Controllers\Controller;
+use App\Models\PaymentWebhookLog;
 use App\Models\Withdrawal;
 use App\Services\WithdrawalService;
 use Illuminate\Http\RedirectResponse;
@@ -56,9 +57,17 @@ class WithdrawalController extends Controller
     {
         $withdrawal->load(['user.wallet', 'user.contracts.plan', 'processedByAdmin']);
 
+        $pollLogs = PaymentWebhookLog::query()
+            ->where('withdrawal_id', $withdrawal->id)
+            ->where('event_type', 'payout_poll')
+            ->orderByDesc('id')
+            ->limit(15)
+            ->get();
+
         return view('admin.withdrawals.show', [
             'withdrawal' => $withdrawal,
             'statuses' => $withdrawal->adminSelectableStatuses(),
+            'pollLogs' => $pollLogs,
         ]);
     }
 
