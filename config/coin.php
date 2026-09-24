@@ -13,6 +13,8 @@ return [
     |
     */
 
+    'display_timezone' => env('COIN_DISPLAY_TIMEZONE', 'Europe/Riga'),
+
     'user_domain' => env('COIN_USER_DOMAIN', 'coin.test'),
 
     'admin_domain' => env('COIN_ADMIN_DOMAIN', 'admin.coin.test'),

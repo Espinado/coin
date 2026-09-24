@@ -12,7 +12,7 @@
             <div class="admin-card">
                 <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.12em;color:rgba(232,237,245,0.62);">{{ strtoupper(__('coin.admin.top_up_detail', ['id' => $deposit->id])) }}</div>
                 <h1 style="margin:10px 0 0;font-size:22px;font-weight:600;">{{ $deposit->formattedAmount() }}</h1>
-                <p style="margin:8px 0 0;font-size:13px;color:rgba(232,237,245,0.72);">{{ ucfirst($deposit->status) }} · {{ $deposit->created_at?->format('M j, Y H:i') }}</p>
+                <p style="margin:8px 0 0;font-size:13px;color:rgba(232,237,245,0.72);">{{ ucfirst($deposit->status) }} · {{ \App\Support\LocaleFormat::dateTimeLocal($deposit->created_at) }} ({{ \App\Support\LocaleFormat::timezoneLabel() }})</p>
                 <div style="margin-top:16px;font-size:13px;line-height:1.7;">
                     <div><strong>{{ __('coin.admin.method') }}:</strong> {{ $deposit->method }}</div>
                     @if($deposit->payment_address)
@@ -34,7 +34,17 @@
                     <div><strong>{{ __('coin.admin.exchange_rate') }}:</strong> {{ rtrim(rtrim(number_format((float) $deposit->exchange_rate, 8, '.', ''), '0'), '.') }} BTC</div>
                     @endif
                     @if($deposit->expires_at)
-                    <div><strong>{{ __('coin.admin.expires_at') }}:</strong> {{ $deposit->expires_at->format('M j, Y H:i') }}</div>
+                    <div>
+                        <strong>{{ __('coin.admin.expires_at') }}:</strong>
+                        {{ \App\Support\LocaleFormat::dateTimeLocal($deposit->expires_at) }} ({{ \App\Support\LocaleFormat::timezoneLabel() }})
+                        @if($deposit->status === \App\Models\Deposit::STATUS_PENDING)
+                            @if($deposit->expires_at->isPast())
+                            <span style="margin-left:8px;color:#ffb0b0;">{{ __('coin.admin.deposit_expired_pending') }}</span>
+                            @else
+                            <span style="margin-left:8px;color:rgba(232,237,245,0.62);">{{ __('coin.admin.deposit_expires_in', ['minutes' => max(1, (int) now()->diffInMinutes($deposit->expires_at, false))]) }}</span>
+                            @endif
+                        @endif
+                    </div>
                     @endif
                     @if($deposit->confirmed_at)<div><strong>{{ __('coin.admin.processed') }}:</strong> {{ $deposit->confirmed_at->format('M j, Y H:i') }}</div>@endif
                     @if($deposit->status === \App\Models\Deposit::STATUS_REJECTED && $deposit->userRejectionMessage())

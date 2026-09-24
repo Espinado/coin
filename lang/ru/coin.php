@@ -964,6 +964,8 @@ return [
         'txid' => 'TXID',
         'received_amount' => 'Получено',
         'expires_at' => 'Истекает',
+        'deposit_expires_in' => 'осталось ~:minutes мин.',
+        'deposit_expired_pending' => 'срок истёк, ожидается автоотклонение',
         'top_up_rejected' => 'Пополнение отклонено.',
         'payout_status_updated' => 'Статус вывода обновлён.',
         'withdrawal_closed' => 'Эта выплата уже закрыта и её статус нельзя изменить.',

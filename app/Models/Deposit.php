@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\LocaleFormat;
 use App\Support\PaymentStatusReason;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -119,7 +120,9 @@ class Deposit extends Model
         if ($this->status === self::STATUS_PENDING) {
             if ($this->expires_at !== null && $this->expires_at->isFuture()) {
                 return __('coin.wallet.deposit_expires_at', [
-                    'time' => $this->expires_at->timezone(config('app.timezone'))->format('d.m.Y H:i'),
+                    'time' => $this->expires_at
+                        ->timezone(LocaleFormat::displayTimezone())
+                        ->format('d.m.Y H:i'),
                 ]);
             }
 

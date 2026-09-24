@@ -46,7 +46,7 @@ Schedule::command('coin:poll-stuck-withdrawals')
     });
 
 Schedule::command('coin:poll-stuck-deposits')
-    ->everyFiveMinutes()
+    ->everyMinute()
     ->withoutOverlapping()
     ->when(function (): bool {
         if (! config('coin.payments.ccapi.poll_stuck_deposits', true)) {

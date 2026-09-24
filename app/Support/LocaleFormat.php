@@ -40,6 +40,36 @@ final class LocaleFormat
         return $date->locale(app()->getLocale())->isoFormat('D MMM · HH:mm');
     }
 
+    public static function displayTimezone(): string
+    {
+        return (string) config('coin.display_timezone', 'Europe/Riga');
+    }
+
+    public static function dateTimeLocal(CarbonInterface|string|null $value): string
+    {
+        $date = self::parse($value);
+
+        if (! $date) {
+            return '—';
+        }
+
+        return $date
+            ->timezone(self::displayTimezone())
+            ->locale(app()->getLocale())
+            ->isoFormat('D MMM YYYY · HH:mm');
+    }
+
+    public static function timezoneLabel(): string
+    {
+        $tz = self::displayTimezone();
+
+        try {
+            return Carbon::now($tz)->format('T');
+        } catch (\Throwable) {
+            return $tz;
+        }
+    }
+
     public static function shortMonthDay(CarbonInterface|string|null $value): string
     {
         $date = self::parse($value);
