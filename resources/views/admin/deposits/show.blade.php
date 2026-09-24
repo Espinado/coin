@@ -48,6 +48,28 @@
                 <p style="margin:0;font-size:13px;line-height:1.6;color:rgba(232,237,245,0.72);">{{ __('coin.admin.deposit_auto_processing_hint') }}</p>
             </div>
             @endif
+
+            <div class="admin-card" style="margin-top:16px;">
+                <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.12em;color:rgba(232,237,245,0.62);">{{ strtoupper(__('coin.admin.deposit_webhook_log')) }}</div>
+                @if($webhookLogs->isEmpty())
+                    <p style="margin:12px 0 0;font-size:13px;line-height:1.6;color:rgba(232,237,245,0.62);">{{ __('coin.admin.deposit_webhook_log_empty') }}</p>
+                @else
+                    <div style="margin-top:12px;display:flex;flex-direction:column;gap:10px;">
+                        @foreach($webhookLogs as $log)
+                            <div style="font-size:12px;line-height:1.55;color:rgba(232,237,245,0.72);padding:10px 12px;border-radius:8px;background:rgba(255,255,255,0.03);">
+                                <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:rgba(232,237,245,0.52);">{{ $log->processed_at?->format('M j, Y H:i:s') ?? $log->created_at?->format('M j, Y H:i:s') }} · {{ $log->event_type }} · {{ $log->signature_valid ? 'sign ok' : 'sign bad' }}</div>
+                                <div style="margin-top:4px;">{{ $log->processing_result }}</div>
+                                @if(is_array($log->payload) && $log->payload !== [])
+                                    <details style="margin-top:6px;">
+                                        <summary style="cursor:pointer;color:rgba(232,237,245,0.58);">{{ __('coin.admin.gateway_poll_response') }}</summary>
+                                        <pre style="margin:8px 0 0;padding:10px;border-radius:8px;background:#070a10;overflow:auto;font-size:11px;line-height:1.45;">{{ json_encode($log->payload, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) }}</pre>
+                                    </details>
+                                @endif
+                            </div>
+                        @endforeach
+                    </div>
+                @endif
+            </div>
         </div>
 
         @include('admin.partials.user-context', ['user' => $deposit->user])

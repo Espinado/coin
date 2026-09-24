@@ -79,7 +79,8 @@
         <p style="margin: 14px 0 0; font-size: 11px; line-height: 1.5; text-align: center; color: rgba(214,238,248,0.55);">{{ __('coin.crypto_gateway.mock_note') }}</p>
         @else
         <p style="margin: 22px 0 0; font-size: 12px; line-height: 1.55; text-align: center; color: rgba(214,238,248,0.72);">{{ __('coin.crypto_gateway.waiting_blockchain') }}</p>
-        <button type="button" wire:click="closePaymentModal" style="width: 100%; margin-top: 14px; padding: 12px; border-radius: 10px; border: 1px solid rgba(150,235,250,0.2); background: rgba(150,235,250,0.06); color: #e6f4fa; font-family: inherit; font-size: 13.5px; cursor: pointer;">{{ __('coin.close') }}</button>
+        <p style="margin: 10px 0 0; font-size: 11px; line-height: 1.5; text-align: center; color: rgba(214,238,248,0.55);">{{ __('coin.messages.top_up_pending') }}</p>
+        <button type="button" wire:click="closePaymentModal" style="width: 100%; margin-top: 14px; padding: 12px; border-radius: 10px; border: 1px solid rgba(150,235,250,0.2); background: rgba(150,235,250,0.06); color: #e6f4fa; font-family: inherit; font-size: 13.5px; cursor: pointer;">{{ __('coin.crypto_gateway.close_and_wait') }}</button>
         @endif
       </div>
     </div>

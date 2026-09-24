@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Admin\Concerns\AdminListQuery;
 use App\Http\Controllers\Controller;
 use App\Models\Deposit;
+use App\Models\PaymentWebhookLog;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -53,8 +54,15 @@ class DepositController extends Controller
     {
         $deposit->load(['user.wallet', 'confirmedBy']);
 
+        $webhookLogs = PaymentWebhookLog::query()
+            ->where('deposit_id', $deposit->id)
+            ->orderByDesc('id')
+            ->limit(20)
+            ->get();
+
         return view('admin.deposits.show', [
             'deposit' => $deposit,
+            'webhookLogs' => $webhookLogs,
         ]);
     }
 

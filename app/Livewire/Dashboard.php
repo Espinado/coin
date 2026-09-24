@@ -217,6 +217,8 @@ class Dashboard extends Component
 
     public int $walletPerPage = 10;
 
+    public int $depositHistoryPerPage = 10;
+
     public string $walletSearch = '';
 
     public string $walletSort = '';
@@ -237,6 +239,11 @@ class Dashboard extends Component
     public function updatedWalletPerPage(): void
     {
         $this->resetPage('walletPage');
+    }
+
+    public function updatedDepositHistoryPerPage(): void
+    {
+        $this->resetPage('depositHistoryPage');
     }
 
     public function updatedWalletSearch(): void
@@ -379,6 +386,7 @@ class Dashboard extends Component
             ->get();
 
         $this->reloadUserNotifications();
+        $this->resumePendingTopUpSession();
 
         if ($this->section < 0 || $this->section > 8) {
             $this->section = 0;
@@ -1139,56 +1147,162 @@ class Dashboard extends Component
 
     public function pollTopUpPaymentStatus(): void
     {
-        if ($this->paymentModal !== 'topup' || $this->paymentModalStep !== 'payment' || ! $this->usesLivePaymentGateway) {
+        if (! $this->usesLivePaymentGateway) {
+            return;
+        }
+
+        if ($this->paymentModal === 'topup' && $this->paymentModalStep === 'processing') {
+            return;
+        }
+
+        $pendingDeposits = Deposit::query()
+            ->where('user_id', $this->user->id)
+            ->where('status', Deposit::STATUS_PENDING)
+            ->latest('id')
+            ->get();
+
+        if ($pendingDeposits->isEmpty()) {
+            if ($this->pendingDepositId !== null) {
+                $this->clearPendingTopUpTracking();
+            }
+
             return;
         }
 
         if ($this->pendingDepositId === null) {
+            $this->resumePendingTopUpSession();
+        }
+
+        $depositService = app(DepositService::class);
+
+        foreach ($pendingDeposits as $deposit) {
+            if ($deposit->expires_at !== null && $deposit->expires_at->isPast()) {
+                $deposit = $depositService->reject(
+                    $deposit,
+                    null,
+                    \App\Support\PaymentStatusReason::DEPOSIT_EXPIRED,
+                );
+            }
+
+            if ($this->pendingDepositId === null || $this->pendingDepositId === $deposit->id) {
+                $this->applyTopUpDepositOutcome($deposit);
+            }
+        }
+    }
+
+    public function reopenTopUpPaymentModal(): void
+    {
+        if ($this->pendingDepositId === null) {
+            return;
+        }
+
+        $this->paymentModal = 'topup';
+        $this->paymentModalStep = 'payment';
+        $this->paymentModalError = null;
+    }
+
+    public function openTopUpFromHistory(int $depositId): void
+    {
+        $deposit = Deposit::query()
+            ->whereKey($depositId)
+            ->where('user_id', $this->user->id)
+            ->first();
+
+        if ($deposit === null || ! $deposit->canReopenPaymentDetails()) {
+            return;
+        }
+
+        $this->pendingDepositId = $deposit->id;
+        $this->pendingPaymentAddress = $deposit->payment_address;
+        $this->pendingTopUpAmount = (float) $deposit->amount;
+        $this->depositCurrency = strtoupper((string) $deposit->currency);
+        $this->reopenTopUpPaymentModal();
+    }
+
+    public function getHasPendingWalletDepositsProperty(): bool
+    {
+        return Deposit::query()
+            ->where('user_id', $this->user->id)
+            ->where('status', Deposit::STATUS_PENDING)
+            ->exists();
+    }
+
+    private function finishTopUpPaymentSuccess(Deposit $deposit): void
+    {
+        $this->depositAmount = '';
+        $this->clearPendingTopUpTracking();
+        $this->reloadPortfolioData();
+        $this->paymentModalReference = 'TOP-'.$deposit->id;
+        $this->paymentModalStep = 'success';
+    }
+
+    private function applyTopUpDepositOutcome(Deposit $deposit): void
+    {
+        if ($deposit->status === Deposit::STATUS_CONFIRMED) {
+            if ($this->paymentModal === 'topup') {
+                $this->finishTopUpPaymentSuccess($deposit);
+
+                return;
+            }
+
+            $this->clearPendingTopUpTracking();
+            $this->depositAmount = '';
+            $this->reloadPortfolioData();
+            $this->actionMessage = __('coin.messages.top_up_credited').' (TOP-'.$deposit->id.')';
+            $this->actionMessageTone = 'success';
+
+            return;
+        }
+
+        if ($deposit->status !== Deposit::STATUS_REJECTED) {
+            return;
+        }
+
+        $message = $this->topUpRejectionMessage($deposit);
+
+        if ($this->paymentModal === 'topup') {
+            $this->paymentModalStep = 'error';
+            $this->paymentModalError = $message;
+
+            return;
+        }
+
+        $this->clearPendingTopUpTracking();
+        $this->depositAmount = '';
+        $this->reloadPortfolioData();
+        $this->actionMessage = $message;
+        $this->actionMessageTone = 'error';
+    }
+
+    private function resumePendingTopUpSession(): void
+    {
+        if (! $this->usesLivePaymentGateway) {
             return;
         }
 
         $deposit = Deposit::query()
-            ->whereKey($this->pendingDepositId)
             ->where('user_id', $this->user->id)
+            ->where('status', Deposit::STATUS_PENDING)
+            ->where('method', 'ccapi')
+            ->whereNotNull('payment_address')
+            ->latest('id')
             ->first();
 
         if ($deposit === null) {
             return;
         }
 
-        if ($deposit->status === Deposit::STATUS_CONFIRMED) {
-            $this->finishTopUpPaymentSuccess($deposit);
-
-            return;
-        }
-
-        if ($deposit->status === Deposit::STATUS_REJECTED) {
-            $this->paymentModalStep = 'error';
-            $this->paymentModalError = $this->topUpRejectionMessage($deposit);
-
-            return;
-        }
-
-        if ($deposit->expires_at !== null && $deposit->expires_at->isPast()) {
-            $deposit = app(DepositService::class)->reject(
-                $deposit,
-                null,
-                \App\Support\PaymentStatusReason::DEPOSIT_EXPIRED,
-            );
-            $this->paymentModalStep = 'error';
-            $this->paymentModalError = $this->topUpRejectionMessage($deposit);
-        }
+        $this->pendingDepositId = $deposit->id;
+        $this->pendingPaymentAddress = $deposit->payment_address;
+        $this->pendingTopUpAmount = (float) $deposit->amount;
+        $this->depositCurrency = strtoupper((string) $deposit->currency);
     }
 
-    private function finishTopUpPaymentSuccess(Deposit $deposit): void
+    private function clearPendingTopUpTracking(): void
     {
-        $this->depositAmount = '';
         $this->pendingTopUpAmount = null;
         $this->pendingDepositId = null;
         $this->pendingPaymentAddress = null;
-        $this->reloadPortfolioData();
-        $this->paymentModalReference = 'TOP-'.$deposit->id;
-        $this->paymentModalStep = 'success';
     }
 
     public function openPayoutPaymentModal(): void
@@ -1879,10 +1993,14 @@ class Dashboard extends Component
         }
 
         $wasTopUp = $this->paymentModal === 'topup';
+        $preservePendingTopUp = $wasTopUp
+            && $this->paymentModalStep === 'payment'
+            && $this->pendingDepositId !== null
+            && $this->usesLivePaymentGateway;
 
-        $this->resetPaymentModal();
+        $this->resetPaymentModal(clearPendingDeposit: ! $preservePendingTopUp);
 
-        if ($wasTopUp) {
+        if ($wasTopUp && ! $preservePendingTopUp) {
             $this->depositAmount = '';
         }
     }
@@ -2030,6 +2148,34 @@ class Dashboard extends Component
         $this->syncSupportUnreadBadge();
         $this->dispatch('support-thread-scroll');
         $this->dispatch('support-message-sent', message: 'Message sent');
+    }
+
+    #[On('echo-private:wallet.user.{user.id},.DepositUpdated')]
+    public function onDepositUpdated(mixed $payload = null): void
+    {
+        $this->reloadPortfolioData();
+
+        $depositId = is_array($payload)
+            ? (data_get($payload, 'deposit.id') ?? data_get($payload, '0.deposit.id'))
+            : null;
+
+        if (! is_numeric($depositId)) {
+            return;
+        }
+
+        $deposit = Deposit::query()
+            ->whereKey((int) $depositId)
+            ->where('user_id', $this->user->id)
+            ->first();
+
+        if ($deposit === null) {
+            return;
+        }
+
+        if ($this->pendingDepositId === null || $this->pendingDepositId === $deposit->id) {
+            $this->pendingDepositId = $deposit->id;
+            $this->applyTopUpDepositOutcome($deposit);
+        }
     }
 
     #[On('echo-private:wallet.user.{user.id},.WithdrawalUpdated')]
@@ -2188,16 +2334,28 @@ class Dashboard extends Component
         $this->syncSupportUnreadBadge();
     }
 
+    public function clearWalletSearch(): void
+    {
+        $this->walletSearch = '';
+        $this->resetPage('walletPage');
+    }
+
     public function render(): View
     {
-        $userId = (int) auth()->id();
+        $userId = (int) $this->user->id;
 
         return view('livewire.dashboard', [
-            'walletTransactions' => WalletTransaction::query()
+            'walletTransactions' => $this->paginateWalletTransactions($userId),
+            'depositHistory' => Deposit::query()
                 ->where('user_id', $userId)
-                ->searchTerm($this->walletSearch)
-                ->applyListSort($this->walletSort, $this->walletDir, 'sort_order')
-                ->paginate($this->walletPageSize(), pageName: 'walletPage'),
+                ->latest('id')
+                ->paginate($this->depositHistoryPerPage, pageName: 'depositHistoryPage'),
+            'pendingWalletWithdrawals' => Withdrawal::query()
+                ->where('user_id', $userId)
+                ->whereIn('status', [Withdrawal::STATUS_PENDING, Withdrawal::STATUS_PROCESSING])
+                ->latest('id')
+                ->limit(5)
+                ->get(),
             'profitHistoryPage' => $this->section === 3 && $this->showFullProfitHistory
                 ? WalletTransaction::query()
                     ->where('user_id', $userId)
@@ -2243,6 +2401,24 @@ class Dashboard extends Component
     private function walletPageSize(): int
     {
         return in_array($this->walletPerPage, [10, 20, 50], true) ? $this->walletPerPage : 10;
+    }
+
+    private function paginateWalletTransactions(int $userId): \Illuminate\Contracts\Pagination\LengthAwarePaginator
+    {
+        $query = WalletTransaction::query()
+            ->where('user_id', $userId)
+            ->searchTerm($this->walletSearch)
+            ->applyListSort($this->walletSort, $this->walletDir, 'sort_order');
+
+        $paginator = $query->paginate($this->walletPageSize(), pageName: 'walletPage');
+
+        if ($paginator->total() > 0 && $paginator->isEmpty()) {
+            $this->resetPage('walletPage');
+
+            return $query->paginate($this->walletPageSize(), pageName: 'walletPage');
+        }
+
+        return $paginator;
     }
 
     private function profitPageSize(): int
@@ -2575,7 +2751,7 @@ class Dashboard extends Component
             ?? $this->completedContracts->firstWhere('id', $contractId);
     }
 
-    private function resetPaymentModal(): void
+    private function resetPaymentModal(bool $clearPendingDeposit = true): void
     {
         if ($this->paymentModalStep === 'payout_verify') {
             app(WithdrawalTwoFactorService::class)->clearChallenge(request());
@@ -2585,12 +2761,13 @@ class Dashboard extends Component
         $this->paymentModalStep = 'review';
         $this->paymentModalError = null;
         $this->paymentModalReference = null;
-        $this->pendingTopUpAmount = null;
-        $this->pendingDepositId = null;
-        $this->pendingPaymentAddress = null;
         $this->pendingWithdrawalId = null;
         $this->payoutPassword = '';
         $this->payoutVerificationCode = '';
+
+        if ($clearPendingDeposit) {
+            $this->clearPendingTopUpTracking();
+        }
     }
 
     private function assertWithdrawalIntentIsValid(): void

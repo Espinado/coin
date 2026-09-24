@@ -182,4 +182,28 @@ class Withdrawal extends Model
 
         return PaymentStatusReason::withdrawalMessage($this);
     }
+
+    public function isSystemGatewayFailureNote(): bool
+    {
+        $note = trim((string) $this->admin_note);
+
+        if ($note === '') {
+            return false;
+        }
+
+        if (str_starts_with($note, 'Gateway reported failed payout')) {
+            return true;
+        }
+
+        return (bool) preg_match('/^Шлюз сообщил об ошибке выплаты \(state \d+\)\./u', $note);
+    }
+
+    public function shouldShowAdminNote(): bool
+    {
+        if (! filled($this->admin_note)) {
+            return false;
+        }
+
+        return ! $this->isSystemGatewayFailureNote();
+    }
 }

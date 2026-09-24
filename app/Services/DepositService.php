@@ -2,8 +2,8 @@
 
 namespace App\Services;
 
+use App\Events\DepositUpdated;
 use App\Support\PlatformTerms;
-
 use App\Models\Admin;
 use App\Models\Deposit;
 use App\Models\User;
@@ -168,7 +168,10 @@ class DepositService
                 'confirmed_at' => now(),
             ]);
 
-            return $deposit->fresh(['user.wallet']);
+            $deposit = $deposit->fresh(['user.wallet']);
+            DepositUpdated::dispatch($deposit);
+
+            return $deposit;
         });
     }
 
@@ -205,7 +208,10 @@ class DepositService
 
             $deposit->update($updates);
 
-            return $deposit->fresh(['user']);
+            $deposit = $deposit->fresh(['user']);
+            DepositUpdated::dispatch($deposit);
+
+            return $deposit;
         });
     }
 }

@@ -176,6 +176,9 @@ class PaymentRejectionReasonTest extends TestCase
 
         $this->assertSame(Withdrawal::STATUS_REJECTED, $withdrawal->status);
         $this->assertSame(PaymentStatusReason::WITHDRAWAL_GATEWAY_FAILED, $withdrawal->status_reason);
+        $this->assertSame('8', $withdrawal->gateway_state);
+        $this->assertNull($withdrawal->admin_note);
+        $this->assertFalse($withdrawal->shouldShowAdminNote());
         $this->assertStringContainsString('8', $withdrawal->userRejectionMessage() ?? '');
     }
 

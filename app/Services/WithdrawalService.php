@@ -281,17 +281,18 @@ class WithdrawalService
             );
             $this->restoreCommittedFunds($wallet, $withdrawal->ledgerAmount());
 
-            $note = $reason ?? __('coin.admin.withdrawal_gateway_failed_note', [
-                'state' => $gatewayState ?? '?',
-            ]);
-
-            $withdrawal->update([
+            $updates = [
                 'status' => Withdrawal::STATUS_REJECTED,
                 'status_reason' => PaymentStatusReason::WITHDRAWAL_GATEWAY_FAILED,
                 'gateway_state' => $gatewayState ?? $withdrawal->gateway_state,
-                'admin_note' => trim(($withdrawal->admin_note ? $withdrawal->admin_note."\n" : '').$note),
                 'processed_at' => now(),
-            ]);
+            ];
+
+            if ($reason !== null && trim($reason) !== '') {
+                $updates['admin_note'] = trim(($withdrawal->admin_note ? $withdrawal->admin_note."\n" : '').$reason);
+            }
+
+            $withdrawal->update($updates);
 
             $withdrawal = $withdrawal->fresh(['user.wallet', 'processedByAdmin']);
 

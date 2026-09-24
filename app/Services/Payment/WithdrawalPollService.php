@@ -114,7 +114,6 @@ class WithdrawalPollService
             $this->withdrawals->markFailedFromGateway(
                 $withdrawal->fresh(),
                 $status->state,
-                $message,
             );
             $this->recordPollLog($withdrawal, PaymentWebhookLog::RESULT_PROCESSED, $message, $status->raw);
             $stats['failed']++;

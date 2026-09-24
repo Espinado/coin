@@ -1522,6 +1522,41 @@ html.coin-nav-open .coin-nav-mobile {
   min-width: 0;
 }
 
+.coin-wallet-deposits-table {
+  min-width: 760px;
+}
+
+.coin-wallet-deposits-table__head,
+.coin-wallet-deposits-table__row {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 0.7fr) minmax(0, 0.8fr) minmax(0, 0.9fr) minmax(0, 2.2fr);
+  align-items: start;
+  gap: 12px;
+  font-size: 13px;
+}
+
+.coin-wallet-deposits-table__head {
+  padding: 16px 0 12px;
+  border-bottom: 1px solid rgba(150, 235, 250, 0.1);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9.5px;
+  letter-spacing: 0.12em;
+  color: rgba(214, 238, 248, 0.66);
+}
+
+.coin-wallet-deposits-table__row {
+  padding: 13px 0;
+  border-bottom: 1px solid rgba(150, 235, 250, 0.07);
+}
+
+.coin-wallet-deposits-table__row:last-child {
+  border-bottom: 0;
+}
+
+.coin-wallet-deposits-table__details {
+  min-width: 0;
+}
+
 .coin-wallet-transactions-table {
   min-width: 640px;
 }
