@@ -5,9 +5,11 @@ namespace App\Services\Payment;
 use App\Models\Deposit;
 use App\Models\PaymentWebhookLog;
 use App\Models\Withdrawal;
+use App\Support\PaymentStatusReason;
 use App\Services\DepositService;
 use App\Services\Payment\Dtos\VerifiedIpnEvent;
 use App\Services\WithdrawalService;
+use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
 
@@ -23,20 +25,20 @@ class PaymentIpnService
         try {
             return DB::transaction(function () use ($event) {
                 if ($this->wasAlreadyProcessed($event)) {
-                    return $this->createAuditLog(
-                        $event,
-                        PaymentWebhookLog::RESULT_DUPLICATE,
-                        'Duplicate IPN ignored.',
-                    );
+                    return $this->finishDuplicate($event, 'Duplicate IPN ignored.');
                 }
 
-                $log = PaymentWebhookLog::query()->create([
-                    'gateway' => (string) config('coin.payments.driver', 'mock'),
-                    'event_type' => $event->type,
-                    'payload' => $event->raw,
-                    'signature_valid' => true,
-                    'idempotency_key' => $event->idempotencyKey(),
-                ]);
+                try {
+                    $log = PaymentWebhookLog::query()->create([
+                        'gateway' => (string) config('coin.payments.driver', 'mock'),
+                        'event_type' => $event->type,
+                        'payload' => $event->raw,
+                        'signature_valid' => true,
+                        'idempotency_key' => $event->idempotencyKey(),
+                    ]);
+                } catch (UniqueConstraintViolationException) {
+                    return $this->finishDuplicate($event, 'Duplicate IPN ignored (concurrent).');
+                }
 
                 if ($event->isIncomingPayment()) {
                     return $this->handleIncomingPayment($event, $log);
@@ -49,11 +51,7 @@ class PaymentIpnService
                 return $this->finish($log, PaymentWebhookLog::RESULT_IGNORED, 'Unsupported IPN type.');
             });
         } catch (RuntimeException $exception) {
-            return $this->createAuditLog(
-                $event,
-                PaymentWebhookLog::RESULT_FAILED,
-                $exception->getMessage(),
-            );
+            return $this->finishOrCreateFailed($event, $exception->getMessage());
         }
     }
 
@@ -97,6 +95,14 @@ class PaymentIpnService
         $validationError = self::validateDepositAgainstIpn($event, $deposit);
 
         if ($validationError !== null) {
+            $rejectReason = PaymentStatusReason::depositReasonFromValidation($validationError);
+
+            if ($rejectReason !== null) {
+                $this->deposits->reject($deposit, null, $rejectReason);
+
+                return $this->finish($log, PaymentWebhookLog::RESULT_PROCESSED, 'Deposit rejected: '.$validationError);
+            }
+
             return $this->finish($log, PaymentWebhookLog::RESULT_IGNORED, $validationError);
         }
 
@@ -106,11 +112,16 @@ class PaymentIpnService
         ]);
 
         if (! $this->receivedAmountMatchesDeposit($event, $deposit)) {
-            $this->deposits->reject($deposit, null);
+            $this->deposits->reject(
+                $deposit,
+                null,
+                PaymentStatusReason::DEPOSIT_AMOUNT_MISMATCH,
+                (float) ($event->amount ?? 0),
+            );
 
             return $this->finish(
                 $log,
-                PaymentWebhookLog::RESULT_IGNORED,
+                PaymentWebhookLog::RESULT_PROCESSED,
                 sprintf(
                     'Amount mismatch: received %s, expected %s %s.',
                     number_format((float) ($event->amount ?? 0), 6, '.', ''),
@@ -421,9 +432,40 @@ class PaymentIpnService
     private function wasAlreadyProcessed(VerifiedIpnEvent $event): bool
     {
         return PaymentWebhookLog::query()
+            ->where('gateway', (string) config('coin.payments.driver', 'mock'))
             ->where('idempotency_key', $event->idempotencyKey())
             ->where('processing_result', 'like', PaymentWebhookLog::RESULT_PROCESSED.':%')
             ->exists();
+    }
+
+    private function findLogByIdempotency(VerifiedIpnEvent $event): ?PaymentWebhookLog
+    {
+        return PaymentWebhookLog::query()
+            ->where('gateway', (string) config('coin.payments.driver', 'mock'))
+            ->where('idempotency_key', $event->idempotencyKey())
+            ->first();
+    }
+
+    private function finishDuplicate(VerifiedIpnEvent $event, string $message): PaymentWebhookLog
+    {
+        $log = $this->findLogByIdempotency($event);
+
+        if ($log !== null) {
+            return $this->finish($log, PaymentWebhookLog::RESULT_DUPLICATE, $message);
+        }
+
+        return $this->createAuditLog($event, PaymentWebhookLog::RESULT_DUPLICATE, $message);
+    }
+
+    private function finishOrCreateFailed(VerifiedIpnEvent $event, string $message): PaymentWebhookLog
+    {
+        $log = $this->findLogByIdempotency($event);
+
+        if ($log !== null) {
+            return $this->finish($log, PaymentWebhookLog::RESULT_FAILED, $message);
+        }
+
+        return $this->createAuditLog($event, PaymentWebhookLog::RESULT_FAILED, $message);
     }
 
     private function createAuditLog(VerifiedIpnEvent $event, string $result, string $message): PaymentWebhookLog

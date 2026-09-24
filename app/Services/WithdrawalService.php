@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Events\WithdrawalUpdated;
+use App\Support\PaymentStatusReason;
 use App\Support\PlatformTerms;
 use App\Models\Admin;
 use App\Models\User;
@@ -141,7 +142,9 @@ class WithdrawalService
                 ]));
             }
 
-            $wallet = $withdrawal->user->wallet ?? throw new RuntimeException('User has no wallet.');
+            $wallet = $this->lockWallet(
+                $withdrawal->user->wallet ?? throw new RuntimeException('User has no wallet.'),
+            );
             $ledgerAmount = $withdrawal->ledgerAmount();
             $wasPending = $previous === Withdrawal::STATUS_PENDING;
             $wasCommitted = in_array($previous, Withdrawal::committedStatuses(), true);
@@ -165,6 +168,9 @@ class WithdrawalService
 
             $withdrawal->update([
                 'status' => $status,
+                'status_reason' => $status === Withdrawal::STATUS_REJECTED
+                    ? PaymentStatusReason::WITHDRAWAL_ADMIN_REJECTED
+                    : null,
                 'processed_by' => $admin->id,
                 'admin_note' => $note ?? $withdrawal->admin_note,
                 'processed_at' => $status === Withdrawal::STATUS_REJECTED ? now() : $withdrawal->processed_at,
@@ -198,10 +204,12 @@ class WithdrawalService
         $autoSimulateIpn ??= $this->shouldAutoCompleteMockPayout();
 
         return DB::transaction(function () use ($withdrawal, $admin, $autoSimulateIpn) {
-            $withdrawal->refresh();
+            $withdrawal = $this->lockWithdrawal($withdrawal);
 
             if ($withdrawal->status === Withdrawal::STATUS_PENDING) {
-                $wallet = $withdrawal->user->wallet ?? throw new RuntimeException('User has no wallet.');
+                $wallet = $this->lockWallet(
+                    $withdrawal->user->wallet ?? throw new RuntimeException('User has no wallet.'),
+                );
                 $this->commitWithdrawalFunds($wallet, $withdrawal->ledgerAmount());
 
                 $withdrawal->update([
@@ -258,7 +266,7 @@ class WithdrawalService
     public function markFailedFromGateway(Withdrawal $withdrawal, ?string $gatewayState = null, ?string $reason = null): Withdrawal
     {
         return DB::transaction(function () use ($withdrawal, $gatewayState, $reason) {
-            $withdrawal->refresh();
+            $withdrawal = $this->lockWithdrawal($withdrawal);
 
             if ($withdrawal->status === Withdrawal::STATUS_REJECTED) {
                 return $withdrawal;
@@ -268,7 +276,9 @@ class WithdrawalService
                 throw new RuntimeException('Only processing withdrawals can be marked failed from gateway.');
             }
 
-            $wallet = $withdrawal->user->wallet ?? throw new RuntimeException('User has no wallet.');
+            $wallet = $this->lockWallet(
+                $withdrawal->user->wallet ?? throw new RuntimeException('User has no wallet.'),
+            );
             $this->restoreCommittedFunds($wallet, $withdrawal->ledgerAmount());
 
             $note = $reason ?? __('coin.admin.withdrawal_gateway_failed_note', [
@@ -277,6 +287,7 @@ class WithdrawalService
 
             $withdrawal->update([
                 'status' => Withdrawal::STATUS_REJECTED,
+                'status_reason' => PaymentStatusReason::WITHDRAWAL_GATEWAY_FAILED,
                 'gateway_state' => $gatewayState ?? $withdrawal->gateway_state,
                 'admin_note' => trim(($withdrawal->admin_note ? $withdrawal->admin_note."\n" : '').$note),
                 'processed_at' => now(),
@@ -293,7 +304,7 @@ class WithdrawalService
     public function markPaidFromGateway(Withdrawal $withdrawal, ?string $txid = null, ?string $gatewayState = null): Withdrawal
     {
         return DB::transaction(function () use ($withdrawal, $txid, $gatewayState) {
-            $withdrawal->refresh();
+            $withdrawal = $this->lockWithdrawal($withdrawal);
             $previous = $withdrawal->status;
 
             if ($previous === Withdrawal::STATUS_PAID) {
@@ -304,7 +315,9 @@ class WithdrawalService
                 throw new RuntimeException('Only processing withdrawals can be marked paid from gateway.');
             }
 
-            $wallet = $withdrawal->user->wallet ?? throw new RuntimeException('User has no wallet.');
+            $wallet = $this->lockWallet(
+                $withdrawal->user->wallet ?? throw new RuntimeException('User has no wallet.'),
+            );
 
             $this->recordPayoutTransaction($withdrawal, $wallet);
 
@@ -335,6 +348,22 @@ class WithdrawalService
         });
     }
 
+    private function lockWithdrawal(Withdrawal $withdrawal): Withdrawal
+    {
+        return Withdrawal::query()
+            ->whereKey($withdrawal->id)
+            ->lockForUpdate()
+            ->firstOrFail();
+    }
+
+    private function lockWallet(Wallet $wallet): Wallet
+    {
+        return Wallet::query()
+            ->whereKey($wallet->id)
+            ->lockForUpdate()
+            ->firstOrFail();
+    }
+
     private function releasePending(Wallet $wallet, float $amount): void
     {
         $wallet->decrement('pending', min($amount, (float) $wallet->pending));
@@ -343,7 +372,11 @@ class WithdrawalService
 
     private function commitWithdrawalFunds(Wallet $wallet, float $amount): void
     {
-        $wallet->decrement('pending', min($amount, (float) $wallet->pending));
+        if ((float) $wallet->pending + 0.001 < $amount) {
+            throw new RuntimeException('Insufficient pending balance for withdrawal commit.');
+        }
+
+        $wallet->decrement('pending', $amount);
         $wallet->decrement('balance', $amount);
     }
 
