@@ -56,4 +56,24 @@ class PaymentWebhookLog extends Model
 
         return substr($text, 0, $maxLength - 3).'...';
     }
+
+    public function resultType(): ?string
+    {
+        [$result] = \App\Support\PaymentStatusDecoder::splitProcessingResult($this->processing_result);
+
+        return $result;
+    }
+
+    public function isDuplicateResult(): bool
+    {
+        return $this->resultType() === self::RESULT_DUPLICATE;
+    }
+
+    public function scopeExcludeDuplicateResults($query)
+    {
+        return $query->where(function ($inner) {
+            $inner->whereNull('processing_result')
+                ->orWhere('processing_result', 'not like', self::RESULT_DUPLICATE.':%');
+        });
+    }
 }

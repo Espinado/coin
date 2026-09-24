@@ -38,6 +38,8 @@
                     <span class="admin-sidebar-badge admin-sidebar-badge--red" data-admin-withdrawals-nav-badge>{{ $pendingWithdrawalsCount }}</span>
                 @endif
             </a>
+            <a href="{{ route('admin.payment-logs.index') }}" class="{{ $navClass($adminNavActive($routeName, 'admin.payment-logs')) }}">{{ __('coin.admin.payment_logs') }}</a>
+            <a href="{{ route('admin.commissions.index') }}" class="{{ $navClass($adminNavActive($routeName, 'admin.commissions')) }}">{{ __('coin.admin.commissions') }}</a>
             <a href="{{ route('admin.plan-changes.index') }}" class="{{ $navClass($adminNavActive($routeName, 'admin.plan-changes')) }}" data-admin-plan-changes-nav>
                 <span>{{ __('coin.admin.plan_changes') }}</span>
                 @if(($pendingPlanChangesCount ?? 0) > 0)

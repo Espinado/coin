@@ -8,8 +8,10 @@ use App\Models\Admin;
 use App\Models\Deposit;
 use App\Models\User;
 use App\Support\PaymentStatusReason;
+use App\Models\PaymentStatusLog;
 use App\Services\Payment\Dtos\DepositIntentDto;
 use App\Services\Payment\PaymentGatewayInterface;
+use App\Services\Payment\PaymentStatusLogService;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
 
@@ -58,6 +60,8 @@ class DepositService
             return $this->confirm($deposit, null);
         }
 
+        app(PaymentStatusLogService::class)->depositCreated($deposit);
+
         return $deposit;
     }
 
@@ -98,9 +102,9 @@ class DepositService
         return app()->environment(['local', 'testing']);
     }
 
-    public function confirm(Deposit $deposit, ?Admin $admin = null): Deposit
+    public function confirm(Deposit $deposit, ?Admin $admin = null, string $logSource = PaymentStatusLog::SOURCE_APP): Deposit
     {
-        return DB::transaction(function () use ($deposit, $admin) {
+        return DB::transaction(function () use ($deposit, $admin, $logSource) {
             $deposit = Deposit::query()
                 ->whereKey($deposit->id)
                 ->lockForUpdate()
@@ -170,6 +174,7 @@ class DepositService
 
             $deposit = $deposit->fresh(['user.wallet']);
             DepositUpdated::dispatch($deposit);
+            app(PaymentStatusLogService::class)->depositConfirmed($deposit, $logSource);
 
             return $deposit;
         });
@@ -180,8 +185,9 @@ class DepositService
         ?Admin $admin = null,
         ?string $statusReason = null,
         ?float $receivedAmount = null,
+        string $logSource = PaymentStatusLog::SOURCE_APP,
     ): Deposit {
-        return DB::transaction(function () use ($deposit, $admin, $statusReason, $receivedAmount) {
+        return DB::transaction(function () use ($deposit, $admin, $statusReason, $receivedAmount, $logSource) {
             $deposit = Deposit::query()
                 ->whereKey($deposit->id)
                 ->lockForUpdate()
@@ -210,6 +216,7 @@ class DepositService
 
             $deposit = $deposit->fresh(['user']);
             DepositUpdated::dispatch($deposit);
+            app(PaymentStatusLogService::class)->depositRejected($deposit, $logSource);
 
             return $deposit;
         });

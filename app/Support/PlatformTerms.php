@@ -16,11 +16,15 @@ final class PlatformTerms
     /** Outbound transfer to user's external wallet. */
     public const TX_PAYOUT = 'Payout';
 
+    /** Platform commission charged on withdrawal. */
+    public const TX_PLATFORM_FEE = 'Platform fee';
+
     public static function displayTransactionType(string $type): string
     {
         $normalized = match ($type) {
             'Deposit', self::TX_TOP_UP => self::TX_TOP_UP,
             'Withdrawal', self::TX_PAYOUT => self::TX_PAYOUT,
+            self::TX_PLATFORM_FEE => self::TX_PLATFORM_FEE,
             'Plan purchase', self::TX_INVESTMENT => self::TX_INVESTMENT,
             'Plan upgrade', self::TX_PLAN_UPGRADE => self::TX_PLAN_UPGRADE,
             default => $type,

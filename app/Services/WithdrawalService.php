@@ -6,12 +6,14 @@ use App\Events\WithdrawalUpdated;
 use App\Support\PaymentStatusReason;
 use App\Support\PlatformTerms;
 use App\Models\Admin;
+use App\Models\PaymentStatusLog;
 use App\Models\User;
 use App\Models\Wallet;
 use App\Models\WalletTransaction;
 use App\Models\Withdrawal;
 use App\Services\Payment\PaymentGatewayInterface;
 use App\Services\Payment\PaymentSimulatorService;
+use App\Services\Payment\PaymentStatusLogService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use RuntimeException;
@@ -24,6 +26,52 @@ class WithdrawalService
         private ExchangeRateService $exchangeRates,
         private PayoutAddressService $payoutAddresses,
     ) {}
+
+    /** @return array{payout_usdt: float, payout_amount: float, currency: string, platform_fee: float, total_debit_usdt: float, exchange_rate: float, usdt_per_btc: float} */
+    public function quote(float $amount, string $currency): array
+    {
+        $currency = strtoupper(trim($currency));
+        $liveUsdtPerBtc = $this->exchangeRates->fetchLiveUsdtPerBtc();
+        $liveBtcPerUsdt = $this->exchangeRates->btcPerUsdtFromUsdtRate($liveUsdtPerBtc);
+        $platformFee = $this->settings->platformWithdrawalFee();
+
+        if ($currency === PayoutAddressService::CURRENCY_BTC) {
+            $payoutUsdt = $this->exchangeRates->convertToBase($amount, 'BTC', $liveBtcPerUsdt)['amount'];
+            $payoutAmount = round($amount, 8);
+        } else {
+            $payoutUsdt = round($amount, 2);
+            $payoutAmount = $payoutUsdt;
+            $currency = PayoutAddressService::CURRENCY_USDT;
+        }
+
+        return [
+            'payout_usdt' => $payoutUsdt,
+            'payout_amount' => $payoutAmount,
+            'currency' => $currency,
+            'platform_fee' => $platformFee,
+            'total_debit_usdt' => round($payoutUsdt + $platformFee, 2),
+            'exchange_rate' => $liveBtcPerUsdt,
+            'usdt_per_btc' => $liveUsdtPerBtc,
+        ];
+    }
+
+    public function assertCanCreate(User $user, float $amount, string $currency): array
+    {
+        $wallet = $user->wallet ?? throw new RuntimeException('User has no wallet.');
+        $quote = $this->quote($amount, $currency);
+
+        if ($quote['payout_usdt'] < $this->settings->minWithdrawal()) {
+            throw new RuntimeException(__('coin.wallet.min_withdrawal_error', [
+                'min' => $this->exchangeRates->formatMinWithdrawalLabel($currency),
+            ]));
+        }
+
+        if ((float) $wallet->available + 0.001 < $quote['total_debit_usdt']) {
+            throw new RuntimeException(__('coin.wallet.insufficient_funds'));
+        }
+
+        return $quote;
+    }
 
     public function createForUser(User $user, float $amount, string $currency = PayoutAddressService::CURRENCY_USDT, ?string $payoutAddress = null): Withdrawal
     {
@@ -42,44 +90,31 @@ class WithdrawalService
             throw new RuntimeException('Amount must be greater than zero.');
         }
 
-        $min = $this->settings->minWithdrawal();
-        $liveUsdtPerBtc = $this->exchangeRates->fetchLiveUsdtPerBtc();
-        $liveBtcPerUsdt = $this->exchangeRates->btcPerUsdtFromUsdtRate($liveUsdtPerBtc);
+        $quote = $this->assertCanCreate($user, $amount, $currency);
 
-        if ($currency === PayoutAddressService::CURRENCY_BTC) {
-            $ledgerUsdt = $this->exchangeRates->convertToBase($amount, 'BTC', $liveBtcPerUsdt)['amount'];
-            $payoutAmount = round($amount, 8);
-        } else {
-            $ledgerUsdt = round($amount, 2);
-            $payoutAmount = $ledgerUsdt;
-            $currency = PayoutAddressService::CURRENCY_USDT;
-        }
+        $this->payoutAddresses->assertWalletReady($wallet, $quote['currency']);
+        $resolved = $this->payoutAddresses->resolveFor($wallet, $quote['currency']);
 
-        if ($ledgerUsdt < $min) {
-            throw new RuntimeException("Minimum payout is {$min}.");
-        }
-
-        $this->payoutAddresses->assertWalletReady($wallet, $currency);
-        $resolved = $this->payoutAddresses->resolveFor($wallet, $currency);
-
-        return DB::transaction(function () use ($user, $wallet, $ledgerUsdt, $payoutAmount, $currency, $payoutAddress, $resolved, $liveBtcPerUsdt, $liveUsdtPerBtc) {
+        return DB::transaction(function () use ($user, $wallet, $quote, $payoutAddress, $resolved) {
             $lockedWallet = Wallet::query()->whereKey($wallet->id)->lockForUpdate()->firstOrFail();
+            $totalDebit = $quote['total_debit_usdt'];
 
-            if ((float) $lockedWallet->available < $ledgerUsdt) {
-                throw new RuntimeException('Insufficient available balance.');
+            if ((float) $lockedWallet->available + 0.001 < $totalDebit) {
+                throw new RuntimeException(__('coin.wallet.insufficient_funds'));
             }
 
-            $lockedWallet->decrement('available', $ledgerUsdt);
-            $lockedWallet->increment('pending', $ledgerUsdt);
+            $lockedWallet->decrement('available', $totalDebit);
+            $lockedWallet->increment('pending', $totalDebit);
 
             $withdrawal = Withdrawal::query()->create([
                 'user_id' => $user->id,
                 'reference' => 'WD-'.Str::upper(Str::random(8)),
-                'amount' => $payoutAmount,
-                'base_amount' => $ledgerUsdt,
-                'currency' => $currency,
-                'exchange_rate' => $liveBtcPerUsdt,
-                'usdt_per_btc' => $liveUsdtPerBtc,
+                'amount' => $quote['payout_amount'],
+                'base_amount' => $quote['payout_usdt'],
+                'platform_fee' => $quote['platform_fee'],
+                'currency' => $quote['currency'],
+                'exchange_rate' => $quote['exchange_rate'],
+                'usdt_per_btc' => $quote['usdt_per_btc'],
                 'withdrawal_type' => 'available_balance',
                 'payout_address' => $payoutAddress ?? $resolved['address'],
                 'network_label' => $resolved['network_label'],
@@ -87,6 +122,8 @@ class WithdrawalService
             ]);
 
             WithdrawalUpdated::dispatch($withdrawal);
+
+            app(PaymentStatusLogService::class)->withdrawalCreated($withdrawal);
 
             return $withdrawal;
         });
@@ -145,7 +182,7 @@ class WithdrawalService
             $wallet = $this->lockWallet(
                 $withdrawal->user->wallet ?? throw new RuntimeException('User has no wallet.'),
             );
-            $ledgerAmount = $withdrawal->ledgerAmount();
+            $reservedAmount = $withdrawal->totalReservedUsdt();
             $wasPending = $previous === Withdrawal::STATUS_PENDING;
             $wasCommitted = in_array($previous, Withdrawal::committedStatuses(), true);
             $willCommit = in_array($status, Withdrawal::committedStatuses(), true);
@@ -158,12 +195,12 @@ class WithdrawalService
                 }
 
                 if ($wasPending) {
-                    $this->releasePending($wallet, $ledgerAmount);
+                    $this->releasePending($wallet, $reservedAmount);
                 } elseif ($wasCommitted) {
-                    $this->restoreCommittedFunds($wallet, $ledgerAmount);
+                    $this->restoreCommittedFunds($wallet, $reservedAmount);
                 }
             } elseif ($willCommit && $wasPending) {
-                $this->commitWithdrawalFunds($wallet, $ledgerAmount);
+                $this->commitWithdrawalFunds($wallet, $reservedAmount);
             }
 
             $withdrawal->update([
@@ -179,6 +216,12 @@ class WithdrawalService
             $withdrawal = $withdrawal->fresh(['user.wallet', 'processedByAdmin']);
 
             WithdrawalUpdated::dispatch($withdrawal);
+
+            app(PaymentStatusLogService::class)->withdrawalAdminStatusChange(
+                $withdrawal,
+                $previous,
+                $status,
+            );
 
             return $withdrawal;
         });
@@ -205,12 +248,14 @@ class WithdrawalService
 
         return DB::transaction(function () use ($withdrawal, $admin, $autoSimulateIpn) {
             $withdrawal = $this->lockWithdrawal($withdrawal);
+            $previousStatus = $withdrawal->status;
+            $wasDispatched = false;
 
             if ($withdrawal->status === Withdrawal::STATUS_PENDING) {
                 $wallet = $this->lockWallet(
                     $withdrawal->user->wallet ?? throw new RuntimeException('User has no wallet.'),
                 );
-                $this->commitWithdrawalFunds($wallet, $withdrawal->ledgerAmount());
+                $this->commitWithdrawalFunds($wallet, $withdrawal->totalReservedUsdt());
 
                 $withdrawal->update([
                     'status' => Withdrawal::STATUS_PROCESSING,
@@ -235,6 +280,7 @@ class WithdrawalService
                 ]);
 
                 $withdrawal->refresh();
+                $wasDispatched = true;
             }
 
             if ($autoSimulateIpn) {
@@ -244,6 +290,10 @@ class WithdrawalService
             $withdrawal = $withdrawal->fresh(['user.wallet', 'processedByAdmin']);
 
             WithdrawalUpdated::dispatch($withdrawal);
+
+            if ($wasDispatched) {
+                app(PaymentStatusLogService::class)->withdrawalDispatched($withdrawal, $previousStatus);
+            }
 
             return $withdrawal;
         });
@@ -268,8 +318,9 @@ class WithdrawalService
         ?string $gatewayState = null,
         ?string $reason = null,
         ?string $statusReason = null,
+        string $logSource = PaymentStatusLog::SOURCE_APP,
     ): Withdrawal {
-        return DB::transaction(function () use ($withdrawal, $gatewayState, $reason, $statusReason) {
+        return DB::transaction(function () use ($withdrawal, $gatewayState, $reason, $statusReason, $logSource) {
             $withdrawal = $this->lockWithdrawal($withdrawal);
 
             if ($withdrawal->status === Withdrawal::STATUS_REJECTED) {
@@ -283,7 +334,7 @@ class WithdrawalService
             $wallet = $this->lockWallet(
                 $withdrawal->user->wallet ?? throw new RuntimeException('User has no wallet.'),
             );
-            $this->restoreCommittedFunds($wallet, $withdrawal->ledgerAmount());
+            $this->restoreCommittedFunds($wallet, $withdrawal->totalReservedUsdt());
 
             $updates = [
                 'status' => Withdrawal::STATUS_REJECTED,
@@ -302,13 +353,19 @@ class WithdrawalService
 
             WithdrawalUpdated::dispatch($withdrawal);
 
+            app(PaymentStatusLogService::class)->withdrawalFailed($withdrawal, $logSource);
+
             return $withdrawal;
         });
     }
 
-    public function markPaidFromGateway(Withdrawal $withdrawal, ?string $txid = null, ?string $gatewayState = null): Withdrawal
-    {
-        return DB::transaction(function () use ($withdrawal, $txid, $gatewayState) {
+    public function markPaidFromGateway(
+        Withdrawal $withdrawal,
+        ?string $txid = null,
+        ?string $gatewayState = null,
+        string $logSource = PaymentStatusLog::SOURCE_APP,
+    ): Withdrawal {
+        return DB::transaction(function () use ($withdrawal, $txid, $gatewayState, $logSource) {
             $withdrawal = $this->lockWithdrawal($withdrawal);
             $previous = $withdrawal->status;
 
@@ -325,6 +382,7 @@ class WithdrawalService
             );
 
             $this->recordPayoutTransaction($withdrawal, $wallet);
+            $this->recordPlatformFeeTransaction($withdrawal, $wallet);
 
             $withdrawal->update([
                 'status' => Withdrawal::STATUS_PAID,
@@ -335,19 +393,18 @@ class WithdrawalService
 
             $withdrawal = $withdrawal->fresh(['user.wallet', 'processedByAdmin']);
 
-            $fee = $this->settings->getFloat('network_fee');
-            $ledgerAmount = $withdrawal->ledgerAmount();
-            $net = max(0, $ledgerAmount - $fee);
             $currency = $withdrawal->currency ?: $this->settings->tokenSymbol();
 
             $this->notifications->notifyWithdrawalPaid(
                 $withdrawal->user,
                 $withdrawal,
-                $net,
+                $withdrawal->ledgerAmount(),
                 $currency,
             );
 
             WithdrawalUpdated::dispatch($withdrawal);
+
+            app(PaymentStatusLogService::class)->withdrawalPaid($withdrawal, $logSource);
 
             return $withdrawal;
         });
@@ -401,9 +458,7 @@ class WithdrawalService
             return;
         }
 
-        $ledgerAmount = $withdrawal->ledgerAmount();
-        $fee = $this->settings->getFloat('network_fee');
-        $net = max(0, $ledgerAmount - $fee);
+        $payoutUsdt = $withdrawal->ledgerAmount();
         $symbol = $this->settings->tokenSymbol();
         $sortOrder = (int) WalletTransaction::query()->where('user_id', $withdrawal->user_id)->max('sort_order') + 1;
 
@@ -412,7 +467,40 @@ class WithdrawalService
             'occurred_label' => now()->format('M j · H:i'),
             'type' => PlatformTerms::TX_PAYOUT,
             'source' => $withdrawal->reference,
-            'amount_label' => '-'.number_format($net, 2, '.', '').' '.$symbol,
+            'amount_label' => '-'.number_format($payoutUsdt, 2, '.', '').' '.$symbol,
+            'amount_tone' => 'neutral',
+            'status_label' => 'COMPLETED',
+            'sort_order' => $sortOrder,
+        ]);
+    }
+
+    private function recordPlatformFeeTransaction(Withdrawal $withdrawal, Wallet $wallet): void
+    {
+        $fee = $withdrawal->platformFeeAmount();
+
+        if ($fee <= 0) {
+            return;
+        }
+
+        $source = $withdrawal->reference.':fee';
+
+        if (WalletTransaction::query()
+            ->where('user_id', $withdrawal->user_id)
+            ->where('source', $source)
+            ->where('type', PlatformTerms::TX_PLATFORM_FEE)
+            ->exists()) {
+            return;
+        }
+
+        $symbol = $this->settings->tokenSymbol();
+        $sortOrder = (int) WalletTransaction::query()->where('user_id', $withdrawal->user_id)->max('sort_order') + 1;
+
+        WalletTransaction::query()->create([
+            'user_id' => $withdrawal->user_id,
+            'occurred_label' => now()->format('M j · H:i'),
+            'type' => PlatformTerms::TX_PLATFORM_FEE,
+            'source' => $source,
+            'amount_label' => '-'.number_format($fee, 2, '.', '').' '.$symbol,
             'amount_tone' => 'neutral',
             'status_label' => 'COMPLETED',
             'sort_order' => $sortOrder,

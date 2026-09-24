@@ -612,10 +612,12 @@ class Dashboard extends Component
     {
         $this->wallet = $this->user->fresh(['wallet'])->wallet;
         $available = max(0, $this->walletAvailableAmount());
+        $fee = app(PlatformSettingsService::class)->platformWithdrawalFee();
+        $maxPayoutUsdt = max(0, $available - $fee);
 
         if ($this->withdrawCurrency === 'BTC') {
             try {
-                $btc = app(ExchangeRateService::class)->convertFromBase($available, 'BTC');
+                $btc = app(ExchangeRateService::class)->convertFromBase($maxPayoutUsdt, 'BTC');
                 $this->withdrawAmount = rtrim(rtrim(number_format($btc, 8, '.', ''), '0'), '.');
             } catch (\Throwable) {
                 $this->withdrawAmount = '0';
@@ -624,7 +626,7 @@ class Dashboard extends Component
             return;
         }
 
-        $this->withdrawAmount = number_format($available, 2, '.', '');
+        $this->withdrawAmount = number_format($maxPayoutUsdt, 2, '.', '');
     }
 
     public function getAvailableBalanceFormattedProperty(): string
@@ -961,9 +963,26 @@ class Dashboard extends Component
 
     public function getNetworkFeeLabelProperty(): string
     {
-        $fee = app(PlatformSettingsService::class)->getFloat('network_fee');
+        $fee = app(PlatformSettingsService::class)->platformWithdrawalFee();
 
         return number_format($fee, 2, ',', '').' '.$this->walletCurrency;
+    }
+
+    public function getWithdrawTotalDebitLabelProperty(): ?string
+    {
+        $amount = (float) str_replace([',', ' '], '', $this->withdrawAmount);
+
+        if ($amount <= 0) {
+            return null;
+        }
+
+        try {
+            $quote = app(WithdrawalService::class)->quote($amount, $this->withdrawCurrency);
+        } catch (\Throwable) {
+            return null;
+        }
+
+        return number_format($quote['total_debit_usdt'], 2, ',', '').' '.$this->walletCurrency;
     }
 
     public function getPlanPriceProperty(): string
@@ -1319,7 +1338,8 @@ class Dashboard extends Component
         ]);
 
         try {
-            app(ExchangeRateService::class)->assertMinWithdrawalAtLiveRate(
+            app(WithdrawalService::class)->assertCanCreate(
+                $this->user,
                 (float) $this->withdrawAmount,
                 $this->withdrawCurrency,
             );
@@ -2780,7 +2800,8 @@ class Dashboard extends Component
             'withdrawAmount' => 'amount',
         ]);
 
-        app(ExchangeRateService::class)->assertMinWithdrawalAtLiveRate(
+        app(WithdrawalService::class)->assertCanCreate(
+            $this->user,
             (float) $this->withdrawAmount,
             $this->withdrawCurrency,
         );

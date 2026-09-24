@@ -3,6 +3,8 @@
 namespace App\Providers;
 
 use App\Listeners\LogAuthLockout;
+use App\Models\PaymentWebhookLog;
+use App\Observers\PaymentWebhookLogObserver;
 use App\Services\Payment\CcapiIpnVerifier;
 use App\Services\PlatformSettingsService;
 use App\Services\Payment\CryptoCurrencyApiClient;
@@ -64,6 +66,8 @@ class AppServiceProvider extends ServiceProvider
         }
 
         View::composer('admin.partials.sidebar', AdminNavComposer::class);
+
+        PaymentWebhookLog::observe(PaymentWebhookLogObserver::class);
 
         Event::listen(Lockout::class, LogAuthLockout::class);
 

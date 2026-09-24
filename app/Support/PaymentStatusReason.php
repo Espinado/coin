@@ -17,6 +17,8 @@ final class PaymentStatusReason
 
     public const DEPOSIT_CURRENCY_MISMATCH = 'deposit_currency_mismatch';
 
+    public const DEPOSIT_DUPLICATE_TXID = 'deposit_duplicate_txid';
+
     public const DEPOSIT_GENERIC = 'deposit_generic';
 
     public const WITHDRAWAL_ADMIN_REJECTED = 'withdrawal_admin_rejected';
@@ -61,6 +63,7 @@ final class PaymentStatusReason
             self::DEPOSIT_ADDRESS_MISMATCH => __('coin.payment_reasons.deposit_address_mismatch'),
             self::DEPOSIT_NETWORK_MISMATCH => __('coin.payment_reasons.deposit_network_mismatch'),
             self::DEPOSIT_CURRENCY_MISMATCH => __('coin.payment_reasons.deposit_currency_mismatch'),
+            self::DEPOSIT_DUPLICATE_TXID => __('coin.payment_reasons.deposit_duplicate_txid'),
             default => __('coin.payment_reasons.deposit_generic'),
         };
     }

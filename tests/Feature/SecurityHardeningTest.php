@@ -206,8 +206,8 @@ class SecurityHardeningTest extends TestCase
     {
         $user = User::factory()->create();
         $user->wallet->update([
-            'available' => 100,
-            'balance' => 100,
+            'available' => 150,
+            'balance' => 150,
             'pending' => 0,
             'payout_address' => PayoutAddressTest::VALID_TRON_ADDRESS,
             'network_label' => 'TRC-20',
@@ -216,7 +216,7 @@ class SecurityHardeningTest extends TestCase
         app(WithdrawalService::class)->createForUser($user, 100);
 
         $this->expectException(\RuntimeException::class);
-        $this->expectExceptionMessage('Insufficient available balance.');
+        $this->expectExceptionMessage(__('coin.wallet.insufficient_funds'));
 
         app(WithdrawalService::class)->createForUser($user, 100);
     }

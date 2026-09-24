@@ -117,7 +117,7 @@ class MockPaymentGatewayFlowTest extends TestCase
 
         $this->assertSame(Withdrawal::STATUS_PAID, $withdrawal->status);
         $this->assertNotEmpty($withdrawal->gateway_request_id);
-        $this->assertSame('220.00', number_format((float) $user->wallet->available, 2, '.', ''));
+        $this->assertSame('219.00', number_format((float) $user->wallet->available, 2, '.', ''));
         $this->assertSame('0.00', number_format((float) $user->wallet->pending, 2, '.', ''));
     }
 }

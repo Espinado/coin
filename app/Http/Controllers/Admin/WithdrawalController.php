@@ -61,6 +61,7 @@ class WithdrawalController extends Controller
             ? PaymentWebhookLog::query()
                 ->where('withdrawal_id', $withdrawal->id)
                 ->where('event_type', 'payout_poll')
+                ->excludeDuplicateResults()
                 ->orderByDesc('id')
                 ->limit(15)
                 ->get()

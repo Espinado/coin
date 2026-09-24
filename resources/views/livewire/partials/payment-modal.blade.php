@@ -110,11 +110,14 @@
           @if($isPayout && $withdrawCurrency === 'BTC' && $this->withdrawDebitPreview)
           <div style="display: flex; justify-content: space-between; gap: 12px;"><span style="color: rgba(214,238,248,0.72);">{{ __('coin.wallet.withdraw_debit_preview_label') }}</span><span style="font-family: 'JetBrains Mono', monospace; text-align: right;">{{ $this->withdrawDebitPreview }}</span></div>
           @endif
-          <div style="display: flex; justify-content: space-between; gap: 12px;"><span style="color: rgba(214,238,248,0.72);">{{ __('coin.wallet.network_fee') }}</span><span style="font-family: 'JetBrains Mono', monospace; text-align: right;">0.40 {{ $currency }}</span></div>
+          <div style="display: flex; justify-content: space-between; gap: 12px;"><span style="color: rgba(214,238,248,0.72);">{{ __('coin.wallet.platform_fee') }}</span><span style="font-family: 'JetBrains Mono', monospace; text-align: right;">{{ $this->networkFeeLabel }}</span></div>
+          @if($this->withdrawTotalDebitLabel)
+          <div style="display: flex; justify-content: space-between; gap: 12px;"><span style="color: rgba(214,238,248,0.72);">{{ __('coin.wallet.withdraw_total_debit') }}</span><span style="font-family: 'JetBrains Mono', monospace; text-align: right;">{{ $this->withdrawTotalDebitLabel }}</span></div>
+          @endif
           @endif
           @if(! $isPlanChange || $this->planChangeTopUp > 0)
           <div style="height: 1px; background: rgba(150,235,250,0.1);"></div>
-          <div style="display: flex; justify-content: space-between; gap: 12px;"><span style="color: rgba(214,238,248,0.72);">{{ __('coin.payment_modal.total') }}</span><span style="font-family: 'JetBrains Mono', monospace; font-size: 15px; color: #f0fbff;">{{ $amount }} {{ $currency }}</span></div>
+          <div style="display: flex; justify-content: space-between; gap: 12px;"><span style="color: rgba(214,238,248,0.72);">{{ $isPayout ? __('coin.wallet.payout_amount') : __('coin.payment_modal.total') }}</span><span style="font-family: 'JetBrains Mono', monospace; font-size: 15px; color: #f0fbff;">{{ $amount }} {{ $currency }}</span></div>
           @endif
         </div>
 

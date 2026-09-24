@@ -17,7 +17,7 @@ class PlatformSettingsService
         'token_symbol' => 'USDT',
         'min_deposit' => '10.00',
         'min_withdrawal' => '10.00',
-        'network_fee' => '0.50',
+        'network_fee' => '1.00',
         'withdrawal_processing_hours' => '24',
         'referral_level1_percent' => '20',
         'referral_level2_percent' => '0',
@@ -158,6 +158,11 @@ class PlatformSettingsService
     public function minWithdrawal(): float
     {
         return $this->getFloat('min_withdrawal');
+    }
+
+    public function platformWithdrawalFee(): float
+    {
+        return max(0, round($this->getFloat('network_fee'), 2));
     }
 
     public function btcPerUsdt(): float

@@ -3,6 +3,7 @@
 namespace App\Services\Payment;
 
 use App\Models\Deposit;
+use App\Models\PaymentStatusLog;
 use App\Models\PaymentWebhookLog;
 use App\Models\Withdrawal;
 use App\Support\PaymentStatusReason;
@@ -25,6 +26,10 @@ class PaymentIpnService
         try {
             return DB::transaction(function () use ($event) {
                 if ($this->wasAlreadyProcessed($event)) {
+                    if ($event->isIncomingPayment()) {
+                        $this->rejectPendingDepositIfTxidAlreadyCredited($event);
+                    }
+
                     return $this->finishDuplicate($event, 'Duplicate IPN ignored.');
                 }
 
@@ -83,11 +88,15 @@ class PaymentIpnService
         $log->update(['deposit_id' => $deposit->id]);
 
         if ($this->wasAlreadyProcessed($event)) {
-            return $this->finish($log, PaymentWebhookLog::RESULT_DUPLICATE, 'Duplicate IPN ignored.');
+            $log->update(['deposit_id' => null]);
+
+            return $this->finishDuplicate($event, 'Duplicate IPN ignored.');
         }
 
         if ($deposit->status === Deposit::STATUS_CONFIRMED) {
-            return $this->finish($log, PaymentWebhookLog::RESULT_DUPLICATE, 'Deposit already confirmed.');
+            $log->update(['deposit_id' => null]);
+
+            return $this->finishDuplicate($event, 'Deposit already confirmed.');
         }
 
         if ($deposit->status !== Deposit::STATUS_PENDING) {
@@ -100,7 +109,7 @@ class PaymentIpnService
             $rejectReason = PaymentStatusReason::depositReasonFromValidation($validationError);
 
             if ($rejectReason !== null) {
-                $this->deposits->reject($deposit, null, $rejectReason);
+                $this->deposits->reject($deposit, null, $rejectReason, logSource: PaymentStatusLog::SOURCE_IPN);
 
                 return $this->finish($log, PaymentWebhookLog::RESULT_PROCESSED, 'Deposit rejected: '.$validationError);
             }
@@ -119,6 +128,7 @@ class PaymentIpnService
                 null,
                 PaymentStatusReason::DEPOSIT_AMOUNT_MISMATCH,
                 (float) ($event->amount ?? 0),
+                PaymentStatusLog::SOURCE_IPN,
             );
 
             return $this->finish(
@@ -133,7 +143,25 @@ class PaymentIpnService
             );
         }
 
-        $this->deposits->confirm($deposit, null);
+        $duplicateDeposit = $this->confirmedDepositWithTxid($event->txid, $deposit->id);
+
+        if ($duplicateDeposit !== null) {
+            $this->deposits->reject(
+                $deposit,
+                null,
+                PaymentStatusReason::DEPOSIT_DUPLICATE_TXID,
+                (float) ($event->amount ?? 0),
+                PaymentStatusLog::SOURCE_IPN,
+            );
+
+            return $this->finish(
+                $log,
+                PaymentWebhookLog::RESULT_PROCESSED,
+                sprintf('Deposit rejected: txid already credited on deposit #%d.', $duplicateDeposit->id),
+            );
+        }
+
+        $this->deposits->confirm($deposit, null, PaymentStatusLog::SOURCE_IPN);
 
         return $this->finish($log, PaymentWebhookLog::RESULT_PROCESSED, 'Deposit confirmed from IPN.');
     }
@@ -369,6 +397,7 @@ class PaymentIpnService
             $withdrawal,
             $event->txid,
             (string) $event->confirmation,
+            PaymentStatusLog::SOURCE_IPN,
         );
 
         return $this->finish($log, PaymentWebhookLog::RESULT_PROCESSED, 'Withdrawal marked paid from IPN.');
@@ -453,10 +482,56 @@ class PaymentIpnService
         $log = $this->findLogByIdempotency($event);
 
         if ($log !== null) {
+            if (str_starts_with((string) $log->processing_result, PaymentWebhookLog::RESULT_PROCESSED.':')) {
+                return $log;
+            }
+
             return $this->finish($log, PaymentWebhookLog::RESULT_DUPLICATE, $message);
         }
 
         return $this->createAuditLog($event, PaymentWebhookLog::RESULT_DUPLICATE, $message);
+    }
+
+    private function confirmedDepositWithTxid(?string $txid, int $exceptDepositId): ?Deposit
+    {
+        if ($txid === null || trim($txid) === '') {
+            return null;
+        }
+
+        return Deposit::query()
+            ->where('txid', $txid)
+            ->where('status', Deposit::STATUS_CONFIRMED)
+            ->whereKeyNot($exceptDepositId)
+            ->first();
+    }
+
+    private function rejectPendingDepositIfTxidAlreadyCredited(VerifiedIpnEvent $event): void
+    {
+        $depositReference = $this->resolveDepositReference($event);
+
+        if ($depositReference === null) {
+            return;
+        }
+
+        $deposit = Deposit::query()->find($depositReference);
+
+        if ($deposit === null || $deposit->status !== Deposit::STATUS_PENDING) {
+            return;
+        }
+
+        $duplicateDeposit = $this->confirmedDepositWithTxid($event->txid, $deposit->id);
+
+        if ($duplicateDeposit === null) {
+            return;
+        }
+
+        $this->deposits->reject(
+            $deposit,
+            null,
+            PaymentStatusReason::DEPOSIT_DUPLICATE_TXID,
+            (float) ($event->amount ?? 0),
+            PaymentStatusLog::SOURCE_IPN,
+        );
     }
 
     private function finishOrCreateFailed(VerifiedIpnEvent $event, string $message): PaymentWebhookLog

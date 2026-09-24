@@ -3,6 +3,7 @@
 namespace App\Services\Payment;
 
 use App\Models\Deposit;
+use App\Models\PaymentStatusLog;
 use App\Services\DepositService;
 use App\Services\PlatformSettingsService;
 use App\Support\PaymentStatusReason;
@@ -52,7 +53,7 @@ class DepositPollService
     {
         if ($deposit->expires_at !== null && $deposit->expires_at->isPast()) {
             try {
-                $this->deposits->reject($deposit, null, PaymentStatusReason::DEPOSIT_EXPIRED);
+                $this->deposits->reject($deposit, null, PaymentStatusReason::DEPOSIT_EXPIRED, logSource: PaymentStatusLog::SOURCE_POLL);
                 $stats['expired']++;
                 Log::info('deposit.poll.expired', [
                     'deposit_id' => $deposit->id,

@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\AdminStaffController;
 use App\Http\Controllers\Admin\BroadcastController;
+use App\Http\Controllers\Admin\CommissionController;
 use App\Http\Controllers\Admin\Auth\AcceptInvitationController;
 use App\Http\Controllers\Admin\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Admin\Auth\RequestPasswordResetController;
@@ -17,6 +18,7 @@ use App\Http\Controllers\Admin\PlanController;
 use App\Http\Controllers\Admin\SettingsController;
 use App\Http\Controllers\Admin\SupportTicketController;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Admin\PaymentLogController;
 use App\Http\Controllers\Admin\WithdrawalController;
 use App\Http\Controllers\Admin\VoximplantCallController;
 use App\Http\Controllers\SessionExpiredController;
@@ -90,6 +92,11 @@ Route::middleware(['admin.domain', 'reject.web.on.admin'])->group(function () {
 
         Route::get('withdrawals', [WithdrawalController::class, 'index'])->name('admin.withdrawals.index');
         Route::get('withdrawals/{withdrawal}', [WithdrawalController::class, 'show'])->name('admin.withdrawals.show');
+
+        Route::get('payment-logs', [PaymentLogController::class, 'index'])->name('admin.payment-logs.index');
+        Route::get('payment-logs/{paymentLog}', [PaymentLogController::class, 'show'])->name('admin.payment-logs.show');
+
+        Route::get('commissions', [CommissionController::class, 'index'])->name('admin.commissions.index');
         Route::post('withdrawals/{withdrawal}/approve', [WithdrawalController::class, 'approve'])
             ->middleware('admin.ability:manage_withdrawals')
             ->name('admin.withdrawals.approve');

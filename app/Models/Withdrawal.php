@@ -26,6 +26,7 @@ class Withdrawal extends Model
         'reference',
         'amount',
         'base_amount',
+        'platform_fee',
         'currency',
         'exchange_rate',
         'usdt_per_btc',
@@ -60,6 +61,7 @@ class Withdrawal extends Model
         return [
             'amount' => 'decimal:8',
             'base_amount' => 'decimal:2',
+            'platform_fee' => 'decimal:2',
             'exchange_rate' => 'decimal:8',
             'usdt_per_btc' => 'decimal:8',
             'sent_at' => 'datetime',
@@ -168,10 +170,21 @@ class Withdrawal extends Model
         return MoneyFormat::amount($this->amount, $this->currency);
     }
 
-    /** USDT amount reserved from the user's balance. */
+    /** USDT amount paid out to the user (excluding platform fee). */
     public function ledgerAmount(): float
     {
         return (float) ($this->base_amount ?? $this->amount);
+    }
+
+    public function platformFeeAmount(): float
+    {
+        return round((float) ($this->platform_fee ?? 0), 2);
+    }
+
+    /** Total USDT reserved from the user's balance (payout + platform fee). */
+    public function totalReservedUsdt(): float
+    {
+        return round($this->ledgerAmount() + $this->platformFeeAmount(), 2);
     }
 
     public static function pendingCountForAdmin(): int

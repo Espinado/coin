@@ -73,6 +73,83 @@ class PaymentWebhookTest extends TestCase
         ]);
     }
 
+    public function test_duplicate_ipn_does_not_overwrite_processed_webhook_log(): void
+    {
+        $user = User::factory()->create();
+        $deposit = Deposit::query()->create([
+            'user_id' => $user->id,
+            'amount' => 10,
+            'currency' => 'USDT',
+            'status' => Deposit::STATUS_PENDING,
+            'method' => 'ccapi',
+            'payment_address' => 'TMockDuplicate123',
+            'gateway_network' => 'trx',
+        ]);
+        $deposit->update(['gateway_uniq_id' => Deposit::gatewayUniqId($deposit->id)]);
+        $deposit->refresh();
+
+        $payload = $this->signedDepositPayload($deposit, 'duplicate-tx-1', 1);
+
+        $this->postJson('http://coin.test/webhooks/ccapi', $payload)->assertOk();
+        $this->postJson('http://coin.test/webhooks/ccapi', $payload)->assertOk();
+
+        $deposit->refresh();
+        $this->assertSame(Deposit::STATUS_CONFIRMED, $deposit->status);
+
+        $this->assertDatabaseHas('payment_webhook_logs', [
+            'deposit_id' => $deposit->id,
+            'processing_result' => PaymentWebhookLog::RESULT_PROCESSED.': Deposit confirmed from IPN.',
+        ]);
+
+        $this->assertSame(1, PaymentWebhookLog::query()
+            ->where('deposit_id', $deposit->id)
+            ->excludeDuplicateResults()
+            ->count());
+    }
+
+    public function test_same_txid_cannot_confirm_two_deposits(): void
+    {
+        $user = User::factory()->create();
+
+        $first = Deposit::query()->create([
+            'user_id' => $user->id,
+            'amount' => 10,
+            'currency' => 'USDT',
+            'status' => Deposit::STATUS_PENDING,
+            'method' => 'ccapi',
+            'payment_address' => 'TMockFirstAddress',
+            'gateway_network' => 'trx',
+        ]);
+        $first->update(['gateway_uniq_id' => Deposit::gatewayUniqId($first->id)]);
+        $first->refresh();
+
+        $second = Deposit::query()->create([
+            'user_id' => $user->id,
+            'amount' => 10,
+            'currency' => 'USDT',
+            'status' => Deposit::STATUS_PENDING,
+            'method' => 'ccapi',
+            'payment_address' => 'TMockSecondAddress',
+            'gateway_network' => 'trx',
+        ]);
+        $second->update(['gateway_uniq_id' => Deposit::gatewayUniqId($second->id)]);
+        $second->refresh();
+
+        $sharedTxid = 'shared-tx-abc';
+
+        $this->postJson('http://coin.test/webhooks/ccapi', $this->signedDepositPayload($first, $sharedTxid, 1))->assertOk();
+
+        $payloadForSecond = $this->signedDepositPayload($second, $sharedTxid, 1);
+        $this->postJson('http://coin.test/webhooks/ccapi', $payloadForSecond)->assertOk();
+
+        $first->refresh();
+        $second->refresh();
+
+        $this->assertSame(Deposit::STATUS_CONFIRMED, $first->status);
+        $this->assertSame(Deposit::STATUS_REJECTED, $second->status);
+        $this->assertSame('deposit_duplicate_txid', $second->status_reason);
+    }
+
     public function test_ccapi_webhook_rejects_invalid_signature(): void
     {
         $payload = [

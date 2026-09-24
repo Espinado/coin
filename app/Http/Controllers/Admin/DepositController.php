@@ -56,6 +56,7 @@ class DepositController extends Controller
 
         $webhookLogs = PaymentWebhookLog::query()
             ->where('deposit_id', $deposit->id)
+            ->excludeDuplicateResults()
             ->orderByDesc('id')
             ->limit(20)
             ->get();
