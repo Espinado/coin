@@ -88,6 +88,7 @@ Route::middleware(['admin.domain', 'reject.web.on.admin'])->group(function () {
             ->name('admin.voximplant.one-time-key');
 
         Route::get('deposits', [DepositController::class, 'index'])->name('admin.deposits.index');
+        Route::get('deposits/{deposit}/status', [DepositController::class, 'status'])->name('admin.deposits.status');
         Route::get('deposits/{deposit}', [DepositController::class, 'show'])->name('admin.deposits.show');
 
         Route::get('withdrawals', [WithdrawalController::class, 'index'])->name('admin.withdrawals.index');

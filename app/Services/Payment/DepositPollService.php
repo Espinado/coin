@@ -6,7 +6,6 @@ use App\Models\Deposit;
 use App\Models\PaymentStatusLog;
 use App\Services\DepositService;
 use App\Services\PlatformSettingsService;
-use App\Support\PaymentStatusReason;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 
@@ -51,23 +50,14 @@ class DepositPollService
     /** @param array{checked: int, expired: int, stale: int, errors: int} $stats */
     private function processDeposit(Deposit $deposit, array &$stats): void
     {
-        if ($deposit->expires_at !== null && $deposit->expires_at->isPast()) {
-            try {
-                $this->deposits->reject($deposit, null, PaymentStatusReason::DEPOSIT_EXPIRED, logSource: PaymentStatusLog::SOURCE_POLL);
-                $stats['expired']++;
-                Log::info('deposit.poll.expired', [
-                    'deposit_id' => $deposit->id,
-                    'user_id' => $deposit->user_id,
-                    'amount' => $deposit->amount,
-                    'gateway_uniq_id' => $deposit->gateway_uniq_id,
-                ]);
-            } catch (\Throwable $exception) {
-                $stats['errors']++;
-                Log::warning('deposit.poll.expire_error', [
-                    'deposit_id' => $deposit->id,
-                    'message' => $exception->getMessage(),
-                ]);
-            }
+        if ($this->deposits->expireIfDue($deposit, PaymentStatusLog::SOURCE_POLL) !== null) {
+            $stats['expired']++;
+            Log::info('deposit.poll.expired', [
+                'deposit_id' => $deposit->id,
+                'user_id' => $deposit->user_id,
+                'amount' => $deposit->amount,
+                'gateway_uniq_id' => $deposit->gateway_uniq_id,
+            ]);
 
             return;
         }

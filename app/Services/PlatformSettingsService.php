@@ -165,6 +165,20 @@ class PlatformSettingsService
         return max(0, round($this->getFloat('network_fee'), 2));
     }
 
+    public function formattedPlatformWithdrawalFeeLabel(?string $currency = null): string
+    {
+        $currency = strtoupper(trim($currency ?: $this->tokenSymbol()));
+
+        return number_format($this->platformWithdrawalFee(), 2, ',', '').' '.$currency;
+    }
+
+    public function withdrawalProcessingTimeLabel(): string
+    {
+        $hours = max(1, $this->getInt('withdrawal_processing_hours'));
+
+        return __('coin.wallet.processing_time_value', ['hours' => $hours]);
+    }
+
     public function btcPerUsdt(): float
     {
         $rate = $this->getFloat('btc_per_usdt');

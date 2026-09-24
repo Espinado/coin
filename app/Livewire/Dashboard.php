@@ -30,6 +30,7 @@ use App\Services\PlatformSettingsService;
 use App\Services\ReferralService;
 use App\Services\SupportTicketService;
 use App\Services\UserActiveSessionService;
+use App\Services\WalletHistoryService;
 use App\Services\WithdrawalService;
 use App\Services\WithdrawalTwoFactorService;
 use App\Support\BitcoinAddressValidator;
@@ -217,8 +218,6 @@ class Dashboard extends Component
 
     public int $walletPerPage = 10;
 
-    public int $depositHistoryPerPage = 10;
-
     public string $walletSearch = '';
 
     public string $walletSort = '';
@@ -239,11 +238,6 @@ class Dashboard extends Component
     public function updatedWalletPerPage(): void
     {
         $this->resetPage('walletPage');
-    }
-
-    public function updatedDepositHistoryPerPage(): void
-    {
-        $this->resetPage('depositHistoryPage');
     }
 
     public function updatedWalletSearch(): void
@@ -963,9 +957,18 @@ class Dashboard extends Component
 
     public function getNetworkFeeLabelProperty(): string
     {
-        $fee = app(PlatformSettingsService::class)->platformWithdrawalFee();
+        return app(PlatformSettingsService::class)
+            ->formattedPlatformWithdrawalFeeLabel($this->walletCurrency);
+    }
 
-        return number_format($fee, 2, ',', '').' '.$this->walletCurrency;
+    public function getPlatformFeeLabelProperty(): string
+    {
+        return $this->networkFeeLabel;
+    }
+
+    public function getProcessingTimeLabelProperty(): string
+    {
+        return app(PlatformSettingsService::class)->withdrawalProcessingTimeLabel();
     }
 
     public function getWithdrawTotalDebitLabelProperty(): ?string
@@ -1195,12 +1198,10 @@ class Dashboard extends Component
         $depositService = app(DepositService::class);
 
         foreach ($pendingDeposits as $deposit) {
-            if ($deposit->expires_at !== null && $deposit->expires_at->isPast()) {
-                $deposit = $depositService->reject(
-                    $deposit,
-                    null,
-                    \App\Support\PaymentStatusReason::DEPOSIT_EXPIRED,
-                );
+            $expired = $depositService->expireIfDue($deposit);
+
+            if ($expired !== null) {
+                $deposit = $expired;
             }
 
             if ($this->pendingDepositId === null || $this->pendingDepositId === $deposit->id) {
@@ -2365,17 +2366,7 @@ class Dashboard extends Component
         $userId = (int) $this->user->id;
 
         return view('livewire.dashboard', [
-            'walletTransactions' => $this->paginateWalletTransactions($userId),
-            'depositHistory' => Deposit::query()
-                ->where('user_id', $userId)
-                ->latest('id')
-                ->paginate($this->depositHistoryPerPage, pageName: 'depositHistoryPage'),
-            'pendingWalletWithdrawals' => Withdrawal::query()
-                ->where('user_id', $userId)
-                ->whereIn('status', [Withdrawal::STATUS_PENDING, Withdrawal::STATUS_PROCESSING])
-                ->latest('id')
-                ->limit(5)
-                ->get(),
+            'walletHistory' => $this->paginateWalletHistory($userId),
             'profitHistoryPage' => $this->section === 3 && $this->showFullProfitHistory
                 ? WalletTransaction::query()
                     ->where('user_id', $userId)
@@ -2423,19 +2414,28 @@ class Dashboard extends Component
         return in_array($this->walletPerPage, [10, 20, 50], true) ? $this->walletPerPage : 10;
     }
 
-    private function paginateWalletTransactions(int $userId): \Illuminate\Contracts\Pagination\LengthAwarePaginator
+    private function paginateWalletHistory(int $userId): \Illuminate\Contracts\Pagination\LengthAwarePaginator
     {
-        $query = WalletTransaction::query()
-            ->where('user_id', $userId)
-            ->searchTerm($this->walletSearch)
-            ->applyListSort($this->walletSort, $this->walletDir, 'sort_order');
-
-        $paginator = $query->paginate($this->walletPageSize(), pageName: 'walletPage');
+        $paginator = app(WalletHistoryService::class)->paginate(
+            $userId,
+            $this->walletSearch,
+            $this->walletSort,
+            $this->walletDir,
+            $this->walletPageSize(),
+            max(1, (int) $this->getPage('walletPage')),
+        );
 
         if ($paginator->total() > 0 && $paginator->isEmpty()) {
             $this->resetPage('walletPage');
 
-            return $query->paginate($this->walletPageSize(), pageName: 'walletPage');
+            return app(WalletHistoryService::class)->paginate(
+                $userId,
+                $this->walletSearch,
+                $this->walletSort,
+                $this->walletDir,
+                $this->walletPageSize(),
+                max(1, (int) $this->getPage('walletPage')),
+            );
         }
 
         return $paginator;

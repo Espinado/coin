@@ -5,7 +5,10 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Admin\Concerns\AdminListQuery;
 use App\Http\Controllers\Controller;
 use App\Models\Deposit;
+use App\Models\PaymentStatusLog;
 use App\Models\PaymentWebhookLog;
+use App\Services\DepositService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -15,6 +18,8 @@ class DepositController extends Controller
 
     public function index(Request $request): View
     {
+        app(DepositService::class)->expireAllDuePending(PaymentStatusLog::SOURCE_ADMIN);
+
         $status = $request->string('status')->toString();
         $search = $this->adminSearchTerm($request);
 
@@ -52,6 +57,7 @@ class DepositController extends Controller
 
     public function show(Deposit $deposit): View
     {
+        $deposit = app(DepositService::class)->expireIfDue($deposit, PaymentStatusLog::SOURCE_ADMIN) ?? $deposit;
         $deposit->load(['user.wallet', 'confirmedBy']);
 
         $webhookLogs = PaymentWebhookLog::query()
@@ -64,6 +70,16 @@ class DepositController extends Controller
         return view('admin.deposits.show', [
             'deposit' => $deposit,
             'webhookLogs' => $webhookLogs,
+        ]);
+    }
+
+    public function status(Deposit $deposit): JsonResponse
+    {
+        $deposit = app(DepositService::class)->expireIfDue($deposit, PaymentStatusLog::SOURCE_ADMIN) ?? $deposit->fresh();
+
+        return response()->json([
+            'id' => $deposit->id,
+            'status' => $deposit->status,
         ]);
     }
 

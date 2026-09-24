@@ -45,6 +45,28 @@ Schedule::command('coin:poll-stuck-withdrawals')
         return app(PlatformSettingsService::class)->usesLivePaymentGateway();
     });
 
+Schedule::command('coin:expire-pending-deposits')
+    ->everyMinute()
+    ->withoutOverlapping()
+    ->when(function (): bool {
+        if ((string) config('coin.payments.driver', 'mock') !== 'ccapi') {
+            return false;
+        }
+
+        return app(PlatformSettingsService::class)->usesLivePaymentGateway();
+    });
+
+Schedule::command('queue:work --stop-when-empty --max-time=55')
+    ->everyMinute()
+    ->withoutOverlapping()
+    ->when(function (): bool {
+        if ((string) config('coin.payments.driver', 'mock') !== 'ccapi') {
+            return false;
+        }
+
+        return app(PlatformSettingsService::class)->usesLivePaymentGateway();
+    });
+
 Schedule::command('coin:poll-stuck-deposits')
     ->everyMinute()
     ->withoutOverlapping()

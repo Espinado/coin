@@ -9,6 +9,7 @@ use App\Models\Deposit;
 use App\Models\User;
 use App\Support\PaymentStatusReason;
 use App\Models\PaymentStatusLog;
+use App\Jobs\ExpirePendingDepositJob;
 use App\Services\Payment\Dtos\DepositIntentDto;
 use App\Services\Payment\PaymentGatewayInterface;
 use App\Services\Payment\PaymentStatusLogService;
@@ -90,7 +91,55 @@ class DepositService
             'external_reference' => $intent->gatewayUniqId,
         ]);
 
-        return $deposit->fresh(['user']);
+        $deposit = $deposit->fresh(['user']);
+
+        if ($deposit->method === 'ccapi' && $intent->expiresAt !== null) {
+            ExpirePendingDepositJob::dispatch($deposit->id)->delay($intent->expiresAt);
+        }
+
+        return $deposit;
+    }
+
+    public function expireIfDue(Deposit $deposit, string $logSource = PaymentStatusLog::SOURCE_APP): ?Deposit
+    {
+        $deposit = $deposit->fresh();
+
+        if ($deposit->status !== Deposit::STATUS_PENDING) {
+            return null;
+        }
+
+        if ($deposit->method !== 'ccapi') {
+            return null;
+        }
+
+        if ($deposit->expires_at === null || $deposit->expires_at->isFuture()) {
+            return null;
+        }
+
+        try {
+            return $this->reject($deposit, null, PaymentStatusReason::DEPOSIT_EXPIRED, logSource: $logSource);
+        } catch (RuntimeException) {
+            return null;
+        }
+    }
+
+    public function expireAllDuePending(string $logSource = PaymentStatusLog::SOURCE_POLL): int
+    {
+        $expired = 0;
+
+        Deposit::query()
+            ->where('status', Deposit::STATUS_PENDING)
+            ->where('method', 'ccapi')
+            ->whereNotNull('expires_at')
+            ->where('expires_at', '<=', now())
+            ->orderBy('id')
+            ->each(function (Deposit $deposit) use (&$expired, $logSource): void {
+                if ($this->expireIfDue($deposit, $logSource) !== null) {
+                    $expired++;
+                }
+            });
+
+        return $expired;
     }
 
     private function shouldAutoConfirmMock(): bool

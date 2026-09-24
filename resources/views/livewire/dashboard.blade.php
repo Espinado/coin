@@ -453,11 +453,11 @@
               <span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">{{ $this->withdrawMinLabel }}</span>
             </div>
             <div style="margin-top: 16px; display: flex; flex-direction: column; gap: 11px; font-size: 12.5px;">
-              <div style="display: flex; justify-content: space-between; gap: 14px;"><span style="color: rgba(214,238,248,0.72); min-width: 0;">{{ __('coin.wallet.platform_fee') }}</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">{{ $this->networkFeeLabel }}</span></div>
+              <div style="display: flex; justify-content: space-between; gap: 14px;"><span style="color: rgba(214,238,248,0.72); min-width: 0;">{{ __('coin.wallet.network_fee') }}</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">{{ $this->platformFeeLabel }}</span></div>
               @if($this->withdrawTotalDebitLabel)
               <div style="display: flex; justify-content: space-between; gap: 14px;"><span style="color: rgba(214,238,248,0.72); min-width: 0;">{{ __('coin.wallet.withdraw_total_debit') }}</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">{{ $this->withdrawTotalDebitLabel }}</span></div>
               @endif
-              <div style="display: flex; justify-content: space-between; gap: 14px;"><span style="color: rgba(214,238,248,0.72); min-width: 0;">{{ __('coin.wallet.processing_time') }}</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">~2 h</span></div>
+              <div style="display: flex; justify-content: space-between; gap: 14px;"><span style="color: rgba(214,238,248,0.72); min-width: 0;">{{ __('coin.wallet.processing_time') }}</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">{{ $this->processingTimeLabel }}</span></div>
             </div>
             @if(! $this->paymentGateEnabled)
             <p style="margin: 14px 0 0; font-size: 12px; line-height: 1.5; color: rgba(214,238,248,0.62);">{{ __('coin.wallet.payment_gate_test_mode_hint') }}</p>
@@ -485,6 +485,7 @@
             </div>
             <div style="margin-top: 14px; display: flex; flex-direction: column; gap: 11px; font-size: 12.5px;">
               <div style="display: flex; justify-content: space-between; gap: 14px;"><span style="color: rgba(214,238,248,0.72); min-width: 0;">{{ __('coin.wallet.network') }}</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">{{ $this->withdrawPayoutNetworkLabel }}</span></div>
+              <div style="display: flex; justify-content: space-between; gap: 14px;"><span style="color: rgba(214,238,248,0.72); min-width: 0;">{{ __('coin.wallet.network_fee') }}</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">{{ $this->platformFeeLabel }}</span></div>
               <div style="display: flex; justify-content: space-between; gap: 14px;"><span style="color: rgba(214,238,248,0.72); min-width: 0;">{{ __('coin.wallet.min_payout') }}</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">{{ $this->withdrawMinLabel }}</span></div>
             </div>
             <div class="coin-wallet-action-card__footer">
@@ -496,51 +497,10 @@
         <div class="coin-wallet-transactions-panel" style="margin-top: 20px;">
           <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap;">
             <div>
-              <span style="font-size: 15px; font-weight: 600;">{{ __('coin.wallet.deposit_history') }}</span>
-              <p style="margin: 6px 0 0; font-size: 12.5px; color: rgba(214,238,248,0.66);">{{ __('coin.wallet.deposit_history_sub') }}</p>
+              <span style="font-size: 15px; font-weight: 600;">{{ __('coin.wallet.transactions') }}</span>
+              <p style="margin: 6px 0 0; font-size: 12.5px; color: rgba(214,238,248,0.66);">{{ __('coin.wallet.transactions_sub') }}</p>
             </div>
-            <span style="font-family: 'JetBrains Mono', monospace; font-size: 10.5px; color: rgba(214,238,248,0.66);">{{ __('coin.stats.total_entries', ['count' => $depositHistory->total()]) }}</span>
-          </div>
-          <div class="coin-scroll-x" style="margin-top: 16px;">
-            <div class="coin-wallet-deposits-table">
-              <div class="coin-wallet-deposits-table__head">
-                <span>{{ mb_strtoupper(__('coin.table.date')) }}</span>
-                <span>{{ mb_strtoupper(__('coin.admin.id')) }}</span>
-                <span>{{ mb_strtoupper(__('coin.table.amount')) }}</span>
-                <span>{{ mb_strtoupper(__('coin.table.status')) }}</span>
-                <span>{{ mb_strtoupper(__('coin.table.details')) }}</span>
-              </div>
-              @forelse($depositHistory as $deposit)
-              <div class="coin-wallet-deposits-table__row" style="{{ $deposit->status === \App\Models\Deposit::STATUS_PENDING ? 'background: rgba(255,180,84,0.06);' : ($deposit->status === \App\Models\Deposit::STATUS_REJECTED ? 'background: rgba(255,120,120,0.05);' : '') }}">
-                <span style="color: rgba(214,238,248,0.78);">{{ $deposit->created_at?->format('d M · H:i') }}</span>
-                <span style="font-family: 'JetBrains Mono', monospace; color: rgba(214,238,248,0.78);">{{ $deposit->publicReference() }}</span>
-                <span style="font-family: 'JetBrains Mono', monospace; color: rgba(214,238,248,0.88);">{{ $deposit->formattedAmount() }}</span>
-                <span style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: {{ $deposit->userStatusColor() }};">{{ $deposit->userStatusLabel() }}</span>
-                <span class="coin-wallet-deposits-table__details">
-                  @if(filled($deposit->userStatusDetail()))
-                  <span style="display: block; font-size: 12px; line-height: 1.45; color: {{ $deposit->status === \App\Models\Deposit::STATUS_REJECTED ? '#ffb0b0' : 'rgba(214,238,248,0.72)' }};">{{ $deposit->userStatusDetail() }}</span>
-                  @endif
-                  @if($deposit->canReopenPaymentDetails())
-                  <button type="button" wire:click="openTopUpFromHistory({{ $deposit->id }})" style="margin-top: {{ filled($deposit->userStatusDetail()) ? '8px' : '0' }}; padding: 7px 11px; border-radius: 8px; border: 1px solid rgba(255,180,84,0.35); background: rgba(255,180,84,0.1); color: #ffe8c8; font-family: inherit; font-size: 11.5px; cursor: pointer;">{{ __('coin.crypto_gateway.view_payment_details') }}</button>
-                  @endif
-                </span>
-              </div>
-              @empty
-              <div style="padding: 24px 0; font-size: 13px; color: rgba(214,238,248,0.68);">{{ __('coin.wallet.deposit_no_history') }}</div>
-              @endforelse
-            </div>
-          </div>
-          @include('livewire.partials.coin-pagination', [
-            'paginator' => $depositHistory,
-            'perPageProperty' => 'depositHistoryPerPage',
-            'perPageOptions' => [10, 20, 50],
-          ])
-        </div>
-
-        <div class="coin-wallet-transactions-panel" style="margin-top: 20px;">
-          <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap;">
-            <span style="font-size: 15px; font-weight: 600;">{{ __('coin.wallet.transactions') }}</span>
-            <span style="font-family: 'JetBrains Mono', monospace; font-size: 10.5px; color: rgba(214,238,248,0.66);">{{ __('coin.stats.total_entries', ['count' => $walletTransactions->total() + $pendingWalletWithdrawals->count()]) }}</span>
+            <span style="font-family: 'JetBrains Mono', monospace; font-size: 10.5px; color: rgba(214,238,248,0.66);">{{ __('coin.stats.total_entries', ['count' => $walletHistory->total()]) }}</span>
           </div>
           @include('livewire.partials.transaction-list-toolbar', [
             'searchProperty' => 'walletSearch',
@@ -555,32 +515,29 @@
                 <span>@include('livewire.partials.sortable-transaction-column', ['column' => 'status', 'label' => mb_strtoupper(__('coin.table.status')), 'sortProperty' => 'walletSort', 'dirProperty' => 'walletDir', 'sortMethod' => 'sortWallet'])</span>
                 <span>@include('livewire.partials.sortable-transaction-column', ['column' => 'amount', 'label' => mb_strtoupper(__('coin.table.amount')), 'sortProperty' => 'walletSort', 'dirProperty' => 'walletDir', 'sortMethod' => 'sortWallet', 'align' => 'right'])</span>
               </div>
-              @foreach($pendingWalletWithdrawals as $pendingWithdrawal)
-              <div class="coin-wallet-transactions-table__row" style="background: rgba(255,180,84,0.06);">
-                <span style="color: rgba(255,210,150,0.88);">{{ $pendingWithdrawal->created_at?->format('d M · H:i') }}</span>
-                <span style="color: rgba(255,210,150,0.88);">{{ __('coin.wallet.pending_payout_type') }}</span>
-                <span style="font-family: 'JetBrains Mono', monospace; color: rgba(255,210,150,0.78);">{{ $pendingWithdrawal->reference }}</span>
-                <span style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: oklch(0.88 0.15 90);">{{ __('coin.wallet.pending_status') }}</span>
-                <span style="font-family: 'JetBrains Mono', monospace; color: rgba(255,210,150,0.88);">−{{ $pendingWithdrawal->formattedAmount() }}</span>
-              </div>
-              @endforeach
-              @forelse($walletTransactions as $transaction)
-              <div class="coin-wallet-transactions-table__row">
-                <span style="color: rgba(214,238,248,0.78);">{{ $transaction->formattedOccurredAt() }}</span>
-                <span style="color: rgba(214,238,248,0.78);">{{ $transaction->displayType() }}</span>
-                <span style="font-family: 'JetBrains Mono', monospace; color: rgba(214,238,248,0.72);">{{ $transaction->displaySource() }}</span>
-                <span style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: {{ $transaction->statusColor() }};">{{ $transaction->displayStatus() }}</span>
-                <span style="font-family: 'JetBrains Mono', monospace; color: {{ $transaction->amountColor() }};">{{ $transaction->amount_label }}</span>
+              @forelse($walletHistory as $entry)
+              <div class="coin-wallet-transactions-table__row" @if($entry->rowBackground) style="background: {{ $entry->rowBackground }};" @endif>
+                <span style="color: rgba(214,238,248,0.78);">{{ \App\Support\LocaleFormat::shortDateTime($entry->occurredAt) }}</span>
+                <span style="color: rgba(214,238,248,0.78);">{{ $entry->typeLabel }}</span>
+                <span style="font-family: 'JetBrains Mono', monospace; color: rgba(214,238,248,0.72);">
+                  {{ $entry->sourceLabel }}
+                  @if(filled($entry->detail))
+                  <span style="display: block; margin-top: 4px; font-family: 'Sora', sans-serif; font-size: 12px; line-height: 1.45; color: {{ $entry->detailColor ?? 'rgba(214,238,248,0.68)' }};">{{ $entry->detail }}</span>
+                  @endif
+                  @if($entry->canReopenPaymentDetails && $entry->depositId)
+                  <button type="button" wire:click="openTopUpFromHistory({{ $entry->depositId }})" style="margin-top: {{ filled($entry->detail) ? '8px' : '4px' }}; padding: 7px 11px; border-radius: 8px; border: 1px solid rgba(255,180,84,0.35); background: rgba(255,180,84,0.1); color: #ffe8c8; font-family: inherit; font-size: 11.5px; cursor: pointer;">{{ __('coin.crypto_gateway.view_payment_details') }}</button>
+                  @endif
+                </span>
+                <span style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: {{ $entry->statusColor }};">{{ $entry->statusLabel }}</span>
+                <span style="font-family: 'JetBrains Mono', monospace; color: {{ $entry->amountColor }};">{{ $entry->amountLabel }}</span>
               </div>
               @empty
-                @if($pendingWalletWithdrawals->isEmpty())
-                <div style="padding: 24px 0; font-size: 13px; color: rgba(214,238,248,0.68);">{{ __('coin.admin.no_transactions') }}</div>
-                @endif
+              <div style="padding: 24px 0; font-size: 13px; color: rgba(214,238,248,0.68);">{{ __('coin.admin.no_transactions') }}</div>
               @endforelse
             </div>
           </div>
           @include('livewire.partials.coin-pagination', [
-            'paginator' => $walletTransactions,
+            'paginator' => $walletHistory,
             'perPageProperty' => 'walletPerPage',
             'perPageOptions' => [10, 20, 50],
           ])

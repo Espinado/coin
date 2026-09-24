@@ -84,4 +84,69 @@
 
         @include('admin.partials.user-context', ['user' => $deposit->user])
     </div>
+
+    @if($deposit->status === \App\Models\Deposit::STATUS_PENDING && $deposit->expires_at)
+        @push('scripts')
+            <script>
+                (function () {
+                    const statusUrl = @json(route('admin.deposits.status', $deposit));
+                    const pendingStatus = @json(\App\Models\Deposit::STATUS_PENDING);
+                    const expiresAtMs = @json($deposit->expires_at->getTimestamp() * 1000);
+                    let pollTimer = null;
+                    let expiryTimer = null;
+
+                    function reloadIfStatusChanged(status) {
+                        if (status !== pendingStatus) {
+                            window.location.reload();
+                        }
+                    }
+
+                    function pollStatus() {
+                        fetch(statusUrl, {
+                            headers: {
+                                'Accept': 'application/json',
+                                'X-Requested-With': 'XMLHttpRequest',
+                            },
+                            credentials: 'same-origin',
+                        })
+                            .then(function (response) {
+                                if (! response.ok) {
+                                    throw new Error('status poll failed');
+                                }
+
+                                return response.json();
+                            })
+                            .then(function (payload) {
+                                reloadIfStatusChanged(payload.status);
+                            })
+                            .catch(function () {});
+                    }
+
+                    function schedulePoll() {
+                        if (pollTimer !== null) {
+                            clearInterval(pollTimer);
+                        }
+
+                        pollTimer = window.setInterval(pollStatus, 3000);
+                    }
+
+                    function scheduleExpiryCheck() {
+                        if (expiryTimer !== null) {
+                            clearTimeout(expiryTimer);
+                        }
+
+                        const delay = Math.max(0, expiresAtMs - Date.now());
+
+                        expiryTimer = window.setTimeout(function () {
+                            pollStatus();
+                            schedulePoll();
+                        }, delay);
+                    }
+
+                    schedulePoll();
+                    scheduleExpiryCheck();
+                })();
+            </script>
+        @endpush
+    @endif
 @endsection

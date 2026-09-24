@@ -110,7 +110,7 @@
           @if($isPayout && $withdrawCurrency === 'BTC' && $this->withdrawDebitPreview)
           <div style="display: flex; justify-content: space-between; gap: 12px;"><span style="color: rgba(214,238,248,0.72);">{{ __('coin.wallet.withdraw_debit_preview_label') }}</span><span style="font-family: 'JetBrains Mono', monospace; text-align: right;">{{ $this->withdrawDebitPreview }}</span></div>
           @endif
-          <div style="display: flex; justify-content: space-between; gap: 12px;"><span style="color: rgba(214,238,248,0.72);">{{ __('coin.wallet.platform_fee') }}</span><span style="font-family: 'JetBrains Mono', monospace; text-align: right;">{{ $this->networkFeeLabel }}</span></div>
+          <div style="display: flex; justify-content: space-between; gap: 12px;"><span style="color: rgba(214,238,248,0.72);">{{ __('coin.wallet.network_fee') }}</span><span style="font-family: 'JetBrains Mono', monospace; text-align: right;">{{ $this->platformFeeLabel }}</span></div>
           @if($this->withdrawTotalDebitLabel)
           <div style="display: flex; justify-content: space-between; gap: 12px;"><span style="color: rgba(214,238,248,0.72);">{{ __('coin.wallet.withdraw_total_debit') }}</span><span style="font-family: 'JetBrains Mono', monospace; text-align: right;">{{ $this->withdrawTotalDebitLabel }}</span></div>
           @endif
