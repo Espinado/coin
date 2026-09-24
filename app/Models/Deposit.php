@@ -77,6 +77,17 @@ class Deposit extends Model
         return number_format((float) $this->credited_amount, 2, '.', ',').' '.($this->credited_currency ?? 'USDT');
     }
 
+    public function formattedChainReceivedAmount(): ?string
+    {
+        if ($this->received_amount === null) {
+            return null;
+        }
+
+        $decimals = strtoupper((string) $this->currency) === 'BTC' ? 8 : 8;
+
+        return number_format((float) $this->received_amount, $decimals, '.', '').' '.strtoupper((string) $this->currency);
+    }
+
     public function userRejectionMessage(): ?string
     {
         if ($this->status !== self::STATUS_REJECTED) {

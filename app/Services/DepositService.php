@@ -169,9 +169,7 @@ class DepositService
 
             $user = $deposit->user;
             $wallet = $this->wallets->ensureWallet($user);
-            $paymentAmount = $deposit->method === 'ccapi' && $deposit->received_amount !== null
-                ? (float) $deposit->received_amount
-                : (float) $deposit->amount;
+            $paymentAmount = (float) $deposit->amount;
             $paymentCurrency = strtoupper((string) ($deposit->currency ?: 'USDT'));
             $lockedBtcPerUsdt = $paymentCurrency === 'BTC' && $deposit->exchange_rate
                 ? (float) $deposit->exchange_rate

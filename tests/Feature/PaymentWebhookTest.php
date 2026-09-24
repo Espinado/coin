@@ -324,6 +324,7 @@ class PaymentWebhookTest extends TestCase
         $user->refresh();
 
         $this->assertSame(Deposit::STATUS_REJECTED, $deposit->status);
+        $this->assertSame(PaymentStatusReason::DEPOSIT_AMOUNT_MISMATCH, $deposit->status_reason);
         $this->assertSame('150.00000000', number_format((float) $deposit->received_amount, 8, '.', ''));
         $this->assertSame('0.00', number_format((float) $user->wallet->available, 2, '.', ''));
 
