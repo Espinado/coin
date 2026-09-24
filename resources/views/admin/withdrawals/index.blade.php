@@ -3,9 +3,11 @@
 @section('title', __('coin.admin.page_title', ['section' => __('coin.admin.payouts')]))
 
 @section('content')
+    @include('admin.partials.finance-tabs', ['active' => 'withdrawals'])
+
     <div class="admin-card">
         <div style="margin-bottom:16px;">
-            <h1 style="margin:0;font-size:24px;font-weight:600;">{{ __('coin.admin.payouts') }}</h1>
+            <h2 style="margin:0;font-size:18px;font-weight:600;">{{ __('coin.admin.payouts') }}</h2>
             <p style="margin:8px 0 0;font-size:14px;color:rgba(232,237,245,0.72);">{{ __('coin.admin.payouts_sub') }}</p>
         </div>
         @include('admin.partials.list-toolbar', [

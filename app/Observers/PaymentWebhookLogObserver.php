@@ -28,6 +28,27 @@ class PaymentWebhookLogObserver
             return;
         }
 
+        if ($this->shouldSkipJournalImport($log, $result)) {
+            return;
+        }
+
         $this->logs->recordFromWebhookLog($log);
+    }
+
+    private function shouldSkipJournalImport(PaymentWebhookLog $log, ?string $result): bool
+    {
+        if ($result !== PaymentWebhookLog::RESULT_IGNORED) {
+            return false;
+        }
+
+        [, $message] = PaymentStatusDecoder::splitProcessingResult($log->processing_result);
+
+        if ($log->event_type === 'payout_poll') {
+            return true;
+        }
+
+        return str_contains($message, 'Awaiting payout confirmation')
+            || str_contains($message, 'Awaiting confirmations')
+            || str_contains($message, 'Awaiting payout confirmations');
     }
 }

@@ -14,6 +14,23 @@
     $navClass = static function (bool $active): string {
         return 'admin-sidebar-link'.($active ? ' admin-sidebar-link--active' : '');
     };
+
+    $financeActive = $adminNavActive(
+        $routeName,
+        'admin.deposits',
+        'admin.withdrawals',
+        'admin.commissions',
+        'admin.profit-accrual',
+        'admin.epochs',
+    );
+
+    $financeBadges = [];
+    if (($pendingDepositsCount ?? 0) > 0) {
+        $financeBadges[] = ['count' => $pendingDepositsCount, 'class' => 'admin-sidebar-badge--amber'];
+    }
+    if (($pendingWithdrawalsCount ?? 0) > 0) {
+        $financeBadges[] = ['count' => $pendingWithdrawalsCount, 'class' => 'admin-sidebar-badge--red', 'attrs' => 'data-admin-withdrawals-nav-badge'];
+    }
 @endphp
 
 <aside class="admin-sidebar" id="admin-sidebar">
@@ -26,20 +43,17 @@
         <nav class="admin-sidebar-nav" id="admin-sidebar-nav" aria-label="{{ __('coin.admin.open_menu') }}">
             <a href="{{ route('admin.dashboard') }}" class="{{ $navClass($routeName === 'admin.dashboard') }}">{{ __('coin.admin.overview') }}</a>
             <a href="{{ route('admin.users.index') }}" class="{{ $navClass($adminNavActive($routeName, 'admin.users')) }}">{{ __('coin.admin.users') }}</a>
-            <a href="{{ route('admin.deposits.index') }}" class="{{ $navClass($adminNavActive($routeName, 'admin.deposits')) }}">
-                <span>{{ __('coin.admin.top_ups') }}</span>
-                @if(($pendingDepositsCount ?? 0) > 0)
-                    <span class="admin-sidebar-badge admin-sidebar-badge--amber">{{ $pendingDepositsCount }}</span>
-                @endif
-            </a>
-            <a href="{{ route('admin.withdrawals.index') }}" class="{{ $navClass($adminNavActive($routeName, 'admin.withdrawals')) }}" data-admin-withdrawals-nav>
-                <span>{{ __('coin.admin.payouts') }}</span>
-                @if(($pendingWithdrawalsCount ?? 0) > 0)
-                    <span class="admin-sidebar-badge admin-sidebar-badge--red" data-admin-withdrawals-nav-badge>{{ $pendingWithdrawalsCount }}</span>
+            <a href="{{ route('admin.deposits.index') }}" class="{{ $navClass($financeActive) }}" data-admin-withdrawals-nav>
+                <span>{{ __('coin.admin.finance') }}</span>
+                @if($financeBadges !== [])
+                    <span class="admin-sidebar-link__badges">
+                        @foreach($financeBadges as $badge)
+                            <span class="admin-sidebar-badge {{ $badge['class'] }}" @if(! empty($badge['attrs'])) {!! $badge['attrs'] !!} @endif>{{ $badge['count'] }}</span>
+                        @endforeach
+                    </span>
                 @endif
             </a>
             <a href="{{ route('admin.payment-logs.index') }}" class="{{ $navClass($adminNavActive($routeName, 'admin.payment-logs')) }}">{{ __('coin.admin.payment_logs') }}</a>
-            <a href="{{ route('admin.commissions.index') }}" class="{{ $navClass($adminNavActive($routeName, 'admin.commissions')) }}">{{ __('coin.admin.commissions') }}</a>
             <a href="{{ route('admin.plan-changes.index') }}" class="{{ $navClass($adminNavActive($routeName, 'admin.plan-changes')) }}" data-admin-plan-changes-nav>
                 <span>{{ __('coin.admin.plan_changes') }}</span>
                 @if(($pendingPlanChangesCount ?? 0) > 0)
@@ -47,10 +61,12 @@
                 @endif
             </a>
             <a href="{{ route('admin.plans.index') }}" class="{{ $navClass($adminNavActive($routeName, 'admin.plans')) }}">{{ __('coin.admin.plans') }}</a>
-            <a href="{{ route('admin.profit-accrual.index') }}" class="{{ $navClass($adminNavActive($routeName, 'admin.profit-accrual')) }}">{{ __('coin.admin.profit_accrual') }}</a>
             <a href="{{ route('admin.admins.index') }}" class="{{ $navClass($adminNavActive($routeName, 'admin.admins')) }}">{{ __('coin.admin.admins.title') }}</a>
             <a href="{{ route('admin.settings.edit') }}" class="{{ $navClass($adminNavActive($routeName, 'admin.settings')) }}">{{ __('coin.admin.settings') }}</a>
             <a href="{{ route('admin.legal.index') }}" class="{{ $navClass($adminNavActive($routeName, 'admin.legal')) }}">{{ __('coin.admin.legal.title') }}</a>
+        </nav>
+
+        <div class="admin-sidebar-bottom">
             <a href="{{ route('admin.broadcasts.index') }}" class="{{ $navClass($adminNavActive($routeName, 'admin.broadcasts')) }}">{{ __('coin.admin.broadcasts.title') }}</a>
             <a href="{{ route('admin.support.index') }}" class="{{ $navClass($adminNavActive($routeName, 'admin.support')) }}" data-admin-support-nav>
                 <span>{{ __('coin.admin.support') }}</span>
@@ -58,9 +74,6 @@
                     <span class="admin-sidebar-badge admin-sidebar-badge--support admin-support-badge" data-admin-support-nav-badge>{{ $unreadSupportCount }}</span>
                 @endif
             </a>
-        </nav>
-
-        <div class="admin-sidebar-footer">
             <form method="POST" action="{{ route('admin.logout') }}">
                 @csrf
                 <button type="submit" class="admin-sidebar-link admin-sidebar-link--logout">{{ __('coin.nav.logout') }}</button>

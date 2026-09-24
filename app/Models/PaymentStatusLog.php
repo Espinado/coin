@@ -75,16 +75,57 @@ class PaymentStatusLog extends Model
 
     public function resultLabel(): string
     {
-        return PaymentStatusDecoder::webhookResult($this->result);
+        return PaymentStatusDecoder::webhookResult($this->result, $this->event_type);
+    }
+
+    public function eventTypeLabel(): string
+    {
+        return PaymentStatusDecoder::eventTypeLabel($this->event_type);
+    }
+
+    public function kindLabel(): string
+    {
+        return PaymentStatusDecoder::logKindLabel($this->event_type, $this->result);
+    }
+
+    public function statusReasonLabel(): ?string
+    {
+        return PaymentStatusDecoder::journalStatusReasonLabel($this->entity_type, $this->status_reason);
+    }
+
+    public function hasStatusTransition(): bool
+    {
+        if (! PaymentStatusDecoder::hasStatusTransition($this->previous_status, $this->new_status)) {
+            return false;
+        }
+
+        if ($this->previous_status === null && in_array($this->event_type, ['payout_poll', 'deposit_ipn', 'payout_ipn'], true)) {
+            return false;
+        }
+
+        return true;
     }
 
     public function transitionLabel(): string
     {
+        if (! $this->hasStatusTransition()) {
+            return '—';
+        }
+
         return PaymentStatusDecoder::transitionLabel(
             $this->previous_status,
             $this->new_status,
             $this->entity_type,
         );
+    }
+
+    public function indexSummary(): string
+    {
+        if ($this->message !== null && $this->message !== '') {
+            return $this->message;
+        }
+
+        return $this->title ?? '—';
     }
 
     public function gatewayStateLabel(): string

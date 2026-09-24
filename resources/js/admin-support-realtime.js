@@ -76,28 +76,29 @@ function readInitialAdminWithdrawalsNavCount() {
 }
 
 function renderAdminWithdrawalsNavBadge(total) {
-    const link = document.querySelector('[data-admin-withdrawals-nav]');
-
-    if (! link) {
-        return;
-    }
-
-    let badge = link.querySelector('[data-admin-withdrawals-nav-badge]');
-
     if (! total || total <= 0) {
-        badge?.remove();
+        document.querySelectorAll('[data-admin-withdrawals-nav-badge]').forEach((badge) => badge.remove());
 
         return;
     }
 
-    if (! badge) {
-        badge = document.createElement('span');
-        badge.dataset.adminWithdrawalsNavBadge = '';
-        badge.style.cssText = withdrawalsBadgeStyle;
-        link.appendChild(badge);
-    }
+    document.querySelectorAll('[data-admin-withdrawals-nav]').forEach((link) => {
+        let badge = link.querySelector('[data-admin-withdrawals-nav-badge]');
 
-    badge.textContent = String(total);
+        if (! badge) {
+            badge = document.createElement('span');
+            badge.dataset.adminWithdrawalsNavBadge = '';
+            if (link.classList.contains('admin-section-tabs__tab')) {
+                badge.className = 'admin-section-tabs__count admin-sidebar-badge admin-sidebar-badge--red';
+            } else {
+                badge.className = 'admin-sidebar-badge admin-sidebar-badge--red';
+            }
+            const host = link.querySelector('.admin-sidebar-link__badges') ?? link;
+            host.appendChild(badge);
+        }
+
+        badge.textContent = String(total);
+    });
 }
 
 function updateWithdrawalsNavBadge(total) {

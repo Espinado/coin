@@ -59,8 +59,13 @@ class UserController extends Controller
         ]);
     }
 
-    public function show(User $user, VoximplantCallService $voximplant): View
+    public function show(Request $request, User $user, VoximplantCallService $voximplant): View
     {
+        $activityTab = $request->string('activity')->toString();
+        if (! in_array($activityTab, ['investments', 'deposits', 'withdrawals', 'transactions'], true)) {
+            $activityTab = 'investments';
+        }
+
         $user->load([
             'wallet',
             'contracts.plan',
@@ -77,6 +82,7 @@ class UserController extends Controller
 
         return view('admin.users.show', [
             'user' => $user,
+            'activityTab' => $activityTab,
             'kycStatuses' => User::kycStatuses(),
             'referralVolume' => (float) $user->referralCommissionsEarned->sum('purchase_amount'),
             'referralEarnings' => (float) $user->referralCommissionsEarned->sum('commission_amount'),

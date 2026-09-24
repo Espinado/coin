@@ -28,7 +28,7 @@ final class PaymentStatusDecoder
 
     public static function transitionLabel(?string $previous, ?string $next, string $entityType): string
     {
-        if ($previous === null && $next === null) {
+        if (! self::hasStatusTransition($previous, $next)) {
             return '—';
         }
 
@@ -45,6 +45,15 @@ final class PaymentStatusDecoder
         }
 
         return $decode($previous).' → '.$decode($next);
+    }
+
+    public static function hasStatusTransition(?string $previous, ?string $next): bool
+    {
+        if ($previous !== null && $next !== null && $previous !== $next) {
+            return true;
+        }
+
+        return $previous === null && $next !== null;
     }
 
     public static function ccapiPayoutState(?string $state, ?string $result = null): string
@@ -94,8 +103,12 @@ final class PaymentStatusDecoder
         };
     }
 
-    public static function webhookResult(?string $result): string
+    public static function webhookResult(?string $result, ?string $eventType = null): string
     {
+        if ($result === 'ignored' && $eventType === 'payout_poll') {
+            return __('coin.payment_log.result_poll_no_change');
+        }
+
         return match ($result) {
             'processed' => __('coin.payment_log.result_processed'),
             'ignored' => __('coin.payment_log.result_ignored'),
@@ -104,6 +117,51 @@ final class PaymentStatusDecoder
             'info' => __('coin.payment_log.result_info'),
             default => $result ?? '—',
         };
+    }
+
+    public static function eventTypeLabel(?string $eventType): string
+    {
+        return match ($eventType) {
+            'created' => __('coin.payment_log.event_created'),
+            'status_change' => __('coin.payment_log.event_status_change'),
+            'gateway_dispatch' => __('coin.payment_log.event_gateway_dispatch'),
+            'payout_poll' => __('coin.payment_log.event_payout_poll'),
+            'deposit_ipn' => __('coin.payment_log.event_deposit_ipn'),
+            'payout_ipn' => __('coin.payment_log.event_payout_ipn'),
+            default => $eventType !== null && $eventType !== '' ? $eventType : '—',
+        };
+    }
+
+    public static function journalStatusReasonLabel(?string $entityType, ?string $statusReason): ?string
+    {
+        if ($statusReason === null || $statusReason === '') {
+            return null;
+        }
+
+        $key = 'coin.payment_log.status_reason_'.$statusReason;
+
+        return __($key) !== $key ? __($key) : $statusReason;
+    }
+
+    public static function logKindLabel(?string $eventType, ?string $result): string
+    {
+        if (in_array($eventType, ['created', 'gateway_dispatch'], true)) {
+            return __('coin.payment_log.kind_lifecycle');
+        }
+
+        if ($eventType === 'status_change' || $result === 'processed') {
+            return __('coin.payment_log.kind_status_change');
+        }
+
+        if ($result === 'failed') {
+            return __('coin.payment_log.kind_error');
+        }
+
+        if ($result === 'ignored') {
+            return __('coin.payment_log.kind_observation');
+        }
+
+        return __('coin.payment_log.kind_info');
     }
 
     public static function sourceLabel(?string $source): string
@@ -139,34 +197,57 @@ final class PaymentStatusDecoder
 
             return [
                 'title' => __('coin.payment_log.title_poll_error'),
-                'message' => self::pollError($error),
+                'message' => __('coin.payment_log.message_poll_error', [
+                    'detail' => self::pollError($error),
+                ]),
                 'gateway_state' => $gatewayState !== '' ? $gatewayState : null,
                 'gateway_result' => $gatewayResult !== '' ? $gatewayResult : null,
             ];
         }
 
         if (str_contains($message, 'Awaiting payout confirmation')) {
+            $state = $gatewayState !== '' ? $gatewayState : self::extractStateFromMessage($message);
+            $txid = is_array($payload) ? (string) ($payload['txid'] ?? '') : '';
+            $text = __('coin.payment_log.message_poll_pending', [
+                'detail' => self::ccapiPayoutState($state),
+            ]);
+            if ($txid !== '') {
+                $text .= ' '.__('coin.payment_log.txid_suffix', ['txid' => $txid]);
+            }
+
             return [
                 'title' => __('coin.payment_log.title_poll_pending'),
-                'message' => self::ccapiPayoutState($gatewayState !== '' ? $gatewayState : self::extractStateFromMessage($message)),
-                'gateway_state' => $gatewayState !== '' ? $gatewayState : null,
+                'message' => $text,
+                'gateway_state' => $state,
                 'gateway_result' => $gatewayResult !== '' ? $gatewayResult : null,
             ];
         }
 
         if (str_contains($message, 'Gateway reported failed payout')) {
+            $state = $gatewayState !== '' ? $gatewayState : self::extractStateFromMessage($message);
+
             return [
                 'title' => __('coin.payment_log.title_gateway_failed'),
-                'message' => self::ccapiPayoutState($gatewayState !== '' ? $gatewayState : self::extractStateFromMessage($message), $gatewayResult),
-                'gateway_state' => $gatewayState !== '' ? $gatewayState : null,
+                'message' => __('coin.payment_log.message_gateway_failed_poll', [
+                    'detail' => self::ccapiPayoutState($state, $gatewayResult !== '' ? $gatewayResult : null),
+                ]),
+                'gateway_state' => $state,
                 'gateway_result' => $gatewayResult !== '' ? $gatewayResult : null,
             ];
         }
 
         if (str_contains($message, 'Marked paid')) {
+            $txid = is_array($payload) ? (string) ($payload['txid'] ?? '') : '';
+            $text = __('coin.payment_log.message_payout_paid_poll', [
+                'detail' => self::ccapiPayoutState($gatewayState !== '' ? $gatewayState : '7', $gatewayResult !== '' ? $gatewayResult : null),
+            ]);
+            if ($txid !== '') {
+                $text .= ' '.__('coin.payment_log.txid_suffix', ['txid' => $txid]);
+            }
+
             return [
                 'title' => __('coin.payment_log.title_payout_paid'),
-                'message' => self::ccapiPayoutState($gatewayState !== '' ? $gatewayState : '7', $gatewayResult),
+                'message' => $text,
                 'gateway_state' => $gatewayState !== '' ? $gatewayState : '7',
                 'gateway_result' => $gatewayResult !== '' ? $gatewayResult : null,
             ];
@@ -193,7 +274,7 @@ final class PaymentStatusDecoder
         if (str_contains($message, 'Rejected stale MOCK')) {
             return [
                 'title' => __('coin.payment_log.title_mock_abandoned'),
-                'message' => __('coin.payment_log.message_mock_abandoned'),
+                'message' => __('coin.payment_log.message_mock_abandoned_detail'),
                 'gateway_state' => 'mock_gateway_reference',
                 'gateway_result' => null,
             ];
@@ -202,8 +283,17 @@ final class PaymentStatusDecoder
         if (str_contains($message, 'Rejected after repeated CCAPI poll errors')) {
             return [
                 'title' => __('coin.payment_log.title_poll_abandoned'),
-                'message' => __('coin.payment_log.message_poll_abandoned'),
+                'message' => __('coin.payment_log.message_poll_abandoned_detail'),
                 'gateway_state' => 'poll_stuck',
+                'gateway_result' => null,
+            ];
+        }
+
+        if (str_contains($message, 'Awaiting confirmations')) {
+            return [
+                'title' => __('coin.payment_log.title_deposit_ipn_pending'),
+                'message' => __('coin.payment_log.message_deposit_ipn_pending'),
+                'gateway_state' => $gatewayState !== '' ? $gatewayState : null,
                 'gateway_result' => null,
             ];
         }

@@ -20,15 +20,24 @@ class PaymentLogController extends Controller
         $result = $request->string('result')->toString();
         $search = $this->adminSearchTerm($request);
 
+        $withdrawalId = $request->integer('withdrawal_id') ?: null;
+        $depositId = $request->integer('deposit_id') ?: null;
+
         $query = PaymentStatusLog::query()
             ->with(['user', 'deposit', 'withdrawal'])
             ->when($entityType !== '', fn ($query) => $query->where('entity_type', $entityType))
             ->when($source !== '', fn ($query) => $query->where('source', $source))
+            ->when($withdrawalId, fn ($query) => $query->where('withdrawal_id', $withdrawalId))
+            ->when($depositId, fn ($query) => $query->where('deposit_id', $depositId))
             ->when($result !== '', fn ($query) => $query->where('result', $result))
             ->when($result === '', fn ($query) => $query->where(function ($inner) {
                 $inner->whereNull('result')
                     ->orWhere('result', '!=', 'duplicate');
             }))
+            ->where(function ($query) {
+                $query->where('event_type', '!=', 'payout_poll')
+                    ->orWhere('result', '!=', 'ignored');
+            })
             ->when($search !== '', function ($query) use ($search) {
                 $query->where(function ($inner) use ($search) {
                     $inner->where('reference', 'like', "%{$search}%")

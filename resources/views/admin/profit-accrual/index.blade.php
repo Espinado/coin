@@ -7,9 +7,11 @@
         <div class="admin-card" style="margin-bottom:16px;border-color:rgba(255,180,84,0.35);">{{ session('status') }}</div>
     @endif
 
+    @include('admin.partials.finance-tabs', ['active' => 'profit-accrual'])
+
     <div class="admin-card">
         <div style="margin-bottom:16px;">
-            <h1 style="margin:0;font-size:24px;font-weight:600;">{{ __('coin.admin.profit_accrual') }}</h1>
+            <h2 style="margin:0;font-size:18px;font-weight:600;">{{ __('coin.admin.profit_accrual') }}</h2>
             <p style="margin:8px 0 0;font-size:14px;color:rgba(232,237,245,0.72);">
                 {!! __('coin.admin.profit_accrual_sub', [
                     'time' => $profitAccrualTime,

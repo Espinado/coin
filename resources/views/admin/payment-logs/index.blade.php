@@ -65,6 +65,7 @@
                     @include('admin.partials.sortable-th', ['column' => 'source', 'label' => strtoupper(__('coin.admin.source')), 'sort' => $sort, 'dir' => $dir])
                     <th style="padding:12px 18px;">{{ strtoupper(__('coin.admin.title')) }}</th>
                     <th style="padding:12px 18px;">{{ strtoupper(__('coin.admin.message')) }}</th>
+                    <th style="padding:12px 18px;">{{ strtoupper(__('coin.admin.status_transition')) }}</th>
                     @include('admin.partials.sortable-th', ['column' => 'result', 'label' => strtoupper(__('coin.admin.result')), 'sort' => $sort, 'dir' => $dir])
                 </tr>
             </thead>
@@ -83,12 +84,13 @@
                         </td>
                         <td style="padding:14px 18px;">{{ $log->user?->email ?? '—' }}</td>
                         <td style="padding:14px 18px;">{{ $log->sourceLabel() }}</td>
-                        <td style="padding:14px 18px;">{{ $log->title }}</td>
-                        <td style="padding:14px 18px;max-width:320px;">{{ \Illuminate\Support\Str::limit($log->message, 120) }}</td>
-                        <td style="padding:14px 18px;">{{ $log->resultLabel() }}</td>
+                        <td style="padding:14px 18px;max-width:180px;">{{ $log->title }}</td>
+                        <td style="padding:14px 18px;max-width:360px;">{{ \Illuminate\Support\Str::limit($log->indexSummary(), 140) }}</td>
+                        <td style="padding:14px 18px;white-space:nowrap;">{{ $log->hasStatusTransition() ? $log->transitionLabel() : '—' }}</td>
+                        <td style="padding:14px 18px;white-space:nowrap;">{{ $log->resultLabel() }}</td>
                     </tr>
                 @empty
-                    <tr><td colspan="9" style="padding:18px;color:rgba(232,237,245,0.65);">{{ __('coin.admin.no_payment_logs') }}</td></tr>
+                    <tr><td colspan="10" style="padding:18px;color:rgba(232,237,245,0.65);">{{ __('coin.admin.no_payment_logs') }}</td></tr>
                 @endforelse
             </tbody>
         </table>

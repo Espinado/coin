@@ -111,55 +111,10 @@
                 </form>
             </div>
 
-            <div class="admin-card" style="margin-top:16px;">
-                <h2 style="margin:0 0 14px;font-size:16px;font-weight:600;">{{ __('coin.admin.investments') }}</h2>
-                @forelse($user->contracts as $contract)
-                    <div style="padding:12px 0;border-bottom:1px solid rgba(255,255,255,0.06);font-size:13px;">
-                        <strong>{{ $contract->code }}</strong> · {{ $contract->plan?->name }} · {{ $contract->formattedPrincipal() }} · {{ $contract->status }}
-                        <div style="margin-top:4px;color:rgba(232,237,245,0.62);">
-                            {{ $contract->formattedAnnualProfit() ?? '—' }} APR · {{ $contract->formattedDailyProfit() }}{{ __('coin.admin.per_day') }} · {{ $contract->progress_percent }}% · {{ __('coin.admin.profit_label') }} {{ $contract->formattedAccrued() }}
-                        </div>
-                    </div>
-                @empty
-                    <p style="margin:0;color:rgba(232,237,245,0.62);">{{ __('coin.admin.no_investments') }}</p>
-                @endforelse
-            </div>
-
-            <div class="admin-card" style="margin-top:16px;">
-                <h2 style="margin:0 0 14px;font-size:16px;font-weight:600;">{{ __('coin.admin.top_ups') }}</h2>
-                @forelse($user->deposits as $deposit)
-                    <div style="display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.06);font-size:13px;">
-                        <span><a href="{{ route('admin.deposits.show', $deposit) }}">#{{ $deposit->id }}</a> · {{ ucfirst($deposit->status) }}</span>
-                        <span style="font-family:'JetBrains Mono',monospace;">{{ $deposit->formattedAmount() }}</span>
-                    </div>
-                @empty
-                    <p style="margin:0;color:rgba(232,237,245,0.62);">{{ __('coin.admin.no_top_ups') }}</p>
-                @endforelse
-            </div>
-
-            <div class="admin-card" style="margin-top:16px;">
-                <h2 style="margin:0 0 14px;font-size:16px;font-weight:600;">{{ __('coin.admin.payouts') }}</h2>
-                @forelse($user->withdrawals as $withdrawal)
-                    <div style="display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.06);font-size:13px;">
-                        <span><a href="{{ route('admin.withdrawals.show', $withdrawal) }}">{{ $withdrawal->reference }}</a> · {{ $withdrawal->statusLabel() }}</span>
-                        <span style="font-family:'JetBrains Mono',monospace;">{{ $withdrawal->formattedAmount() }}</span>
-                    </div>
-                @empty
-                    <p style="margin:0;color:rgba(232,237,245,0.62);">{{ __('coin.admin.no_payouts') }}</p>
-                @endforelse
-            </div>
-
-            <div class="admin-card" style="margin-top:16px;">
-                <h2 style="margin:0 0 14px;font-size:16px;font-weight:600;">{{ __('coin.admin.recent_transactions') }}</h2>
-                @forelse($user->walletTransactions->sortByDesc('sort_order')->take(8) as $tx)
-                    <div style="display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.06);font-size:13px;">
-                        <span>{{ $tx->type }} · {{ $tx->source }}</span>
-                        <span style="font-family:'JetBrains Mono',monospace;">{{ $tx->amount_label }}</span>
-                    </div>
-                @empty
-                    <p style="margin:0;color:rgba(232,237,245,0.62);">{{ __('coin.admin.no_transactions') }}</p>
-                @endforelse
-            </div>
+            @include('admin.partials.user-activity-tabs', [
+                'user' => $user,
+                'activeTab' => $activityTab,
+            ])
         </div>
 
         <div>

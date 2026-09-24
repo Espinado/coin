@@ -24,7 +24,7 @@ class BackfillPaymentStatusLogs extends Command
             ->whereNotNull('processing_result')
             ->orderBy('id')
             ->each(function (PaymentWebhookLog $log) use ($logs, &$imported, &$skipped): void {
-                $record = $logs->recordFromWebhookLog($log, force: true);
+                $record = $logs->recordFromWebhookLog($log);
 
                 if ($record === null) {
                     $skipped++;
