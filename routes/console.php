@@ -44,3 +44,18 @@ Schedule::command('coin:poll-stuck-withdrawals')
 
         return app(PlatformSettingsService::class)->usesLivePaymentGateway();
     });
+
+Schedule::command('coin:poll-stuck-deposits')
+    ->everyFiveMinutes()
+    ->withoutOverlapping()
+    ->when(function (): bool {
+        if (! config('coin.payments.ccapi.poll_stuck_deposits', true)) {
+            return false;
+        }
+
+        if ((string) config('coin.payments.driver', 'mock') !== 'ccapi') {
+            return false;
+        }
+
+        return app(PlatformSettingsService::class)->usesLivePaymentGateway();
+    });

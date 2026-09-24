@@ -50,6 +50,8 @@ class PaymentIpnService
 
                 return $this->finish($log, PaymentWebhookLog::RESULT_IGNORED, 'Unsupported IPN type.');
             });
+        } catch (PaymentIpnRetryableException $exception) {
+            throw $exception;
         } catch (RuntimeException $exception) {
             return $this->finishOrCreateFailed($event, $exception->getMessage());
         }
@@ -459,13 +461,23 @@ class PaymentIpnService
 
     private function finishOrCreateFailed(VerifiedIpnEvent $event, string $message): PaymentWebhookLog
     {
-        $log = $this->findLogByIdempotency($event);
+        try {
+            $log = $this->findLogByIdempotency($event);
 
-        if ($log !== null) {
-            return $this->finish($log, PaymentWebhookLog::RESULT_FAILED, $message);
+            if ($log !== null) {
+                return $this->finish($log, PaymentWebhookLog::RESULT_FAILED, $message);
+            }
+
+            return $this->createAuditLog($event, PaymentWebhookLog::RESULT_FAILED, $message);
+        } catch (UniqueConstraintViolationException) {
+            return $this->finishDuplicate($event, 'Duplicate IPN ignored (concurrent).');
+        } catch (\Throwable $exception) {
+            throw new PaymentIpnRetryableException(
+                'Failed to persist IPN failure audit log: '.$exception->getMessage(),
+                0,
+                $exception,
+            );
         }
-
-        return $this->createAuditLog($event, PaymentWebhookLog::RESULT_FAILED, $message);
     }
 
     private function createAuditLog(VerifiedIpnEvent $event, string $result, string $message): PaymentWebhookLog

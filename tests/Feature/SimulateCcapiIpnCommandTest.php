@@ -43,6 +43,7 @@ class SimulateCcapiIpnCommandTest extends TestCase
         $this->artisan('coin:simulate-ccapi-ipn', [
             '--deposit' => $deposit->id,
             '--txid' => 'sim-cli-tx-1',
+            '--allow-live-target' => true,
         ])->assertSuccessful();
 
         $deposit->refresh();
@@ -101,6 +102,27 @@ class SimulateCcapiIpnCommandTest extends TestCase
         $this->assertSame(Deposit::STATUS_PENDING, $deposit->fresh()->status);
     }
 
+    public function test_command_blocks_ccapi_method_deposit_without_allow_live_target(): void
+    {
+        $user = User::factory()->create();
+        $deposit = Deposit::query()->create([
+            'user_id' => $user->id,
+            'amount' => 10,
+            'currency' => 'USDT',
+            'status' => Deposit::STATUS_PENDING,
+            'method' => 'ccapi',
+            'payment_address' => 'TSimAddress',
+            'gateway_network' => 'trx',
+        ]);
+        $deposit->update(['gateway_uniq_id' => Deposit::gatewayUniqId($deposit->id)]);
+
+        $this->artisan('coin:simulate-ccapi-ipn', [
+            '--deposit' => $deposit->id,
+        ])->assertFailed();
+
+        $this->assertSame(Deposit::STATUS_PENDING, $deposit->fresh()->status);
+    }
+
     public function test_command_dry_run_does_not_confirm_deposit(): void
     {
         $user = User::factory()->create();
@@ -118,6 +140,7 @@ class SimulateCcapiIpnCommandTest extends TestCase
         $this->artisan('coin:simulate-ccapi-ipn', [
             '--deposit' => $deposit->id,
             '--dry-run' => true,
+            '--allow-live-target' => true,
         ])->assertSuccessful();
 
         $this->assertSame(Deposit::STATUS_PENDING, $deposit->fresh()->status);

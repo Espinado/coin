@@ -21,9 +21,7 @@ class CryptoCurrencyApiClient
             ->withHeaders([
                 'CCAPI-KEY' => $this->apiKey,
             ])
-            ->get($endpoint, array_merge($params, [
-                'key' => $this->apiKey,
-            ]));
+            ->get($endpoint, $params);
 
         if (! $response->successful()) {
             throw new PaymentGatewayException(

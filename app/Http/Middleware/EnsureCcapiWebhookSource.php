@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Services\PlatformSettingsService;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -13,7 +14,7 @@ class EnsureCcapiWebhookSource
 
     public function handle(Request $request, Closure $next): Response
     {
-        if (! app()->environment('production')) {
+        if (! $this->shouldEnforceIpCheck()) {
             return $next($request);
         }
 
@@ -25,6 +26,16 @@ class EnsureCcapiWebhookSource
         }
 
         return $next($request);
+    }
+
+    private function shouldEnforceIpCheck(): bool
+    {
+        if (app()->environment('production')) {
+            return true;
+        }
+
+        return app(PlatformSettingsService::class)->usesLivePaymentGateway()
+            && (string) config('coin.payments.driver', 'mock') === 'ccapi';
     }
 
     /** @return list<string> */

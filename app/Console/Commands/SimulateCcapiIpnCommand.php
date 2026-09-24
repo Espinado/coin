@@ -22,6 +22,7 @@ class SimulateCcapiIpnCommand extends Command
                             {--via=internal : Delivery: internal sub-request or http external POST}
                             {--url= : Webhook URL for --via=http (defaults to CCAPI_IPN_URL)}
                             {--dry-run : Print payload only, do not dispatch}
+                            {--allow-live-target : Allow simulating IPN for ccapi-method deposits (local/testing only)}
                             {--force : Ignored; kept for backward compatibility}';
 
     protected $description = 'Simulate a signed CryptoCurrencyAPI IPN for local webhook testing';
@@ -67,6 +68,14 @@ class SimulateCcapiIpnCommand extends Command
 
         if ($deposit->status !== Deposit::STATUS_PENDING) {
             $this->components->warn("Deposit #{$depositId} status is \"{$deposit->status}\", expected pending.");
+        }
+
+        if ($deposit->method === 'ccapi' && ! $this->option('allow-live-target')) {
+            $this->components->error(
+                'Simulating IPN for ccapi-method deposits is blocked. Use a mock deposit or pass --allow-live-target.',
+            );
+
+            return self::FAILURE;
         }
 
         $confirmation = (int) ($this->option('confirmation') ?? config('coin.payments.ccapi.min_confirmations', 1));

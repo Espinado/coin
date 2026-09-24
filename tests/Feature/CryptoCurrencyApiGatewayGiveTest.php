@@ -57,10 +57,12 @@ class CryptoCurrencyApiGatewayGiveTest extends TestCase
             $query = [];
             parse_str((string) parse_url($request->url(), PHP_URL_QUERY), $query);
 
-            return ($query['to'] ?? null) === 'TLcvabZXL8sfwux16zqwgdiMzhBgKGNDCy'
+            return ! array_key_exists('key', $query)
+                && ($query['to'] ?? null) === 'TLcvabZXL8sfwux16zqwgdiMzhBgKGNDCy'
                 && ($query['from'] ?? null) === 'TLcvabZXL8sfwux16zqwgdiMzhBgKGNDCy'
                 && ($query['token'] ?? null) === 'USDT'
-                && ($query['statusURL'] ?? null) === 'https://coin.test/webhooks/ccapi';
+                && ($query['statusURL'] ?? null) === 'https://coin.test/webhooks/ccapi'
+                && $request->header('CCAPI-KEY')[0] === 'test-ccapi-key';
         });
     }
 

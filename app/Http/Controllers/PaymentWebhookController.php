@@ -5,9 +5,13 @@ namespace App\Http\Controllers;
 use App\Models\PaymentWebhookLog;
 use App\Services\Payment\PaymentGatewayException;
 use App\Services\Payment\CryptoCurrencyApiGateway;
+use App\Services\Payment\PaymentIpnRetryableException;
 use App\Services\Payment\PaymentIpnService;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Log;
+use PDOException;
 
 class PaymentWebhookController extends Controller
 {
@@ -35,7 +39,16 @@ class PaymentWebhookController extends Controller
             return response('invalid signature', 403);
         }
 
-        $ipnService->handle($event);
+        try {
+            $ipnService->handle($event);
+        } catch (PaymentIpnRetryableException|QueryException|PDOException $exception) {
+            Log::error('ccapi.webhook.retryable_failure', [
+                'message' => $exception->getMessage(),
+                'exception' => $exception::class,
+            ]);
+
+            return response('Service Unavailable', Response::HTTP_SERVICE_UNAVAILABLE);
+        }
 
         return response('OK', 200);
     }

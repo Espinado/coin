@@ -68,9 +68,13 @@ class CcapiIpnPayloadBuilder
     /** @param array<string, mixed> $payload */
     public function sign(array $payload): array
     {
-        $apiKey = (string) config('coin.payments.ccapi.api_key', 'local-sim-key');
+        $apiKey = (string) config('coin.payments.ccapi.api_key', '');
 
         if ($apiKey === '') {
+            if (! app()->environment(['local', 'testing'])) {
+                throw new \RuntimeException('CCAPI_API_KEY is not configured.');
+            }
+
             $apiKey = 'local-sim-key';
         }
 
