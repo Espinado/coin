@@ -49,6 +49,7 @@ class WithdrawalUpdated implements ShouldBroadcastNow
                 'status' => $this->withdrawal->status,
                 'status_label' => $this->withdrawal->statusLabel(),
                 'amount' => $this->withdrawal->formattedAmount(),
+                'rejection_message' => $this->withdrawal->userRejectionMessage(),
             ],
             'pending_withdrawals_count' => Withdrawal::pendingCountForAdmin(),
             'wallet' => $wallet ? [

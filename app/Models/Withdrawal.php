@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Support\MoneyFormat;
+use App\Support\PaymentStatusReason;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -38,6 +39,7 @@ class Withdrawal extends Model
         'gateway_poll_checked_at',
         'gateway_poll_summary',
         'status',
+        'status_reason',
         'processed_by',
         'admin_note',
         'processed_at',
@@ -170,5 +172,14 @@ class Withdrawal extends Model
     public static function pendingCountForAdmin(): int
     {
         return self::query()->whereIn('status', self::openStatuses())->count();
+    }
+
+    public function userRejectionMessage(): ?string
+    {
+        if ($this->status !== self::STATUS_REJECTED) {
+            return null;
+        }
+
+        return PaymentStatusReason::withdrawalMessage($this);
     }
 }

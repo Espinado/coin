@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Livewire\Dashboard;
 use App\Models\Deposit;
 use App\Models\User;
+use App\Support\PaymentStatusReason;
 use App\Services\PlatformSettingsService;
 use Database\Seeders\PlatformSettingsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -77,7 +78,7 @@ class TopUpPaymentPollingTest extends TestCase
             ->set('pendingDepositId', $deposit->id)
             ->call('pollTopUpPaymentStatus')
             ->assertSet('paymentModalStep', 'error')
-            ->assertSet('paymentModalError', __('coin.crypto_gateway.deposit_rejected'));
+            ->assertSet('paymentModalError', __('coin.payment_reasons.deposit_generic'));
     }
 
     public function test_poll_shows_amount_mismatch_message_when_received_amount_differs(): void
@@ -89,6 +90,7 @@ class TopUpPaymentPollingTest extends TestCase
             'currency' => 'USDT',
             'received_amount' => 50,
             'status' => Deposit::STATUS_REJECTED,
+            'status_reason' => PaymentStatusReason::DEPOSIT_AMOUNT_MISMATCH,
             'method' => 'ccapi',
             'payment_address' => 'TAddrMismatch',
             'gateway_uniq_id' => Deposit::gatewayUniqId(102),
@@ -102,7 +104,7 @@ class TopUpPaymentPollingTest extends TestCase
             ->set('pendingDepositId', $deposit->id)
             ->call('pollTopUpPaymentStatus')
             ->assertSet('paymentModalStep', 'error')
-            ->assertSet('paymentModalError', __('coin.crypto_gateway.deposit_amount_mismatch', [
+            ->assertSet('paymentModalError', __('coin.payment_reasons.deposit_amount_mismatch', [
                 'expected' => '100.00',
                 'received' => '50.00',
                 'currency' => 'USDT',

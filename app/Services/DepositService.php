@@ -7,6 +7,7 @@ use App\Support\PlatformTerms;
 use App\Models\Admin;
 use App\Models\Deposit;
 use App\Models\User;
+use App\Support\PaymentStatusReason;
 use App\Services\Payment\Dtos\DepositIntentDto;
 use App\Services\Payment\PaymentGatewayInterface;
 use Illuminate\Support\Facades\DB;
@@ -171,9 +172,13 @@ class DepositService
         });
     }
 
-    public function reject(Deposit $deposit, ?Admin $admin = null): Deposit
-    {
-        return DB::transaction(function () use ($deposit, $admin) {
+    public function reject(
+        Deposit $deposit,
+        ?Admin $admin = null,
+        ?string $statusReason = null,
+        ?float $receivedAmount = null,
+    ): Deposit {
+        return DB::transaction(function () use ($deposit, $admin, $statusReason, $receivedAmount) {
             $deposit = Deposit::query()
                 ->whereKey($deposit->id)
                 ->lockForUpdate()
@@ -187,11 +192,18 @@ class DepositService
                 throw new RuntimeException(__('coin.admin.deposit_manual_action_blocked'));
             }
 
-            $deposit->update([
-            'status' => Deposit::STATUS_REJECTED,
-            'confirmed_by' => $admin?->id,
-            'confirmed_at' => now(),
-            ]);
+            $updates = [
+                'status' => Deposit::STATUS_REJECTED,
+                'status_reason' => $statusReason ?? PaymentStatusReason::DEPOSIT_GENERIC,
+                'confirmed_by' => $admin?->id,
+                'confirmed_at' => now(),
+            ];
+
+            if ($receivedAmount !== null) {
+                $updates['received_amount'] = $receivedAmount;
+            }
+
+            $deposit->update($updates);
 
             return $deposit->fresh(['user']);
         });

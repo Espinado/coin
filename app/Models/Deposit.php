@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\PaymentStatusReason;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -21,6 +22,7 @@ class Deposit extends Model
         'credited_currency',
         'exchange_rate',
         'status',
+        'status_reason',
         'method',
         'external_reference',
         'payment_address',
@@ -72,5 +74,14 @@ class Deposit extends Model
         }
 
         return number_format((float) $this->credited_amount, 2, '.', ',').' '.($this->credited_currency ?? 'USDT');
+    }
+
+    public function userRejectionMessage(): ?string
+    {
+        if ($this->status !== self::STATUS_REJECTED) {
+            return null;
+        }
+
+        return PaymentStatusReason::depositMessage($this);
     }
 }

@@ -28,6 +28,9 @@
                     @endif
                     @if($withdrawal->txid)<div><strong>{{ __('coin.admin.txid') }}:</strong> <span style="font-family:'JetBrains Mono',monospace;font-size:12px;word-break:break-all;">{{ $withdrawal->txid }}</span></div>@endif
                     @if($withdrawal->admin_note)<div style="margin-top:10px;"><strong>{{ __('coin.admin.admin_note') }}:</strong> {{ $withdrawal->admin_note }}</div>@endif
+                    @if($withdrawal->status === \App\Models\Withdrawal::STATUS_REJECTED && $withdrawal->userRejectionMessage())
+                        <div style="margin-top:10px;"><strong>{{ __('coin.admin.status_reason') }}:</strong> {{ $withdrawal->userRejectionMessage() }}</div>
+                    @endif
                 </div>
             </div>
 

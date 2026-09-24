@@ -1170,8 +1170,13 @@ class Dashboard extends Component
         }
 
         if ($deposit->expires_at !== null && $deposit->expires_at->isPast()) {
+            $deposit = app(DepositService::class)->reject(
+                $deposit,
+                null,
+                \App\Support\PaymentStatusReason::DEPOSIT_EXPIRED,
+            );
             $this->paymentModalStep = 'error';
-            $this->paymentModalError = __('coin.crypto_gateway.deposit_expired');
+            $this->paymentModalError = $this->topUpRejectionMessage($deposit);
         }
     }
 
@@ -1889,20 +1894,8 @@ class Dashboard extends Component
 
     private function topUpRejectionMessage(Deposit $deposit): string
     {
-        if ($deposit->received_amount !== null
-            && ! PaymentIpnService::receivedAmountMatchesDepositAmount(
-                (float) $deposit->received_amount,
-                (float) $deposit->amount,
-                currency: (string) $deposit->currency,
-            )) {
-            return __('coin.crypto_gateway.deposit_amount_mismatch', [
-                'expected' => number_format((float) $deposit->amount, 2, '.', ''),
-                'received' => number_format((float) $deposit->received_amount, 2, '.', ''),
-                'currency' => strtoupper((string) $deposit->currency),
-            ]);
-        }
-
-        return __('coin.crypto_gateway.deposit_rejected');
+        return $deposit->userRejectionMessage()
+            ?? __('coin.payment_reasons.deposit_generic');
     }
 
     public function openContractDetails(int $contractId): void
@@ -2043,6 +2036,40 @@ class Dashboard extends Component
     public function onWithdrawalUpdated(mixed $payload = null): void
     {
         $this->reloadPortfolioData();
+
+        $withdrawalId = is_array($payload)
+            ? (data_get($payload, 'withdrawal.id') ?? data_get($payload, '0.withdrawal.id'))
+            : null;
+
+        if (! is_numeric($withdrawalId)) {
+            return;
+        }
+
+        $withdrawal = Withdrawal::query()
+            ->whereKey((int) $withdrawalId)
+            ->where('user_id', $this->user->id)
+            ->first();
+
+        if ($withdrawal === null) {
+            return;
+        }
+
+        if ($withdrawal->status === Withdrawal::STATUS_REJECTED) {
+            $message = data_get($payload, 'withdrawal.rejection_message')
+                ?? data_get($payload, '0.withdrawal.rejection_message')
+                ?? $withdrawal->userRejectionMessage();
+
+            if (is_string($message) && $message !== '') {
+                $this->actionMessage = $message;
+                $this->actionMessageTone = 'error';
+            }
+        } elseif ($withdrawal->status === Withdrawal::STATUS_PAID) {
+            $this->actionMessage = __('coin.messages.payout_completed', [
+                'reference' => $withdrawal->reference,
+                'amount' => $withdrawal->formattedAmount(),
+            ]);
+            $this->actionMessageTone = 'success';
+        }
     }
 
     #[On('echo-private:wallet.user.{user.id},.ReferralCommissionPaid')]

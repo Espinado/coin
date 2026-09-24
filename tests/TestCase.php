@@ -8,7 +8,7 @@ use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 
 abstract class TestCase extends BaseTestCase
 {
-    protected function afterRefreshingDatabase(): void
+    protected function afterRefreshingDatabase()
     {
         if (! in_array(RefreshDatabase::class, class_uses_recursive(static::class), true)) {
             return;
