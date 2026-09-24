@@ -88,6 +88,8 @@ return [
             ))),
             // Poll CCAPI .status for withdrawals stuck in processing without IPN.
             'poll_stuck_withdrawals' => (bool) env('CCAPI_POLL_STUCK_WITHDRAWALS', true),
+            'withdrawal_poll_stale_hours' => max(1, (int) env('CCAPI_WITHDRAWAL_POLL_STALE_HOURS', 24)),
+            'withdrawal_poll_error_reject_count' => max(1, (int) env('CCAPI_WITHDRAWAL_POLL_ERROR_REJECT_COUNT', 30)),
             // Reject expired pending deposits and log stale ones awaiting IPN.
             'poll_stuck_deposits' => (bool) env('CCAPI_POLL_STUCK_DEPOSITS', true),
             'deposit_stale_alert_minutes' => max(1, (int) env('CCAPI_DEPOSIT_STALE_ALERT_MINUTES', 30)),

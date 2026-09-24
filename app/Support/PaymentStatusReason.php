@@ -23,6 +23,10 @@ final class PaymentStatusReason
 
     public const WITHDRAWAL_GATEWAY_FAILED = 'withdrawal_gateway_failed';
 
+    public const WITHDRAWAL_MOCK_GATEWAY = 'withdrawal_mock_gateway';
+
+    public const WITHDRAWAL_POLL_STUCK = 'withdrawal_poll_stuck';
+
     public const WITHDRAWAL_GENERIC = 'withdrawal_generic';
 
     /** @var array<string, string> */
@@ -67,9 +71,11 @@ final class PaymentStatusReason
 
         return match ($reason) {
             self::WITHDRAWAL_ADMIN_REJECTED => __('coin.payment_reasons.withdrawal_admin_rejected'),
-            self::WITHDRAWAL_GATEWAY_FAILED => __('coin.payment_reasons.withdrawal_gateway_failed', [
+            self::WITHDRAWAL_MOCK_GATEWAY => __('coin.payment_reasons.withdrawal_mock_gateway'),
+            self::WITHDRAWAL_POLL_STUCK => __('coin.payment_reasons.withdrawal_poll_stuck'),
+            self::WITHDRAWAL_GATEWAY_FAILED => trim(__('coin.payment_reasons.withdrawal_gateway_failed', [
                 'state' => $withdrawal->gateway_state ?? '?',
-            ]),
+            ]).' '.self::withdrawalGatewayDetail($withdrawal)),
             default => __('coin.payment_reasons.withdrawal_generic'),
         };
     }
@@ -77,5 +83,16 @@ final class PaymentStatusReason
     private static function depositAmountDecimals(Deposit $deposit): int
     {
         return strtoupper((string) $deposit->currency) === 'BTC' ? 8 : 2;
+    }
+
+    private static function withdrawalGatewayDetail(Withdrawal $withdrawal): string
+    {
+        $summary = (string) ($withdrawal->gateway_poll_summary ?? '');
+
+        if (str_contains($summary, 'result=OUT_OF_ENERGY')) {
+            return __('coin.payment_reasons.withdrawal_gateway_detail_out_of_energy');
+        }
+
+        return '';
     }
 }

@@ -213,4 +213,90 @@ class WithdrawalPollTest extends TestCase
         $this->artisan('coin:poll-stuck-withdrawals')
             ->assertSuccessful();
     }
+
+    public function test_poll_rejects_mock_gateway_reference_on_live_ccapi(): void
+    {
+        $user = User::factory()->create();
+        $user->wallet->update([
+            'available' => 500,
+            'balance' => 1500,
+            'pending' => 0,
+        ]);
+
+        $withdrawal = Withdrawal::query()->create([
+            'user_id' => $user->id,
+            'reference' => 'WD-POLLMOCK',
+            'amount' => 1000,
+            'base_amount' => 1000,
+            'currency' => 'USDT',
+            'withdrawal_type' => 'available_balance',
+            'payout_address' => 'TRecipient123',
+            'gateway_request_id' => 'MOCK-98631',
+            'status' => Withdrawal::STATUS_PROCESSING,
+            'created_at' => now()->subDays(6),
+        ]);
+
+        $stats = app(WithdrawalPollService::class)->pollStuckWithdrawals();
+
+        $withdrawal->refresh();
+        $user->wallet->refresh();
+
+        $this->assertSame(1, $stats['polled']);
+        $this->assertSame(1, $stats['abandoned']);
+        $this->assertSame(Withdrawal::STATUS_REJECTED, $withdrawal->status);
+        $this->assertSame('withdrawal_mock_gateway', $withdrawal->status_reason);
+        $this->assertSame('1500.00', number_format((float) $user->wallet->available, 2, '.', ''));
+        Http::assertNothingSent();
+    }
+
+    public function test_poll_rejects_after_repeated_status_errors_and_stale_age(): void
+    {
+        config([
+            'coin.payments.ccapi.withdrawal_poll_stale_hours' => 24,
+            'coin.payments.ccapi.withdrawal_poll_error_reject_count' => 30,
+        ]);
+
+        $user = User::factory()->create();
+        $user->wallet->update([
+            'available' => 500,
+            'balance' => 1500,
+            'pending' => 0,
+        ]);
+
+        $withdrawal = Withdrawal::query()->create([
+            'user_id' => $user->id,
+            'reference' => 'WD-POLLSTALE',
+            'amount' => 1000,
+            'base_amount' => 1000,
+            'currency' => 'USDT',
+            'withdrawal_type' => 'available_balance',
+            'payout_address' => 'TRecipient123',
+            'gateway_request_id' => '3551999',
+            'status' => Withdrawal::STATUS_PROCESSING,
+            'sent_at' => now()->subDays(2),
+            'gateway_poll_summary' => 'poll: Poll error: id_or_label_required',
+        ]);
+
+        for ($i = 0; $i < 30; $i++) {
+            PaymentWebhookLog::query()->create([
+                'gateway' => 'ccapi',
+                'event_type' => 'payout_poll',
+                'payload' => ['error' => 'id_or_label_required'],
+                'signature_valid' => true,
+                'idempotency_key' => 'poll:'.$withdrawal->id.':seed-'.$i,
+                'withdrawal_id' => $withdrawal->id,
+                'processing_result' => 'failed: Poll error: id_or_label_required',
+                'processed_at' => now()->subMinutes(30 - $i),
+            ]);
+        }
+
+        $stats = app(WithdrawalPollService::class)->pollStuckWithdrawals();
+
+        $withdrawal->refresh();
+
+        $this->assertSame(1, $stats['abandoned']);
+        $this->assertSame(Withdrawal::STATUS_REJECTED, $withdrawal->status);
+        $this->assertSame('withdrawal_poll_stuck', $withdrawal->status_reason);
+        Http::assertNothingSent();
+    }
 }

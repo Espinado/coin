@@ -50,6 +50,11 @@ class Withdrawal extends Model
         return 'withdrawal:'.$reference;
     }
 
+    public static function isMockGatewayRequestId(?string $gatewayRequestId): bool
+    {
+        return is_string($gatewayRequestId) && str_starts_with($gatewayRequestId, 'MOCK-');
+    }
+
     protected function casts(): array
     {
         return [

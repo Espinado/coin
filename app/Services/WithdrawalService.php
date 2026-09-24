@@ -263,9 +263,13 @@ class WithdrawalService
         return (bool) config('coin.payments.mock.auto_complete_payout', true);
     }
 
-    public function markFailedFromGateway(Withdrawal $withdrawal, ?string $gatewayState = null, ?string $reason = null): Withdrawal
-    {
-        return DB::transaction(function () use ($withdrawal, $gatewayState, $reason) {
+    public function markFailedFromGateway(
+        Withdrawal $withdrawal,
+        ?string $gatewayState = null,
+        ?string $reason = null,
+        ?string $statusReason = null,
+    ): Withdrawal {
+        return DB::transaction(function () use ($withdrawal, $gatewayState, $reason, $statusReason) {
             $withdrawal = $this->lockWithdrawal($withdrawal);
 
             if ($withdrawal->status === Withdrawal::STATUS_REJECTED) {
@@ -283,7 +287,7 @@ class WithdrawalService
 
             $updates = [
                 'status' => Withdrawal::STATUS_REJECTED,
-                'status_reason' => PaymentStatusReason::WITHDRAWAL_GATEWAY_FAILED,
+                'status_reason' => $statusReason ?? PaymentStatusReason::WITHDRAWAL_GATEWAY_FAILED,
                 'gateway_state' => $gatewayState ?? $withdrawal->gateway_state,
                 'processed_at' => now(),
             ];
