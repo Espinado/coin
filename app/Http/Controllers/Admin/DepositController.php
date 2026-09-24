@@ -60,16 +60,14 @@ class DepositController extends Controller
         $deposit = app(DepositService::class)->expireIfDue($deposit, PaymentStatusLog::SOURCE_ADMIN) ?? $deposit;
         $deposit->load(['user.wallet', 'confirmedBy']);
 
-        $webhookLogs = PaymentWebhookLog::query()
-            ->linkedToDeposit($deposit)
-            ->excludeDuplicateResults()
-            ->orderByDesc('id')
-            ->limit(20)
-            ->get();
+        $webhookLogs = PaymentWebhookLog::journalForDeposit($deposit);
+        $webhookLogsOnlyDuplicates = $webhookLogs->isNotEmpty()
+            && $webhookLogs->every(fn (PaymentWebhookLog $log) => $log->isDuplicateResult());
 
         return view('admin.deposits.show', [
             'deposit' => $deposit,
             'webhookLogs' => $webhookLogs,
+            'webhookLogsOnlyDuplicates' => $webhookLogsOnlyDuplicates,
         ]);
     }
 

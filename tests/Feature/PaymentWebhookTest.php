@@ -138,6 +138,46 @@ class PaymentWebhookTest extends TestCase
         ]);
     }
 
+    public function test_journal_for_deposit_includes_duplicate_when_no_primary_log_exists(): void
+    {
+        $user = User::factory()->create();
+        $deposit = Deposit::query()->create([
+            'user_id' => $user->id,
+            'amount' => 10,
+            'currency' => 'USDT',
+            'status' => Deposit::STATUS_CONFIRMED,
+            'method' => 'ccapi',
+            'payment_address' => 'TMockJournalDup123',
+            'gateway_network' => 'trx',
+            'txid' => 'journal-dup-tx',
+            'confirmed_at' => now(),
+        ]);
+        $deposit->update(['gateway_uniq_id' => Deposit::gatewayUniqId($deposit->id)]);
+        $deposit->refresh();
+
+        PaymentWebhookLog::query()->create([
+            'gateway' => 'ccapi',
+            'event_type' => 'in',
+            'payload' => [
+                'type' => 'in',
+                'label' => $deposit->gateway_uniq_id,
+                'txid' => 'journal-dup-tx',
+                'confirmation' => 10,
+            ],
+            'signature_valid' => true,
+            'idempotency_key' => 'journal-dup-tx:0',
+            'deposit_id' => $deposit->id,
+            'processing_result' => PaymentWebhookLog::RESULT_DUPLICATE.': Deposit already confirmed.',
+            'processed_at' => now(),
+        ]);
+
+        $journal = PaymentWebhookLog::journalForDeposit($deposit);
+
+        $this->assertCount(1, $journal);
+        $this->assertTrue($journal->first()?->isDuplicateResult());
+        $this->assertSame(0, PaymentWebhookLog::query()->linkedToDeposit($deposit)->excludeDuplicateResults()->count());
+    }
+
     public function test_linked_to_deposit_scope_finds_processed_webhook_without_deposit_id(): void
     {
         $user = User::factory()->create();

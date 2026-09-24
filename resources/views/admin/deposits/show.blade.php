@@ -65,6 +65,9 @@
                 @if($webhookLogs->isEmpty())
                     <p style="margin:12px 0 0;font-size:13px;line-height:1.6;color:rgba(232,237,245,0.62);">{{ __('coin.admin.deposit_webhook_log_empty') }}</p>
                 @else
+                    @if(! empty($webhookLogsOnlyDuplicates))
+                    <p style="margin:12px 0 0;font-size:12.5px;line-height:1.55;color:rgba(232,237,245,0.62);">{{ __('coin.admin.deposit_webhook_duplicate_only_hint') }}</p>
+                    @endif
                     <div style="margin-top:12px;display:flex;flex-direction:column;gap:10px;">
                         @foreach($webhookLogs as $log)
                             <div style="font-size:12px;line-height:1.55;color:rgba(232,237,245,0.72);padding:10px 12px;border-radius:8px;background:rgba(255,255,255,0.03);">

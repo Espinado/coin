@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -92,5 +93,24 @@ class PaymentWebhookLog extends Model
                 }
             });
         });
+    }
+
+    /** @return EloquentCollection<int, self> */
+    public static function journalForDeposit(Deposit $deposit, int $limit = 20): EloquentCollection
+    {
+        $query = static::query()
+            ->linkedToDeposit($deposit)
+            ->orderByDesc('id');
+
+        $primary = (clone $query)
+            ->excludeDuplicateResults()
+            ->limit($limit)
+            ->get();
+
+        if ($primary->isNotEmpty()) {
+            return $primary;
+        }
+
+        return $query->limit($limit)->get();
     }
 }
