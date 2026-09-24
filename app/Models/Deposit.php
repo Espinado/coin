@@ -83,6 +83,15 @@ class Deposit extends Model
             return null;
         }
 
+        return PaymentStatusReason::depositShortMessage($this);
+    }
+
+    public function adminRejectionMessage(): ?string
+    {
+        if ($this->status !== self::STATUS_REJECTED) {
+            return null;
+        }
+
         return PaymentStatusReason::depositMessage($this);
     }
 

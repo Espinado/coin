@@ -77,7 +77,8 @@ class PaymentRejectionReasonTest extends TestCase
 
         $this->assertSame(Deposit::STATUS_REJECTED, $deposit->status);
         $this->assertSame(PaymentStatusReason::DEPOSIT_AMOUNT_MISMATCH, $deposit->status_reason);
-        $this->assertStringContainsString('50.00', $deposit->userRejectionMessage() ?? '');
+        $this->assertSame(__('coin.payment_reasons_short.deposit_amount_mismatch'), $deposit->userRejectionMessage());
+        $this->assertStringContainsString('50.00', PaymentStatusReason::depositMessage($deposit));
     }
 
     public function test_deposit_expired_ipn_rejects_with_reason(): void
@@ -139,7 +140,8 @@ class PaymentRejectionReasonTest extends TestCase
             PaymentStatusReason::DEPOSIT_EXPIRED,
         );
 
-        $this->assertSame(__('coin.payment_reasons.deposit_expired'), $deposit->userRejectionMessage());
+        $this->assertSame(__('coin.payment_reasons_short.deposit_expired'), $deposit->userRejectionMessage());
+        $this->assertSame(__('coin.payment_reasons.deposit_expired'), PaymentStatusReason::depositMessage($deposit));
     }
 
     public function test_gateway_failed_withdrawal_has_user_reason(): void
@@ -179,7 +181,8 @@ class PaymentRejectionReasonTest extends TestCase
         $this->assertSame('8', $withdrawal->gateway_state);
         $this->assertNull($withdrawal->admin_note);
         $this->assertFalse($withdrawal->shouldShowAdminNote());
-        $this->assertStringContainsString('8', $withdrawal->userRejectionMessage() ?? '');
+        $this->assertSame(__('coin.payment_reasons_short.withdrawal_gateway_failed'), $withdrawal->userRejectionMessage());
+        $this->assertStringContainsString('8', PaymentStatusReason::withdrawalMessage($withdrawal));
     }
 
     public function test_admin_rejected_withdrawal_has_user_reason(): void
@@ -215,8 +218,12 @@ class PaymentRejectionReasonTest extends TestCase
 
         $this->assertSame(PaymentStatusReason::WITHDRAWAL_ADMIN_REJECTED, $withdrawal->fresh()->status_reason);
         $this->assertSame(
-            __('coin.payment_reasons.withdrawal_admin_rejected'),
+            __('coin.payment_reasons_short.withdrawal_admin_rejected'),
             $withdrawal->fresh()->userRejectionMessage(),
+        );
+        $this->assertSame(
+            __('coin.payment_reasons.withdrawal_admin_rejected'),
+            $withdrawal->fresh()->adminRejectionMessage(),
         );
     }
 }

@@ -72,7 +72,9 @@ readonly class WalletHistoryEntry
             sortOrder: $deposit->id,
             typeLabel: __('coin.wallet.pending_top_up_type'),
             sourceLabel: $deposit->publicReference(),
-            detail: $deposit->userStatusDetail(),
+            detail: $deposit->status === Deposit::STATUS_REJECTED
+                ? PaymentStatusReason::depositShortMessage($deposit)
+                : $deposit->userStatusDetail(),
             detailColor: $deposit->status === Deposit::STATUS_REJECTED
                 ? '#ffb0b0'
                 : 'rgba(214,238,248,0.72)',
@@ -88,7 +90,9 @@ readonly class WalletHistoryEntry
                 $deposit->publicReference(),
                 $deposit->formattedAmount(),
                 $deposit->userStatusLabel(),
-                $deposit->userStatusDetail(),
+                $deposit->status === Deposit::STATUS_REJECTED
+                    ? PaymentStatusReason::depositShortMessage($deposit)
+                    : $deposit->userStatusDetail(),
                 $deposit->status,
                 __('coin.wallet.pending_top_up_type'),
             ])),
@@ -108,7 +112,7 @@ readonly class WalletHistoryEntry
             ? '#ff8f8f'
             : 'oklch(0.88 0.15 90)';
 
-        $detail = $isRejected ? $withdrawal->userRejectionMessage() : null;
+        $detail = $isRejected ? PaymentStatusReason::withdrawalShortMessage($withdrawal) : null;
 
         return new self(
             kind: 'withdrawal',

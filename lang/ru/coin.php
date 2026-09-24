@@ -773,6 +773,21 @@ return [
         'withdrawal_generic' => 'Заявка на вывод отклонена. Средства возвращены на доступный баланс.',
     ],
 
+    'payment_reasons_short' => [
+        'deposit_expired' => 'Срок ожидания истёк',
+        'deposit_amount_mismatch' => 'Сумма не совпадает',
+        'deposit_address_mismatch' => 'Неверный адрес',
+        'deposit_network_mismatch' => 'Неверная сеть',
+        'deposit_currency_mismatch' => 'Неверная валюта',
+        'deposit_duplicate_txid' => 'Дубликат транзакции',
+        'deposit_generic' => 'Пополнение отклонено',
+        'withdrawal_admin_rejected' => 'Отклонено администратором',
+        'withdrawal_gateway_failed' => 'Ошибка выплаты',
+        'withdrawal_mock_gateway' => 'Тестовый режим',
+        'withdrawal_poll_stuck' => 'Таймаут шлюза',
+        'withdrawal_generic' => 'Вывод отклонён',
+    ],
+
     'messages' => [
         'top_up_credited' => 'Пополнение зачислено на доступный баланс.',
         'top_up_pending' => 'Ожидаем поступление средств. Зачисление произойдёт автоматически после подтверждения в блокчейне.',

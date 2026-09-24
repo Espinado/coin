@@ -2034,7 +2034,7 @@ class Dashboard extends Component
     private function topUpRejectionMessage(Deposit $deposit): string
     {
         return $deposit->userRejectionMessage()
-            ?? __('coin.payment_reasons.deposit_generic');
+            ?? __('coin.payment_reasons_short.deposit_generic');
     }
 
     public function openContractDetails(int $contractId): void

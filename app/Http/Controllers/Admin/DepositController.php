@@ -61,7 +61,7 @@ class DepositController extends Controller
         $deposit->load(['user.wallet', 'confirmedBy']);
 
         $webhookLogs = PaymentWebhookLog::query()
-            ->where('deposit_id', $deposit->id)
+            ->linkedToDeposit($deposit)
             ->excludeDuplicateResults()
             ->orderByDesc('id')
             ->limit(20)

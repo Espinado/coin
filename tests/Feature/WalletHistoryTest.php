@@ -96,4 +96,25 @@ class WalletHistoryTest extends TestCase
         $this->assertContains('withdrawal:WD-PENDING1', $kinds);
         $this->assertFalse(collect($kinds)->contains(fn (string $kind) => str_starts_with($kind, 'deposit:TOP-') && $kind !== 'deposit:'.$pendingDeposit->publicReference()));
     }
+
+    public function test_rejected_deposit_shows_short_reason_in_wallet_history(): void
+    {
+        $user = User::factory()->create();
+
+        Deposit::query()->create([
+            'user_id' => $user->id,
+            'amount' => 1000,
+            'currency' => 'USDT',
+            'status' => Deposit::STATUS_REJECTED,
+            'status_reason' => PaymentStatusReason::DEPOSIT_EXPIRED,
+            'method' => 'ccapi',
+        ]);
+
+        $entry = app(WalletHistoryService::class)
+            ->paginate($user->id, perPage: 10)
+            ->items()[0];
+
+        $this->assertSame(__('coin.payment_reasons_short.deposit_expired'), $entry->detail);
+        $this->assertNotSame(__('coin.payment_reasons.deposit_expired'), $entry->detail);
+    }
 }

@@ -88,15 +88,13 @@ class PaymentIpnService
         $log->update(['deposit_id' => $deposit->id]);
 
         if ($this->wasAlreadyProcessed($event)) {
-            $log->update(['deposit_id' => null]);
-
-            return $this->finishDuplicate($event, 'Duplicate IPN ignored.');
+            return $this->finishDuplicate($event, 'Duplicate IPN ignored.', $deposit);
         }
 
         if ($deposit->status === Deposit::STATUS_CONFIRMED) {
-            $log->update(['deposit_id' => null]);
+            $this->restoreProcessedWebhookDepositLink($deposit);
 
-            return $this->finishDuplicate($event, 'Deposit already confirmed.');
+            return $this->finish($log, PaymentWebhookLog::RESULT_DUPLICATE, 'Deposit already confirmed.');
         }
 
         if ($deposit->status !== Deposit::STATUS_PENDING) {
@@ -477,19 +475,43 @@ class PaymentIpnService
             ->first();
     }
 
-    private function finishDuplicate(VerifiedIpnEvent $event, string $message): PaymentWebhookLog
+    private function finishDuplicate(VerifiedIpnEvent $event, string $message, ?Deposit $deposit = null): PaymentWebhookLog
     {
         $log = $this->findLogByIdempotency($event);
 
         if ($log !== null) {
             if (str_starts_with((string) $log->processing_result, PaymentWebhookLog::RESULT_PROCESSED.':')) {
-                return $log;
+                $this->ensureWebhookLogLinkedToDeposit($log, $deposit);
+
+                return $log->fresh();
             }
 
             return $this->finish($log, PaymentWebhookLog::RESULT_DUPLICATE, $message);
         }
 
+        if ($deposit !== null) {
+            $this->restoreProcessedWebhookDepositLink($deposit);
+        }
+
         return $this->createAuditLog($event, PaymentWebhookLog::RESULT_DUPLICATE, $message);
+    }
+
+    private function ensureWebhookLogLinkedToDeposit(PaymentWebhookLog $log, ?Deposit $deposit): void
+    {
+        if ($log->deposit_id !== null || $deposit === null) {
+            return;
+        }
+
+        $log->update(['deposit_id' => $deposit->id]);
+    }
+
+    private function restoreProcessedWebhookDepositLink(Deposit $deposit): void
+    {
+        PaymentWebhookLog::query()
+            ->linkedToDeposit($deposit)
+            ->where('processing_result', 'like', PaymentWebhookLog::RESULT_PROCESSED.':%')
+            ->whereNull('deposit_id')
+            ->update(['deposit_id' => $deposit->id]);
     }
 
     private function confirmedDepositWithTxid(?string $txid, int $exceptDepositId): ?Deposit

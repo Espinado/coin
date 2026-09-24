@@ -197,7 +197,7 @@ class PaymentStatusLogService
             Deposit::STATUS_REJECTED,
             'processed',
             __('coin.payment_log.title_deposit_rejected'),
-            $deposit->userRejectionMessage() ?? PaymentStatusReason::depositMessage($deposit),
+            PaymentStatusReason::depositMessage($deposit),
         );
     }
 
@@ -270,7 +270,7 @@ class PaymentStatusLogService
             Withdrawal::STATUS_REJECTED,
             'failed',
             __('coin.payment_log.title_gateway_failed'),
-            $withdrawal->userRejectionMessage() ?? PaymentStatusReason::withdrawalMessage($withdrawal),
+            PaymentStatusReason::withdrawalMessage($withdrawal),
             gatewayState: $withdrawal->gateway_state,
             gatewayResult: $gatewayResult,
         );

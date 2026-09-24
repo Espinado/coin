@@ -78,7 +78,7 @@ class TopUpPaymentPollingTest extends TestCase
             ->set('pendingDepositId', $deposit->id)
             ->call('pollTopUpPaymentStatus')
             ->assertSet('paymentModalStep', 'error')
-            ->assertSet('paymentModalError', __('coin.payment_reasons.deposit_generic'));
+            ->assertSet('paymentModalError', __('coin.payment_reasons_short.deposit_generic'));
     }
 
     public function test_poll_shows_amount_mismatch_message_when_received_amount_differs(): void
@@ -104,11 +104,7 @@ class TopUpPaymentPollingTest extends TestCase
             ->set('pendingDepositId', $deposit->id)
             ->call('pollTopUpPaymentStatus')
             ->assertSet('paymentModalStep', 'error')
-            ->assertSet('paymentModalError', __('coin.payment_reasons.deposit_amount_mismatch', [
-                'expected' => '100.00',
-                'received' => '50.00',
-                'currency' => 'USDT',
-            ]));
+            ->assertSet('paymentModalError', __('coin.payment_reasons_short.deposit_amount_mismatch'));
     }
 
     public function test_poll_is_ignored_in_mock_mode(): void

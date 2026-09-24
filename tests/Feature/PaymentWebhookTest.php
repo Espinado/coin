@@ -107,6 +107,65 @@ class PaymentWebhookTest extends TestCase
             ->count());
     }
 
+    public function test_retry_ipn_after_confirm_restores_unlinked_processed_webhook_log(): void
+    {
+        $user = User::factory()->create();
+        $deposit = Deposit::query()->create([
+            'user_id' => $user->id,
+            'amount' => 10,
+            'currency' => 'USDT',
+            'status' => Deposit::STATUS_PENDING,
+            'method' => 'ccapi',
+            'payment_address' => 'TMockRestoreLink123',
+            'gateway_network' => 'trx',
+        ]);
+        $deposit->update(['gateway_uniq_id' => Deposit::gatewayUniqId($deposit->id)]);
+        $deposit->refresh();
+
+        $firstPayload = $this->signedDepositPayload($deposit, 'restore-link-tx-1', 1);
+        $this->postJson('http://coin.test/webhooks/ccapi', $firstPayload)->assertOk();
+
+        PaymentWebhookLog::query()
+            ->where('deposit_id', $deposit->id)
+            ->update(['deposit_id' => null]);
+
+        $retryPayload = $this->signedDepositPayload($deposit, 'restore-link-tx-2', 1);
+        $this->postJson('http://coin.test/webhooks/ccapi', $retryPayload)->assertOk();
+
+        $this->assertDatabaseHas('payment_webhook_logs', [
+            'deposit_id' => $deposit->id,
+            'processing_result' => PaymentWebhookLog::RESULT_PROCESSED.': Deposit confirmed from IPN.',
+        ]);
+    }
+
+    public function test_linked_to_deposit_scope_finds_processed_webhook_without_deposit_id(): void
+    {
+        $user = User::factory()->create();
+        $deposit = Deposit::query()->create([
+            'user_id' => $user->id,
+            'amount' => 10,
+            'currency' => 'USDT',
+            'status' => Deposit::STATUS_PENDING,
+            'method' => 'ccapi',
+            'payment_address' => 'TMockScope123',
+            'gateway_network' => 'trx',
+        ]);
+        $deposit->update(['gateway_uniq_id' => Deposit::gatewayUniqId($deposit->id)]);
+        $deposit->refresh();
+
+        $this->postJson('http://coin.test/webhooks/ccapi', $this->signedDepositPayload($deposit, 'scope-tx-1', 1))->assertOk();
+
+        $deposit->refresh();
+        PaymentWebhookLog::query()
+            ->where('payload->txid', 'scope-tx-1')
+            ->update(['deposit_id' => null]);
+
+        $this->assertSame(1, PaymentWebhookLog::query()
+            ->linkedToDeposit($deposit)
+            ->excludeDuplicateResults()
+            ->count());
+    }
+
     public function test_same_txid_cannot_confirm_two_deposits(): void
     {
         $user = User::factory()->create();

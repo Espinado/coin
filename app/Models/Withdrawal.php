@@ -198,6 +198,15 @@ class Withdrawal extends Model
             return null;
         }
 
+        return PaymentStatusReason::withdrawalShortMessage($this);
+    }
+
+    public function adminRejectionMessage(): ?string
+    {
+        if ($this->status !== self::STATUS_REJECTED) {
+            return null;
+        }
+
         return PaymentStatusReason::withdrawalMessage($this);
     }
 

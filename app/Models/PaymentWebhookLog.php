@@ -76,4 +76,21 @@ class PaymentWebhookLog extends Model
                 ->orWhere('processing_result', 'not like', self::RESULT_DUPLICATE.':%');
         });
     }
+
+    public function scopeLinkedToDeposit($query, Deposit $deposit)
+    {
+        $gatewayLabel = $deposit->gateway_uniq_id ?? Deposit::gatewayUniqId($deposit->id);
+
+        return $query->where(function ($inner) use ($deposit, $gatewayLabel) {
+            $inner->where('deposit_id', $deposit->id);
+
+            $inner->orWhere(function ($payloadQuery) use ($deposit, $gatewayLabel) {
+                $payloadQuery->where('payload->label', $gatewayLabel);
+
+                if ($deposit->txid) {
+                    $payloadQuery->orWhere('payload->txid', $deposit->txid);
+                }
+            });
+        });
+    }
 }

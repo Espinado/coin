@@ -68,6 +68,21 @@ final class PaymentStatusReason
         };
     }
 
+    public static function depositShortMessage(Deposit $deposit): string
+    {
+        $reason = $deposit->status_reason ?: self::DEPOSIT_GENERIC;
+
+        return match ($reason) {
+            self::DEPOSIT_EXPIRED => __('coin.payment_reasons_short.deposit_expired'),
+            self::DEPOSIT_AMOUNT_MISMATCH => __('coin.payment_reasons_short.deposit_amount_mismatch'),
+            self::DEPOSIT_ADDRESS_MISMATCH => __('coin.payment_reasons_short.deposit_address_mismatch'),
+            self::DEPOSIT_NETWORK_MISMATCH => __('coin.payment_reasons_short.deposit_network_mismatch'),
+            self::DEPOSIT_CURRENCY_MISMATCH => __('coin.payment_reasons_short.deposit_currency_mismatch'),
+            self::DEPOSIT_DUPLICATE_TXID => __('coin.payment_reasons_short.deposit_duplicate_txid'),
+            default => __('coin.payment_reasons_short.deposit_generic'),
+        };
+    }
+
     public static function withdrawalMessage(Withdrawal $withdrawal): string
     {
         $reason = $withdrawal->status_reason ?: self::WITHDRAWAL_GENERIC;
@@ -80,6 +95,19 @@ final class PaymentStatusReason
                 'state' => $withdrawal->gateway_state ?? '?',
             ]).' '.self::withdrawalGatewayDetail($withdrawal)),
             default => __('coin.payment_reasons.withdrawal_generic'),
+        };
+    }
+
+    public static function withdrawalShortMessage(Withdrawal $withdrawal): string
+    {
+        $reason = $withdrawal->status_reason ?: self::WITHDRAWAL_GENERIC;
+
+        return match ($reason) {
+            self::WITHDRAWAL_ADMIN_REJECTED => __('coin.payment_reasons_short.withdrawal_admin_rejected'),
+            self::WITHDRAWAL_MOCK_GATEWAY => __('coin.payment_reasons_short.withdrawal_mock_gateway'),
+            self::WITHDRAWAL_POLL_STUCK => __('coin.payment_reasons_short.withdrawal_poll_stuck'),
+            self::WITHDRAWAL_GATEWAY_FAILED => __('coin.payment_reasons_short.withdrawal_gateway_failed'),
+            default => __('coin.payment_reasons_short.withdrawal_generic'),
         };
     }
 

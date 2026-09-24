@@ -47,8 +47,9 @@
                     </div>
                     @endif
                     @if($deposit->confirmed_at)<div><strong>{{ __('coin.admin.processed') }}:</strong> {{ $deposit->confirmed_at->format('M j, Y H:i') }}</div>@endif
-                    @if($deposit->status === \App\Models\Deposit::STATUS_REJECTED && $deposit->userRejectionMessage())
-                        <div style="margin-top:10px;"><strong>{{ __('coin.admin.status_reason') }}:</strong> {{ $deposit->userRejectionMessage() }}</div>
+                    @if($deposit->status === \App\Models\Deposit::STATUS_REJECTED && $deposit->adminRejectionMessage())
+                        <div style="margin-top:10px;"><strong>{{ __('coin.admin.status_reason') }}:</strong> {{ $deposit->adminRejectionMessage() }}</div>
+                        <div style="margin-top:6px;font-size:12px;color:rgba(232,237,245,0.62);"><strong>{{ __('coin.admin.user_facing_reason') }}:</strong> {{ $deposit->userRejectionMessage() }}</div>
                     @endif
                 </div>
             </div>
