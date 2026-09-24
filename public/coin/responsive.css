@@ -1564,9 +1564,61 @@ html.coin-nav-open .coin-nav-mobile {
 .coin-wallet-transactions-table__head,
 .coin-wallet-transactions-table__row {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr) minmax(0, 1.4fr) minmax(0, 0.8fr) minmax(0, 0.8fr);
-  align-items: center;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr) minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, 0.8fr);
+  align-items: start;
+  column-gap: 12px;
   font-size: 13px;
+}
+
+.coin-wallet-transactions-table__cell {
+  min-width: 0;
+}
+
+.coin-wallet-transactions-table__destination {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.coin-wallet-transactions-table__reopen-btn {
+  margin: 0;
+  padding: 7px 11px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 180, 84, 0.35);
+  background: rgba(255, 180, 84, 0.1);
+  color: #ffe8c8;
+  font-family: inherit;
+  font-size: 11.5px;
+  cursor: pointer;
+}
+
+.coin-wallet-transactions-table__status {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: flex-start;
+  gap: 4px;
+  text-align: right;
+}
+
+.coin-wallet-transactions-table__status-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  line-height: 1.35;
+  white-space: nowrap;
+}
+
+.coin-wallet-transactions-table__status-detail {
+  font-family: 'Sora', sans-serif;
+  font-size: 12px;
+  line-height: 1.4;
+  max-width: 100%;
+  word-break: break-word;
+}
+
+.coin-wallet-transactions-table__amount {
+  padding-top: 1px;
 }
 
 .coin-wallet-transactions-table__head {
@@ -1579,7 +1631,7 @@ html.coin-nav-open .coin-nav-mobile {
 }
 
 .coin-wallet-transactions-table__row {
-  padding: 13px 0;
+  padding: 14px 0;
   border-bottom: 1px solid rgba(150, 235, 250, 0.07);
 }
 
@@ -1587,8 +1639,9 @@ html.coin-nav-open .coin-nav-mobile {
   border-bottom: 0;
 }
 
+.coin-wallet-transactions-table__head span:nth-child(4),
 .coin-wallet-transactions-table__head span:last-child,
-.coin-wallet-transactions-table__row span:last-child {
+.coin-wallet-transactions-table__amount {
   text-align: right;
 }
 

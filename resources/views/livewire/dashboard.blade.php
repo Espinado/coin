@@ -517,19 +517,21 @@
               </div>
               @forelse($walletHistory as $entry)
               <div class="coin-wallet-transactions-table__row" @if($entry->rowBackground) style="background: {{ $entry->rowBackground }};" @endif>
-                <span style="color: rgba(214,238,248,0.78);">{{ \App\Support\LocaleFormat::shortDateTime($entry->occurredAt) }}</span>
-                <span style="color: rgba(214,238,248,0.78);">{{ $entry->typeLabel }}</span>
-                <span style="font-family: 'JetBrains Mono', monospace; color: rgba(214,238,248,0.72);">
-                  {{ $entry->sourceLabel }}
-                  @if(filled($entry->detail))
-                  <span style="display: block; margin-top: 4px; font-family: 'Sora', sans-serif; font-size: 12px; line-height: 1.45; color: {{ $entry->detailColor ?? 'rgba(214,238,248,0.68)' }};">{{ $entry->detail }}</span>
-                  @endif
+                <span class="coin-wallet-transactions-table__cell" style="color: rgba(214,238,248,0.78);">{{ \App\Support\LocaleFormat::shortDateTime($entry->occurredAt) }}</span>
+                <span class="coin-wallet-transactions-table__cell" style="color: rgba(214,238,248,0.78);">{{ $entry->typeLabel }}</span>
+                <span class="coin-wallet-transactions-table__cell coin-wallet-transactions-table__destination">
+                  <span style="font-family: 'JetBrains Mono', monospace; color: rgba(214,238,248,0.72);">{{ $entry->sourceLabel }}</span>
                   @if($entry->canReopenPaymentDetails && $entry->depositId)
-                  <button type="button" wire:click="openTopUpFromHistory({{ $entry->depositId }})" style="margin-top: {{ filled($entry->detail) ? '8px' : '4px' }}; padding: 7px 11px; border-radius: 8px; border: 1px solid rgba(255,180,84,0.35); background: rgba(255,180,84,0.1); color: #ffe8c8; font-family: inherit; font-size: 11.5px; cursor: pointer;">{{ __('coin.crypto_gateway.view_payment_details') }}</button>
+                  <button type="button" wire:click="openTopUpFromHistory({{ $entry->depositId }})" class="coin-wallet-transactions-table__reopen-btn">{{ __('coin.crypto_gateway.view_payment_details') }}</button>
                   @endif
                 </span>
-                <span style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: {{ $entry->statusColor }};">{{ $entry->statusLabel }}</span>
-                <span style="font-family: 'JetBrains Mono', monospace; color: {{ $entry->amountColor }};">{{ $entry->amountLabel }}</span>
+                <span class="coin-wallet-transactions-table__cell coin-wallet-transactions-table__status">
+                  <span class="coin-wallet-transactions-table__status-label" style="color: {{ $entry->statusColor }};">{{ $entry->statusLabel }}</span>
+                  @if(filled($entry->detail))
+                  <span class="coin-wallet-transactions-table__status-detail" style="color: {{ $entry->detailColor ?? 'rgba(214,238,248,0.68)' }};">{{ $entry->detail }}</span>
+                  @endif
+                </span>
+                <span class="coin-wallet-transactions-table__cell coin-wallet-transactions-table__amount" style="font-family: 'JetBrains Mono', monospace; color: {{ $entry->amountColor }};">{{ $entry->amountLabel }}</span>
               </div>
               @empty
               <div style="padding: 24px 0; font-size: 13px; color: rgba(214,238,248,0.68);">{{ __('coin.admin.no_transactions') }}</div>
