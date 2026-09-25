@@ -86,7 +86,7 @@
                         <td style="padding:14px 18px;">{{ $log->sourceLabel() }}</td>
                         <td style="padding:14px 18px;max-width:180px;">{{ $log->title }}</td>
                         <td style="padding:14px 18px;max-width:360px;">{{ \Illuminate\Support\Str::limit($log->indexSummary(), 140) }}</td>
-                        <td style="padding:14px 18px;white-space:nowrap;">{{ $log->hasStatusTransition() ? $log->transitionLabel() : '—' }}</td>
+                        <td style="padding:14px 18px;white-space:nowrap;">{{ $log->statusTransitionDisplayLabel() }}</td>
                         <td style="padding:14px 18px;white-space:nowrap;">{{ $log->resultLabel() }}</td>
                     </tr>
                 @empty

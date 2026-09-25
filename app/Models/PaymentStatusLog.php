@@ -119,6 +119,83 @@ class PaymentStatusLog extends Model
         );
     }
 
+    public function statusTransitionHeading(): string
+    {
+        if ($this->event_type === 'created') {
+            return __('coin.payment_log.status_after_event_label');
+        }
+
+        return __('coin.admin.status_transition');
+    }
+
+    public function statusTransitionDisplayLabel(): string
+    {
+        if (! $this->hasStatusTransition()) {
+            return '—';
+        }
+
+        $eventLabel = $this->transitionLabel();
+
+        if ($this->entityStatusDiffersFromEvent()) {
+            $current = $this->currentEntityStatusLabel();
+
+            if ($current !== null) {
+                return $eventLabel.' · '.__('coin.payment_log.current_entity_status', [
+                    'status' => $current,
+                ]);
+            }
+        }
+
+        return $eventLabel;
+    }
+
+    public function entityStatusDiffersFromEvent(): bool
+    {
+        $entity = $this->linkedEntity();
+
+        if ($entity === null || $this->new_status === null) {
+            return false;
+        }
+
+        return $entity->status !== $this->new_status;
+    }
+
+    public function currentEntityStatusLabel(): ?string
+    {
+        $entity = $this->linkedEntity();
+
+        if ($entity instanceof Withdrawal) {
+            return $entity->statusLabel();
+        }
+
+        if ($entity instanceof Deposit) {
+            return PaymentStatusDecoder::depositStatus($entity->status);
+        }
+
+        return null;
+    }
+
+    public function linkedEntity(): Deposit|Withdrawal|null
+    {
+        if ($this->relationLoaded('withdrawal') && $this->withdrawal !== null) {
+            return $this->withdrawal;
+        }
+
+        if ($this->relationLoaded('deposit') && $this->deposit !== null) {
+            return $this->deposit;
+        }
+
+        if ($this->withdrawal_id !== null) {
+            return $this->withdrawal;
+        }
+
+        if ($this->deposit_id !== null) {
+            return $this->deposit;
+        }
+
+        return null;
+    }
+
     public function indexSummary(): string
     {
         if ($this->message !== null && $this->message !== '') {

@@ -3,6 +3,7 @@
 namespace Tests\Unit;
 
 use App\Models\PaymentStatusLog;
+use App\Models\Withdrawal;
 use App\Support\PaymentStatusDecoder;
 use Tests\TestCase;
 
@@ -57,5 +58,26 @@ class PaymentStatusDecoderTest extends TestCase
         $label = PaymentStatusDecoder::journalStatusReasonLabel('withdrawal', 'withdrawal_gateway_failed');
 
         $this->assertSame(__('coin.payment_log.status_reason_withdrawal_gateway_failed'), $label);
+    }
+
+    public function test_created_log_shows_current_entity_status_when_stale(): void
+    {
+        $withdrawal = new Withdrawal([
+            'reference' => 'WD-STALE02',
+            'status' => Withdrawal::STATUS_REJECTED,
+        ]);
+
+        $log = new PaymentStatusLog([
+            'entity_type' => 'withdrawal',
+            'withdrawal_id' => 1,
+            'event_type' => 'created',
+            'previous_status' => null,
+            'new_status' => Withdrawal::STATUS_PENDING,
+        ]);
+        $log->setRelation('withdrawal', $withdrawal);
+
+        $this->assertTrue($log->entityStatusDiffersFromEvent());
+        $this->assertStringContainsString(__('coin.withdrawal_status.rejected'), $log->statusTransitionDisplayLabel());
+        $this->assertStringContainsString(__('coin.withdrawal_status.pending'), $log->statusTransitionDisplayLabel());
     }
 }
