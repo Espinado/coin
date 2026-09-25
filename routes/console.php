@@ -81,3 +81,14 @@ Schedule::command('coin:poll-stuck-deposits')
 
         return app(PlatformSettingsService::class)->usesLivePaymentGateway();
     });
+
+Schedule::command('coin:monitor-payment-security')
+    ->hourly()
+    ->withoutOverlapping()
+    ->when(function (): bool {
+        if ((string) config('coin.payments.driver', 'mock') !== 'ccapi') {
+            return false;
+        }
+
+        return app(PlatformSettingsService::class)->usesLivePaymentGateway();
+    });

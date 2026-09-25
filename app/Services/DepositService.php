@@ -7,6 +7,7 @@ use App\Support\PlatformTerms;
 use App\Models\Admin;
 use App\Models\Deposit;
 use App\Models\User;
+use App\Models\Wallet;
 use App\Models\WalletTransaction;
 use App\Support\PaymentStatusReason;
 use App\Models\PaymentStatusLog;
@@ -186,6 +187,10 @@ class DepositService
 
             $user = $deposit->user;
             $wallet = $this->wallets->ensureWallet($user);
+            $wallet = Wallet::query()
+                ->whereKey($wallet->id)
+                ->lockForUpdate()
+                ->firstOrFail();
             $paymentAmount = (float) $deposit->amount;
             $paymentCurrency = strtoupper((string) ($deposit->currency ?: 'USDT'));
             $lockedBtcPerUsdt = $paymentCurrency === 'BTC' && $deposit->exchange_rate

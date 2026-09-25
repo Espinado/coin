@@ -219,6 +219,31 @@ class SecurityHardeningTest extends TestCase
             ->assertForbidden();
     }
 
+    public function test_viewer_admin_cannot_approve_withdrawal(): void
+    {
+        $viewer = Admin::query()->create([
+            'name' => 'Viewer',
+            'email' => 'viewer-withdraw@coin.test',
+            'password' => 'password',
+            'role' => AdminRole::Viewer,
+        ]);
+
+        $user = User::factory()->create();
+        $withdrawal = Withdrawal::query()->create([
+            'user_id' => $user->id,
+            'amount' => 25,
+            'currency' => 'USDT',
+            'status' => Withdrawal::STATUS_PENDING,
+            'payout_address' => PayoutAddressTest::VALID_TRON_ADDRESS,
+            'network_label' => 'TRC-20',
+            'reference' => 'WD-TEST-1',
+        ]);
+
+        $this->actingAs($viewer, 'admin')
+            ->post("http://admin.coin.test/withdrawals/{$withdrawal->id}/approve")
+            ->assertForbidden();
+    }
+
     public function test_viewer_admin_can_access_dashboard(): void
     {
         $viewer = Admin::query()->create([

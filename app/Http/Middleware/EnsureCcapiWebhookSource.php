@@ -5,6 +5,7 @@ namespace App\Http\Middleware;
 use App\Services\PlatformSettingsService;
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response;
 
 class EnsureCcapiWebhookSource
@@ -22,6 +23,11 @@ class EnsureCcapiWebhookSource
         $clientIp = (string) $request->ip();
 
         if (! in_array($clientIp, $allowedIps, true)) {
+            Log::warning('ccapi.webhook.blocked_ip', [
+                'client_ip' => $clientIp,
+                'allowed_ips' => $allowedIps,
+            ]);
+
             return response('Forbidden', Response::HTTP_FORBIDDEN);
         }
 

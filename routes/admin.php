@@ -67,7 +67,9 @@ Route::middleware(['admin.domain', 'reject.web.on.admin'])->group(function () {
     Route::middleware('auth:admin')->group(function () {
         Broadcast::routes(['middleware' => ['web', 'broadcast.auth:admin']]);
 
-        Route::post('reverb-debug', [ReverbDebugLogController::class, 'store'])->name('admin.reverb-debug.store');
+        Route::post('reverb-debug', [ReverbDebugLogController::class, 'store'])
+            ->middleware('admin.ability:manage_settings')
+            ->name('admin.reverb-debug.store');
 
         Route::get('dashboard', DashboardController::class)
             ->name('admin.dashboard');

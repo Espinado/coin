@@ -20,6 +20,7 @@ use App\Services\WithdrawalService;
 
 use App\Support\PaymentStatusReason;
 
+use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 
@@ -661,25 +662,33 @@ class WithdrawalPollService
 
     {
 
-        PaymentWebhookLog::query()->create([
+        try {
 
-            'gateway' => (string) config('coin.payments.driver', 'mock'),
+            PaymentWebhookLog::query()->create([
 
-            'event_type' => 'payout_poll',
+                'gateway' => (string) config('coin.payments.driver', 'mock'),
 
-            'payload' => $payload,
+                'event_type' => 'payout_poll',
 
-            'signature_valid' => true,
+                'payload' => $payload,
 
-            'idempotency_key' => 'poll:'.$withdrawal->id.':'.now()->format('Y-m-d-H-i-s'),
+                'signature_valid' => true,
 
-            'withdrawal_id' => $withdrawal->id,
+                'idempotency_key' => 'poll:'.$withdrawal->id.':'.now()->format('Y-m-d-H-i-s.u'),
 
-            'processing_result' => PaymentWebhookLog::formatProcessingResult($result, $message),
+                'withdrawal_id' => $withdrawal->id,
 
-            'processed_at' => now(),
+                'processing_result' => PaymentWebhookLog::formatProcessingResult($result, $message),
 
-        ]);
+                'processed_at' => now(),
+
+            ]);
+
+        } catch (UniqueConstraintViolationException) {
+
+            // Concurrent poll workers may attempt the same audit row.
+
+        }
 
     }
 

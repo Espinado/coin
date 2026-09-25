@@ -96,6 +96,10 @@ return [
             // Reject expired pending deposits and log stale ones awaiting IPN.
             'poll_stuck_deposits' => (bool) env('CCAPI_POLL_STUCK_DEPOSITS', true),
             'deposit_stale_alert_minutes' => max(1, (int) env('CCAPI_DEPOSIT_STALE_ALERT_MINUTES', 30)),
+            'security_monitor' => [
+                'lookback_minutes' => max(1, (int) env('CCAPI_SECURITY_MONITOR_LOOKBACK_MINUTES', 60)),
+                'invalid_signature_threshold' => max(1, (int) env('CCAPI_INVALID_SIGNATURE_ALERT_THRESHOLD', 5)),
+            ],
         ],
     ],
 
