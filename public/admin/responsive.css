@@ -333,11 +333,7 @@ body {
 }
 
 .payment-logs-table .admin-table-scroll table {
-    min-width: 980px;
-}
-
-.payment-logs-table__grid .payment-log-group__result {
-    min-width: 130px;
+    min-width: 760px;
 }
 
 .payment-log-group-details {
