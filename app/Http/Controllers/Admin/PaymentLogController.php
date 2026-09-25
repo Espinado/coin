@@ -25,6 +25,11 @@ class PaymentLogController extends Controller
 
         $query = PaymentStatusLog::query()
             ->with(['user', 'deposit', 'withdrawal'])
+            ->where(function ($query) {
+                $query->whereNotNull('deposit_id')
+                    ->orWhereNotNull('withdrawal_id')
+                    ->orWhereNotNull('reference');
+            })
             ->when($entityType !== '', fn ($query) => $query->where('entity_type', $entityType))
             ->when($source !== '', fn ($query) => $query->where('source', $source))
             ->when($withdrawalId, fn ($query) => $query->where('withdrawal_id', $withdrawalId))

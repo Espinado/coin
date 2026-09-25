@@ -256,7 +256,7 @@ final class PaymentStatusDecoder
         if (str_contains($message, 'Deposit confirmed')) {
             return [
                 'title' => __('coin.payment_log.title_deposit_confirmed'),
-                'message' => $message,
+                'message' => __('coin.payment_log.message_deposit_confirmed_ipn'),
                 'gateway_state' => null,
                 'gateway_result' => null,
             ];
@@ -265,7 +265,7 @@ final class PaymentStatusDecoder
         if (str_contains($message, 'Deposit rejected')) {
             return [
                 'title' => __('coin.payment_log.title_deposit_rejected'),
-                'message' => $message,
+                'message' => __('coin.payment_log.message_deposit_rejected_ipn'),
                 'gateway_state' => null,
                 'gateway_result' => null,
             ];

@@ -2,6 +2,7 @@
 
 namespace Tests\Unit;
 
+use App\Models\Deposit;
 use App\Models\PaymentStatusLog;
 use App\Models\Withdrawal;
 use App\Support\PaymentStatusDecoder;
@@ -79,6 +80,40 @@ class PaymentStatusDecoderTest extends TestCase
         $this->assertTrue($log->showsEntityStatus());
         $this->assertSame(__('coin.withdrawal_status.rejected'), $log->entityStatusDisplayLabel());
         $this->assertStringNotContainsString(__('coin.withdrawal_status.pending'), $log->entityStatusDisplayLabel());
+    }
+
+    public function test_deposit_confirmed_decoder_uses_russian_message(): void
+    {
+        $decoded = PaymentStatusDecoder::decodeWebhookMessage(
+            'processed: Deposit confirmed from IPN.',
+        );
+
+        $this->assertSame(__('coin.payment_log.title_deposit_confirmed'), $decoded['title']);
+        $this->assertSame(__('coin.payment_log.message_deposit_confirmed_ipn'), $decoded['message']);
+    }
+
+    public function test_deposit_ipn_log_display_uses_same_credited_message(): void
+    {
+        $deposit = new Deposit([
+            'amount' => 10,
+            'currency' => 'USDT',
+            'credited_amount' => 10,
+            'credited_currency' => 'USDT',
+            'status' => Deposit::STATUS_CONFIRMED,
+        ]);
+
+        $log = new PaymentStatusLog([
+            'entity_type' => 'deposit',
+            'source' => PaymentStatusLog::SOURCE_IPN,
+            'event_type' => 'deposit_ipn',
+            'message' => 'Deposit confirmed from IPN.',
+        ]);
+        $log->setRelation('deposit', $deposit);
+
+        $this->assertSame(
+            __('coin.payment_log.message_deposit_confirmed', ['amount' => '10.00 USDT']),
+            $log->displayMessage(),
+        );
     }
 
     public function test_created_log_message_reflects_rejected_withdrawal(): void

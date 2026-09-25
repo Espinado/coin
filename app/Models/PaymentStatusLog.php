@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Support\LocaleFormat;
 use App\Support\PaymentStatusDecoder;
+use App\Support\PaymentStatusReason;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -197,19 +198,39 @@ class PaymentStatusLog extends Model
             };
         }
 
-        if ($entity instanceof Deposit && $this->event_type === 'created') {
-            $amount = $entity->formattedAmount();
+        if ($entity instanceof Deposit) {
+            return $this->depositDisplayMessage($entity, $stored);
+        }
 
-            return match ($entity->status) {
+        return $stored !== '' ? $stored : ($this->title ?? '—');
+    }
+
+    private function depositDisplayMessage(Deposit $deposit, string $stored): string
+    {
+        $requestedAmount = $deposit->formattedAmount();
+        $creditedAmount = $deposit->formattedCreditedAmount() ?? $requestedAmount;
+
+        if (in_array($this->event_type, ['status_change', 'deposit_ipn'], true)) {
+            return match ($deposit->status) {
+                Deposit::STATUS_CONFIRMED => __('coin.payment_log.message_deposit_confirmed', [
+                    'amount' => $creditedAmount,
+                ]),
+                Deposit::STATUS_REJECTED => PaymentStatusReason::depositMessage($deposit),
+                default => $stored !== '' ? $stored : __('coin.payment_log.message_deposit_ipn_pending'),
+            };
+        }
+
+        if ($this->event_type === 'created') {
+            return match ($deposit->status) {
                 Deposit::STATUS_REJECTED => __('coin.payment_log.message_deposit_created_rejected', [
-                    'amount' => $amount,
+                    'amount' => $requestedAmount,
                 ]),
                 Deposit::STATUS_CONFIRMED => __('coin.payment_log.message_deposit_created_confirmed', [
-                    'amount' => $entity->formattedCreditedAmount() ?? $amount,
+                    'amount' => $creditedAmount,
                 ]),
                 default => $stored !== ''
                     ? $stored
-                    : __('coin.payment_log.message_deposit_created', ['amount' => $amount]),
+                    : __('coin.payment_log.message_deposit_created', ['amount' => $requestedAmount]),
             };
         }
 
