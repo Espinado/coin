@@ -71,12 +71,16 @@ function bridgeWebToPstn(event) {
     var config = readCallConfig(event);
     var destination = normalizeE164(config.destination);
     var callerId = normalizeE164(config.caller_id) || String(config.caller_id || '');
+    var mediaBridged = false;
 
     if (!destination) {
         Logger.write('CloudFlops bridge: missing destination');
         incoming.hangup();
         return;
     }
+
+    // Keep the browser leg alive while PSTN is ringing.
+    incoming.answer();
 
     var outbound = dialPstn(destination, callerId);
 
@@ -86,8 +90,33 @@ function bridgeWebToPstn(event) {
         return;
     }
 
-    // easyProcess answers the Web SDK leg when PSTN connects — do not call incoming.answer() here.
-    VoxEngine.easyProcess(incoming, outbound);
+    var bridgeMedia = function () {
+        if (mediaBridged) {
+            return;
+        }
+
+        mediaBridged = true;
+        VoxEngine.sendMediaBetween(incoming, outbound);
+    };
+
+    outbound.addEventListener(CallEvents.Connected, bridgeMedia);
+    outbound.addEventListener(CallEvents.AudioStarted, bridgeMedia);
+
+    outbound.addEventListener(CallEvents.Ringing, function () {
+        incoming.ring();
+    });
+
+    var terminate = function () {
+        VoxEngine.terminate();
+    };
+
+    incoming.addEventListener(CallEvents.Disconnected, terminate);
+    incoming.addEventListener(CallEvents.Failed, terminate);
+    outbound.addEventListener(CallEvents.Disconnected, terminate);
+    outbound.addEventListener(CallEvents.Failed, function (e) {
+        Logger.write('CloudFlops PSTN failed: ' + (e.reason || e.code || 'unknown'));
+        terminate();
+    });
 }
 
 VoxEngine.addEventListener(AppEvents.Started, function () {

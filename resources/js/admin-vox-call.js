@@ -208,14 +208,6 @@ async function ensureMicrophoneAccess(root) {
     }
 
     prepareCallHardware();
-    setStatus(root, root.dataset.statusRequestingMic || 'Requesting microphone access…');
-
-    try {
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        stream.getTracks().forEach((track) => track.stop());
-    } catch {
-        throw new Error(root.dataset.statusMicDenied || 'Microphone access denied.');
-    }
 }
 
 function playAudioRenderer(renderer, audioSink) {
@@ -270,6 +262,7 @@ async function ensureLoggedIn(root, sdk) {
         await sdk.init({
             node: resolveConnectionNode(root.dataset.node),
             micRequired: true,
+            progressTone: true,
         });
     }
 
@@ -332,7 +325,10 @@ function attachCallListeners(call, modal, root, onClear, audioSink) {
             : (root.dataset.statusEnded || 'Call ended.'), failed);
     };
 
+    let wasConnected = false;
+
     call.on(VoxImplant.CallEvents.Connected, () => {
+        wasConnected = true;
         call.getEndpoints().forEach((endpoint) => {
             endpoint.mediaRenderers?.forEach((renderer) => playAudioRenderer(renderer, audioSink));
         });
@@ -340,8 +336,12 @@ function attachCallListeners(call, modal, root, onClear, audioSink) {
         setStatus(root, root.dataset.statusConnected || 'Connected.');
     });
 
+    call.on(VoxImplant.CallEvents.ProgressTone, () => {
+        setStatus(root, root.dataset.statusCalling || 'Calling…');
+    });
+
     call.on(VoxImplant.CallEvents.Disconnected, () => {
-        finish(modal.getTalkSeconds() === 0);
+        finish(! wasConnected);
     });
 
     call.on(VoxImplant.CallEvents.Failed, (event) => {
@@ -428,7 +428,6 @@ export function bootAdminVoxCall(root, modalElement) {
             clearActiveCall();
             setStatus(root, error.message || 'Call failed.', true);
         } finally {
-            callButton.disabled = false;
             refreshButtons();
         }
     });
