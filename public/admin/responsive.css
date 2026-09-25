@@ -233,8 +233,10 @@ body {
 
 .admin-main .admin-content {
     flex: 1;
+    min-width: 0;
     padding: 28px;
     max-width: none;
+    overflow-x: hidden;
 }
 
 .admin-content--auth {
@@ -319,11 +321,113 @@ body {
     -webkit-overflow-scrolling: touch;
 }
 
+.admin-table-scroll {
+    max-width: 100%;
+}
+
 .admin-table-scroll table {
     width: 100%;
     min-width: 720px;
     border-collapse: collapse;
     font-size: 13px;
+}
+
+.payment-logs-table .admin-table-scroll table {
+    min-width: 980px;
+}
+
+.payment-logs-table__grid .payment-log-group__result {
+    min-width: 130px;
+}
+
+.payment-log-group-details {
+    margin: 0;
+}
+
+.payment-log-group-details__summary {
+    cursor: pointer;
+    list-style: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(255, 255, 255, 0.04);
+    color: #c5d4ff;
+    font-size: 12px;
+    white-space: nowrap;
+}
+
+.payment-log-group-details__summary::-webkit-details-marker {
+    display: none;
+}
+
+.payment-log-group-details__summary::before {
+    content: '▸';
+    font-size: 10px;
+    color: rgba(232, 237, 245, 0.62);
+    transition: transform 0.15s ease;
+}
+
+.payment-log-group-details[open] .payment-log-group-details__summary::before {
+    transform: rotate(90deg);
+}
+
+.payment-log-group-details__panel {
+    margin-top: 10px;
+    min-width: 420px;
+    max-width: min(640px, 70vw);
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(7, 10, 16, 0.92);
+}
+
+.payment-log-group-details__sources {
+    margin-bottom: 8px;
+    font-size: 11px;
+    color: rgba(232, 237, 245, 0.58);
+}
+
+.payment-log-group-details__event + .payment-log-group-details__event {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.payment-log-group-details__event-head {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+    font-size: 11px;
+    color: rgba(232, 237, 245, 0.62);
+}
+
+.payment-log-group-details__event-id {
+    font-family: 'JetBrains Mono', monospace;
+}
+
+.payment-log-group-details__event-source {
+    padding: 2px 7px;
+    border-radius: 999px;
+    background: rgba(157, 180, 255, 0.12);
+    color: #9db4ff;
+}
+
+.payment-log-group-details__event-title {
+    margin-top: 4px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #e8edf5;
+}
+
+.payment-log-group-details__event-message {
+    margin-top: 4px;
+    font-size: 12px;
+    line-height: 1.55;
+    color: rgba(232, 237, 245, 0.78);
 }
 
 .admin-list-toolbar {
