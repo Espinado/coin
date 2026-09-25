@@ -5,6 +5,7 @@
         <div data-vox-modal-subtitle style="margin-top:10px;font-size:14px;line-height:1.55;color:rgba(232,237,245,0.78);"></div>
         <div data-vox-modal-timer style="display:none;margin-top:16px;font-family:'JetBrains Mono',monospace;font-size:28px;letter-spacing:0.06em;color:#f0f4fa;">00:00</div>
         <div data-vox-modal-duration style="display:none;margin-top:12px;font-size:14px;color:rgba(232,237,245,0.72);"></div>
+        <div data-vox-modal-audio hidden aria-hidden="true" style="position:absolute;width:0;height:0;overflow:hidden;"></div>
         <div style="margin-top:24px;display:flex;flex-direction:column;gap:10px;">
             <button type="button" data-vox-modal-hangup class="admin-btn" style="width:100%;padding:13px 16px;border-radius:11px;border:1px solid rgba(255,95,95,0.55);background:linear-gradient(140deg,#ff5f5f,#d93636);color:#fff;font-size:14px;font-weight:600;">
                 {{ __('coin.voximplant.hangup_call') }}

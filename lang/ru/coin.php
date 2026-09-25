@@ -1466,7 +1466,7 @@ return [
 
     'voximplant' => [
         'title' => 'Звонок пользователю',
-        'hint' => 'Нажмите «Позвонить» — звонок пойдёт из браузера через Voximplant.',
+        'hint' => 'Нажмите «Позвонить» — браузер запросит доступ к микрофону, звонок пойдёт через Voximplant.',
         'call' => 'Позвонить',
         'connect' => 'Подключиться',
         'call_browser' => 'Позвонить из браузера',
@@ -1478,6 +1478,9 @@ return [
         'caller_id_missing' => 'Caller ID не задан. Арендуйте номер в Voximplant и укажите VOXIMPLANT_CALLER_ID.',
         'api_call_started' => 'Voximplant запустил звонок на :phone.',
         'status_idle' => 'Нажмите «Позвонить», чтобы позвонить клиенту.',
+        'status_requesting_mic' => 'Запрос доступа к микрофону…',
+        'status_mic_denied' => 'Нужен доступ к микрофону. Разрешите его в браузере и попробуйте снова.',
+        'status_mic_unsupported' => 'Этот браузер не поддерживает звонки с микрофона.',
         'status_connecting' => 'Подключение к Voximplant…',
         'status_ready' => 'Готово. Можно звонить.',
         'status_calling' => 'Идёт набор номера…',

@@ -181,6 +181,64 @@ function resolveConnectionNode(nodeName) {
     return VoxImplant.ConnectionNode[nodeName] ?? nodeName;
 }
 
+function getAudioDeviceManager() {
+    return VoxImplant.Hardware.AudioDeviceManager.get();
+}
+
+function prepareCallHardware() {
+    getAudioDeviceManager().prepareAudioContext();
+}
+
+async function ensureMicrophoneAccess(root) {
+    if (! navigator.mediaDevices?.getUserMedia) {
+        throw new Error(root.dataset.statusMicUnsupported || 'Microphone is not supported in this browser.');
+    }
+
+    prepareCallHardware();
+    setStatus(root, root.dataset.statusRequestingMic || 'Requesting microphone access…');
+
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        stream.getTracks().forEach((track) => track.stop());
+    } catch {
+        throw new Error(root.dataset.statusMicDenied || 'Microphone access denied.');
+    }
+}
+
+function playAudioRenderer(renderer, audioSink) {
+    if (! renderer || renderer.kind !== VoxImplant.MediaRendererKind.Audio) {
+        return;
+    }
+
+    renderer.enable();
+    renderer.setVolume(1);
+
+    if (audioSink) {
+        renderer.render(audioSink);
+    }
+
+    const playPromise = renderer.element?.play?.();
+
+    if (playPromise) {
+        playPromise.catch(() => {});
+    }
+}
+
+function wireCallAudio(call, audioSink) {
+    const wireEndpoint = (endpoint) => {
+        endpoint.mediaRenderers?.forEach((renderer) => playAudioRenderer(renderer, audioSink));
+        endpoint.on(VoxImplant.EndpointEvents.RemoteMediaAdded, (event) => {
+            playAudioRenderer(event.mediaRenderer, audioSink);
+        });
+    };
+
+    call.on(VoxImplant.CallEvents.EndpointAdded, (event) => {
+        wireEndpoint(event.endpoint);
+    });
+
+    call.getEndpoints().forEach(wireEndpoint);
+}
+
 async function ensureLoggedIn(root, sdk) {
     if (sdk.getClientState() === VoxImplant.ClientState.LOGGED_IN) {
         return;
@@ -198,6 +256,7 @@ async function ensureLoggedIn(root, sdk) {
     if (! sdk.alreadyInitialized) {
         await sdk.init({
             node: resolveConnectionNode(root.dataset.node),
+            micRequired: true,
         });
     }
 
@@ -235,10 +294,12 @@ async function ensureLoggedIn(root, sdk) {
     });
 }
 
-function attachCallListeners(call, modal, root, onClear) {
+function attachCallListeners(call, modal, root, onClear, audioSink) {
     let finished = false;
 
-    const finish = (failed = false) => {
+    wireCallAudio(call, audioSink);
+
+    const finish = (failed = false, reason = '') => {
         if (finished) {
             return;
         }
@@ -247,12 +308,21 @@ function attachCallListeners(call, modal, root, onClear) {
         const talkSeconds = modal.getTalkSeconds();
         modal.showEnded(talkSeconds, failed);
         onClear();
+
+        if (failed && reason) {
+            setStatus(root, reason, true);
+            return;
+        }
+
         setStatus(root, failed
             ? (root.dataset.statusFailed || 'Call failed.')
             : (root.dataset.statusEnded || 'Call ended.'), failed);
     };
 
     call.on(VoxImplant.CallEvents.Connected, () => {
+        call.getEndpoints().forEach((endpoint) => {
+            endpoint.mediaRenderers?.forEach((renderer) => playAudioRenderer(renderer, audioSink));
+        });
         modal.showConnected();
         setStatus(root, root.dataset.statusConnected || 'Connected.');
     });
@@ -261,8 +331,8 @@ function attachCallListeners(call, modal, root, onClear) {
         finish(false);
     });
 
-    call.on(VoxImplant.CallEvents.Failed, () => {
-        finish(true);
+    call.on(VoxImplant.CallEvents.Failed, (event) => {
+        finish(true, event?.reason || root.dataset.statusFailed || 'Call failed.');
     });
 }
 
@@ -276,6 +346,7 @@ export function bootAdminVoxCall(root, modalElement) {
     const callerId = root.dataset.callerId || '';
     const userName = root.dataset.userName || '';
     const callButton = root.querySelector('[data-vox-call]');
+    const audioSink = modalElement.querySelector('[data-vox-modal-audio]');
     let activeCall = null;
 
     const modal = createModalController(modalElement, {
@@ -303,7 +374,7 @@ export function bootAdminVoxCall(root, modalElement) {
     sdk.addEventListener(VoxImplant.Events.IncomingCall, (event) => {
         activeCall = event.call;
         modal.showDialing(userName, destination);
-        attachCallListeners(activeCall, modal, root, clearActiveCall);
+        attachCallListeners(activeCall, modal, root, clearActiveCall, audioSink);
         refreshButtons();
     });
 
@@ -318,15 +389,24 @@ export function bootAdminVoxCall(root, modalElement) {
         refreshButtons();
 
         try {
+            await ensureMicrophoneAccess(root);
             await ensureLoggedIn(root, sdk);
             setStatus(root, root.dataset.statusCalling || 'Calling…');
 
-            activeCall = sdk.call(destination, false, JSON.stringify({
-                destination,
-                caller_id: callerId,
-            }));
+            activeCall = sdk.call({
+                number: destination,
+                video: false,
+                customData: JSON.stringify({
+                    destination,
+                    caller_id: callerId,
+                }),
+                extraHeaders: {
+                    'X-Destination': destination,
+                    'X-Caller-Id': callerId,
+                },
+            });
 
-            attachCallListeners(activeCall, modal, root, clearActiveCall);
+            attachCallListeners(activeCall, modal, root, clearActiveCall, audioSink);
         } catch (error) {
             modal.showEnded(0, true);
             clearActiveCall();
