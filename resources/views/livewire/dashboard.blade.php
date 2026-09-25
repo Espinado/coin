@@ -387,7 +387,7 @@
             </div>
             <div style="margin-top: 16px; font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.12em; color: rgba(214,238,248,0.68);">{{ mb_strtoupper(__('coin.amount')) }}</div>
             <div style="margin-top: 9px; padding: 13px 15px; border-radius: 11px; border: 1px solid rgba(150,235,250,0.16); background: rgba(4,16,28,0.6); display: flex; justify-content: space-between; font-family: 'JetBrains Mono', monospace; font-size: 15px; opacity: {{ $topUpLocked ? '0.72' : '1' }};">
-              <input type="text" inputmode="decimal" wire:model="depositAmount" wire:key="deposit-amount-{{ $depositCurrency }}-{{ $depositAmount }}" placeholder="{{ $this->depositAmountPlaceholder }}" autocomplete="off" @readonly($topUpLocked) style="flex:1;border:0;background:transparent;color:#f0fbff;outline:none;font-family:inherit;font-size:15px;" />
+              <input type="text" inputmode="decimal" wire:model.live.debounce.300ms="depositAmount" wire:key="deposit-amount-{{ $depositCurrency }}" placeholder="{{ $this->depositAmountPlaceholder }}" autocomplete="off" @readonly($topUpLocked) style="flex:1;border:0;background:transparent;color:#f0fbff;outline:none;font-family:inherit;font-size:15px;" />
               <span style="color: rgba(214,238,248,0.78);">{{ $depositCurrency }}</span>
             </div>
             @if($topUpLocked)
@@ -441,7 +441,7 @@
               <button type="button" wire:click="setWithdrawMax" wire:loading.attr="disabled" wire:target="setWithdrawMax" style="border:0;background:transparent;color:oklch(0.88 0.11 195);font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.08em;cursor:pointer;padding:0;">{{ mb_strtoupper(__('coin.wallet.max')) }}</button>
             </div>
             <div style="margin-top: 9px; padding: 13px 15px; border-radius: 11px; border: 1px solid rgba(150,235,250,0.16); background: rgba(4,16,28,0.6); display: flex; justify-content: space-between; font-family: 'JetBrains Mono', monospace; font-size: 15px;">
-              <input type="text" inputmode="decimal" wire:model="withdrawAmount" wire:key="withdraw-amount-{{ $withdrawCurrency }}-{{ $withdrawAmount }}" placeholder="0.00" autocomplete="off" style="flex:1;min-width:0;border:0;background:transparent;color:#f0fbff;outline:none;font-family:inherit;font-size:15px;" />
+              <input type="text" inputmode="decimal" wire:model.live.debounce.300ms="withdrawAmount" wire:key="withdraw-amount-{{ $withdrawCurrency }}" placeholder="0.00" autocomplete="off" style="flex:1;min-width:0;border:0;background:transparent;color:#f0fbff;outline:none;font-family:inherit;font-size:15px;" />
               <span style="flex:none;margin-left:12px;color:rgba(214,238,248,0.78);">{{ $withdrawCurrency }}</span>
             </div>
             @error('withdrawAmount')<p style="margin-top:8px;font-size:12px;color:#ff8f8f;">{{ $message }}</p>@enderror
