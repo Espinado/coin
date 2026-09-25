@@ -41,6 +41,25 @@ class Deposit extends Model
         return 'deposit:'.$id;
     }
 
+    public static function idFromPublicReference(?string $value): ?int
+    {
+        if (! is_string($value) || trim($value) === '') {
+            return null;
+        }
+
+        $value = trim($value);
+
+        if (preg_match('/^top[-_]?(\d+)$/i', $value, $matches) === 1) {
+            return (int) $matches[1];
+        }
+
+        if (ctype_digit($value)) {
+            return (int) $value;
+        }
+
+        return null;
+    }
+
     protected function casts(): array
     {
         return [

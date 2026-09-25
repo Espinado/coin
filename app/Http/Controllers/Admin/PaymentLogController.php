@@ -36,7 +36,31 @@ class PaymentLogController extends Controller
             }))
             ->where(function ($query) {
                 $query->where('event_type', '!=', 'payout_poll')
-                    ->orWhere('result', '!=', 'ignored');
+                    ->orWhere(function ($poll) {
+                        $poll->where('result', '!=', 'ignored')
+                            ->where(function ($failed) {
+                                $failed->where('result', '!=', 'failed')
+                                    ->orWhere(function ($onlyOpen) {
+                                        $onlyOpen->where(function ($withdrawalOpen) {
+                                            $withdrawalOpen->whereNull('withdrawal_id')
+                                                ->orWhereExists(function ($exists) {
+                                                    $exists->selectRaw('1')
+                                                        ->from('withdrawals')
+                                                        ->whereColumn('withdrawals.id', 'payment_status_logs.withdrawal_id')
+                                                        ->where('withdrawals.status', \App\Models\Withdrawal::STATUS_PROCESSING);
+                                                });
+                                        })->where(function ($depositOpen) {
+                                            $depositOpen->whereNull('deposit_id')
+                                                ->orWhereExists(function ($exists) {
+                                                    $exists->selectRaw('1')
+                                                        ->from('deposits')
+                                                        ->whereColumn('deposits.id', 'payment_status_logs.deposit_id')
+                                                        ->where('deposits.status', \App\Models\Deposit::STATUS_PENDING);
+                                                });
+                                        });
+                                    });
+                            });
+                    });
             })
             ->when($search !== '', function ($query) use ($search) {
                 $query->where(function ($inner) use ($search) {

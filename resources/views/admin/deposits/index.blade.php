@@ -27,7 +27,7 @@
         <table style="width:100%;border-collapse:collapse;font-size:13px;">
             <thead>
                 <tr style="text-align:left;border-bottom:1px solid rgba(255,255,255,0.08);">
-                    @include('admin.partials.sortable-th', ['column' => 'id', 'label' => strtoupper(__('coin.admin.id')), 'sort' => $sort, 'dir' => $dir])
+                    @include('admin.partials.sortable-th', ['column' => 'reference', 'label' => strtoupper(__('coin.admin.application_reference')), 'sort' => $sort, 'dir' => $dir])
                     @include('admin.partials.sortable-th', ['column' => 'user', 'label' => strtoupper(__('coin.user')), 'sort' => $sort, 'dir' => $dir])
                     @include('admin.partials.sortable-th', ['column' => 'amount', 'label' => strtoupper(__('coin.amount')), 'sort' => $sort, 'dir' => $dir])
                     @include('admin.partials.sortable-th', ['column' => 'status', 'label' => strtoupper(__('coin.status')), 'sort' => $sort, 'dir' => $dir])
@@ -37,7 +37,7 @@
             <tbody>
                 @forelse($deposits as $deposit)
                     <tr style="border-bottom:1px solid rgba(255,255,255,0.06);">
-                        <td style="padding:14px 18px;"><a href="{{ route('admin.deposits.show', $deposit) }}">#{{ $deposit->id }}</a></td>
+                        <td style="padding:14px 18px;font-family:'JetBrains Mono',monospace;"><a href="{{ route('admin.deposits.show', $deposit) }}">{{ $deposit->publicReference() }}</a></td>
                         <td style="padding:14px 18px;">{{ $deposit->user?->email }}</td>
                         <td style="padding:14px 18px;">{{ $deposit->formattedAmount() }}</td>
                         <td style="padding:14px 18px;">{{ $statuses[$deposit->status] ?? ucfirst($deposit->status) }}</td>

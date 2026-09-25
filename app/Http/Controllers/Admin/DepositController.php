@@ -28,19 +28,20 @@ class DepositController extends Controller
             ->when($status !== '', fn ($query) => $query->where('status', $status))
             ->when($search !== '', function ($query) use ($search) {
                 $query->where(function ($inner) use ($search) {
-                    if (ctype_digit($search)) {
-                        $inner->where('id', (int) $search);
-                    }
+                    $like = '%'.$search.'%';
 
-                    $inner->orWhereHas('user', fn ($userQuery) => $userQuery
-                        ->where('email', 'like', "%{$search}%")
-                        ->orWhere('name', 'like', "%{$search}%")
-                        ->orWhere('account_slug', 'like', "%{$search}%"));
+                    $inner->whereRaw("CONCAT('TOP-', id) LIKE ?", [$like])
+                        ->orWhere('external_reference', 'like', $like)
+                        ->orWhere('gateway_uniq_id', 'like', $like)
+                        ->orWhereHas('user', fn ($userQuery) => $userQuery
+                            ->where('email', 'like', $like)
+                            ->orWhere('name', 'like', $like)
+                            ->orWhere('account_slug', 'like', $like));
                 });
             });
 
         $this->adminApplySort($request, $query, [
-            'id' => 'id',
+            'reference' => 'id',
             'amount' => 'amount',
             'status' => 'status',
             'created_at' => 'created_at',

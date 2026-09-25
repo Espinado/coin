@@ -93,4 +93,57 @@ class RepairPaymentStatusLogsTest extends TestCase
         $this->assertSame(Withdrawal::STATUS_REJECTED, $failedLog->new_status);
         $this->assertSame('withdrawal_gateway_failed', $failedLog->status_reason);
     }
+
+    public function test_repair_removes_stale_failed_polls_on_closed_withdrawals(): void
+    {
+        $user = User::factory()->create();
+        $withdrawal = Withdrawal::query()->create([
+            'user_id' => $user->id,
+            'reference' => 'WD-STALE01',
+            'amount' => 1000,
+            'currency' => 'USDT',
+            'base_amount' => 1000,
+            'withdrawal_type' => 'available_balance',
+            'payout_address' => 'TRecipient1234567890123456789012345',
+            'network_label' => 'TRC-20',
+            'gateway_request_id' => 'MOCK-12345',
+            'status' => Withdrawal::STATUS_REJECTED,
+            'status_reason' => 'withdrawal_mock_gateway',
+        ]);
+
+        PaymentStatusLog::query()->create([
+            'entity_type' => 'withdrawal',
+            'withdrawal_id' => $withdrawal->id,
+            'user_id' => $user->id,
+            'reference' => $withdrawal->reference,
+            'source' => PaymentStatusLog::SOURCE_POLL,
+            'event_type' => 'payout_poll',
+            'result' => 'failed',
+            'gateway_result' => 'id_or_label_required',
+            'title' => __('coin.payment_log.title_poll_error'),
+            'message' => __('coin.payment_log.message_poll_error', [
+                'detail' => __('coin.payment_log.poll_error_id_or_label_required'),
+            ]),
+        ]);
+
+        $terminalLog = PaymentStatusLog::query()->create([
+            'entity_type' => 'withdrawal',
+            'withdrawal_id' => $withdrawal->id,
+            'user_id' => $user->id,
+            'reference' => $withdrawal->reference,
+            'source' => PaymentStatusLog::SOURCE_POLL,
+            'event_type' => 'payout_poll',
+            'result' => 'processed',
+            'previous_status' => Withdrawal::STATUS_PROCESSING,
+            'new_status' => Withdrawal::STATUS_REJECTED,
+            'status_reason' => 'withdrawal_mock_gateway',
+            'title' => __('coin.payment_log.title_mock_abandoned'),
+            'message' => __('coin.payment_log.message_mock_abandoned'),
+        ]);
+
+        $this->artisan('payment-logs:repair')->assertSuccessful();
+
+        $this->assertSame(1, PaymentStatusLog::query()->where('withdrawal_id', $withdrawal->id)->count());
+        $this->assertDatabaseHas('payment_status_logs', ['id' => $terminalLog->id]);
+    }
 }

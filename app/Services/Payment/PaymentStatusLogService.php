@@ -31,7 +31,7 @@ class PaymentStatusLogService
             'entity_type' => 'deposit',
             'deposit_id' => $deposit->id,
             'user_id' => $deposit->user_id,
-            'reference' => 'TOP-'.$deposit->id,
+            'reference' => $deposit->publicReference(),
             'source' => $source,
             'event_type' => $eventType,
             'previous_status' => $previousStatus,
@@ -134,7 +134,7 @@ class PaymentStatusLogService
             'deposit_id' => $log->deposit_id,
             'withdrawal_id' => $log->withdrawal_id,
             'user_id' => $deposit?->user_id ?? $withdrawal?->user_id,
-            'reference' => $deposit ? 'TOP-'.$deposit->id : $withdrawal?->reference,
+            'reference' => $deposit ? $deposit->publicReference() : $withdrawal?->reference,
             'source' => $log->event_type === 'payout_poll' || str_contains((string) $log->event_type, 'poll')
                 ? PaymentStatusLog::SOURCE_POLL
                 : PaymentStatusLog::SOURCE_IPN,
@@ -266,6 +266,8 @@ class PaymentStatusLogService
 
     public function repairExistingRow(PaymentStatusLog $log): bool
     {
+        $changed = $this->normalizeRowLinks($log);
+
         $payload = is_array($log->payload) ? $log->payload : [];
         $webhookId = $payload['webhook_log_id'] ?? null;
 
@@ -273,11 +275,76 @@ class PaymentStatusLogService
             $webhook = PaymentWebhookLog::query()->find((int) $webhookId);
 
             if ($webhook !== null && filled($webhook->processing_result)) {
-                return $this->refreshRowFromWebhook($log, $webhook);
+                return $this->refreshRowFromWebhook($log, $webhook) || $changed;
             }
         }
 
-        return $this->repairAppRow($log);
+        return $this->repairAppRow($log) || $changed;
+    }
+
+    public function normalizeRowLinks(PaymentStatusLog $log): bool
+    {
+        $updates = [];
+
+        if ($log->withdrawal_id === null && is_string($log->reference) && str_starts_with($log->reference, 'WD-')) {
+            $withdrawal = Withdrawal::query()->where('reference', $log->reference)->first();
+            if ($withdrawal !== null) {
+                $updates['withdrawal_id'] = $withdrawal->id;
+                $updates['entity_type'] = 'withdrawal';
+                $updates['user_id'] = $withdrawal->user_id;
+            }
+        }
+
+        if ($log->deposit_id === null && is_string($log->reference) && str_starts_with($log->reference, 'TOP-')) {
+            $depositId = Deposit::idFromPublicReference($log->reference);
+            if ($depositId !== null) {
+                $deposit = Deposit::query()->find($depositId);
+                if ($deposit !== null) {
+                    $updates['deposit_id'] = $deposit->id;
+                    $updates['entity_type'] = 'deposit';
+                    $updates['user_id'] = $deposit->user_id;
+                }
+            }
+        }
+
+        if ($log->deposit_id !== null) {
+            $deposit = Deposit::query()->find($log->deposit_id);
+            if ($deposit !== null) {
+                $reference = $deposit->publicReference();
+                if ($log->reference !== $reference) {
+                    $updates['reference'] = $reference;
+                }
+                if ($log->user_id === null) {
+                    $updates['user_id'] = $deposit->user_id;
+                }
+                if ($log->entity_type !== 'deposit') {
+                    $updates['entity_type'] = 'deposit';
+                }
+            }
+        }
+
+        if ($log->withdrawal_id !== null) {
+            $withdrawal = Withdrawal::query()->find($log->withdrawal_id);
+            if ($withdrawal !== null) {
+                if ($log->reference !== $withdrawal->reference) {
+                    $updates['reference'] = $withdrawal->reference;
+                }
+                if ($log->user_id === null) {
+                    $updates['user_id'] = $withdrawal->user_id;
+                }
+                if ($log->entity_type !== 'withdrawal') {
+                    $updates['entity_type'] = 'withdrawal';
+                }
+            }
+        }
+
+        if ($updates === []) {
+            return false;
+        }
+
+        $log->forceFill($updates)->save();
+
+        return true;
     }
 
     private function refreshRowFromWebhook(PaymentStatusLog $log, PaymentWebhookLog $webhook): bool
@@ -293,7 +360,14 @@ class PaymentStatusLogService
         $withdrawal = $webhook->withdrawal_id ? Withdrawal::query()->find($webhook->withdrawal_id) : null;
         $statusFields = $this->webhookJournalStatusFields($webhook, $result, $deposit, $withdrawal);
 
+        $reference = $deposit?->publicReference() ?? $withdrawal?->reference;
+
         $log->forceFill([
+            'deposit_id' => $webhook->deposit_id ?? $log->deposit_id,
+            'withdrawal_id' => $webhook->withdrawal_id ?? $log->withdrawal_id,
+            'user_id' => $deposit?->user_id ?? $withdrawal?->user_id ?? $log->user_id,
+            'reference' => $reference ?? $log->reference,
+            'entity_type' => $deposit !== null ? 'deposit' : ($withdrawal !== null ? 'withdrawal' : $log->entity_type),
             'title' => $decoded['title'],
             'message' => $decoded['message'],
             'gateway_state' => $decoded['gateway_state'],

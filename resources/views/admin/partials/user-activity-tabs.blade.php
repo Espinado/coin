@@ -58,7 +58,7 @@
     <div class="admin-user-activity__panel{{ $activeTab === 'deposits' ? ' is-active' : '' }}" role="tabpanel" id="user-activity-panel-deposits" aria-labelledby="user-activity-tab-deposits" @if($activeTab !== 'deposits') hidden @endif>
         @forelse($user->deposits as $deposit)
             <div style="display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.06);font-size:13px;">
-                <span><a href="{{ route('admin.deposits.show', $deposit) }}">#{{ $deposit->id }}</a> · {{ ucfirst($deposit->status) }}</span>
+                <span><a href="{{ route('admin.deposits.show', $deposit) }}" style="font-family:'JetBrains Mono',monospace;">{{ $deposit->publicReference() }}</a> · {{ ucfirst($deposit->status) }}</span>
                 <span style="font-family:'JetBrains Mono',monospace;">{{ $deposit->formattedAmount() }}</span>
             </div>
         @empty

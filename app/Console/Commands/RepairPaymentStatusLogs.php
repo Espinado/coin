@@ -2,7 +2,9 @@
 
 namespace App\Console\Commands;
 
+use App\Models\Deposit;
 use App\Models\PaymentStatusLog;
+use App\Models\Withdrawal;
 use App\Services\Payment\PaymentStatusLogService;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
@@ -41,10 +43,38 @@ class RepairPaymentStatusLogs extends Command
 
         $pollProcessedDupeCount = (clone $pollProcessedDupes)->count();
 
+        $staleFailedPolls = PaymentStatusLog::query()
+            ->where('event_type', 'payout_poll')
+            ->where('result', 'failed')
+            ->where(function ($query) {
+                $query->whereNotNull('withdrawal_id')
+                    ->whereExists(function ($exists) {
+                        $exists->select(DB::raw(1))
+                            ->from('withdrawals')
+                            ->whereColumn('withdrawals.id', 'payment_status_logs.withdrawal_id')
+                            ->where('withdrawals.status', '!=', Withdrawal::STATUS_PROCESSING);
+                    })
+                    ->orWhere(function ($inner) {
+                        $inner->whereNotNull('deposit_id')
+                            ->whereExists(function ($exists) {
+                                $exists->select(DB::raw(1))
+                                    ->from('deposits')
+                                    ->whereColumn('deposits.id', 'payment_status_logs.deposit_id')
+                                    ->whereIn('deposits.status', [
+                                        Deposit::STATUS_CONFIRMED,
+                                        Deposit::STATUS_REJECTED,
+                                    ]);
+                            });
+                    });
+            });
+
+        $staleFailedPollCount = (clone $staleFailedPolls)->count();
+
         $refreshCount = PaymentStatusLog::query()->count();
 
         $this->info("Ignored payout polls to remove: {$ignoredPollCount}");
         $this->info("Duplicate poll processed rows to remove: {$pollProcessedDupeCount}");
+        $this->info("Stale failed poll rows on closed requests to remove: {$staleFailedPollCount}");
         $this->info("Rows to refresh (decode / fix fields): {$refreshCount}");
 
         if ($dryRun) {
@@ -54,12 +84,13 @@ class RepairPaymentStatusLogs extends Command
         }
 
         if (! $skipDelete) {
-            DB::transaction(function () use ($ignoredPolls, $pollProcessedDupes): void {
+            DB::transaction(function () use ($ignoredPolls, $pollProcessedDupes, $staleFailedPolls): void {
                 $ignoredPolls->delete();
                 $pollProcessedDupes->delete();
+                $staleFailedPolls->delete();
             });
 
-            $this->info('Removed noisy / duplicate rows.');
+            $this->info('Removed noisy / duplicate / stale poll rows.');
         }
 
         $updated = 0;

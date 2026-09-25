@@ -1,6 +1,6 @@
 @extends('layouts.admin')
 
-@section('title', __('coin.admin.page_title', ['section' => __('coin.admin.top_up_detail', ['id' => $deposit->id])]))
+@section('title', __('coin.admin.page_title', ['section' => __('coin.admin.top_up_detail', ['reference' => $deposit->publicReference()])]))
 
 @section('content')
     @if (session('status'))
@@ -10,7 +10,7 @@
     <div style="display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:16px;align-items:start;">
         <div>
             <div class="admin-card">
-                <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.12em;color:rgba(232,237,245,0.62);">{{ strtoupper(__('coin.admin.top_up_detail', ['id' => $deposit->id])) }}</div>
+                <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.12em;color:rgba(232,237,245,0.62);">{{ $deposit->publicReference() }}</div>
                 <h1 style="margin:10px 0 0;font-size:22px;font-weight:600;">{{ $deposit->formattedAmount() }}</h1>
                 <p style="margin:8px 0 0;font-size:13px;color:rgba(232,237,245,0.72);">{{ ucfirst($deposit->status) }} · {{ \App\Support\LocaleFormat::dateTimeLocal($deposit->created_at) }} ({{ \App\Support\LocaleFormat::timezoneLabel() }})</p>
                 <div style="margin-top:16px;font-size:13px;line-height:1.7;">
