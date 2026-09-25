@@ -341,7 +341,7 @@ function attachCallListeners(call, modal, root, onClear, audioSink) {
     });
 
     call.on(VoxImplant.CallEvents.Disconnected, () => {
-        finish(false);
+        finish(modal.getTalkSeconds() === 0);
     });
 
     call.on(VoxImplant.CallEvents.Failed, (event) => {
@@ -407,7 +407,7 @@ export function bootAdminVoxCall(root, modalElement) {
             setStatus(root, root.dataset.statusCalling || 'Calling…');
 
             activeCall = sdk.call({
-                number: destination,
+                number: 'outbound',
                 video: false,
                 customData: JSON.stringify({
                     destination,

@@ -78,10 +78,6 @@ function bridgeWebToPstn(event) {
         return;
     }
 
-    incoming.addEventListener(CallEvents.Disconnected, VoxEngine.terminate);
-    incoming.addEventListener(CallEvents.Failed, VoxEngine.terminate);
-    incoming.answer();
-
     var outbound = dialPstn(destination, callerId);
 
     if (!outbound) {
@@ -90,10 +86,8 @@ function bridgeWebToPstn(event) {
         return;
     }
 
-    outbound.addEventListener(CallEvents.Disconnected, VoxEngine.terminate);
-    outbound.addEventListener(CallEvents.Failed, VoxEngine.terminate);
-
-    VoxEngine.easyProcess([incoming, outbound]);
+    // easyProcess answers the Web SDK leg when PSTN connects — do not call incoming.answer() here.
+    VoxEngine.easyProcess(incoming, outbound);
 }
 
 VoxEngine.addEventListener(AppEvents.Started, function () {
