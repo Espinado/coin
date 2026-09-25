@@ -354,6 +354,9 @@ export function bootAdminVoxCall(root, modalElement) {
         return;
     }
 
+    modalElement.hidden = true;
+    modalElement.style.display = 'none';
+
     const sdk = VoxImplant.getInstance();
     const destination = root.dataset.destination || '';
     const callerId = root.dataset.callerId || '';

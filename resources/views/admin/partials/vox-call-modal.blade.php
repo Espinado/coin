@@ -1,4 +1,4 @@
-<div id="admin-vox-call-modal" hidden style="position:fixed;inset:0;z-index:10050;display:flex;align-items:center;justify-content:center;padding:24px;background:rgba(4,8,16,0.82);backdrop-filter:blur(4px);">
+<div id="admin-vox-call-modal" hidden class="admin-vox-call-modal">
     <div style="width:min(100%,420px);border-radius:18px;border:1px solid rgba(255,255,255,0.12);background:linear-gradient(170deg,#101826,#070a10);box-shadow:0 28px 80px rgba(0,0,0,0.55);padding:28px 26px 24px;text-align:center;">
         <div data-vox-modal-spinner style="width:46px;height:46px;margin:0 auto 18px;border-radius:50%;border:3px solid rgba(255,255,255,0.08);border-top-color:#6ea8ff;animation:adminVoxSpin 0.9s linear infinite;"></div>
         <div data-vox-modal-title style="font-size:20px;font-weight:600;color:#f0f4fa;"></div>
@@ -17,6 +17,25 @@
     </div>
 </div>
 <style>
+    .admin-vox-call-modal {
+        position: fixed;
+        inset: 0;
+        z-index: 10050;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+        background: rgba(4, 8, 16, 0.82);
+        backdrop-filter: blur(4px);
+    }
+
+    .admin-vox-call-modal[hidden] {
+        display: none !important;
+    }
+
+    .admin-vox-call-modal:not([hidden]) {
+        display: flex;
+    }
+
     @keyframes adminVoxSpin {
         to { transform: rotate(360deg); }
     }
