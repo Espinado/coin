@@ -11,6 +11,19 @@ function setStatus(root, message, isError = false) {
         return;
     }
 
+    const hideStatuses = [
+        root.dataset.statusIdle,
+        root.dataset.statusReady,
+    ].filter(Boolean);
+
+    if (! isError && (message === '' || hideStatuses.includes(message))) {
+        status.hidden = true;
+        status.textContent = '';
+
+        return;
+    }
+
+    status.hidden = false;
     status.textContent = message;
     status.style.color = isError ? '#ff8f8f' : 'rgba(232,237,245,0.78)';
 }

@@ -60,9 +60,7 @@
                                 <span style="color:rgba(232,237,245,0.62);">{{ __('coin.admin.phone') }}:</span>
                                 <span style="font-family:'JetBrains Mono',monospace;">{{ $voximplantDestination }}</span>
                             </div>
-                            <div data-vox-status style="margin-bottom:12px;font-size:13px;color:rgba(232,237,245,0.78);">
-                                {{ __('coin.voximplant.status_idle') }}
-                            </div>
+                            <div data-vox-status hidden style="margin-bottom:12px;font-size:13px;color:rgba(232,237,245,0.78);"></div>
                             <div style="display:flex;flex-wrap:wrap;gap:10px;">
                                 <button type="button" class="admin-btn admin-btn-primary" data-vox-call>{{ __('coin.voximplant.call') }}</button>
                             </div>
