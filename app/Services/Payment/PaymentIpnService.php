@@ -51,13 +51,17 @@ class PaymentIpnService
 
     private function handleIncomingPayment(VerifiedIpnEvent $event, PaymentWebhookLog $log): PaymentWebhookLog
     {
+        $depositReference = $this->resolveDepositReference($event);
+
+        if ($depositReference !== null) {
+            $log->update(['deposit_id' => $depositReference]);
+        }
+
         $minConfirmations = (int) config('coin.payments.ccapi.min_confirmations', 1);
 
         if ($event->confirmation < $minConfirmations) {
             return $this->finish($log, PaymentWebhookLog::RESULT_IGNORED, 'Awaiting confirmations.');
         }
-
-        $depositReference = $this->resolveDepositReference($event);
 
         if ($depositReference === null) {
             return $this->finish($log, PaymentWebhookLog::RESULT_IGNORED, 'Deposit not found for IPN label.');
@@ -71,8 +75,6 @@ class PaymentIpnService
         if ($deposit === null) {
             return $this->finish($log, PaymentWebhookLog::RESULT_IGNORED, 'Deposit not found for IPN label.');
         }
-
-        $log->update(['deposit_id' => $deposit->id]);
 
         if ($this->wasAlreadyProcessed($event)) {
             return $this->finishDuplicate($event, 'Duplicate IPN ignored.', $deposit);
@@ -313,13 +315,17 @@ class PaymentIpnService
 
     private function handleOutgoingPayment(VerifiedIpnEvent $event, PaymentWebhookLog $log): PaymentWebhookLog
     {
+        $withdrawalReference = $this->resolveWithdrawalReference($event);
+
+        if ($withdrawalReference !== null) {
+            $log->update(['withdrawal_id' => $withdrawalReference]);
+        }
+
         $minConfirmations = (int) config('coin.payments.ccapi.min_confirmations', 1);
 
         if ($event->confirmation < $minConfirmations) {
             return $this->finish($log, PaymentWebhookLog::RESULT_IGNORED, 'Awaiting payout confirmations.');
         }
-
-        $withdrawalReference = $this->resolveWithdrawalReference($event);
 
         if ($withdrawalReference === null) {
             return $this->finish($log, PaymentWebhookLog::RESULT_IGNORED, 'Withdrawal not found for IPN label.');
@@ -333,8 +339,6 @@ class PaymentIpnService
         if ($withdrawal === null) {
             return $this->finish($log, PaymentWebhookLog::RESULT_IGNORED, 'Withdrawal not found for IPN label.');
         }
-
-        $log->update(['withdrawal_id' => $withdrawal->id]);
 
         if ($withdrawal->status === Withdrawal::STATUS_PAID) {
             return $this->finish($log, PaymentWebhookLog::RESULT_DUPLICATE, 'Withdrawal already paid.');

@@ -42,7 +42,9 @@
 
         <nav class="admin-sidebar-nav" id="admin-sidebar-nav" aria-label="{{ __('coin.admin.open_menu') }}">
             <a href="{{ route('admin.dashboard') }}" class="{{ $navClass($routeName === 'admin.dashboard') }}">{{ __('coin.admin.overview') }}</a>
-            <a href="{{ route('admin.users.index') }}" class="{{ $navClass($adminNavActive($routeName, 'admin.users')) }}">{{ __('coin.admin.users') }}</a>
+            @if($canManageUsers ?? false)
+                <a href="{{ route('admin.users.index') }}" class="{{ $navClass($adminNavActive($routeName, 'admin.users')) }}">{{ __('coin.admin.users') }}</a>
+            @endif
             @if($canAccessFinance ?? false)
                 <a href="{{ $financeNavUrl ?? route('admin.deposits.index') }}" class="{{ $navClass($financeActive) }}" data-admin-withdrawals-nav>
                     <span>{{ __('coin.admin.finance') }}</span>
@@ -58,26 +60,40 @@
             @if($canAccessPaymentLogs ?? false)
                 <a href="{{ route('admin.payment-logs.index') }}" class="{{ $navClass($adminNavActive($routeName, 'admin.payment-logs')) }}">{{ __('coin.admin.payment_logs') }}</a>
             @endif
-            <a href="{{ route('admin.plan-changes.index') }}" class="{{ $navClass($adminNavActive($routeName, 'admin.plan-changes')) }}" data-admin-plan-changes-nav>
-                <span>{{ __('coin.admin.plan_changes') }}</span>
-                @if(($pendingPlanChangesCount ?? 0) > 0)
-                    <span class="admin-sidebar-badge admin-sidebar-badge--blue" data-admin-plan-changes-nav-badge>{{ $pendingPlanChangesCount }}</span>
-                @endif
-            </a>
-            <a href="{{ route('admin.plans.index') }}" class="{{ $navClass($adminNavActive($routeName, 'admin.plans')) }}">{{ __('coin.admin.plans') }}</a>
-            <a href="{{ route('admin.admins.index') }}" class="{{ $navClass($adminNavActive($routeName, 'admin.admins')) }}">{{ __('coin.admin.admins.title') }}</a>
-            <a href="{{ route('admin.settings.edit') }}" class="{{ $navClass($adminNavActive($routeName, 'admin.settings')) }}">{{ __('coin.admin.settings') }}</a>
-            <a href="{{ route('admin.legal.index') }}" class="{{ $navClass($adminNavActive($routeName, 'admin.legal')) }}">{{ __('coin.admin.legal.title') }}</a>
+            @if($canManagePlanChanges ?? false)
+                <a href="{{ route('admin.plan-changes.index') }}" class="{{ $navClass($adminNavActive($routeName, 'admin.plan-changes')) }}" data-admin-plan-changes-nav>
+                    <span>{{ __('coin.admin.plan_changes') }}</span>
+                    @if(($pendingPlanChangesCount ?? 0) > 0)
+                        <span class="admin-sidebar-badge admin-sidebar-badge--blue" data-admin-plan-changes-nav-badge>{{ $pendingPlanChangesCount }}</span>
+                    @endif
+                </a>
+            @endif
+            @if($canManagePlans ?? false)
+                <a href="{{ route('admin.plans.index') }}" class="{{ $navClass($adminNavActive($routeName, 'admin.plans')) }}">{{ __('coin.admin.plans') }}</a>
+            @endif
+            @if($canManageAdmins ?? false)
+                <a href="{{ route('admin.admins.index') }}" class="{{ $navClass($adminNavActive($routeName, 'admin.admins')) }}">{{ __('coin.admin.admins.title') }}</a>
+            @endif
+            @if($canManageSettings ?? false)
+                <a href="{{ route('admin.settings.edit') }}" class="{{ $navClass($adminNavActive($routeName, 'admin.settings')) }}">{{ __('coin.admin.settings') }}</a>
+            @endif
+            @if($canManageLegal ?? false)
+                <a href="{{ route('admin.legal.index') }}" class="{{ $navClass($adminNavActive($routeName, 'admin.legal')) }}">{{ __('coin.admin.legal.title') }}</a>
+            @endif
         </nav>
 
         <div class="admin-sidebar-bottom">
-            <a href="{{ route('admin.broadcasts.index') }}" class="{{ $navClass($adminNavActive($routeName, 'admin.broadcasts')) }}">{{ __('coin.admin.broadcasts.title') }}</a>
-            <a href="{{ route('admin.support.index') }}" class="{{ $navClass($adminNavActive($routeName, 'admin.support')) }}" data-admin-support-nav>
-                <span>{{ __('coin.admin.support') }}</span>
-                @if(($unreadSupportCount ?? 0) > 0)
-                    <span class="admin-sidebar-badge admin-sidebar-badge--support admin-support-badge" data-admin-support-nav-badge>{{ $unreadSupportCount }}</span>
-                @endif
-            </a>
+            @if($canManageBroadcasts ?? false)
+                <a href="{{ route('admin.broadcasts.index') }}" class="{{ $navClass($adminNavActive($routeName, 'admin.broadcasts')) }}">{{ __('coin.admin.broadcasts.title') }}</a>
+            @endif
+            @if($canManageSupport ?? false)
+                <a href="{{ route('admin.support.index') }}" class="{{ $navClass($adminNavActive($routeName, 'admin.support')) }}" data-admin-support-nav>
+                    <span>{{ __('coin.admin.support') }}</span>
+                    @if(($unreadSupportCount ?? 0) > 0)
+                        <span class="admin-sidebar-badge admin-sidebar-badge--support admin-support-badge" data-admin-support-nav-badge>{{ $unreadSupportCount }}</span>
+                    @endif
+                </a>
+            @endif
             <form method="POST" action="{{ route('admin.logout') }}">
                 @csrf
                 <button type="submit" class="admin-sidebar-link admin-sidebar-link--logout">{{ __('coin.nav.logout') }}</button>

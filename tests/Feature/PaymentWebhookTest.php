@@ -101,6 +101,7 @@ class PaymentWebhookTest extends TestCase
         $this->assertSame(Deposit::STATUS_PENDING, $deposit->status);
 
         $this->assertDatabaseHas('payment_webhook_logs', [
+            'deposit_id' => $deposit->id,
             'processing_result' => PaymentWebhookLog::RESULT_IGNORED.': Awaiting confirmations.',
         ]);
 

@@ -69,7 +69,7 @@ class AppServiceProvider extends ServiceProvider
         }
 
         View::composer(
-            ['admin.partials.sidebar', 'admin.partials.finance-tabs'],
+            ['admin.partials.sidebar', 'admin.partials.finance-tabs', 'admin.dashboard'],
             AdminNavComposer::class,
         );
 

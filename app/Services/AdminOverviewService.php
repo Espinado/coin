@@ -29,6 +29,7 @@ class AdminOverviewService
             'open_tickets' => SupportTicket::query()->where('status', SupportTicket::STATUS_OPEN)->count(),
             'pending_withdrawals_count' => (clone $pendingWithdrawals)->count(),
             'pending_withdrawals_sum' => (float) (clone $pendingWithdrawals)->sum('amount'),
+            'stale_processing_withdrawals_count' => Withdrawal::staleProcessingCount(),
             'today_profit' => (float) WalletTransaction::query()
                 ->where('type', 'Daily profit')
                 ->whereDate('occurred_at', today())

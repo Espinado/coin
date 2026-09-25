@@ -72,20 +72,17 @@ Route::middleware(['admin.domain', 'reject.web.on.admin'])->group(function () {
         Route::get('dashboard', DashboardController::class)
             ->name('admin.dashboard');
 
-        Route::get('users', [UserController::class, 'index'])->name('admin.users.index');
-        Route::get('users/{user}', [UserController::class, 'show'])->name('admin.users.show');
-        Route::patch('users/{user}', [UserController::class, 'update'])
-            ->middleware('admin.ability:manage_users')
-            ->name('admin.users.update');
-        Route::post('users/{user}/notifications', [UserController::class, 'sendNotification'])
-            ->middleware('admin.ability:manage_users')
-            ->name('admin.users.notifications.store');
-        Route::post('users/{user}/call', [VoximplantCallController::class, 'store'])
-            ->middleware('admin.ability:manage_users')
-            ->name('admin.users.call');
-        Route::post('voximplant/one-time-key', [VoximplantCallController::class, 'oneTimeKey'])
-            ->middleware('admin.ability:manage_users')
-            ->name('admin.voximplant.one-time-key');
+        Route::middleware('admin.ability:manage_users')->group(function () {
+            Route::get('users', [UserController::class, 'index'])->name('admin.users.index');
+            Route::get('users/{user}', [UserController::class, 'show'])->name('admin.users.show');
+            Route::patch('users/{user}', [UserController::class, 'update'])->name('admin.users.update');
+            Route::post('users/{user}/notifications', [UserController::class, 'sendNotification'])
+                ->name('admin.users.notifications.store');
+            Route::post('users/{user}/call', [VoximplantCallController::class, 'store'])
+                ->name('admin.users.call');
+            Route::post('voximplant/one-time-key', [VoximplantCallController::class, 'oneTimeKey'])
+                ->name('admin.voximplant.one-time-key');
+        });
 
         Route::middleware('admin.ability:manage_deposits')->group(function () {
             Route::get('deposits', [DepositController::class, 'index'])->name('admin.deposits.index');
@@ -109,92 +106,79 @@ Route::middleware(['admin.domain', 'reject.web.on.admin'])->group(function () {
             ->middleware('admin.ability:manage_withdrawals')
             ->name('admin.withdrawals.status');
 
-        Route::get('plan-changes', [PlanChangeRequestController::class, 'index'])->name('admin.plan-changes.index');
-        Route::get('plan-changes/{planChange}', [PlanChangeRequestController::class, 'show'])->name('admin.plan-changes.show');
-        Route::post('plan-changes/{planChange}/approve', [PlanChangeRequestController::class, 'approve'])
-            ->middleware('admin.ability:manage_plan_changes')
-            ->name('admin.plan-changes.approve');
-        Route::post('plan-changes/{planChange}/reject', [PlanChangeRequestController::class, 'reject'])
-            ->middleware('admin.ability:manage_plan_changes')
-            ->name('admin.plan-changes.reject');
-
-        Route::get('plans', [PlanController::class, 'index'])->name('admin.plans.index');
-        Route::get('plans/create', [PlanController::class, 'create'])->name('admin.plans.create');
-        Route::post('plans', [PlanController::class, 'store'])
-            ->middleware('admin.ability:manage_plans')
-            ->name('admin.plans.store');
-        Route::get('plans/{plan}/edit', [PlanController::class, 'edit'])->name('admin.plans.edit');
-        Route::patch('plans/{plan}', [PlanController::class, 'update'])
-            ->middleware('admin.ability:manage_plans')
-            ->name('admin.plans.update');
-        Route::delete('plans/{plan}', [PlanController::class, 'destroy'])
-            ->middleware('admin.ability:manage_plans')
-            ->name('admin.plans.destroy');
+        Route::middleware('admin.ability:manage_plan_changes')->group(function () {
+            Route::get('plan-changes', [PlanChangeRequestController::class, 'index'])->name('admin.plan-changes.index');
+            Route::get('plan-changes/{planChange}', [PlanChangeRequestController::class, 'show'])->name('admin.plan-changes.show');
+            Route::post('plan-changes/{planChange}/approve', [PlanChangeRequestController::class, 'approve'])
+                ->name('admin.plan-changes.approve');
+            Route::post('plan-changes/{planChange}/reject', [PlanChangeRequestController::class, 'reject'])
+                ->name('admin.plan-changes.reject');
+        });
 
         Route::middleware('admin.ability:manage_plans')->group(function () {
+            Route::get('plans', [PlanController::class, 'index'])->name('admin.plans.index');
+            Route::get('plans/create', [PlanController::class, 'create'])->name('admin.plans.create');
+            Route::post('plans', [PlanController::class, 'store'])->name('admin.plans.store');
+            Route::get('plans/{plan}/edit', [PlanController::class, 'edit'])->name('admin.plans.edit');
+            Route::patch('plans/{plan}', [PlanController::class, 'update'])->name('admin.plans.update');
+            Route::delete('plans/{plan}', [PlanController::class, 'destroy'])->name('admin.plans.destroy');
+
             Route::get('profit-accrual', [ProfitAccrualController::class, 'index'])->name('admin.profit-accrual.index');
 
             Route::redirect('epochs', '/profit-accrual')->name('admin.epochs.index');
             Route::get('epochs/{epoch}', [EpochController::class, 'show'])->name('admin.epochs.show');
         });
 
-        Route::get('settings', [SettingsController::class, 'edit'])->name('admin.settings.edit');
-        Route::patch('settings', [SettingsController::class, 'update'])
-            ->middleware('admin.ability:manage_settings')
-            ->name('admin.settings.update');
-        Route::post('settings/refresh-btc-rate', [SettingsController::class, 'refreshBtcRate'])
-            ->middleware('admin.ability:manage_settings')
-            ->name('admin.settings.refresh-btc-rate');
-        Route::patch('settings/legal', [SettingsController::class, 'updateLegal'])
-            ->middleware('admin.ability:manage_settings')
-            ->name('admin.settings.legal.update');
+        Route::middleware('admin.ability:manage_settings')->group(function () {
+            Route::get('settings', [SettingsController::class, 'edit'])->name('admin.settings.edit');
+            Route::patch('settings', [SettingsController::class, 'update'])->name('admin.settings.update');
+            Route::post('settings/refresh-btc-rate', [SettingsController::class, 'refreshBtcRate'])
+                ->name('admin.settings.refresh-btc-rate');
+            Route::patch('settings/legal', [SettingsController::class, 'updateLegal'])
+                ->name('admin.settings.legal.update');
+        });
 
-        Route::get('admins', [AdminStaffController::class, 'index'])->name('admin.admins.index');
-        Route::get('admins/invite', [AdminStaffController::class, 'create'])->name('admin.admins.invite');
-        Route::post('admins/invite', [AdminStaffController::class, 'store'])
-            ->middleware('admin.ability:manage_admins')
-            ->name('admin.admins.invite.store');
-        Route::delete('admins/{admin}', [AdminStaffController::class, 'destroy'])
-            ->middleware('admin.ability:manage_admins')
-            ->name('admin.admins.destroy');
-        Route::post('admins/{admin}/reset-password', [AdminStaffController::class, 'resetPassword'])
-            ->middleware('admin.ability:manage_admins')
-            ->name('admin.admins.reset-password');
-        Route::delete('admins/invitations/{invitation}', [AdminStaffController::class, 'destroyInvitation'])
-            ->middleware('admin.ability:manage_admins')
-            ->name('admin.admins.invitations.destroy');
-        Route::post('admins/invitations/{invitation}/resend', [AdminStaffController::class, 'resendInvitation'])
-            ->middleware('admin.ability:manage_admins')
-            ->name('admin.admins.invitations.resend');
+        Route::middleware('admin.ability:manage_admins')->group(function () {
+            Route::get('admins', [AdminStaffController::class, 'index'])->name('admin.admins.index');
+            Route::get('admins/invite', [AdminStaffController::class, 'create'])->name('admin.admins.invite');
+            Route::post('admins/invite', [AdminStaffController::class, 'store'])->name('admin.admins.invite.store');
+            Route::delete('admins/{admin}', [AdminStaffController::class, 'destroy'])->name('admin.admins.destroy');
+            Route::post('admins/{admin}/reset-password', [AdminStaffController::class, 'resetPassword'])
+                ->name('admin.admins.reset-password');
+            Route::delete('admins/invitations/{invitation}', [AdminStaffController::class, 'destroyInvitation'])
+                ->name('admin.admins.invitations.destroy');
+            Route::post('admins/invitations/{invitation}/resend', [AdminStaffController::class, 'resendInvitation'])
+                ->name('admin.admins.invitations.resend');
+        });
 
-        Route::get('legal', [LegalPageController::class, 'index'])->name('admin.legal.index');
-        Route::get('legal/{legalPage}/edit', [LegalPageController::class, 'edit'])->name('admin.legal.edit');
-        Route::patch('legal/{legalPage}', [LegalPageController::class, 'update'])
-            ->middleware('admin.ability:manage_legal')
-            ->name('admin.legal.update');
+        Route::middleware('admin.ability:manage_legal')->group(function () {
+            Route::get('legal', [LegalPageController::class, 'index'])->name('admin.legal.index');
+            Route::get('legal/{legalPage}/edit', [LegalPageController::class, 'edit'])->name('admin.legal.edit');
+            Route::patch('legal/{legalPage}', [LegalPageController::class, 'update'])->name('admin.legal.update');
+        });
 
-        Route::get('broadcasts', [BroadcastController::class, 'index'])->name('admin.broadcasts.index');
-        Route::get('broadcasts/create', [BroadcastController::class, 'create'])->name('admin.broadcasts.create');
-        Route::post('broadcasts', [BroadcastController::class, 'store'])
-            ->middleware('admin.ability:manage_broadcasts')
-            ->name('admin.broadcasts.store');
-        Route::get('broadcasts/{broadcast}', [BroadcastController::class, 'show'])->name('admin.broadcasts.show');
+        Route::middleware('admin.ability:manage_broadcasts')->group(function () {
+            Route::get('broadcasts', [BroadcastController::class, 'index'])->name('admin.broadcasts.index');
+            Route::get('broadcasts/create', [BroadcastController::class, 'create'])->name('admin.broadcasts.create');
+            Route::post('broadcasts', [BroadcastController::class, 'store'])->name('admin.broadcasts.store');
+            Route::get('broadcasts/{broadcast}', [BroadcastController::class, 'show'])->name('admin.broadcasts.show');
+        });
 
-        Route::get('support', [SupportTicketController::class, 'index'])
-            ->name('admin.support.index');
-        Route::get('support/unread-count', [SupportTicketController::class, 'unreadCount'])
-            ->name('admin.support.unread-count');
-        Route::get('support/{ticket}', [SupportTicketController::class, 'show'])
-            ->name('admin.support.show')
-            ->missing(fn () => redirect()
-                ->route('admin.support.index')
-                ->with('status', __('coin.admin.support_ticket_not_found')));
-        Route::post('support/{ticket}/reply', [SupportTicketController::class, 'reply'])
-            ->middleware('admin.ability:manage_support')
-            ->name('admin.support.reply');
-        Route::patch('support/{ticket}/status', [SupportTicketController::class, 'updateStatus'])
-            ->middleware('admin.ability:manage_support')
-            ->name('admin.support.status');
+        Route::middleware('admin.ability:manage_support')->group(function () {
+            Route::get('support', [SupportTicketController::class, 'index'])
+                ->name('admin.support.index');
+            Route::get('support/unread-count', [SupportTicketController::class, 'unreadCount'])
+                ->name('admin.support.unread-count');
+            Route::get('support/{ticket}', [SupportTicketController::class, 'show'])
+                ->name('admin.support.show')
+                ->missing(fn () => redirect()
+                    ->route('admin.support.index')
+                    ->with('status', __('coin.admin.support_ticket_not_found')));
+            Route::post('support/{ticket}/reply', [SupportTicketController::class, 'reply'])
+                ->name('admin.support.reply');
+            Route::patch('support/{ticket}/status', [SupportTicketController::class, 'updateStatus'])
+                ->name('admin.support.status');
+        });
 
         Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])
             ->name('admin.logout');

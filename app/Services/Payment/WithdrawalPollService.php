@@ -20,6 +20,7 @@ use App\Services\WithdrawalService;
 
 use App\Support\PaymentStatusReason;
 
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 
 
@@ -57,6 +58,8 @@ class WithdrawalPollService
             'errors' => 0,
 
             'abandoned' => 0,
+
+            'stale' => 0,
 
         ];
 
@@ -376,9 +379,39 @@ class WithdrawalPollService
 
         $stats['pending']++;
 
+        $this->alertIfStaleProcessing($withdrawal, $stats);
+
     }
 
 
+
+    /** @param array{polled: int, completed: int, failed: int, pending: int, errors: int, abandoned: int, stale: int} $stats */
+    private function alertIfStaleProcessing(Withdrawal $withdrawal, array &$stats): void
+    {
+        $staleHours = max(1, (int) config('coin.payments.ccapi.withdrawal_poll_stale_hours', 24));
+        $anchor = $withdrawal->sent_at ?? $withdrawal->created_at;
+
+        if ($anchor === null || $anchor->gt(now()->subHours($staleHours))) {
+            return;
+        }
+
+        $cacheKey = 'withdrawal.poll.stale:'.$withdrawal->id;
+
+        if (! Cache::add($cacheKey, true, now()->addHour())) {
+            return;
+        }
+
+        $stats['stale']++;
+
+        Log::warning('withdrawal.poll.stale_processing', [
+            'withdrawal_id' => $withdrawal->id,
+            'reference' => $withdrawal->reference,
+            'gateway_request_id' => $withdrawal->gateway_request_id,
+            'gateway_state' => $withdrawal->gateway_state,
+            'sent_at' => $withdrawal->sent_at?->toIso8601String(),
+            'stale_hours' => $staleHours,
+        ]);
+    }
 
     private function shouldAbandonAsMockGateway(Withdrawal $withdrawal): bool
 

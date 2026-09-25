@@ -90,6 +90,7 @@ return [
             ))),
             // Poll CCAPI .status for withdrawals stuck in processing without IPN.
             'poll_stuck_withdrawals' => (bool) env('CCAPI_POLL_STUCK_WITHDRAWALS', true),
+            // Log/dashboard alert when processing payout exceeds this age without final IPN.
             'withdrawal_poll_stale_hours' => max(1, (int) env('CCAPI_WITHDRAWAL_POLL_STALE_HOURS', 24)),
             'withdrawal_poll_error_reject_count' => max(1, (int) env('CCAPI_WITHDRAWAL_POLL_ERROR_REJECT_COUNT', 30)),
             // Reject expired pending deposits and log stale ones awaiting IPN.

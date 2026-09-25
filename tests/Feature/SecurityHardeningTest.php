@@ -177,6 +177,62 @@ class SecurityHardeningTest extends TestCase
             ->assertForbidden();
     }
 
+    public function test_viewer_admin_cannot_access_sensitive_admin_sections(): void
+    {
+        $viewer = Admin::query()->create([
+            'name' => 'Viewer',
+            'email' => 'viewer-sections@coin.test',
+            'password' => 'password',
+            'role' => AdminRole::Viewer,
+        ]);
+
+        $this->actingAs($viewer, 'admin')
+            ->get('http://admin.coin.test/users')
+            ->assertForbidden();
+
+        $this->actingAs($viewer, 'admin')
+            ->get('http://admin.coin.test/settings')
+            ->assertForbidden();
+
+        $this->actingAs($viewer, 'admin')
+            ->get('http://admin.coin.test/admins')
+            ->assertForbidden();
+
+        $this->actingAs($viewer, 'admin')
+            ->get('http://admin.coin.test/legal')
+            ->assertForbidden();
+
+        $this->actingAs($viewer, 'admin')
+            ->get('http://admin.coin.test/plans')
+            ->assertForbidden();
+
+        $this->actingAs($viewer, 'admin')
+            ->get('http://admin.coin.test/plan-changes')
+            ->assertForbidden();
+
+        $this->actingAs($viewer, 'admin')
+            ->get('http://admin.coin.test/broadcasts')
+            ->assertForbidden();
+
+        $this->actingAs($viewer, 'admin')
+            ->get('http://admin.coin.test/support')
+            ->assertForbidden();
+    }
+
+    public function test_viewer_admin_can_access_dashboard(): void
+    {
+        $viewer = Admin::query()->create([
+            'name' => 'Viewer',
+            'email' => 'viewer-dashboard@coin.test',
+            'password' => 'password',
+            'role' => AdminRole::Viewer,
+        ]);
+
+        $this->actingAs($viewer, 'admin')
+            ->get('http://admin.coin.test/dashboard')
+            ->assertOk();
+    }
+
     public function test_viewer_admin_cannot_update_platform_settings(): void
     {
         $viewer = Admin::query()->create([

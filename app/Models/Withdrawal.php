@@ -192,6 +192,25 @@ class Withdrawal extends Model
         return self::query()->whereIn('status', self::openStatuses())->count();
     }
 
+    public static function staleProcessingCount(?int $staleHours = null): int
+    {
+        $staleHours ??= max(1, (int) config('coin.payments.ccapi.withdrawal_poll_stale_hours', 24));
+        $threshold = now()->subHours($staleHours);
+
+        return self::query()
+            ->where('status', self::STATUS_PROCESSING)
+            ->where(function ($query) use ($threshold) {
+                $query->where(function ($inner) use ($threshold) {
+                    $inner->whereNotNull('sent_at')
+                        ->where('sent_at', '<=', $threshold);
+                })->orWhere(function ($inner) use ($threshold) {
+                    $inner->whereNull('sent_at')
+                        ->where('created_at', '<=', $threshold);
+                });
+            })
+            ->count();
+    }
+
     public function userRejectionMessage(): ?string
     {
         if ($this->status !== self::STATUS_REJECTED) {

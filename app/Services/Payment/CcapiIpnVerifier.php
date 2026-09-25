@@ -2,6 +2,10 @@
 
 namespace App\Services\Payment;
 
+/**
+ * CCAPI IPN signatures use SHA-1 per gateway protocol (not chosen by this app).
+ * Security relies on a secret API key, HTTPS, and webhook source IP allowlisting.
+ */
 class CcapiIpnVerifier
 {
     public function verify(array $payload, string $apiKey): bool

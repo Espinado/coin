@@ -20,12 +20,13 @@ class PollStuckWithdrawalsCommand extends Command
         }
 
         $this->components->info(sprintf(
-            'Polled %d withdrawal(s): %d completed, %d pending, %d gateway failed, %d errors.',
+            'Polled %d withdrawal(s): %d completed, %d pending, %d gateway failed, %d errors, %d stale alert(s).',
             $stats['polled'],
             $stats['completed'],
             $stats['pending'],
             $stats['failed'],
             $stats['errors'],
+            $stats['stale'],
         ));
 
         return self::SUCCESS;
