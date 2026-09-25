@@ -10,37 +10,37 @@ final class ProductionPaymentConfigGuard
     /** @return list<string> */
     public static function violations(): array
     {
-        if (! app()->environment('production')) {
+        if (! app()->environment(['production', 'staging'])) {
             return [];
         }
 
         $errors = [];
 
         if ((string) config('coin.payments.driver', 'mock') !== 'ccapi') {
-            $errors[] = 'COIN_PAYMENT_DRIVER must be ccapi in production.';
+            $errors[] = 'COIN_PAYMENT_DRIVER must be ccapi in production and staging.';
         }
 
         if (! filled((string) config('coin.payments.ccapi.api_key'))) {
-            $errors[] = 'CCAPI_API_KEY must be set in production.';
+            $errors[] = 'CCAPI_API_KEY must be set in production and staging.';
         }
 
         $webhookIps = config('coin.payments.ccapi.webhook_ips', []);
 
         if (! is_array($webhookIps) || $webhookIps === []) {
-            $errors[] = 'CCAPI_WEBHOOK_IPS must be set explicitly in production.';
+            $errors[] = 'CCAPI_WEBHOOK_IPS must be set explicitly in production and staging.';
         }
 
         $trustedProxies = config('coin.trusted_proxies', []);
 
         if (is_array($trustedProxies) && in_array('*', $trustedProxies, true)) {
-            $errors[] = 'COIN_TRUSTED_PROXIES must not be * in production (webhook IP checks can be bypassed).';
+            $errors[] = 'COIN_TRUSTED_PROXIES must not be * in production and staging (webhook IP checks can be bypassed).';
         }
 
         if (self::platformSettingsAvailable()) {
             $settings = app(PlatformSettingsService::class);
 
             if (! $settings->paymentGateEnabled()) {
-                $errors[] = 'payment_gate_enabled must be enabled in production platform settings.';
+                $errors[] = 'payment_gate_enabled must be enabled in production and staging platform settings.';
             }
         }
 
@@ -60,7 +60,7 @@ final class ProductionPaymentConfigGuard
         }
 
         throw new \RuntimeException(
-            'Production payment configuration is unsafe: '.implode(' ', $errors),
+            'Live payment configuration is unsafe: '.implode(' ', $errors),
         );
     }
 

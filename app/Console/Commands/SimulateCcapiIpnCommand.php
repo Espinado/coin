@@ -23,6 +23,7 @@ class SimulateCcapiIpnCommand extends Command
                             {--url= : Webhook URL for --via=http (defaults to CCAPI_IPN_URL)}
                             {--dry-run : Print payload only, do not dispatch}
                             {--allow-live-target : Allow simulating IPN for ccapi-method deposits (local/testing only)}
+                            {--confirm-external-url : Allow --via=http to a host outside APP_URL (local/testing only)}
                             {--force : Ignored; kept for backward compatibility}';
 
     protected $description = 'Simulate a signed CryptoCurrencyAPI IPN for local webhook testing';
@@ -210,6 +211,8 @@ class SimulateCcapiIpnCommand extends Command
             throw new \RuntimeException('Webhook URL is empty. Set CCAPI_IPN_URL or pass --url=');
         }
 
+        $this->assertAllowedWebhookUrl($url);
+
         $httpResponse = Http::timeout(15)
             ->acceptJson()
             ->asJson()
@@ -272,5 +275,34 @@ class SimulateCcapiIpnCommand extends Command
         }
 
         return app()->environment(['local', 'testing']);
+    }
+
+    private function assertAllowedWebhookUrl(string $url): void
+    {
+        $targetHost = strtolower((string) parse_url($url, PHP_URL_HOST));
+
+        if ($targetHost === '') {
+            throw new \RuntimeException('Webhook URL must include a host.');
+        }
+
+        $allowedHosts = array_values(array_filter(array_unique(array_map(
+            static fn (?string $host): string => strtolower((string) $host),
+            [
+                parse_url((string) config('app.url'), PHP_URL_HOST),
+                (string) config('coin.user_domain'),
+                (string) config('coin.admin_domain'),
+            ],
+        ))));
+
+        if (in_array($targetHost, $allowedHosts, true)) {
+            return;
+        }
+
+        if (! $this->option('confirm-external-url')) {
+            throw new \RuntimeException(
+                'Webhook URL host "'.$targetHost.'" is outside this application. '
+                .'Use --confirm-external-url to override.',
+            );
+        }
     }
 }

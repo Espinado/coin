@@ -14,6 +14,7 @@ use App\Models\Withdrawal;
 use App\Services\Payment\PaymentGatewayInterface;
 use App\Services\Payment\PaymentSimulatorService;
 use App\Services\Payment\PaymentStatusLogService;
+use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use RuntimeException;
@@ -359,6 +360,19 @@ class WithdrawalService
         });
     }
 
+    public function findPaidWithdrawalWithTxid(?string $txid, int $exceptWithdrawalId): ?Withdrawal
+    {
+        if ($txid === null || trim($txid) === '') {
+            return null;
+        }
+
+        return Withdrawal::query()
+            ->where('txid', trim($txid))
+            ->where('status', Withdrawal::STATUS_PAID)
+            ->whereKeyNot($exceptWithdrawalId)
+            ->first();
+    }
+
     public function markPaidFromGateway(
         Withdrawal $withdrawal,
         ?string $txid = null,
@@ -377,6 +391,12 @@ class WithdrawalService
                 throw new RuntimeException('Only processing withdrawals can be marked paid from gateway.');
             }
 
+            $resolvedTxid = $txid ?? $withdrawal->txid;
+
+            if ($this->findPaidWithdrawalWithTxid($resolvedTxid, $withdrawal->id) !== null) {
+                throw new RuntimeException('Transaction id already used by another paid withdrawal.');
+            }
+
             $wallet = $this->lockWallet(
                 $withdrawal->user->wallet ?? throw new RuntimeException('User has no wallet.'),
             );
@@ -384,12 +404,16 @@ class WithdrawalService
             $this->recordPayoutTransaction($withdrawal, $wallet);
             $this->recordPlatformFeeTransaction($withdrawal, $wallet);
 
-            $withdrawal->update([
-                'status' => Withdrawal::STATUS_PAID,
-                'txid' => $txid ?? $withdrawal->txid,
-                'gateway_state' => $gatewayState ?? $withdrawal->gateway_state,
-                'processed_at' => now(),
-            ]);
+            try {
+                $withdrawal->update([
+                    'status' => Withdrawal::STATUS_PAID,
+                    'txid' => $resolvedTxid,
+                    'gateway_state' => $gatewayState ?? $withdrawal->gateway_state,
+                    'processed_at' => now(),
+                ]);
+            } catch (UniqueConstraintViolationException) {
+                throw new RuntimeException('Transaction id already used by another paid withdrawal.');
+            }
 
             $withdrawal = $withdrawal->fresh(['user.wallet', 'processedByAdmin']);
 

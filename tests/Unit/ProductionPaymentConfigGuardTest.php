@@ -28,9 +28,9 @@ class ProductionPaymentConfigGuardTest extends TestCase
 
         $violations = ProductionPaymentConfigGuard::violations();
 
-        $this->assertContains('COIN_PAYMENT_DRIVER must be ccapi in production.', $violations);
-        $this->assertContains('CCAPI_API_KEY must be set in production.', $violations);
-        $this->assertContains('CCAPI_WEBHOOK_IPS must be set explicitly in production.', $violations);
+        $this->assertContains('COIN_PAYMENT_DRIVER must be ccapi in production and staging.', $violations);
+        $this->assertContains('CCAPI_API_KEY must be set in production and staging.', $violations);
+        $this->assertContains('CCAPI_WEBHOOK_IPS must be set explicitly in production and staging.', $violations);
     }
 
     public function test_production_rejects_wildcard_trusted_proxies(): void
@@ -44,9 +44,26 @@ class ProductionPaymentConfigGuardTest extends TestCase
         $violations = ProductionPaymentConfigGuard::violations();
 
         $this->assertContains(
-            'COIN_TRUSTED_PROXIES must not be * in production (webhook IP checks can be bypassed).',
+            'COIN_TRUSTED_PROXIES must not be * in production and staging (webhook IP checks can be bypassed).',
             $violations,
         );
+    }
+
+    public function test_staging_requires_same_payment_config_as_production(): void
+    {
+        app()['env'] = 'staging';
+
+        config([
+            'coin.payments.driver' => 'mock',
+            'coin.payments.ccapi.api_key' => '',
+            'coin.payments.ccapi.webhook_ips' => [],
+            'coin.trusted_proxies' => [],
+        ]);
+
+        $violations = ProductionPaymentConfigGuard::violations();
+
+        $this->assertContains('COIN_PAYMENT_DRIVER must be ccapi in production and staging.', $violations);
+        $this->assertContains('CCAPI_WEBHOOK_IPS must be set explicitly in production and staging.', $violations);
     }
 
     public function test_valid_production_payment_config_has_no_violations_when_gate_enabled(): void

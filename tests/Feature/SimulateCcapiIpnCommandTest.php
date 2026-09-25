@@ -123,6 +123,35 @@ class SimulateCcapiIpnCommandTest extends TestCase
         $this->assertSame(Deposit::STATUS_PENDING, $deposit->fresh()->status);
     }
 
+    public function test_http_dispatch_blocks_external_url_without_confirmation(): void
+    {
+        config([
+            'app.url' => 'http://coin.test',
+            'coin.user_domain' => 'coin.test',
+            'coin.payments.ccapi.ipn_url' => 'https://evil.example/webhooks/ccapi',
+        ]);
+
+        $user = User::factory()->create();
+        $deposit = Deposit::query()->create([
+            'user_id' => $user->id,
+            'amount' => 10,
+            'currency' => 'USDT',
+            'status' => Deposit::STATUS_PENDING,
+            'method' => 'ccapi',
+            'payment_address' => 'TSimAddress',
+            'gateway_network' => 'trx',
+        ]);
+        $deposit->update(['gateway_uniq_id' => Deposit::gatewayUniqId($deposit->id)]);
+
+        $this->artisan('coin:simulate-ccapi-ipn', [
+            '--deposit' => $deposit->id,
+            '--via' => 'http',
+            '--allow-live-target' => true,
+        ])->assertFailed();
+
+        $this->assertSame(Deposit::STATUS_PENDING, $deposit->fresh()->status);
+    }
+
     public function test_command_dry_run_does_not_confirm_deposit(): void
     {
         $user = User::factory()->create();

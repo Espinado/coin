@@ -244,6 +244,44 @@ class WithdrawalPollService
 
 
 
+            if ($this->withdrawals->findPaidWithdrawalWithTxid($status->txid, $withdrawal->id) !== null) {
+
+                $message = 'Poll confirmed but transaction id is already used by another withdrawal.';
+
+                Log::warning('withdrawal.poll.duplicate_txid', [
+
+                    'withdrawal_id' => $withdrawal->id,
+
+                    'reference' => $withdrawal->reference,
+
+                    'txid' => $status->txid,
+
+                ]);
+
+                $this->withdrawals->markFailedFromGateway(
+
+                    $withdrawal->fresh(),
+
+                    $status->state,
+
+                    $message,
+
+                    PaymentStatusReason::WITHDRAWAL_IPN_MISMATCH,
+
+                    PaymentStatusLog::SOURCE_POLL,
+
+                );
+
+                $this->recordPollLog($withdrawal, PaymentWebhookLog::RESULT_PROCESSED, $message, $status->raw);
+
+
+
+                return;
+
+            }
+
+
+
             $this->withdrawals->markPaidFromGateway(
 
                 $withdrawal->fresh(),

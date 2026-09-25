@@ -73,6 +73,55 @@ class PaymentWebhookTest extends TestCase
         ]);
     }
 
+    public function test_sub_threshold_ipn_retry_confirms_deposit_when_confirmations_increase(): void
+    {
+        config(['coin.payments.ccapi.min_confirmations' => 3]);
+
+        $user = User::factory()->create();
+        $deposit = Deposit::query()->create([
+            'user_id' => $user->id,
+            'amount' => 50,
+            'currency' => 'USDT',
+            'status' => Deposit::STATUS_PENDING,
+            'method' => 'ccapi',
+            'payment_address' => 'TMockSubThreshold123',
+            'gateway_network' => 'trx',
+        ]);
+        $deposit->update(['gateway_uniq_id' => Deposit::gatewayUniqId($deposit->id)]);
+        $deposit->refresh();
+
+        $txid = 'sub-threshold-retry-tx';
+
+        $this->postJson(
+            'http://coin.test/webhooks/ccapi',
+            $this->signedDepositPayload($deposit, $txid, 1),
+        )->assertOk();
+
+        $deposit->refresh();
+        $this->assertSame(Deposit::STATUS_PENDING, $deposit->status);
+
+        $this->assertDatabaseHas('payment_webhook_logs', [
+            'processing_result' => PaymentWebhookLog::RESULT_IGNORED.': Awaiting confirmations.',
+        ]);
+
+        $this->postJson(
+            'http://coin.test/webhooks/ccapi',
+            $this->signedDepositPayload($deposit, $txid, 3),
+        )->assertOk();
+
+        $deposit->refresh();
+        $user->refresh();
+
+        $this->assertSame(Deposit::STATUS_CONFIRMED, $deposit->status);
+        $this->assertSame($txid, $deposit->txid);
+        $this->assertSame('50.00', number_format((float) $user->wallet->available, 2, '.', ''));
+
+        $this->assertDatabaseHas('payment_webhook_logs', [
+            'deposit_id' => $deposit->id,
+            'processing_result' => PaymentWebhookLog::RESULT_PROCESSED.': Deposit confirmed from IPN.',
+        ]);
+    }
+
     public function test_duplicate_ipn_does_not_overwrite_processed_webhook_log(): void
     {
         $user = User::factory()->create();

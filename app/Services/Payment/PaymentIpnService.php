@@ -34,27 +34,13 @@ class PaymentIpnService
                     return $this->finishDuplicate($event, 'Duplicate IPN ignored.');
                 }
 
-                try {
-                    $log = PaymentWebhookLog::query()->create([
-                        'gateway' => (string) config('coin.payments.driver', 'mock'),
-                        'event_type' => $event->type,
-                        'payload' => $event->raw,
-                        'signature_valid' => true,
-                        'idempotency_key' => $event->idempotencyKey(),
-                    ]);
-                } catch (UniqueConstraintViolationException) {
+                $log = $this->resolveLogForProcessing($event);
+
+                if ($log === null) {
                     return $this->finishDuplicate($event, 'Duplicate IPN ignored (concurrent).');
                 }
 
-                if ($event->isIncomingPayment()) {
-                    return $this->handleIncomingPayment($event, $log);
-                }
-
-                if ($event->isOutgoingPayment()) {
-                    return $this->handleOutgoingPayment($event, $log);
-                }
-
-                return $this->finish($log, PaymentWebhookLog::RESULT_IGNORED, 'Unsupported IPN type.');
+                return $this->dispatchPaymentHandling($event, $log);
             });
         } catch (PaymentIpnRetryableException $exception) {
             throw $exception;
@@ -382,6 +368,12 @@ class PaymentIpnService
             );
         }
 
+        $duplicateResponse = $this->rejectIfWithdrawalTxidAlreadyPaid($event, $withdrawal, $log);
+
+        if ($duplicateResponse !== null) {
+            return $duplicateResponse;
+        }
+
         $this->withdrawals->markPaidFromGateway(
             $withdrawal,
             $event->txid,
@@ -466,6 +458,68 @@ class PaymentIpnService
             ->first();
     }
 
+    private function resolveLogForProcessing(VerifiedIpnEvent $event): ?PaymentWebhookLog
+    {
+        $existing = $this->findLogByIdempotency($event);
+
+        if ($existing !== null) {
+            return $this->prepareLogForRetry($existing, $event);
+        }
+
+        try {
+            return PaymentWebhookLog::query()->create([
+                'gateway' => (string) config('coin.payments.driver', 'mock'),
+                'event_type' => $event->type,
+                'payload' => $event->raw,
+                'signature_valid' => true,
+                'idempotency_key' => $event->idempotencyKey(),
+            ]);
+        } catch (UniqueConstraintViolationException) {
+            $existing = $this->findLogByIdempotency($event);
+
+            if ($existing === null) {
+                return null;
+            }
+
+            return $this->prepareLogForRetry($existing, $event);
+        }
+    }
+
+    private function dispatchPaymentHandling(VerifiedIpnEvent $event, PaymentWebhookLog $log): PaymentWebhookLog
+    {
+        if ($event->isIncomingPayment()) {
+            return $this->handleIncomingPayment($event, $log);
+        }
+
+        if ($event->isOutgoingPayment()) {
+            return $this->handleOutgoingPayment($event, $log);
+        }
+
+        return $this->finish($log, PaymentWebhookLog::RESULT_IGNORED, 'Unsupported IPN type.');
+    }
+
+    private function prepareLogForRetry(PaymentWebhookLog $log, VerifiedIpnEvent $event): ?PaymentWebhookLog
+    {
+        if (! $this->isRetryableLog($log)) {
+            return null;
+        }
+
+        $log->update([
+            'event_type' => $event->type,
+            'payload' => $event->raw,
+        ]);
+
+        return $log->fresh();
+    }
+
+    private function isRetryableLog(PaymentWebhookLog $log): bool
+    {
+        return in_array($log->resultType(), [
+            PaymentWebhookLog::RESULT_IGNORED,
+            PaymentWebhookLog::RESULT_FAILED,
+        ], true);
+    }
+
     private function finishDuplicate(VerifiedIpnEvent $event, string $message, ?Deposit $deposit = null): PaymentWebhookLog
     {
         $log = $this->findLogByIdempotency($event);
@@ -475,6 +529,12 @@ class PaymentIpnService
                 $this->ensureWebhookLogLinkedToDeposit($log, $deposit);
 
                 return $log->fresh();
+            }
+
+            $prepared = $this->prepareLogForRetry($log, $event);
+
+            if ($prepared !== null) {
+                return $this->dispatchPaymentHandling($event, $prepared);
             }
 
             return $this->finish($log, PaymentWebhookLog::RESULT_DUPLICATE, $message);
@@ -527,6 +587,25 @@ class PaymentIpnService
         );
 
         return $this->finish($log, PaymentWebhookLog::RESULT_PROCESSED, 'Withdrawal rejected: '.$reason);
+    }
+
+    private function rejectIfWithdrawalTxidAlreadyPaid(
+        VerifiedIpnEvent $event,
+        Withdrawal $withdrawal,
+        PaymentWebhookLog $log,
+    ): ?PaymentWebhookLog {
+        $duplicateWithdrawal = $this->withdrawals->findPaidWithdrawalWithTxid($event->txid, $withdrawal->id);
+
+        if ($duplicateWithdrawal === null) {
+            return null;
+        }
+
+        return $this->rejectWithdrawalFromIpnMismatch(
+            $withdrawal,
+            $log,
+            sprintf('Transaction id already paid on withdrawal %s.', $duplicateWithdrawal->reference),
+            $event,
+        );
     }
 
     private function rejectIfTxidAlreadyUsed(
