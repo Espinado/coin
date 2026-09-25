@@ -11,6 +11,7 @@ use App\Services\Payment\CryptoCurrencyApiClient;
 use App\Services\Payment\CryptoCurrencyApiGateway;
 use App\Services\Payment\MockPaymentGateway;
 use App\Services\Payment\PaymentGatewayInterface;
+use App\Support\ProductionPaymentConfigGuard;
 use App\View\Composers\AdminNavComposer;
 use Illuminate\Auth\Events\Lockout;
 use Illuminate\Cache\RateLimiting\Limit;
@@ -60,6 +61,8 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Schema::defaultStringLength(191);
+
+        ProductionPaymentConfigGuard::assertValid();
 
         if ($this->app->environment('production')) {
             URL::forceScheme('https');

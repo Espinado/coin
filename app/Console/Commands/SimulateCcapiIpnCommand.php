@@ -71,9 +71,7 @@ class SimulateCcapiIpnCommand extends Command
         }
 
         if ($deposit->method === 'ccapi' && ! $this->option('allow-live-target')) {
-            $this->components->error(
-                'Simulating IPN for ccapi-method deposits is blocked. Use a mock deposit or pass --allow-live-target.',
-            );
+            $this->components->error('ccapi-method deposits require --allow-live-target in local/testing.');
 
             return self::FAILURE;
         }

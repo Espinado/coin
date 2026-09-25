@@ -1,0 +1,92 @@
+<?php
+
+namespace App\Support;
+
+use App\Services\PlatformSettingsService;
+use Illuminate\Support\Facades\Schema;
+
+final class ProductionPaymentConfigGuard
+{
+    /** @return list<string> */
+    public static function violations(): array
+    {
+        if (! app()->environment('production')) {
+            return [];
+        }
+
+        $errors = [];
+
+        if ((string) config('coin.payments.driver', 'mock') !== 'ccapi') {
+            $errors[] = 'COIN_PAYMENT_DRIVER must be ccapi in production.';
+        }
+
+        if (! filled((string) config('coin.payments.ccapi.api_key'))) {
+            $errors[] = 'CCAPI_API_KEY must be set in production.';
+        }
+
+        $trustedProxies = config('coin.trusted_proxies', []);
+
+        if (is_array($trustedProxies) && in_array('*', $trustedProxies, true)) {
+            $errors[] = 'COIN_TRUSTED_PROXIES must not be * in production (webhook IP checks can be bypassed).';
+        }
+
+        if (Schema::hasTable('platform_settings')) {
+            $settings = app(PlatformSettingsService::class);
+
+            if (! $settings->paymentGateEnabled()) {
+                $errors[] = 'payment_gate_enabled must be enabled in production platform settings.';
+            }
+        }
+
+        return $errors;
+    }
+
+    public static function assertValid(): void
+    {
+        if (self::shouldSkip()) {
+            return;
+        }
+
+        $errors = self::violations();
+
+        if ($errors === []) {
+            return;
+        }
+
+        throw new \RuntimeException(
+            'Production payment configuration is unsafe: '.implode(' ', $errors),
+        );
+    }
+
+    private static function shouldSkip(): bool
+    {
+        if (! app()->runningInConsole()) {
+            return false;
+        }
+
+        $command = $_SERVER['argv'][1] ?? '';
+
+        if ($command === '') {
+            return true;
+        }
+
+        $skipPrefixes = [
+            'migrate',
+            'db:',
+            'key:',
+            'about',
+            'list',
+            'help',
+            'env',
+            'tinker',
+        ];
+
+        foreach ($skipPrefixes as $prefix) {
+            if ($command === $prefix || str_starts_with($command, $prefix)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+}

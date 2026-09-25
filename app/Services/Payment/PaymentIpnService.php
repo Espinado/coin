@@ -115,11 +115,6 @@ class PaymentIpnService
             return $this->finish($log, PaymentWebhookLog::RESULT_IGNORED, $validationError);
         }
 
-        $deposit->update([
-            'txid' => $event->txid,
-            'received_amount' => $event->amount,
-        ]);
-
         if (! $this->receivedAmountMatchesDeposit($event, $deposit)) {
             $this->deposits->reject(
                 $deposit,
@@ -141,22 +136,16 @@ class PaymentIpnService
             );
         }
 
-        $duplicateDeposit = $this->confirmedDepositWithTxid($event->txid, $deposit->id);
+        $duplicateResponse = $this->rejectIfTxidAlreadyUsed($event, $deposit, $log);
 
-        if ($duplicateDeposit !== null) {
-            $this->deposits->reject(
-                $deposit,
-                null,
-                PaymentStatusReason::DEPOSIT_DUPLICATE_TXID,
-                (float) ($event->amount ?? 0),
-                PaymentStatusLog::SOURCE_IPN,
-            );
+        if ($duplicateResponse !== null) {
+            return $duplicateResponse;
+        }
 
-            return $this->finish(
-                $log,
-                PaymentWebhookLog::RESULT_PROCESSED,
-                sprintf('Deposit rejected: txid already credited on deposit #%d.', $duplicateDeposit->id),
-            );
+        $assignResponse = $this->assignDepositReceiptFromIpn($event, $deposit, $log);
+
+        if ($assignResponse !== null) {
+            return $assignResponse;
         }
 
         $this->deposits->confirm($deposit, null, PaymentStatusLog::SOURCE_IPN);
@@ -512,6 +501,61 @@ class PaymentIpnService
             ->where('processing_result', 'like', PaymentWebhookLog::RESULT_PROCESSED.':%')
             ->whereNull('deposit_id')
             ->update(['deposit_id' => $deposit->id]);
+    }
+
+    private function rejectIfTxidAlreadyUsed(
+        VerifiedIpnEvent $event,
+        Deposit $deposit,
+        PaymentWebhookLog $log,
+    ): ?PaymentWebhookLog {
+        $duplicateDeposit = $this->confirmedDepositWithTxid($event->txid, $deposit->id);
+
+        if ($duplicateDeposit === null) {
+            return null;
+        }
+
+        $this->deposits->reject(
+            $deposit,
+            null,
+            PaymentStatusReason::DEPOSIT_DUPLICATE_TXID,
+            (float) ($event->amount ?? 0),
+            PaymentStatusLog::SOURCE_IPN,
+        );
+
+        return $this->finish(
+            $log,
+            PaymentWebhookLog::RESULT_PROCESSED,
+            sprintf('Deposit rejected: txid already credited on deposit #%d.', $duplicateDeposit->id),
+        );
+    }
+
+    private function assignDepositReceiptFromIpn(
+        VerifiedIpnEvent $event,
+        Deposit $deposit,
+        PaymentWebhookLog $log,
+    ): ?PaymentWebhookLog {
+        try {
+            $deposit->update([
+                'txid' => $event->txid,
+                'received_amount' => $event->amount,
+            ]);
+        } catch (UniqueConstraintViolationException) {
+            $this->deposits->reject(
+                $deposit,
+                null,
+                PaymentStatusReason::DEPOSIT_DUPLICATE_TXID,
+                (float) ($event->amount ?? 0),
+                PaymentStatusLog::SOURCE_IPN,
+            );
+
+            return $this->finish(
+                $log,
+                PaymentWebhookLog::RESULT_PROCESSED,
+                'Deposit rejected: txid already assigned to another deposit.',
+            );
+        }
+
+        return null;
     }
 
     private function confirmedDepositWithTxid(?string $txid, int $exceptDepositId): ?Deposit
