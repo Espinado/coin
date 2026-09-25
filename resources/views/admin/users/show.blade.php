@@ -33,14 +33,25 @@
                         <div
                             id="admin-vox-call"
                             data-username="{{ $voximplantUsername }}"
+                            data-user-name="{{ $user->name }}"
                             data-destination="{{ $voximplantDestination }}"
                             data-caller-id="{{ $voximplantCallerId }}"
                             data-node="{{ $voximplantNode }}"
                             data-one-time-key-url="{{ route('admin.voximplant.one-time-key') }}"
+                            data-status-idle="{{ __('coin.voximplant.status_idle') }}"
                             data-status-connecting="{{ __('coin.voximplant.status_connecting') }}"
                             data-status-ready="{{ __('coin.voximplant.status_ready') }}"
                             data-status-calling="{{ __('coin.voximplant.status_calling') }}"
+                            data-status-connected="{{ __('coin.voximplant.status_connected') }}"
+                            data-status-ended="{{ __('coin.voximplant.status_ended') }}"
+                            data-status-failed="{{ __('coin.voximplant.status_failed') }}"
                             data-status-no-phone="{{ __('coin.voximplant.no_phone') }}"
+                            data-label-dialing="{{ __('coin.voximplant.modal_dialing') }}"
+                            data-label-connected="{{ __('coin.voximplant.modal_connected') }}"
+                            data-label-ended="{{ __('coin.voximplant.modal_ended') }}"
+                            data-label-failed="{{ __('coin.voximplant.modal_failed') }}"
+                            data-label-duration="{{ __('coin.voximplant.modal_duration') }}"
+                            data-label-to-user="{{ __('coin.voximplant.modal_to_user') }}"
                         >
                             <div style="font-size:13px;margin-bottom:12px;">
                                 <span style="color:rgba(232,237,245,0.62);">{{ __('coin.admin.phone') }}:</span>
@@ -50,13 +61,7 @@
                                 {{ __('coin.voximplant.status_idle') }}
                             </div>
                             <div style="display:flex;flex-wrap:wrap;gap:10px;">
-                                <button type="button" class="admin-btn admin-btn-primary" data-vox-connect>{{ __('coin.voximplant.connect') }}</button>
-                                <button type="button" class="admin-btn admin-btn-primary" data-vox-call hidden>{{ __('coin.voximplant.call_browser') }}</button>
-                                <button type="button" class="admin-btn" data-vox-hangup hidden>{{ __('coin.voximplant.hangup') }}</button>
-                                <form method="POST" action="{{ route('admin.users.call', $user) }}" style="margin:0;">
-                                    @csrf
-                                    <button type="submit" class="admin-btn">{{ __('coin.voximplant.call_api') }}</button>
-                                </form>
+                                <button type="button" class="admin-btn admin-btn-primary" data-vox-call>{{ __('coin.voximplant.call') }}</button>
                             </div>
                             @if ($voximplantCallerId === '')
                                 <p style="margin:12px 0 0;font-size:12.5px;color:rgba(255,180,84,0.9);">{{ __('coin.voximplant.caller_id_missing') }}</p>
@@ -129,6 +134,8 @@
 @endsection
 
 @if ($voximplantReady && $voximplantDestination)
+    @include('admin.partials.vox-call-modal')
+
     @push('scripts')
         @vite(['resources/js/admin-vox-call.js'])
     @endpush

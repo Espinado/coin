@@ -15,6 +15,144 @@ function setStatus(root, message, isError = false) {
     status.style.color = isError ? '#ff8f8f' : 'rgba(232,237,245,0.78)';
 }
 
+function formatDuration(totalSeconds) {
+    const seconds = Math.max(0, totalSeconds);
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const remainder = seconds % 60;
+
+    if (hours > 0) {
+        return `${hours}:${String(minutes).padStart(2, '0')}:${String(remainder).padStart(2, '0')}`;
+    }
+
+    return `${String(minutes).padStart(2, '0')}:${String(remainder).padStart(2, '0')}`;
+}
+
+function createModalController(modal, labels) {
+    const title = modal.querySelector('[data-vox-modal-title]');
+    const subtitle = modal.querySelector('[data-vox-modal-subtitle]');
+    const timer = modal.querySelector('[data-vox-modal-timer]');
+    const duration = modal.querySelector('[data-vox-modal-duration]');
+    const spinner = modal.querySelector('[data-vox-modal-spinner]');
+    const hangupButton = modal.querySelector('[data-vox-modal-hangup]');
+    const closeButton = modal.querySelector('[data-vox-modal-close]');
+
+    let timerInterval = null;
+    let connectedAt = null;
+    let state = 'hidden';
+
+    const stopTimer = () => {
+        if (timerInterval !== null) {
+            clearInterval(timerInterval);
+            timerInterval = null;
+        }
+    };
+
+    const updateTimerDisplay = () => {
+        if (connectedAt === null || ! timer) {
+            return;
+        }
+
+        const elapsed = Math.floor((Date.now() - connectedAt) / 1000);
+        timer.textContent = formatDuration(elapsed);
+    };
+
+    const show = () => {
+        modal.hidden = false;
+        modal.style.display = 'flex';
+    };
+
+    const hide = () => {
+        stopTimer();
+        connectedAt = null;
+        state = 'hidden';
+        modal.hidden = true;
+        modal.style.display = 'none';
+    };
+
+    return {
+        hangupButton,
+        closeButton,
+        isActive: () => state === 'dialing' || state === 'connected',
+        showDialing(userName, phone) {
+            state = 'dialing';
+            show();
+            if (spinner) {
+                spinner.hidden = false;
+            }
+            if (title) {
+                title.textContent = labels.dialing;
+            }
+            if (subtitle) {
+                subtitle.textContent = labels.toUser
+                    .replace(':name', userName)
+                    .replace(':phone', phone);
+            }
+            if (timer) {
+                timer.style.display = 'none';
+            }
+            if (duration) {
+                duration.style.display = 'none';
+            }
+            if (hangupButton) {
+                hangupButton.hidden = false;
+            }
+            if (closeButton) {
+                closeButton.hidden = true;
+            }
+        },
+        showConnected() {
+            state = 'connected';
+            connectedAt = Date.now();
+            if (spinner) {
+                spinner.hidden = true;
+            }
+            if (title) {
+                title.textContent = labels.connected;
+            }
+            if (timer) {
+                timer.style.display = 'block';
+                timer.textContent = '00:00';
+            }
+            stopTimer();
+            timerInterval = window.setInterval(updateTimerDisplay, 1000);
+            updateTimerDisplay();
+        },
+        showEnded(talkSeconds, failed = false) {
+            state = 'ended';
+            stopTimer();
+
+            if (spinner) {
+                spinner.hidden = true;
+            }
+            if (title) {
+                title.textContent = failed ? labels.failed : labels.ended;
+            }
+            if (timer) {
+                timer.style.display = 'none';
+            }
+            if (duration) {
+                duration.style.display = 'block';
+                duration.textContent = labels.duration.replace(':duration', formatDuration(talkSeconds));
+            }
+            if (hangupButton) {
+                hangupButton.hidden = true;
+            }
+            if (closeButton) {
+                closeButton.hidden = false;
+            }
+        },
+        hide,
+        getTalkSeconds() {
+            if (connectedAt === null) {
+                return 0;
+            }
+
+            return Math.floor((Date.now() - connectedAt) / 1000);
+        },
+    };
+}
+
 async function requestOneTimeHash(oneTimeKeyUrl, key) {
     const response = await fetch(oneTimeKeyUrl, {
         method: 'POST',
@@ -97,43 +235,76 @@ async function ensureLoggedIn(root, sdk) {
     });
 }
 
-export function bootAdminVoxCall(root) {
-    if (! root) {
+function attachCallListeners(call, modal, root, onClear) {
+    let finished = false;
+
+    const finish = (failed = false) => {
+        if (finished) {
+            return;
+        }
+
+        finished = true;
+        const talkSeconds = modal.getTalkSeconds();
+        modal.showEnded(talkSeconds, failed);
+        onClear();
+        setStatus(root, failed
+            ? (root.dataset.statusFailed || 'Call failed.')
+            : (root.dataset.statusEnded || 'Call ended.'), failed);
+    };
+
+    call.on(VoxImplant.CallEvents.Connected, () => {
+        modal.showConnected();
+        setStatus(root, root.dataset.statusConnected || 'Connected.');
+    });
+
+    call.on(VoxImplant.CallEvents.Disconnected, () => {
+        finish(false);
+    });
+
+    call.on(VoxImplant.CallEvents.Failed, () => {
+        finish(true);
+    });
+}
+
+export function bootAdminVoxCall(root, modalElement) {
+    if (! root || ! modalElement) {
         return;
     }
 
     const sdk = VoxImplant.getInstance();
     const destination = root.dataset.destination || '';
     const callerId = root.dataset.callerId || '';
-    const connectButton = root.querySelector('[data-vox-connect]');
+    const userName = root.dataset.userName || '';
     const callButton = root.querySelector('[data-vox-call]');
-    const hangupButton = root.querySelector('[data-vox-hangup]');
     let activeCall = null;
 
+    const modal = createModalController(modalElement, {
+        dialing: root.dataset.labelDialing || 'Dialing…',
+        connected: root.dataset.labelConnected || 'Connected',
+        ended: root.dataset.labelEnded || 'Call ended',
+        failed: root.dataset.labelFailed || 'Call failed',
+        duration: root.dataset.labelDuration || 'Duration: :duration',
+        toUser: root.dataset.labelToUser || ':name · :phone',
+    });
+
     const refreshButtons = () => {
-        const loggedIn = sdk.getClientState() === VoxImplant.ClientState.LOGGED_IN;
-        connectButton.hidden = loggedIn;
-        callButton.hidden = ! loggedIn;
-        hangupButton.hidden = ! activeCall;
+        const inCall = modal.isActive();
+
+        if (callButton) {
+            callButton.disabled = inCall;
+        }
+    };
+
+    const clearActiveCall = () => {
+        activeCall = null;
+        refreshButtons();
     };
 
     sdk.addEventListener(VoxImplant.Events.IncomingCall, (event) => {
         activeCall = event.call;
+        modal.showDialing(userName, destination);
+        attachCallListeners(activeCall, modal, root, clearActiveCall);
         refreshButtons();
-    });
-
-    connectButton?.addEventListener('click', async () => {
-        connectButton.disabled = true;
-
-        try {
-            await ensureLoggedIn(root, sdk);
-            setStatus(root, root.dataset.statusReady || 'Ready.');
-        } catch (error) {
-            setStatus(root, error.message || 'Connection failed.', true);
-        } finally {
-            connectButton.disabled = false;
-            refreshButtons();
-        }
     });
 
     callButton?.addEventListener('click', async () => {
@@ -143,6 +314,8 @@ export function bootAdminVoxCall(root) {
         }
 
         callButton.disabled = true;
+        modal.showDialing(userName, destination);
+        refreshButtons();
 
         try {
             await ensureLoggedIn(root, sdk);
@@ -152,26 +325,44 @@ export function bootAdminVoxCall(root) {
                 destination,
                 caller_id: callerId,
             }));
-            refreshButtons();
+
+            attachCallListeners(activeCall, modal, root, clearActiveCall);
         } catch (error) {
+            modal.showEnded(0, true);
+            clearActiveCall();
             setStatus(root, error.message || 'Call failed.', true);
         } finally {
             callButton.disabled = false;
+            refreshButtons();
         }
     });
 
-    hangupButton?.addEventListener('click', () => {
-        activeCall?.hangup();
-        activeCall = null;
+    modal.hangupButton?.addEventListener('click', () => {
+        if (activeCall) {
+            activeCall.hangup();
+            return;
+        }
+
+        modal.showEnded(modal.getTalkSeconds(), false);
+        clearActiveCall();
+    });
+
+    modal.closeButton?.addEventListener('click', () => {
+        modal.hide();
+        if (sdk.getClientState() === VoxImplant.ClientState.LOGGED_IN) {
+            setStatus(root, root.dataset.statusReady || 'Ready.');
+        } else {
+            setStatus(root, root.dataset.statusIdle || 'Idle.');
+        }
         refreshButtons();
-        setStatus(root, root.dataset.statusReady || 'Ready.');
     });
 
     refreshButtons();
 }
 
 const root = document.getElementById('admin-vox-call');
+const modal = document.getElementById('admin-vox-call-modal');
 
-if (root) {
-    bootAdminVoxCall(root);
+if (root && modal) {
+    bootAdminVoxCall(root, modal);
 }
