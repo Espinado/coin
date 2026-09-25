@@ -175,10 +175,53 @@ class PaymentStatusLog extends Model
         return null;
     }
 
+    public function displayMessage(): string
+    {
+        $stored = trim((string) ($this->message ?? ''));
+
+        $entity = $this->linkedEntity();
+
+        if ($entity instanceof Withdrawal && $this->event_type === 'created') {
+            $amount = $entity->formattedAmount();
+
+            return match ($entity->status) {
+                Withdrawal::STATUS_REJECTED => __('coin.payment_log.message_withdrawal_created_rejected', [
+                    'amount' => $amount,
+                ]),
+                Withdrawal::STATUS_PAID => __('coin.payment_log.message_withdrawal_created_paid', [
+                    'amount' => $amount,
+                ]),
+                default => $stored !== ''
+                    ? $stored
+                    : __('coin.payment_log.message_withdrawal_created', ['amount' => $amount]),
+            };
+        }
+
+        if ($entity instanceof Deposit && $this->event_type === 'created') {
+            $amount = $entity->formattedAmount();
+
+            return match ($entity->status) {
+                Deposit::STATUS_REJECTED => __('coin.payment_log.message_deposit_created_rejected', [
+                    'amount' => $amount,
+                ]),
+                Deposit::STATUS_CONFIRMED => __('coin.payment_log.message_deposit_created_confirmed', [
+                    'amount' => $entity->formattedCreditedAmount() ?? $amount,
+                ]),
+                default => $stored !== ''
+                    ? $stored
+                    : __('coin.payment_log.message_deposit_created', ['amount' => $amount]),
+            };
+        }
+
+        return $stored !== '' ? $stored : ($this->title ?? '—');
+    }
+
     public function indexSummary(): string
     {
-        if ($this->message !== null && $this->message !== '') {
-            return $this->message;
+        $display = $this->displayMessage();
+
+        if ($display !== '' && $display !== '—') {
+            return $display;
         }
 
         return $this->title ?? '—';

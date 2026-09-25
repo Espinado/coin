@@ -59,7 +59,7 @@
 
             <div class="admin-card" style="margin-top:16px;">
                 <h2 style="margin:0 0 12px;font-size:16px;font-weight:600;">{{ __('coin.admin.message') }}</h2>
-                <p style="margin:0;font-size:13px;line-height:1.7;white-space:pre-wrap;">{{ $log->message }}</p>
+                <p style="margin:0;font-size:13px;line-height:1.7;white-space:pre-wrap;">{{ $log->displayMessage() }}</p>
                 @if($log->entity_type === 'withdrawal' && $log->new_status === 'rejected' && in_array($log->event_type, ['status_change', 'payout_poll'], true))
                 <p style="margin:12px 0 0;font-size:12px;color:rgba(232,237,245,0.62);">{{ __('coin.payment_log.detail_funds_restored') }}</p>
                 @endif

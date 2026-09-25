@@ -80,4 +80,23 @@ class PaymentStatusDecoderTest extends TestCase
         $this->assertSame(__('coin.withdrawal_status.rejected'), $log->entityStatusDisplayLabel());
         $this->assertStringNotContainsString(__('coin.withdrawal_status.pending'), $log->entityStatusDisplayLabel());
     }
+
+    public function test_created_log_message_reflects_rejected_withdrawal(): void
+    {
+        $withdrawal = new Withdrawal([
+            'amount' => 10,
+            'currency' => 'USDT',
+            'status' => Withdrawal::STATUS_REJECTED,
+        ]);
+
+        $log = new PaymentStatusLog([
+            'entity_type' => 'withdrawal',
+            'event_type' => 'created',
+            'message' => __('coin.payment_log.message_withdrawal_created', ['amount' => '10.00 USDT']),
+        ]);
+        $log->setRelation('withdrawal', $withdrawal);
+
+        $this->assertStringContainsString('возвращены', mb_strtolower($log->displayMessage()));
+        $this->assertStringNotContainsString('зарезервированы', mb_strtolower($log->displayMessage()));
+    }
 }
