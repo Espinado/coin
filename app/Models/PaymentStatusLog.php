@@ -119,45 +119,24 @@ class PaymentStatusLog extends Model
         );
     }
 
-    public function statusTransitionHeading(): string
+    public function entityStatusDisplayLabel(): string
     {
-        if ($this->event_type === 'created') {
-            return __('coin.payment_log.status_after_event_label');
+        $current = $this->currentEntityStatusLabel();
+
+        if ($current !== null) {
+            return $current;
         }
 
-        return __('coin.admin.status_transition');
+        if ($this->hasStatusTransition()) {
+            return $this->transitionLabel();
+        }
+
+        return '—';
     }
 
-    public function statusTransitionDisplayLabel(): string
+    public function showsEntityStatus(): bool
     {
-        if (! $this->hasStatusTransition()) {
-            return '—';
-        }
-
-        $eventLabel = $this->transitionLabel();
-
-        if ($this->entityStatusDiffersFromEvent()) {
-            $current = $this->currentEntityStatusLabel();
-
-            if ($current !== null) {
-                return $eventLabel.' · '.__('coin.payment_log.current_entity_status', [
-                    'status' => $current,
-                ]);
-            }
-        }
-
-        return $eventLabel;
-    }
-
-    public function entityStatusDiffersFromEvent(): bool
-    {
-        $entity = $this->linkedEntity();
-
-        if ($entity === null || $this->new_status === null) {
-            return false;
-        }
-
-        return $entity->status !== $this->new_status;
+        return $this->currentEntityStatusLabel() !== null;
     }
 
     public function currentEntityStatusLabel(): ?string

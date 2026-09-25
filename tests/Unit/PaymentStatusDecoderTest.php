@@ -60,7 +60,7 @@ class PaymentStatusDecoderTest extends TestCase
         $this->assertSame(__('coin.payment_log.status_reason_withdrawal_gateway_failed'), $label);
     }
 
-    public function test_created_log_shows_current_entity_status_when_stale(): void
+    public function test_entity_status_display_uses_current_status_only(): void
     {
         $withdrawal = new Withdrawal([
             'reference' => 'WD-STALE02',
@@ -76,8 +76,8 @@ class PaymentStatusDecoderTest extends TestCase
         ]);
         $log->setRelation('withdrawal', $withdrawal);
 
-        $this->assertTrue($log->entityStatusDiffersFromEvent());
-        $this->assertStringContainsString(__('coin.withdrawal_status.rejected'), $log->statusTransitionDisplayLabel());
-        $this->assertStringContainsString(__('coin.withdrawal_status.pending'), $log->statusTransitionDisplayLabel());
+        $this->assertTrue($log->showsEntityStatus());
+        $this->assertSame(__('coin.withdrawal_status.rejected'), $log->entityStatusDisplayLabel());
+        $this->assertStringNotContainsString(__('coin.withdrawal_status.pending'), $log->entityStatusDisplayLabel());
     }
 }

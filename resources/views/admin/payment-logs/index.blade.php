@@ -65,7 +65,7 @@
                     @include('admin.partials.sortable-th', ['column' => 'source', 'label' => strtoupper(__('coin.admin.source')), 'sort' => $sort, 'dir' => $dir])
                     <th style="padding:12px 18px;">{{ strtoupper(__('coin.admin.title')) }}</th>
                     <th style="padding:12px 18px;">{{ strtoupper(__('coin.admin.message')) }}</th>
-                    <th style="padding:12px 18px;">{{ strtoupper(__('coin.admin.status_transition')) }}</th>
+                    <th style="padding:12px 18px;">{{ strtoupper(__('coin.payment_log.entity_status_label')) }}</th>
                     @include('admin.partials.sortable-th', ['column' => 'result', 'label' => strtoupper(__('coin.admin.result')), 'sort' => $sort, 'dir' => $dir])
                 </tr>
             </thead>
@@ -86,7 +86,7 @@
                         <td style="padding:14px 18px;">{{ $log->sourceLabel() }}</td>
                         <td style="padding:14px 18px;max-width:180px;">{{ $log->title }}</td>
                         <td style="padding:14px 18px;max-width:360px;">{{ \Illuminate\Support\Str::limit($log->indexSummary(), 140) }}</td>
-                        <td style="padding:14px 18px;white-space:nowrap;">{{ $log->statusTransitionDisplayLabel() }}</td>
+                        <td style="padding:14px 18px;white-space:nowrap;">{{ $log->entityStatusDisplayLabel() }}</td>
                         <td style="padding:14px 18px;white-space:nowrap;">{{ $log->resultLabel() }}</td>
                     </tr>
                 @empty

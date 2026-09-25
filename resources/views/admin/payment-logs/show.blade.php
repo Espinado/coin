@@ -30,25 +30,21 @@
                     @if($log->user)
                     <div><strong>{{ __('coin.user') }}:</strong> <a href="{{ route('admin.users.show', $log->user) }}">{{ $log->user->email }}</a></div>
                     @endif
-                    @if($log->currentEntityStatusLabel())
-                    <div><strong>{{ __('coin.payment_log.current_entity_status_label') }}:</strong>
+                    @if($log->showsEntityStatus())
+                    <div><strong>{{ __('coin.payment_log.entity_status_label') }}:</strong>
                         @if($log->entityAdminUrl())
                             <a href="{{ $log->entityAdminUrl() }}">{{ $log->currentEntityStatusLabel() }}</a>
                         @else
                             {{ $log->currentEntityStatusLabel() }}
                         @endif
                     </div>
-                    @endif
-                    <div><strong>{{ __('coin.admin.source') }}:</strong> {{ $log->sourceLabel() }}</div>
-                    <div><strong>{{ __('coin.admin.event_type') }}:</strong> {{ $log->eventTypeLabel() }}</div>
-                    @if($log->hasStatusTransition())
-                    <div><strong>{{ $log->statusTransitionHeading() }}:</strong> {{ $log->transitionLabel() }}</div>
-                    @if($log->entityStatusDiffersFromEvent())
-                    <div style="color:rgba(232,237,245,0.62);">{{ __('coin.payment_log.detail_historical_status_hint') }}</div>
-                    @endif
+                    @elseif($log->hasStatusTransition())
+                    <div><strong>{{ __('coin.payment_log.entity_status_label') }}:</strong> {{ $log->transitionLabel() }}</div>
                     @elseif(in_array($log->result, ['ignored', 'failed'], true) && in_array($log->event_type, ['payout_poll', 'deposit_ipn', 'payout_ipn'], true))
                     <div style="color:rgba(232,237,245,0.62);">{{ __('coin.payment_log.detail_no_status_change') }}</div>
                     @endif
+                    <div><strong>{{ __('coin.admin.source') }}:</strong> {{ $log->sourceLabel() }}</div>
+                    <div><strong>{{ __('coin.admin.event_type') }}:</strong> {{ $log->eventTypeLabel() }}</div>
                     @if($log->gateway)
                     <div><strong>{{ __('coin.admin.gateway') }}:</strong> {{ $log->gateway }}</div>
                     @endif
