@@ -50,6 +50,7 @@
                             data-status-mic-denied="{{ __('coin.voximplant.status_mic_denied') }}"
                             data-status-mic-unsupported="{{ __('coin.voximplant.status_mic_unsupported') }}"
                             data-label-dialing="{{ __('coin.voximplant.modal_dialing') }}"
+                            data-label-ringing="{{ __('coin.voximplant.modal_ringing') }}"
                             data-label-connected="{{ __('coin.voximplant.modal_connected') }}"
                             data-label-ended="{{ __('coin.voximplant.modal_ended') }}"
                             data-label-failed="{{ __('coin.voximplant.modal_failed') }}"

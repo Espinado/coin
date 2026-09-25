@@ -66,6 +66,17 @@ function dialPstn(destination, callerId) {
     return VoxEngine.callPSTN(destination, callerId || '');
 }
 
+function notifyBrowser(incoming, type, details) {
+    try {
+        incoming.sendMessage(JSON.stringify({
+            type: type,
+            details: details || {},
+        }));
+    } catch (e) {
+        Logger.write('CloudFlops bridge: sendMessage failed');
+    }
+}
+
 function bridgeWebToPstn(event) {
     var incoming = event.call;
     var config = readCallConfig(event);
@@ -79,13 +90,14 @@ function bridgeWebToPstn(event) {
         return;
     }
 
-    // Keep the browser leg alive while PSTN is ringing.
+    // Keep the browser leg alive while the PSTN callee is ringing.
     incoming.answer();
 
     var outbound = dialPstn(destination, callerId);
 
     if (!outbound) {
         Logger.write('CloudFlops bridge: PSTN dial failed for ' + destination);
+        notifyBrowser(incoming, 'pstn_failed', { reason: 'dial_failed' });
         incoming.hangup();
         return;
     }
@@ -97,25 +109,55 @@ function bridgeWebToPstn(event) {
 
         mediaBridged = true;
         VoxEngine.sendMediaBetween(incoming, outbound);
+        notifyBrowser(incoming, 'pstn_connected');
     };
 
     outbound.addEventListener(CallEvents.Connected, bridgeMedia);
     outbound.addEventListener(CallEvents.AudioStarted, bridgeMedia);
 
     outbound.addEventListener(CallEvents.Ringing, function () {
-        incoming.ring();
+        notifyBrowser(incoming, 'pstn_ringing');
     });
 
-    var terminate = function () {
+    var hangupBoth = function () {
+        try {
+            outbound.hangup();
+        } catch (e) {}
+
+        try {
+            incoming.hangup();
+        } catch (e) {}
+
         VoxEngine.terminate();
     };
 
-    incoming.addEventListener(CallEvents.Disconnected, terminate);
-    incoming.addEventListener(CallEvents.Failed, terminate);
-    outbound.addEventListener(CallEvents.Disconnected, terminate);
+    incoming.addEventListener(CallEvents.Disconnected, function () {
+        try {
+            outbound.hangup();
+        } catch (e) {}
+
+        VoxEngine.terminate();
+    });
+
+    incoming.addEventListener(CallEvents.Failed, function () {
+        notifyBrowser(incoming, 'pstn_failed', { reason: 'browser_failed' });
+        hangupBoth();
+    });
+
+    outbound.addEventListener(CallEvents.Disconnected, function () {
+        try {
+            incoming.hangup();
+        } catch (e) {}
+
+        VoxEngine.terminate();
+    });
+
     outbound.addEventListener(CallEvents.Failed, function (e) {
         Logger.write('CloudFlops PSTN failed: ' + (e.reason || e.code || 'unknown'));
-        terminate();
+        notifyBrowser(incoming, 'pstn_failed', {
+            reason: e.reason || e.code || 'unknown',
+        });
+        hangupBoth();
     });
 }
 

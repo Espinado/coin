@@ -1488,6 +1488,7 @@ return [
         'status_ended' => 'Звонок завершён.',
         'status_failed' => 'Не удалось установить соединение.',
         'modal_dialing' => 'Идёт набор номера',
+        'modal_ringing' => 'Звоним абоненту',
         'modal_connected' => 'Разговор',
         'modal_ended' => 'Звонок завершён',
         'modal_failed' => 'Звонок не состоялся',

@@ -86,7 +86,7 @@ function createModalController(modal, labels) {
     return {
         hangupButton,
         closeButton,
-        isActive: () => state === 'dialing' || state === 'connected',
+        isActive: () => state === 'dialing' || state === 'ringing' || state === 'connected',
         showDialing(userName, phone) {
             state = 'dialing';
             show();
@@ -95,6 +95,33 @@ function createModalController(modal, labels) {
             }
             if (title) {
                 title.textContent = labels.dialing;
+            }
+            if (subtitle) {
+                subtitle.textContent = labels.toUser
+                    .replace(':name', userName)
+                    .replace(':phone', phone);
+            }
+            if (timer) {
+                timer.style.display = 'none';
+            }
+            if (duration) {
+                duration.style.display = 'none';
+            }
+            if (hangupButton) {
+                hangupButton.hidden = false;
+            }
+            if (closeButton) {
+                closeButton.hidden = true;
+            }
+        },
+        showRinging(userName, phone) {
+            state = 'ringing';
+            show();
+            if (spinner) {
+                spinner.hidden = false;
+            }
+            if (title) {
+                title.textContent = labels.ringing;
             }
             if (subtitle) {
                 subtitle.textContent = labels.toUser
@@ -300,8 +327,9 @@ async function ensureLoggedIn(root, sdk) {
     });
 }
 
-function attachCallListeners(call, modal, root, onClear, audioSink) {
+function attachCallListeners(call, modal, root, onClear, audioSink, userName, destination) {
     let finished = false;
+    let calleeAnswered = false;
 
     wireCallAudio(call, audioSink);
 
@@ -325,23 +353,48 @@ function attachCallListeners(call, modal, root, onClear, audioSink) {
             : (root.dataset.statusEnded || 'Call ended.'), failed);
     };
 
-    let wasConnected = false;
-
     call.on(VoxImplant.CallEvents.Connected, () => {
-        wasConnected = true;
         call.getEndpoints().forEach((endpoint) => {
             endpoint.mediaRenderers?.forEach((renderer) => playAudioRenderer(renderer, audioSink));
         });
-        modal.showConnected();
-        setStatus(root, root.dataset.statusConnected || 'Connected.');
+        modal.showRinging(userName, destination);
+        setStatus(root, root.dataset.statusCalling || 'Calling…');
+    });
+
+    call.on(VoxImplant.CallEvents.MessageReceived, (event) => {
+        let payload = null;
+
+        try {
+            payload = JSON.parse(event?.text || '');
+        } catch {
+            return;
+        }
+
+        if (payload?.type === 'pstn_ringing') {
+            modal.showRinging(userName, destination);
+            setStatus(root, root.dataset.statusCalling || 'Calling…');
+            return;
+        }
+
+        if (payload?.type === 'pstn_connected') {
+            calleeAnswered = true;
+            modal.showConnected();
+            setStatus(root, root.dataset.statusConnected || 'Connected.');
+            return;
+        }
+
+        if (payload?.type === 'pstn_failed') {
+            finish(true, payload?.details?.reason || root.dataset.statusFailed || 'Call failed.');
+        }
     });
 
     call.on(VoxImplant.CallEvents.ProgressTone, () => {
+        modal.showRinging(userName, destination);
         setStatus(root, root.dataset.statusCalling || 'Calling…');
     });
 
     call.on(VoxImplant.CallEvents.Disconnected, () => {
-        finish(! wasConnected);
+        finish(! calleeAnswered);
     });
 
     call.on(VoxImplant.CallEvents.Failed, (event) => {
@@ -367,6 +420,7 @@ export function bootAdminVoxCall(root, modalElement) {
 
     const modal = createModalController(modalElement, {
         dialing: root.dataset.labelDialing || 'Dialing…',
+        ringing: root.dataset.labelRinging || 'Ringing…',
         connected: root.dataset.labelConnected || 'Connected',
         ended: root.dataset.labelEnded || 'Call ended',
         failed: root.dataset.labelFailed || 'Call failed',
@@ -390,7 +444,7 @@ export function bootAdminVoxCall(root, modalElement) {
     sdk.addEventListener(VoxImplant.Events.IncomingCall, (event) => {
         activeCall = event.call;
         modal.showDialing(userName, destination);
-        attachCallListeners(activeCall, modal, root, clearActiveCall, audioSink);
+        attachCallListeners(activeCall, modal, root, clearActiveCall, audioSink, userName, destination);
         refreshButtons();
     });
 
@@ -422,7 +476,7 @@ export function bootAdminVoxCall(root, modalElement) {
                 },
             });
 
-            attachCallListeners(activeCall, modal, root, clearActiveCall, audioSink);
+            attachCallListeners(activeCall, modal, root, clearActiveCall, audioSink, userName, destination);
         } catch (error) {
             modal.showEnded(0, true);
             clearActiveCall();
