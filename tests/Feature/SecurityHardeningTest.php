@@ -147,6 +147,36 @@ class SecurityHardeningTest extends TestCase
         app(WithdrawalService::class)->updateStatus($withdrawal->fresh(), Withdrawal::STATUS_PAID, $admin);
     }
 
+    public function test_viewer_admin_cannot_access_finance_routes(): void
+    {
+        $viewer = Admin::query()->create([
+            'name' => 'Viewer',
+            'email' => 'viewer@coin.test',
+            'password' => 'password',
+            'role' => AdminRole::Viewer,
+        ]);
+
+        $this->actingAs($viewer, 'admin')
+            ->get('http://admin.coin.test/deposits')
+            ->assertForbidden();
+
+        $this->actingAs($viewer, 'admin')
+            ->get('http://admin.coin.test/payment-logs')
+            ->assertForbidden();
+
+        $this->actingAs($viewer, 'admin')
+            ->get('http://admin.coin.test/withdrawals')
+            ->assertForbidden();
+
+        $this->actingAs($viewer, 'admin')
+            ->get('http://admin.coin.test/commissions')
+            ->assertForbidden();
+
+        $this->actingAs($viewer, 'admin')
+            ->get('http://admin.coin.test/profit-accrual')
+            ->assertForbidden();
+    }
+
     public function test_viewer_admin_cannot_update_platform_settings(): void
     {
         $viewer = Admin::query()->create([

@@ -212,8 +212,6 @@ class WithdrawalPollService
 
                 $message = 'Poll confirmed but payout details mismatch.';
 
-                $this->recordPollLog($withdrawal, PaymentWebhookLog::RESULT_IGNORED, $message, $status->raw);
-
                 Log::warning('withdrawal.poll.mismatch', [
 
                     'withdrawal_id' => $withdrawal->id,
@@ -221,6 +219,22 @@ class WithdrawalPollService
                     'reference' => $withdrawal->reference,
 
                 ]);
+
+                $this->withdrawals->markFailedFromGateway(
+
+                    $withdrawal->fresh(),
+
+                    $status->state,
+
+                    $message,
+
+                    PaymentStatusReason::WITHDRAWAL_IPN_MISMATCH,
+
+                    PaymentStatusLog::SOURCE_POLL,
+
+                );
+
+                $this->recordPollLog($withdrawal, PaymentWebhookLog::RESULT_PROCESSED, $message, $status->raw);
 
 
 

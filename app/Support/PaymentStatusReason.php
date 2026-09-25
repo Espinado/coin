@@ -29,6 +29,8 @@ final class PaymentStatusReason
 
     public const WITHDRAWAL_POLL_STUCK = 'withdrawal_poll_stuck';
 
+    public const WITHDRAWAL_IPN_MISMATCH = 'withdrawal_ipn_mismatch';
+
     public const WITHDRAWAL_GENERIC = 'withdrawal_generic';
 
     /** @var array<string, string> */
@@ -91,6 +93,7 @@ final class PaymentStatusReason
             self::WITHDRAWAL_ADMIN_REJECTED => __('coin.payment_reasons.withdrawal_admin_rejected'),
             self::WITHDRAWAL_MOCK_GATEWAY => __('coin.payment_reasons.withdrawal_mock_gateway'),
             self::WITHDRAWAL_POLL_STUCK => __('coin.payment_reasons.withdrawal_poll_stuck'),
+            self::WITHDRAWAL_IPN_MISMATCH => __('coin.payment_reasons.withdrawal_ipn_mismatch'),
             self::WITHDRAWAL_GATEWAY_FAILED => trim(__('coin.payment_reasons.withdrawal_gateway_failed', [
                 'state' => $withdrawal->gateway_state ?? '?',
             ]).' '.self::withdrawalGatewayDetail($withdrawal)),
@@ -106,6 +109,7 @@ final class PaymentStatusReason
             self::WITHDRAWAL_ADMIN_REJECTED => __('coin.payment_reasons_short.withdrawal_admin_rejected'),
             self::WITHDRAWAL_MOCK_GATEWAY => __('coin.payment_reasons_short.withdrawal_mock_gateway'),
             self::WITHDRAWAL_POLL_STUCK => __('coin.payment_reasons_short.withdrawal_poll_stuck'),
+            self::WITHDRAWAL_IPN_MISMATCH => __('coin.payment_reasons_short.withdrawal_ipn_mismatch'),
             self::WITHDRAWAL_GATEWAY_FAILED => __('coin.payment_reasons_short.withdrawal_gateway_failed'),
             default => __('coin.payment_reasons_short.withdrawal_generic'),
         };

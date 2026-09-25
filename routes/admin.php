@@ -87,17 +87,21 @@ Route::middleware(['admin.domain', 'reject.web.on.admin'])->group(function () {
             ->middleware('admin.ability:manage_users')
             ->name('admin.voximplant.one-time-key');
 
-        Route::get('deposits', [DepositController::class, 'index'])->name('admin.deposits.index');
-        Route::get('deposits/{deposit}/status', [DepositController::class, 'status'])->name('admin.deposits.status');
-        Route::get('deposits/{deposit}', [DepositController::class, 'show'])->name('admin.deposits.show');
+        Route::middleware('admin.ability:manage_deposits')->group(function () {
+            Route::get('deposits', [DepositController::class, 'index'])->name('admin.deposits.index');
+            Route::get('deposits/{deposit}/status', [DepositController::class, 'status'])->name('admin.deposits.status');
+            Route::get('deposits/{deposit}', [DepositController::class, 'show'])->name('admin.deposits.show');
 
-        Route::get('withdrawals', [WithdrawalController::class, 'index'])->name('admin.withdrawals.index');
-        Route::get('withdrawals/{withdrawal}', [WithdrawalController::class, 'show'])->name('admin.withdrawals.show');
+            Route::get('payment-logs', [PaymentLogController::class, 'index'])->name('admin.payment-logs.index');
+            Route::get('payment-logs/{paymentLog}', [PaymentLogController::class, 'show'])->name('admin.payment-logs.show');
+        });
 
-        Route::get('payment-logs', [PaymentLogController::class, 'index'])->name('admin.payment-logs.index');
-        Route::get('payment-logs/{paymentLog}', [PaymentLogController::class, 'show'])->name('admin.payment-logs.show');
+        Route::middleware('admin.ability:manage_withdrawals')->group(function () {
+            Route::get('withdrawals', [WithdrawalController::class, 'index'])->name('admin.withdrawals.index');
+            Route::get('withdrawals/{withdrawal}', [WithdrawalController::class, 'show'])->name('admin.withdrawals.show');
 
-        Route::get('commissions', [CommissionController::class, 'index'])->name('admin.commissions.index');
+            Route::get('commissions', [CommissionController::class, 'index'])->name('admin.commissions.index');
+        });
         Route::post('withdrawals/{withdrawal}/approve', [WithdrawalController::class, 'approve'])
             ->middleware('admin.ability:manage_withdrawals')
             ->name('admin.withdrawals.approve');
@@ -127,10 +131,12 @@ Route::middleware(['admin.domain', 'reject.web.on.admin'])->group(function () {
             ->middleware('admin.ability:manage_plans')
             ->name('admin.plans.destroy');
 
-        Route::get('profit-accrual', [ProfitAccrualController::class, 'index'])->name('admin.profit-accrual.index');
+        Route::middleware('admin.ability:manage_plans')->group(function () {
+            Route::get('profit-accrual', [ProfitAccrualController::class, 'index'])->name('admin.profit-accrual.index');
 
-        Route::redirect('epochs', '/profit-accrual')->name('admin.epochs.index');
-        Route::get('epochs/{epoch}', [EpochController::class, 'show'])->name('admin.epochs.show');
+            Route::redirect('epochs', '/profit-accrual')->name('admin.epochs.index');
+            Route::get('epochs/{epoch}', [EpochController::class, 'show'])->name('admin.epochs.show');
+        });
 
         Route::get('settings', [SettingsController::class, 'edit'])->name('admin.settings.edit');
         Route::patch('settings', [SettingsController::class, 'update'])

@@ -7,7 +7,9 @@ use App\Http\Controllers\Admin\Concerns\RedirectsWithAdminFlash;
 use App\Http\Controllers\Controller;
 use App\Models\PaymentWebhookLog;
 use App\Models\Withdrawal;
+use App\Services\AdminAuthorization;
 use App\Services\WithdrawalService;
+use App\Support\AdminAbility;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -67,10 +69,14 @@ class WithdrawalController extends Controller
                 ->get()
             : collect();
 
+        $admin = auth('admin')->user();
+
         return view('admin.withdrawals.show', [
             'withdrawal' => $withdrawal,
             'statuses' => $withdrawal->adminSelectableStatuses(),
             'pollLogs' => $pollLogs,
+            'canManageWithdrawals' => $admin !== null
+                && app(AdminAuthorization::class)->allows($admin, AdminAbility::ManageWithdrawals),
         ]);
     }
 

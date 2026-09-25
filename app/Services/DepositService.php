@@ -7,13 +7,16 @@ use App\Support\PlatformTerms;
 use App\Models\Admin;
 use App\Models\Deposit;
 use App\Models\User;
+use App\Models\WalletTransaction;
 use App\Support\PaymentStatusReason;
 use App\Models\PaymentStatusLog;
 use App\Jobs\ExpirePendingDepositJob;
 use App\Services\Payment\Dtos\DepositIntentDto;
 use App\Services\Payment\PaymentGatewayInterface;
 use App\Services\Payment\PaymentStatusLogService;
+use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use RuntimeException;
 
 class DepositService
@@ -159,12 +162,26 @@ class DepositService
                 ->lockForUpdate()
                 ->firstOrFail();
 
+            if ($deposit->status === Deposit::STATUS_CONFIRMED) {
+                return $deposit->fresh(['user.wallet']);
+            }
+
             if ($deposit->status !== Deposit::STATUS_PENDING) {
                 throw new RuntimeException('Only pending top-ups can be confirmed.');
             }
 
             if ($admin !== null) {
                 throw new RuntimeException(__('coin.admin.deposit_manual_action_blocked'));
+            }
+
+            $walletTransactionExists = WalletTransaction::query()
+                ->where('reference_type', $deposit->getMorphClass())
+                ->where('reference_id', $deposit->id)
+                ->where('type', PlatformTerms::TX_TOP_UP)
+                ->exists();
+
+            if ($walletTransactionExists) {
+                throw new RuntimeException('Deposit wallet transaction already exists but deposit is still pending.');
             }
 
             $user = $deposit->user;
@@ -199,16 +216,30 @@ class DepositService
                     ],
             );
 
-            $this->wallets->record(
-                $user,
-                PlatformTerms::TX_TOP_UP,
-                $source,
-                $creditedAmount,
-                $walletCurrency,
-                'positive',
-                'COMPLETED',
-                $deposit,
-            );
+            try {
+                $this->wallets->record(
+                    $user,
+                    PlatformTerms::TX_TOP_UP,
+                    $source,
+                    $creditedAmount,
+                    $walletCurrency,
+                    'positive',
+                    'COMPLETED',
+                    $deposit,
+                );
+            } catch (UniqueConstraintViolationException $exception) {
+                Log::warning('Duplicate deposit wallet transaction ignored during confirm.', [
+                    'deposit_id' => $deposit->id,
+                ]);
+
+                $deposit->refresh();
+
+                if ($deposit->status === Deposit::STATUS_CONFIRMED) {
+                    return $deposit->fresh(['user.wallet']);
+                }
+
+                throw $exception;
+            }
 
             $deposit->update([
                 'credited_amount' => $creditedAmount,

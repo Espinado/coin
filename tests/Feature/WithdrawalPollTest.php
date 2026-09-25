@@ -76,7 +76,7 @@ class WithdrawalPollTest extends TestCase
             ->count());
     }
 
-    public function test_poll_ignores_confirmed_status_with_mismatched_amount(): void
+    public function test_poll_rejects_confirmed_status_with_mismatched_amount(): void
     {
         $user = User::factory()->create();
         $withdrawal = Withdrawal::query()->create([
@@ -108,12 +108,16 @@ class WithdrawalPollTest extends TestCase
 
         $this->assertSame(1, $stats['polled']);
         $this->assertSame(0, $stats['completed']);
-        $this->assertSame(Withdrawal::STATUS_PROCESSING, $withdrawal->fresh()->status);
+
+        $withdrawal->refresh();
+
+        $this->assertSame(Withdrawal::STATUS_REJECTED, $withdrawal->status);
+        $this->assertSame('withdrawal_ipn_mismatch', $withdrawal->status_reason);
 
         $this->assertSame(1, PaymentWebhookLog::query()
             ->where('withdrawal_id', $withdrawal->id)
             ->where('event_type', 'payout_poll')
-            ->where('processing_result', 'like', 'ignored:%')
+            ->where('processing_result', 'like', 'processed:%')
             ->count());
     }
 

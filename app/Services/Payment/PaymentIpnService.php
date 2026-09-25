@@ -12,6 +12,7 @@ use App\Services\Payment\Dtos\VerifiedIpnEvent;
 use App\Services\WithdrawalService;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use RuntimeException;
 
 class PaymentIpnService
@@ -360,7 +361,7 @@ class PaymentIpnService
         $validationError = self::validateWithdrawalAgainstIpn($event, $withdrawal);
 
         if ($validationError !== null) {
-            return $this->finish($log, PaymentWebhookLog::RESULT_IGNORED, $validationError);
+            return $this->rejectWithdrawalFromIpnMismatch($withdrawal, $log, $validationError, $event);
         }
 
         if (! self::receivedAmountMatchesDepositAmount(
@@ -368,15 +369,16 @@ class PaymentIpnService
             (float) $withdrawal->amount,
             currency: (string) $withdrawal->currency,
         )) {
-            return $this->finish(
+            return $this->rejectWithdrawalFromIpnMismatch(
+                $withdrawal,
                 $log,
-                PaymentWebhookLog::RESULT_IGNORED,
                 sprintf(
                     'Payout amount mismatch: received %s, expected %s %s.',
                     number_format((float) ($event->amount ?? 0), 6, '.', ''),
                     number_format((float) $withdrawal->amount, strtoupper((string) $withdrawal->currency) === 'BTC' ? 8 : 2, '.', ''),
                     strtoupper((string) $withdrawal->currency),
                 ),
+                $event,
             );
         }
 
@@ -501,6 +503,30 @@ class PaymentIpnService
             ->where('processing_result', 'like', PaymentWebhookLog::RESULT_PROCESSED.':%')
             ->whereNull('deposit_id')
             ->update(['deposit_id' => $deposit->id]);
+    }
+
+    private function rejectWithdrawalFromIpnMismatch(
+        Withdrawal $withdrawal,
+        PaymentWebhookLog $log,
+        string $reason,
+        VerifiedIpnEvent $event,
+    ): PaymentWebhookLog {
+        Log::warning('Withdrawal IPN rejected due to mismatch.', [
+            'withdrawal_id' => $withdrawal->id,
+            'reference' => $withdrawal->reference,
+            'reason' => $reason,
+            'txid' => $event->txid,
+        ]);
+
+        $this->withdrawals->markFailedFromGateway(
+            $withdrawal,
+            null,
+            'IPN mismatch: '.$reason,
+            PaymentStatusReason::WITHDRAWAL_IPN_MISMATCH,
+            PaymentStatusLog::SOURCE_IPN,
+        );
+
+        return $this->finish($log, PaymentWebhookLog::RESULT_PROCESSED, 'Withdrawal rejected: '.$reason);
     }
 
     private function rejectIfTxidAlreadyUsed(

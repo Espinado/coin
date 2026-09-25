@@ -63,6 +63,8 @@
                             </div>
                         </div>
                     @endif
+                @elseif(! ($canManageWithdrawals ?? false))
+                    <p style="margin:0;font-size:13px;line-height:1.65;color:rgba(232,237,245,0.62);">{{ __('coin.admin.withdrawal_read_only_hint') }}</p>
                 @else
                     <form method="POST" action="{{ route('admin.withdrawals.approve', $withdrawal) }}" style="display:flex;flex-direction:column;gap:12px;margin-bottom:18px;">
                         @csrf

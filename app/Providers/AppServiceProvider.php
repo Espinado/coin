@@ -68,7 +68,10 @@ class AppServiceProvider extends ServiceProvider
             URL::forceScheme('https');
         }
 
-        View::composer('admin.partials.sidebar', AdminNavComposer::class);
+        View::composer(
+            ['admin.partials.sidebar', 'admin.partials.finance-tabs'],
+            AdminNavComposer::class,
+        );
 
         PaymentWebhookLog::observe(PaymentWebhookLogObserver::class);
 

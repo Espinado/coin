@@ -24,13 +24,19 @@ final class ProductionPaymentConfigGuard
             $errors[] = 'CCAPI_API_KEY must be set in production.';
         }
 
+        $webhookIps = config('coin.payments.ccapi.webhook_ips', []);
+
+        if (! is_array($webhookIps) || $webhookIps === []) {
+            $errors[] = 'CCAPI_WEBHOOK_IPS must be set explicitly in production.';
+        }
+
         $trustedProxies = config('coin.trusted_proxies', []);
 
         if (is_array($trustedProxies) && in_array('*', $trustedProxies, true)) {
             $errors[] = 'COIN_TRUSTED_PROXIES must not be * in production (webhook IP checks can be bypassed).';
         }
 
-        if (Schema::hasTable('platform_settings')) {
+        if (self::platformSettingsAvailable()) {
             $settings = app(PlatformSettingsService::class);
 
             if (! $settings->paymentGateEnabled()) {
@@ -56,6 +62,15 @@ final class ProductionPaymentConfigGuard
         throw new \RuntimeException(
             'Production payment configuration is unsafe: '.implode(' ', $errors),
         );
+    }
+
+    private static function platformSettingsAvailable(): bool
+    {
+        try {
+            return Schema::hasTable('platform_settings');
+        } catch (\Throwable) {
+            return false;
+        }
     }
 
     private static function shouldSkip(): bool

@@ -25,10 +25,10 @@
     );
 
     $financeBadges = [];
-    if (($pendingDepositsCount ?? 0) > 0) {
+    if (($canManageDeposits ?? false) && ($pendingDepositsCount ?? 0) > 0) {
         $financeBadges[] = ['count' => $pendingDepositsCount, 'class' => 'admin-sidebar-badge--amber'];
     }
-    if (($pendingWithdrawalsCount ?? 0) > 0) {
+    if (($canManageWithdrawals ?? false) && ($pendingWithdrawalsCount ?? 0) > 0) {
         $financeBadges[] = ['count' => $pendingWithdrawalsCount, 'class' => 'admin-sidebar-badge--red', 'attrs' => 'data-admin-withdrawals-nav-badge'];
     }
 @endphp
@@ -43,17 +43,21 @@
         <nav class="admin-sidebar-nav" id="admin-sidebar-nav" aria-label="{{ __('coin.admin.open_menu') }}">
             <a href="{{ route('admin.dashboard') }}" class="{{ $navClass($routeName === 'admin.dashboard') }}">{{ __('coin.admin.overview') }}</a>
             <a href="{{ route('admin.users.index') }}" class="{{ $navClass($adminNavActive($routeName, 'admin.users')) }}">{{ __('coin.admin.users') }}</a>
-            <a href="{{ route('admin.deposits.index') }}" class="{{ $navClass($financeActive) }}" data-admin-withdrawals-nav>
-                <span>{{ __('coin.admin.finance') }}</span>
-                @if($financeBadges !== [])
-                    <span class="admin-sidebar-link__badges">
-                        @foreach($financeBadges as $badge)
-                            <span class="admin-sidebar-badge {{ $badge['class'] }}" @if(! empty($badge['attrs'])) {!! $badge['attrs'] !!} @endif>{{ $badge['count'] }}</span>
-                        @endforeach
-                    </span>
-                @endif
-            </a>
-            <a href="{{ route('admin.payment-logs.index') }}" class="{{ $navClass($adminNavActive($routeName, 'admin.payment-logs')) }}">{{ __('coin.admin.payment_logs') }}</a>
+            @if($canAccessFinance ?? false)
+                <a href="{{ $financeNavUrl ?? route('admin.deposits.index') }}" class="{{ $navClass($financeActive) }}" data-admin-withdrawals-nav>
+                    <span>{{ __('coin.admin.finance') }}</span>
+                    @if($financeBadges !== [])
+                        <span class="admin-sidebar-link__badges">
+                            @foreach($financeBadges as $badge)
+                                <span class="admin-sidebar-badge {{ $badge['class'] }}" @if(! empty($badge['attrs'])) {!! $badge['attrs'] !!} @endif>{{ $badge['count'] }}</span>
+                            @endforeach
+                        </span>
+                    @endif
+                </a>
+            @endif
+            @if($canAccessPaymentLogs ?? false)
+                <a href="{{ route('admin.payment-logs.index') }}" class="{{ $navClass($adminNavActive($routeName, 'admin.payment-logs')) }}">{{ __('coin.admin.payment_logs') }}</a>
+            @endif
             <a href="{{ route('admin.plan-changes.index') }}" class="{{ $navClass($adminNavActive($routeName, 'admin.plan-changes')) }}" data-admin-plan-changes-nav>
                 <span>{{ __('coin.admin.plan_changes') }}</span>
                 @if(($pendingPlanChangesCount ?? 0) > 0)

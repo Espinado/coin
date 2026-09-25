@@ -4,30 +4,43 @@
         $active = 'deposits';
     }
 
-    $tabs = [
-        'deposits' => [
+    $tabs = [];
+
+    if ($canManageDeposits ?? false) {
+        $tabs['deposits'] = [
             'label' => __('coin.admin.top_ups'),
             'url' => route('admin.deposits.index'),
             'badge' => ($pendingDepositsCount ?? 0) > 0 ? (int) $pendingDepositsCount : null,
             'badge_class' => 'admin-sidebar-badge--amber',
-        ],
-        'withdrawals' => [
+        ];
+    }
+
+    if ($canManageWithdrawals ?? false) {
+        $tabs['withdrawals'] = [
             'label' => __('coin.admin.payouts'),
             'url' => route('admin.withdrawals.index'),
             'badge' => ($pendingWithdrawalsCount ?? 0) > 0 ? (int) $pendingWithdrawalsCount : null,
             'badge_class' => 'admin-sidebar-badge--red',
             'nav_attrs' => 'data-admin-withdrawals-nav',
             'badge_attrs' => 'data-admin-withdrawals-nav-badge',
-        ],
-        'profit-accrual' => [
-            'label' => __('coin.admin.profit_accrual'),
-            'url' => route('admin.profit-accrual.index'),
-        ],
-        'commissions' => [
+        ];
+
+        $tabs['commissions'] = [
             'label' => __('coin.admin.commissions'),
             'url' => route('admin.commissions.index'),
-        ],
-    ];
+        ];
+    }
+
+    if ($canManagePlans ?? false) {
+        $tabs['profit-accrual'] = [
+            'label' => __('coin.admin.profit_accrual'),
+            'url' => route('admin.profit-accrual.index'),
+        ];
+    }
+
+    if (! array_key_exists($active, $tabs)) {
+        $active = array_key_first($tabs) ?? 'deposits';
+    }
 @endphp
 
 <div class="admin-card admin-section-tabs" style="margin-bottom:16px;">

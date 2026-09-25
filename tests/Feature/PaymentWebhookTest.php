@@ -582,7 +582,10 @@ class PaymentWebhookTest extends TestCase
 
         $this->postJson('http://coin.test/webhooks/ccapi', $payload)->assertOk();
 
-        $this->assertSame(Withdrawal::STATUS_PROCESSING, $withdrawal->fresh()->status);
+        $withdrawal->refresh();
+
+        $this->assertSame(Withdrawal::STATUS_REJECTED, $withdrawal->status);
+        $this->assertSame('withdrawal_ipn_mismatch', $withdrawal->status_reason);
     }
 
     public function test_outgoing_ipn_rejects_wrong_payout_address(): void
@@ -621,7 +624,10 @@ class PaymentWebhookTest extends TestCase
 
         $this->postJson('http://coin.test/webhooks/ccapi', $payload)->assertOk();
 
-        $this->assertSame(Withdrawal::STATUS_PROCESSING, $withdrawal->fresh()->status);
+        $withdrawal->refresh();
+
+        $this->assertSame(Withdrawal::STATUS_REJECTED, $withdrawal->status);
+        $this->assertSame('withdrawal_ipn_mismatch', $withdrawal->status_reason);
     }
 
     /** @return array<string, mixed> */

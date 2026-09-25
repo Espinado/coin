@@ -30,7 +30,7 @@ class EnsureCcapiWebhookSource
 
     private function shouldEnforceIpCheck(): bool
     {
-        if (app()->environment('production')) {
+        if (app()->environment(['production', 'staging'])) {
             return true;
         }
 
