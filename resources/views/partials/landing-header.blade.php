@@ -37,5 +37,5 @@
   <a href="#faq" class="coin-landing-drawer__link">Вопросы</a>
   <div class="coin-landing-drawer__divider" aria-hidden="true"></div>
   <a href="{{ route('login') }}" class="coin-landing-drawer__cta">Войти</a>
-  <a href="{{ route('register') }}" class="coin-landing-drawer__cta coin-landing-drawer__cta--secondary">Создать аккаунт</a>
+  <a href="{{ route('register') }}" class="coin-landing-drawer__cta">Начать</a>
 </nav>

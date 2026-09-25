@@ -386,13 +386,7 @@ html.coin-nav-open .coin-nav-mobile {
   flex: none;
 }
 
-.coin-landing .coin-header-login {
-  padding: 10px 4px;
-  font-size: 14px;
-  font-weight: 500;
-  color: rgba(230, 244, 250, 0.85);
-}
-
+.coin-landing .coin-header-login,
 .coin-landing .coin-header-cta {
   padding: 11px 22px;
   border-radius: 11px;
@@ -401,6 +395,13 @@ html.coin-nav-open .coin-nav-mobile {
   color: #04121f;
   font-size: 14px;
   font-weight: 600;
+  white-space: nowrap;
+}
+
+.coin-landing .coin-header-login:hover,
+.coin-landing .coin-header-cta:hover {
+  color: #04121f;
+  filter: brightness(1.05);
 }
 
 .coin-landing .coin-landing-drawer {
