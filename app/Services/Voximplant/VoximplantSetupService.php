@@ -54,6 +54,16 @@ class VoximplantSetupService
         $existingScenario = collect($application['scenarios'] ?? [])
             ->first(fn (array $scenario) => ($scenario['scenario_name'] ?? '') === $scenarioName);
 
+        if ($existingScenario === null) {
+            $scenarios = $this->client->call('GetScenarios', [
+                'application_id' => $applicationId,
+                'scenario_name' => $scenarioName,
+            ]);
+
+            $existingScenario = collect($scenarios['result'] ?? [])
+                ->first(fn (array $scenario) => ($scenario['scenario_name'] ?? '') === $scenarioName);
+        }
+
         if ($existingScenario !== null) {
             $this->client->call('SetScenarioInfo', [
                 'scenario_id' => (int) $existingScenario['scenario_id'],
