@@ -21,6 +21,8 @@ final class PaymentStatusReason
 
     public const DEPOSIT_GENERIC = 'deposit_generic';
 
+    public const DEPOSIT_GATEWAY_FAILED = 'deposit_gateway_failed';
+
     public const WITHDRAWAL_ADMIN_REJECTED = 'withdrawal_admin_rejected';
 
     public const WITHDRAWAL_GATEWAY_FAILED = 'withdrawal_gateway_failed';
@@ -66,6 +68,7 @@ final class PaymentStatusReason
             self::DEPOSIT_NETWORK_MISMATCH => __('coin.payment_reasons.deposit_network_mismatch'),
             self::DEPOSIT_CURRENCY_MISMATCH => __('coin.payment_reasons.deposit_currency_mismatch'),
             self::DEPOSIT_DUPLICATE_TXID => __('coin.payment_reasons.deposit_duplicate_txid'),
+            self::DEPOSIT_GATEWAY_FAILED => __('coin.payment_reasons.deposit_gateway_failed'),
             default => __('coin.payment_reasons.deposit_generic'),
         };
     }
@@ -81,6 +84,7 @@ final class PaymentStatusReason
             self::DEPOSIT_NETWORK_MISMATCH => __('coin.payment_reasons_short.deposit_network_mismatch'),
             self::DEPOSIT_CURRENCY_MISMATCH => __('coin.payment_reasons_short.deposit_currency_mismatch'),
             self::DEPOSIT_DUPLICATE_TXID => __('coin.payment_reasons_short.deposit_duplicate_txid'),
+            self::DEPOSIT_GATEWAY_FAILED => __('coin.payment_reasons_short.deposit_gateway_failed'),
             default => __('coin.payment_reasons_short.deposit_generic'),
         };
     }
@@ -117,7 +121,7 @@ final class PaymentStatusReason
 
     private static function depositAmountDecimals(Deposit $deposit): int
     {
-        return strtoupper((string) $deposit->currency) === 'BTC' ? 8 : 2;
+        return CryptoAmountFormat::decimals((string) $deposit->currency);
     }
 
     private static function withdrawalGatewayDetail(Withdrawal $withdrawal): string

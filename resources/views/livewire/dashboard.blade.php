@@ -387,7 +387,7 @@
             </div>
             <div style="margin-top: 16px; font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.12em; color: rgba(214,238,248,0.68);">{{ mb_strtoupper(__('coin.amount')) }}</div>
             <div style="margin-top: 9px; padding: 13px 15px; border-radius: 11px; border: 1px solid rgba(150,235,250,0.16); background: rgba(4,16,28,0.6); display: flex; justify-content: space-between; font-family: 'JetBrains Mono', monospace; font-size: 15px; opacity: {{ $topUpLocked ? '0.72' : '1' }};">
-              <input type="text" inputmode="decimal" wire:model="depositAmount" wire:key="deposit-amount-{{ $depositAmount }}" placeholder="0.00" autocomplete="off" @readonly($topUpLocked) style="flex:1;border:0;background:transparent;color:#f0fbff;outline:none;font-family:inherit;font-size:15px;" />
+              <input type="text" inputmode="decimal" wire:model="depositAmount" wire:key="deposit-amount-{{ $depositCurrency }}-{{ $depositAmount }}" placeholder="{{ $this->depositAmountPlaceholder }}" autocomplete="off" @readonly($topUpLocked) style="flex:1;border:0;background:transparent;color:#f0fbff;outline:none;font-family:inherit;font-size:15px;" />
               <span style="color: rgba(214,238,248,0.78);">{{ $depositCurrency }}</span>
             </div>
             @if($topUpLocked)
@@ -405,16 +405,16 @@
             <p style="margin-top:10px;font-size:12px;line-height:1.5;color:rgba(214,238,248,0.72);">{{ __('coin.wallet.deposit_credit_preview', ['amount' => $this->depositCreditPreview]) }}</p>
             @endif
             @if($depositCurrency === 'BTC')
-            <p style="margin-top:10px;font-size:12px;line-height:1.5;color:rgba(214,238,248,0.62);">{{ __('coin.wallet.btc_deposit_address_hint') }}</p>
+            <p style="margin-top:10px;font-size:12px;line-height:1.5;color:rgba(214,238,248,0.62);">{{ __('coin.wallet.btc_deposit_usdt_hint') }}</p>
             @endif
             <div style="margin-top: 14px; display: flex; justify-content: space-between; gap: 14px; font-size: 12.5px;">
               <span style="color: rgba(214,238,248,0.72); min-width: 0;">{{ __('coin.wallet.min_top_up') }}</span>
               <span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">{{ $this->depositMinLabel }}</span>
             </div>
             <div class="coin-deposit-presets" style="opacity: {{ $topUpLocked ? '0.55' : '1' }};">
-              <button type="button" wire:click="setDepositPreset(100)" @disabled($topUpLocked) class="coin-deposit-presets__btn coin-btn-quiet">100 {{ $depositCurrency }}</button>
-              <button type="button" wire:click="setDepositPreset(500)" @disabled($topUpLocked) class="coin-deposit-presets__btn coin-btn-quiet">500 {{ $depositCurrency }}</button>
-              <button type="button" wire:click="setDepositPreset(1000)" @disabled($topUpLocked) class="coin-deposit-presets__btn coin-btn-quiet">1 000 {{ $depositCurrency }}</button>
+              <button type="button" wire:click="setDepositPreset(100)" @disabled($topUpLocked) class="coin-deposit-presets__btn coin-btn-quiet">100 USDT</button>
+              <button type="button" wire:click="setDepositPreset(500)" @disabled($topUpLocked) class="coin-deposit-presets__btn coin-btn-quiet">500 USDT</button>
+              <button type="button" wire:click="setDepositPreset(1000)" @disabled($topUpLocked) class="coin-deposit-presets__btn coin-btn-quiet">1 000 USDT</button>
             </div>
             @if(! $this->paymentGateEnabled)
             <p style="margin: 14px 0 0; font-size: 12px; line-height: 1.5; color: rgba(214,238,248,0.62);">{{ __('coin.wallet.payment_gate_test_mode_hint') }}</p>

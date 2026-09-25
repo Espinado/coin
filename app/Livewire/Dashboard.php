@@ -34,6 +34,8 @@ use App\Services\WalletHistoryService;
 use App\Services\WithdrawalService;
 use App\Services\WithdrawalTwoFactorService;
 use App\Support\BitcoinAddressValidator;
+use App\Support\CcapiUserMessage;
+use App\Support\CryptoAmountFormat;
 use App\Support\TronAddressValidator;
 use Carbon\Carbon;
 use Illuminate\Contracts\View\View;
@@ -618,7 +620,20 @@ class Dashboard extends Component
             return;
         }
 
-        $this->depositAmount = number_format(max(0, (float) $amount), 2, '.', '');
+        $presetUsdt = max(0, (float) $amount);
+
+        if ($this->depositCurrency === 'BTC') {
+            try {
+                $btc = app(ExchangeRateService::class)->convertFromBase($presetUsdt, 'BTC');
+                $this->depositAmount = rtrim(rtrim(number_format($btc, 8, '.', ''), '0'), '.');
+            } catch (\Throwable) {
+                $this->depositAmount = '0';
+            }
+
+            return;
+        }
+
+        $this->depositAmount = number_format($presetUsdt, 2, '.', '');
     }
 
     public function setWithdrawMax(): void
@@ -903,6 +918,10 @@ class Dashboard extends Component
 
     public function getDepositCreditPreviewProperty(): ?string
     {
+        if ($this->depositCurrency === $this->walletCurrency) {
+            return null;
+        }
+
         $amount = (float) str_replace([',', ' '], '', $this->depositAmount);
 
         if ($amount <= 0) {
@@ -916,9 +935,70 @@ class Dashboard extends Component
         }
     }
 
+    public function getTopUpPayAmountProperty(): float
+    {
+        if ($this->pendingDepositId !== null) {
+            $deposit = Deposit::query()
+                ->whereKey($this->pendingDepositId)
+                ->where('user_id', $this->user->id)
+                ->first();
+
+            if ($deposit !== null) {
+                return (float) $deposit->amount;
+            }
+        }
+
+        $amount = (float) str_replace([',', ' '], '', $this->depositAmount);
+
+        if ($amount <= 0) {
+            return 0;
+        }
+
+        try {
+            $prepared = app(ExchangeRateService::class)->prepareGatewayDeposit($amount, $this->depositCurrency, assertMinimum: false);
+
+            return (float) $prepared['pay_amount'];
+        } catch (\Throwable) {
+            return 0;
+        }
+    }
+
+    public function getTopUpInputEquivalentProperty(): ?string
+    {
+        if ($this->pendingDepositId !== null) {
+            $deposit = Deposit::query()
+                ->whereKey($this->pendingDepositId)
+                ->where('user_id', $this->user->id)
+                ->first();
+
+            if ($deposit?->hasInputConversion()) {
+                return $deposit->formattedInputAmount();
+            }
+
+            return null;
+        }
+
+        if ($this->depositCurrency !== 'BTC') {
+            return null;
+        }
+
+        $amount = (float) str_replace([',', ' '], '', $this->depositAmount);
+
+        if ($amount <= 0) {
+            return null;
+        }
+
+        return CryptoAmountFormat::amountWithSymbol($amount, 'BTC');
+    }
+
     public function getDepositMinLabelProperty(): string
     {
         return app(ExchangeRateService::class)->formatMinDepositLabel($this->depositCurrency);
+    }
+
+    public function getDepositAmountPlaceholderProperty(): string
+    {
+        return CryptoAmountFormat::placeholder($this->depositCurrency);
     }
 
     public function getWithdrawDebitPreviewProperty(): ?string
@@ -1150,10 +1230,11 @@ class Dashboard extends Component
             $this->pendingDepositId = $deposit->id;
             $this->pendingPaymentAddress = $deposit->payment_address;
             $this->paymentModalStep = 'payment';
-        } catch (\RuntimeException $exception) {
+        } catch (\Throwable $exception) {
+            $message = CcapiUserMessage::fromThrowable($exception);
             $this->paymentModalStep = 'error';
-            $this->paymentModalError = $exception->getMessage();
-            $this->addError('depositAmount', $exception->getMessage());
+            $this->paymentModalError = $message;
+            $this->addError('depositAmount', $message);
         }
     }
 
@@ -1253,8 +1334,12 @@ class Dashboard extends Component
 
         $this->pendingDepositId = $deposit->id;
         $this->pendingPaymentAddress = $deposit->payment_address;
-        $this->pendingTopUpAmount = (float) $deposit->amount;
-        $this->depositCurrency = strtoupper((string) $deposit->currency);
+        $this->pendingTopUpAmount = $deposit->hasInputConversion()
+            ? (float) $deposit->input_amount
+            : (float) $deposit->amount;
+        $this->depositCurrency = $deposit->hasInputConversion()
+            ? strtoupper((string) $deposit->input_currency)
+            : strtoupper((string) $deposit->currency);
         $this->reopenTopUpPaymentModal();
     }
 
@@ -1333,8 +1418,12 @@ class Dashboard extends Component
 
         $this->pendingDepositId = $deposit->id;
         $this->pendingPaymentAddress = $deposit->payment_address;
-        $this->pendingTopUpAmount = (float) $deposit->amount;
-        $this->depositCurrency = strtoupper((string) $deposit->currency);
+        $this->pendingTopUpAmount = $deposit->hasInputConversion()
+            ? (float) $deposit->input_amount
+            : (float) $deposit->amount;
+        $this->depositCurrency = $deposit->hasInputConversion()
+            ? strtoupper((string) $deposit->input_currency)
+            : strtoupper((string) $deposit->currency);
     }
 
     private function clearPendingTopUpTracking(): void

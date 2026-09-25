@@ -47,7 +47,7 @@ class DepositUpdated implements ShouldBroadcastNow
                 'id' => $this->deposit->id,
                 'reference' => 'TOP-'.$this->deposit->id,
                 'status' => $this->deposit->status,
-                'amount' => number_format((float) $this->deposit->amount, 2, '.', '').' '.strtoupper((string) $this->deposit->currency),
+                'amount' => $this->deposit->formattedAmount(),
                 'rejection_message' => $this->deposit->userRejectionMessage(),
             ],
             'wallet' => $wallet ? [

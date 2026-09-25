@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Support\CryptoAmountFormat;
 use App\Services\ExchangeRates\CoinMarketCapClient;
 use RuntimeException;
 use Throwable;
@@ -163,6 +164,67 @@ class ExchangeRateService
         return number_format($converted['amount'], 2, '.', ',').' '.$converted['base_currency'];
     }
 
+    /**
+     * Normalize a user-entered top-up into the USDT amount sent to the payment gateway.
+     *
+     * @return array{
+     *     pay_amount: float,
+     *     pay_currency: string,
+     *     input_amount: ?float,
+     *     input_currency: ?string,
+     *     exchange_rate: ?float,
+     *     usdt_per_btc: ?float
+     * }
+     */
+    public function prepareGatewayDeposit(float $amount, string $inputCurrency, bool $assertMinimum = true): array
+    {
+        $input = strtoupper(trim($inputCurrency));
+        $base = $this->baseCurrency();
+        $allowed = config('coin.deposits.currencies', ['USDT', 'BTC']);
+
+        if (! in_array($input, $allowed, true)) {
+            throw new RuntimeException('Unsupported top-up currency.');
+        }
+
+        if ($input === $base) {
+            if ($assertMinimum) {
+                $this->assertMinDeposit($amount, $input);
+            }
+
+            return [
+                'pay_amount' => round($amount, 2),
+                'pay_currency' => $base,
+                'input_amount' => null,
+                'input_currency' => null,
+                'exchange_rate' => null,
+                'usdt_per_btc' => null,
+            ];
+        }
+
+        $usdtPerBtc = $this->fetchLiveUsdtPerBtc();
+        $btcPerUsdt = $this->btcPerUsdtFromUsdtRate($usdtPerBtc);
+
+        if ($assertMinimum) {
+            $this->assertMinDeposit($amount, $input, $btcPerUsdt);
+        }
+
+        $conversion = $this->convertToBase($amount, $input, $btcPerUsdt, $usdtPerBtc);
+
+        return [
+            'pay_amount' => $conversion['amount'],
+            'pay_currency' => $base,
+            'input_amount' => $amount,
+            'input_currency' => $input,
+            'exchange_rate' => $btcPerUsdt,
+            'usdt_per_btc' => $usdtPerBtc,
+        ];
+    }
+
+    public function prepareGatewayDepositAtLiveRate(float $amount, string $inputCurrency, bool $assertMinimum = true): array
+    {
+        return $this->prepareGatewayDeposit($amount, $inputCurrency, $assertMinimum);
+    }
+
     public function minDepositUsdt(): float
     {
         return $this->settings->minDeposit();
@@ -190,11 +252,8 @@ class ExchangeRateService
     {
         $amount = $this->minDepositAmountIn($currency, $btcPerUsdt);
         $symbol = strtoupper(trim($currency));
-        $formatted = $symbol === 'BTC'
-            ? rtrim(rtrim(number_format($amount, 8, '.', ''), '0'), '.')
-            : number_format($amount, 2, '.', '');
 
-        return $formatted.' '.$symbol;
+        return CryptoAmountFormat::amountWithSymbol($amount, $symbol);
     }
 
     public function assertMinDeposit(float $amount, string $currency, ?float $btcPerUsdt = null): void

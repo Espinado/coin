@@ -74,6 +74,32 @@ class MockPaymentGatewayFlowTest extends TestCase
         app(DepositService::class)->createPending($user, 10, 'BTC');
     }
 
+    public function test_btc_input_is_converted_to_usdt_before_gateway(): void
+    {
+        config([
+            'coin.exchange_rates.coinmarketcap.enabled' => true,
+            'coin.exchange_rates.coinmarketcap.api_key' => 'test-cmc-key',
+        ]);
+
+        \Illuminate\Support\Facades\Http::fake([
+            'pro-api.coinmarketcap.com/v3/cryptocurrency/quotes/latest*' => \Illuminate\Support\Facades\Http::response([
+                'data' => [[
+                    'symbol' => 'BTC',
+                    'quote' => [['symbol' => 'USDT', 'price' => 80000]],
+                ]],
+            ]),
+        ]);
+
+        $user = User::factory()->create();
+
+        $deposit = app(DepositService::class)->createPending($user, 0.000125, 'BTC');
+
+        $this->assertSame('USDT', $deposit->currency);
+        $this->assertSame('10.00', number_format((float) $deposit->amount, 2, '.', ''));
+        $this->assertSame('0.00012500', number_format((float) $deposit->input_amount, 8, '.', ''));
+        $this->assertSame('BTC', $deposit->input_currency);
+    }
+
     public function test_withdrawal_processing_triggers_mock_gateway_payout_and_ipn(): void
     {
         $admin = Admin::query()->create([

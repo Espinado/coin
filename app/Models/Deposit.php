@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\CryptoAmountFormat;
 use App\Support\LocaleFormat;
 use App\Support\PaymentStatusReason;
 use Illuminate\Database\Eloquent\Model;
@@ -19,6 +20,8 @@ class Deposit extends Model
         'user_id',
         'amount',
         'currency',
+        'input_amount',
+        'input_currency',
         'credited_amount',
         'credited_currency',
         'exchange_rate',
@@ -63,7 +66,8 @@ class Deposit extends Model
     protected function casts(): array
     {
         return [
-            'amount' => 'decimal:2',
+            'amount' => 'decimal:8',
+            'input_amount' => 'decimal:8',
             'credited_amount' => 'decimal:2',
             'exchange_rate' => 'decimal:8',
             'received_amount' => 'decimal:8',
@@ -84,7 +88,25 @@ class Deposit extends Model
 
     public function formattedAmount(): string
     {
-        return number_format((float) $this->amount, 2, '.', ',').' '.$this->currency;
+        return CryptoAmountFormat::amountWithSymbol($this->amount, (string) $this->currency);
+    }
+
+    public function hasInputConversion(): bool
+    {
+        if ($this->input_amount === null || $this->input_currency === null) {
+            return false;
+        }
+
+        return strtoupper((string) $this->input_currency) !== strtoupper((string) $this->currency);
+    }
+
+    public function formattedInputAmount(): ?string
+    {
+        if ($this->input_amount === null || $this->input_currency === null) {
+            return null;
+        }
+
+        return CryptoAmountFormat::amountWithSymbol($this->input_amount, (string) $this->input_currency);
     }
 
     public function formattedCreditedAmount(): ?string
@@ -102,9 +124,8 @@ class Deposit extends Model
             return null;
         }
 
-        $decimals = strtoupper((string) $this->currency) === 'BTC' ? 8 : 8;
-
-        return number_format((float) $this->received_amount, $decimals, '.', '').' '.strtoupper((string) $this->currency);
+        return CryptoAmountFormat::formatPlain($this->received_amount, (string) $this->currency)
+            .' '.strtoupper((string) $this->currency);
     }
 
     public function userRejectionMessage(): ?string

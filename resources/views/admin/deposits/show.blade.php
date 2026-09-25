@@ -12,6 +12,9 @@
             <div class="admin-card">
                 <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.12em;color:rgba(232,237,245,0.62);">{{ $deposit->publicReference() }}</div>
                 <h1 style="margin:10px 0 0;font-size:22px;font-weight:600;">{{ $deposit->formattedAmount() }}</h1>
+                @if($deposit->hasInputConversion() && $deposit->formattedInputAmount())
+                <p style="margin:8px 0 0;font-size:13px;color:rgba(232,237,245,0.72);">{{ __('coin.wallet.deposit_input_equivalent') }}: {{ $deposit->formattedInputAmount() }}</p>
+                @endif
                 <p style="margin:8px 0 0;font-size:13px;color:rgba(232,237,245,0.72);">{{ ucfirst($deposit->status) }} · {{ \App\Support\LocaleFormat::dateTimeLocal($deposit->created_at) }} ({{ \App\Support\LocaleFormat::timezoneLabel() }})</p>
                 <div style="margin-top:16px;font-size:13px;line-height:1.7;">
                     <div><strong>{{ __('coin.admin.method') }}:</strong> {{ $deposit->method }}</div>

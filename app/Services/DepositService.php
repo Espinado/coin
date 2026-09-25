@@ -9,6 +9,8 @@ use App\Models\Deposit;
 use App\Models\User;
 use App\Models\Wallet;
 use App\Models\WalletTransaction;
+use App\Support\CcapiUserMessage;
+use App\Support\CryptoAmountFormat;
 use App\Support\PaymentStatusReason;
 use App\Models\PaymentStatusLog;
 use App\Jobs\ExpirePendingDepositJob;
@@ -30,32 +32,18 @@ class DepositService
 
     public function createPending(User $user, float $amount, string $currency = 'USDT', ?string $method = null): Deposit
     {
-        $currency = strtoupper(trim($currency));
-        $allowed = config('coin.deposits.currencies', ['USDT', 'BTC']);
-
-        if (! in_array($currency, $allowed, true)) {
-            throw new RuntimeException('Unsupported top-up currency.');
-        }
-
-        $lockedBtcPerUsdt = null;
-        $lockedUsdtPerBtc = null;
-
-        if ($currency === 'BTC') {
-            $lockedUsdtPerBtc = $this->exchangeRates->fetchLiveUsdtPerBtc();
-            $lockedBtcPerUsdt = $this->exchangeRates->btcPerUsdtFromUsdtRate($lockedUsdtPerBtc);
-            $this->exchangeRates->assertMinDeposit($amount, $currency, $lockedBtcPerUsdt);
-        } else {
-            $this->exchangeRates->assertMinDeposit($amount, $currency);
-        }
+        $prepared = $this->exchangeRates->prepareGatewayDeposit($amount, $currency);
 
         $method ??= (string) config('coin.payments.driver', 'mock');
 
-        $deposit = DB::transaction(function () use ($user, $amount, $currency, $method, $lockedBtcPerUsdt) {
+        $deposit = DB::transaction(function () use ($user, $prepared, $method) {
             return Deposit::query()->create([
                 'user_id' => $user->id,
-                'amount' => $amount,
-                'currency' => $currency,
-                'exchange_rate' => $lockedBtcPerUsdt,
+                'amount' => $prepared['pay_amount'],
+                'currency' => $prepared['pay_currency'],
+                'input_amount' => $prepared['input_amount'],
+                'input_currency' => $prepared['input_currency'],
+                'exchange_rate' => $prepared['exchange_rate'],
                 'status' => Deposit::STATUS_PENDING,
                 'method' => $method,
             ]);
@@ -79,8 +67,27 @@ class DepositService
             : 'mock';
         $deposit = $this->createPending($user, $amount, $currency, $driver);
 
-        $intent = $gateway->createDepositIntent($deposit);
-        $this->applyDepositIntent($deposit, $intent);
+        try {
+            $intent = $gateway->createDepositIntent($deposit);
+            $this->applyDepositIntent($deposit, $intent);
+        } catch (\Throwable $exception) {
+            try {
+                $this->reject(
+                    $deposit->fresh(),
+                    null,
+                    PaymentStatusReason::DEPOSIT_GATEWAY_FAILED,
+                    logSource: PaymentStatusLog::SOURCE_APP,
+                );
+            } catch (RuntimeException $rejectException) {
+                Log::warning('Failed to reject deposit after gateway error.', [
+                    'deposit_id' => $deposit->id,
+                    'gateway_error' => $exception->getMessage(),
+                    'reject_error' => $rejectException->getMessage(),
+                ]);
+            }
+
+            throw new RuntimeException(CcapiUserMessage::fromThrowable($exception), 0, $exception);
+        }
 
         return $deposit->fresh(['user']);
     }
@@ -193,33 +200,52 @@ class DepositService
                 ->firstOrFail();
             $paymentAmount = (float) $deposit->amount;
             $paymentCurrency = strtoupper((string) ($deposit->currency ?: 'USDT'));
-            $lockedBtcPerUsdt = $paymentCurrency === 'BTC' && $deposit->exchange_rate
-                ? (float) $deposit->exchange_rate
-                : null;
-
-            $conversion = $lockedBtcPerUsdt !== null
-                ? $this->exchangeRates->convertToBase($paymentAmount, $paymentCurrency, $lockedBtcPerUsdt)
-                : $this->exchangeRates->convertToBaseAtLiveRate($paymentAmount, $paymentCurrency);
-            $creditedAmount = $conversion['amount'];
+            $inputCurrency = strtoupper((string) ($deposit->input_currency ?? ''));
             $walletCurrency = $this->wallets->currencyFor($wallet);
+            $isLiveDeposit = $deposit->method === 'ccapi';
+
+            if ($paymentCurrency === 'BTC') {
+                $lockedBtcPerUsdt = $deposit->exchange_rate
+                    ? (float) $deposit->exchange_rate
+                    : null;
+                $conversion = $lockedBtcPerUsdt !== null
+                    ? $this->exchangeRates->convertToBase($paymentAmount, $paymentCurrency, $lockedBtcPerUsdt)
+                    : $this->exchangeRates->convertToBaseAtLiveRate($paymentAmount, $paymentCurrency);
+                $creditedAmount = $conversion['amount'];
+                $sourceKey = $isLiveDeposit ? 'live_top_up_converted' : 'mock_top_up_converted';
+                $source = __(
+                    'coin.tx_sources.'.$sourceKey,
+                    [
+                        'paid' => rtrim(rtrim(number_format($paymentAmount, 8, '.', ''), '0'), '.').' BTC',
+                        'rate' => number_format((float) ($conversion['rate'] ?? 1), 8, '.', ''),
+                    ],
+                );
+            } elseif ($deposit->hasInputConversion() && $inputCurrency === 'BTC') {
+                $creditedAmount = $paymentAmount;
+                $conversion = [
+                    'amount' => $creditedAmount,
+                    'rate' => $deposit->exchange_rate,
+                ];
+                $sourceKey = $isLiveDeposit ? 'live_top_up_converted' : 'mock_top_up_converted';
+                $source = __(
+                    'coin.tx_sources.'.$sourceKey,
+                    [
+                        'paid' => CryptoAmountFormat::amountWithSymbol((float) $deposit->input_amount, 'BTC'),
+                        'rate' => number_format((float) ($deposit->exchange_rate ?? 0), 8, '.', ''),
+                    ],
+                );
+            } else {
+                $creditedAmount = $paymentAmount;
+                $conversion = [
+                    'amount' => $creditedAmount,
+                    'rate' => null,
+                ];
+                $sourceKey = $isLiveDeposit ? 'live_top_up' : 'mock_top_up';
+                $source = __('coin.tx_sources.'.$sourceKey);
+            }
 
             $wallet->increment('available', $creditedAmount);
             $wallet->increment('balance', $creditedAmount);
-
-            $isLiveDeposit = $deposit->method === 'ccapi';
-            $sourceKey = $paymentCurrency === $walletCurrency
-                ? ($isLiveDeposit ? 'live_top_up' : 'mock_top_up')
-                : ($isLiveDeposit ? 'live_top_up_converted' : 'mock_top_up_converted');
-
-            $source = __(
-                'coin.tx_sources.'.$sourceKey,
-                $sourceKey === 'mock_top_up' || $sourceKey === 'live_top_up'
-                    ? []
-                    : [
-                        'paid' => number_format($paymentAmount, 2, '.', '').' '.$paymentCurrency,
-                        'rate' => number_format((float) ($conversion['rate'] ?? 1), 4, '.', ''),
-                    ],
-            );
 
             try {
                 $this->wallets->record(
@@ -249,7 +275,7 @@ class DepositService
             $deposit->update([
                 'credited_amount' => $creditedAmount,
                 'credited_currency' => $walletCurrency,
-                'exchange_rate' => $conversion['rate'],
+                'exchange_rate' => $conversion['rate'] ?? $deposit->exchange_rate,
                 'status' => Deposit::STATUS_CONFIRMED,
                 'confirmed_by' => $admin?->id,
                 'confirmed_at' => now(),
@@ -261,6 +287,55 @@ class DepositService
 
             return $deposit;
         });
+    }
+
+    public function discardOrphanPending(Deposit $deposit, string $logSource = PaymentStatusLog::SOURCE_APP): Deposit
+    {
+        $this->assertOrphanPending($deposit);
+
+        return $this->reject($deposit, null, PaymentStatusReason::DEPOSIT_GATEWAY_FAILED, logSource: $logSource);
+    }
+
+    public function deleteOrphanPending(Deposit $deposit): void
+    {
+        $this->assertOrphanPending($deposit);
+
+        DB::transaction(function () use ($deposit): void {
+            $deposit = Deposit::query()
+                ->whereKey($deposit->id)
+                ->lockForUpdate()
+                ->firstOrFail();
+
+            $this->assertOrphanPending($deposit);
+
+            $deposit->delete();
+        });
+    }
+
+    private function assertOrphanPending(Deposit $deposit): void
+    {
+        $deposit = $deposit->fresh();
+
+        if ($deposit->status !== Deposit::STATUS_PENDING) {
+            throw new RuntimeException('Only pending top-ups can be discarded.');
+        }
+
+        if (filled($deposit->payment_address)) {
+            throw new RuntimeException('Deposit already has a payment address.');
+        }
+
+        if (filled($deposit->txid)) {
+            throw new RuntimeException('Deposit already has a blockchain transaction.');
+        }
+
+        $walletTransactionExists = WalletTransaction::query()
+            ->where('reference_type', $deposit->getMorphClass())
+            ->where('reference_id', $deposit->id)
+            ->exists();
+
+        if ($walletTransactionExists) {
+            throw new RuntimeException('Deposit already has a wallet transaction.');
+        }
     }
 
     public function reject(
