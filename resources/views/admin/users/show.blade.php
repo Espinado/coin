@@ -45,6 +45,7 @@
                             data-status-connected="{{ __('coin.voximplant.status_connected') }}"
                             data-status-ended="{{ __('coin.voximplant.status_ended') }}"
                             data-status-failed="{{ __('coin.voximplant.status_failed') }}"
+                            data-status-callee-busy="{{ __('coin.voximplant.status_callee_busy') }}"
                             data-status-no-phone="{{ __('coin.voximplant.no_phone') }}"
                             data-status-requesting-mic="{{ __('coin.voximplant.status_requesting_mic') }}"
                             data-status-mic-denied="{{ __('coin.voximplant.status_mic_denied') }}"

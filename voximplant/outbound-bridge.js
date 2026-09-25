@@ -1,5 +1,7 @@
 /* CloudFlops — bridge Web SDK / API outbound calls to PSTN. */
 
+var handledByWebCall = false;
+
 function readEngineConfig() {
     try {
         return JSON.parse(VoxEngine.customData() || '{}');
@@ -83,6 +85,7 @@ function bridgeWebToPstn(event) {
     var destination = normalizeE164(config.destination);
     var callerId = normalizeE164(config.caller_id) || String(config.caller_id || '');
     var mediaBridged = false;
+    var outbound = null;
 
     if (!destination) {
         Logger.write('CloudFlops bridge: missing destination');
@@ -90,14 +93,13 @@ function bridgeWebToPstn(event) {
         return;
     }
 
-    // Keep the browser leg alive while the PSTN callee is ringing.
     incoming.answer();
 
-    var outbound = dialPstn(destination, callerId);
+    outbound = dialPstn(destination, callerId);
 
     if (!outbound) {
         Logger.write('CloudFlops bridge: PSTN dial failed for ' + destination);
-        notifyBrowser(incoming, 'pstn_failed', { reason: 'dial_failed' });
+        notifyBrowser(incoming, 'pstn_failed', { reason: 'dial_failed', code: 0 });
         incoming.hangup();
         return;
     }
@@ -119,9 +121,11 @@ function bridgeWebToPstn(event) {
         notifyBrowser(incoming, 'pstn_ringing');
     });
 
-    var hangupBoth = function () {
+    var cleanup = function () {
         try {
-            outbound.hangup();
+            if (outbound) {
+                outbound.hangup();
+            }
         } catch (e) {}
 
         try {
@@ -133,15 +137,17 @@ function bridgeWebToPstn(event) {
 
     incoming.addEventListener(CallEvents.Disconnected, function () {
         try {
-            outbound.hangup();
+            if (outbound) {
+                outbound.hangup();
+            }
         } catch (e) {}
 
         VoxEngine.terminate();
     });
 
     incoming.addEventListener(CallEvents.Failed, function () {
-        notifyBrowser(incoming, 'pstn_failed', { reason: 'browser_failed' });
-        hangupBoth();
+        notifyBrowser(incoming, 'pstn_failed', { reason: 'browser_failed', code: 0 });
+        cleanup();
     });
 
     outbound.addEventListener(CallEvents.Disconnected, function () {
@@ -155,12 +161,19 @@ function bridgeWebToPstn(event) {
     outbound.addEventListener(CallEvents.Failed, function (e) {
         Logger.write('CloudFlops PSTN failed: ' + (e.reason || e.code || 'unknown'));
         notifyBrowser(incoming, 'pstn_failed', {
-            reason: e.reason || e.code || 'unknown',
+            reason: e.reason || 'pstn_failed',
+            code: e.code || 0,
         });
-        hangupBoth();
+        cleanup();
     });
 }
 
+VoxEngine.addEventListener(AppEvents.CallAlerting, function (event) {
+    handledByWebCall = true;
+    bridgeWebToPstn(event);
+});
+
+// StartScenarios API calls have no CallAlerting — dial after a short wait.
 VoxEngine.addEventListener(AppEvents.Started, function () {
     var config = readEngineConfig();
     var destination = normalizeE164(config.destination);
@@ -169,12 +182,16 @@ VoxEngine.addEventListener(AppEvents.Started, function () {
         return;
     }
 
-    var outbound = dialPstn(destination, config.caller_id || '');
+    setTimeout(function () {
+        if (handledByWebCall) {
+            return;
+        }
 
-    if (outbound) {
-        outbound.addEventListener(CallEvents.Disconnected, VoxEngine.terminate);
-        outbound.addEventListener(CallEvents.Failed, VoxEngine.terminate);
-    }
+        var outbound = dialPstn(destination, config.caller_id || '');
+
+        if (outbound) {
+            outbound.addEventListener(CallEvents.Disconnected, VoxEngine.terminate);
+            outbound.addEventListener(CallEvents.Failed, VoxEngine.terminate);
+        }
+    }, 300);
 });
-
-VoxEngine.addEventListener(AppEvents.CallAlerting, bridgeWebToPstn);

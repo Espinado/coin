@@ -1487,6 +1487,7 @@ return [
         'status_connected' => 'Разговор.',
         'status_ended' => 'Звонок завершён.',
         'status_failed' => 'Не удалось установить соединение.',
+        'status_callee_busy' => 'Абонент занят или сбросил вызов до ответа.',
         'modal_dialing' => 'Идёт набор номера',
         'modal_ringing' => 'Звоним абоненту',
         'modal_connected' => 'Разговор',

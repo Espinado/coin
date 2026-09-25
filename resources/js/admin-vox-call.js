@@ -384,7 +384,15 @@ function attachCallListeners(call, modal, root, onClear, audioSink, userName, de
         }
 
         if (payload?.type === 'pstn_failed') {
-            finish(true, payload?.details?.reason || root.dataset.statusFailed || 'Call failed.');
+            const code = Number(payload?.details?.code || 0);
+            const reason = payload?.details?.reason || '';
+
+            if (code === 486 || reason === 'Busy Here') {
+                finish(true, root.dataset.statusCalleeBusy || 'The number is busy or rejected the call.');
+                return;
+            }
+
+            finish(true, reason || root.dataset.statusFailed || 'Call failed.');
         }
     });
 
