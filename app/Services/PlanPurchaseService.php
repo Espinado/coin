@@ -41,6 +41,12 @@ class PlanPurchaseService
             throw new RuntimeException('Amount is below the minimum investment for this plan.');
         }
 
+        $maxAmount = $plan->calculatorMaxAmount();
+
+        if ($amount > $maxAmount) {
+            throw new RuntimeException('Amount exceeds the maximum investment for this plan.');
+        }
+
         $wallet = $this->wallets->ensureWallet($user);
 
         return DB::transaction(function () use ($user, $plan, $amount, $wallet) {

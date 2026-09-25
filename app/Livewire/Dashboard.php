@@ -43,6 +43,8 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
 use Illuminate\Validation\ValidationException;
+use App\Support\Concerns\ThrottlesSupportActions;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\On;
 use Livewire\Attributes\Url;
 use Livewire\Component;
@@ -50,6 +52,7 @@ use Livewire\WithPagination;
 
 class Dashboard extends Component
 {
+    use ThrottlesSupportActions;
     use WithPagination;
 
     #[Url(as: 'section', history: true, keep: false)]
@@ -70,14 +73,19 @@ class Dashboard extends Component
 
     public int $epochsPerDay = 3;
 
+    #[Locked]
     public $wallet;
 
+    #[Locked]
     public $user;
 
+    #[Locked]
     public $primaryContract;
 
+    #[Locked]
     public $primaryPlan;
 
+    #[Locked]
     public $referral;
 
     /** @var Collection<int, mixed> */
@@ -201,6 +209,8 @@ class Dashboard extends Component
     public string $referralInviteEmail = '';
 
     public string $profileEmail = '';
+
+    public string $profileEmailPassword = '';
 
     public string $profileCurrentPassword = '';
 
@@ -341,6 +351,15 @@ class Dashboard extends Component
         }
 
         $this->resetPage('referralInvitedPage');
+    }
+
+    public function hydrate(): void
+    {
+        if (! auth()->check()) {
+            return;
+        }
+
+        $this->user = auth()->user();
     }
 
     public function mount(DashboardDataService $data, PlatformSettingsService $settings): void
@@ -1775,9 +1794,13 @@ class Dashboard extends Component
                 'max:255',
                 Rule::unique('users', 'email')->ignore($this->user->id),
             ],
+            'profileEmailPassword' => ['required', 'string'],
         ], [], [
             'profileEmail' => __('coin.auth.email'),
+            'profileEmailPassword' => __('coin.profile.current_password'),
         ]);
+
+        $this->assertCurrentUserPassword($validated['profileEmailPassword'], 'profileEmailPassword');
 
         $newEmail = $validated['profileEmail'];
 
@@ -1792,6 +1815,7 @@ class Dashboard extends Component
 
         $this->reloadPortfolioData();
         $this->profileEmail = (string) $this->user->email;
+        $this->reset('profileEmailPassword');
         $this->actionMessage = __('coin.messages.email_updated');
     }
 
@@ -2138,6 +2162,8 @@ class Dashboard extends Component
 
     public function createTicket(SupportTicketService $support): void
     {
+        $this->throttleSupportAction('create-ticket');
+
         $this->newSubject = trim($this->newSubject);
         $this->newBody = trim($this->newBody);
 
@@ -2331,6 +2357,8 @@ class Dashboard extends Component
 
     public function sendTicketReply(SupportTicketService $support): void
     {
+        $this->throttleSupportAction('reply', 20);
+
         $ticket = $this->selectedTicket;
 
         abort_unless($ticket !== null, 403);

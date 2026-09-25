@@ -5,16 +5,20 @@ namespace Tests\Feature;
 use App\Livewire\Dashboard;
 use App\Models\Admin;
 use App\Models\Deposit;
+use App\Models\Plan;
 use App\Models\User;
 use App\Models\Withdrawal;
 use App\Services\DepositService;
 use App\Services\Payment\PaymentSimulatorService;
+use App\Services\PlanPurchaseService;
 use App\Services\PlatformSettingsService;
 use App\Services\WithdrawalService;
 use App\Support\AdminRole;
 use Database\Seeders\AdminSeeder;
+use Database\Seeders\PlanSeeder;
 use Database\Seeders\PlatformSettingsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\RateLimiter;
 use Livewire\Livewire;
 use Tests\TestCase;
 
@@ -357,5 +361,112 @@ class SecurityHardeningTest extends TestCase
             ->assertSessionHasErrors('payment_gate_enabled');
 
         $this->assertTrue(app(PlatformSettingsService::class)->paymentGateEnabled());
+    }
+
+    public function test_save_profile_email_requires_password(): void
+    {
+        $user = User::factory()->create([
+            'email' => 'owner@coin.test',
+            'password' => 'SecretPass1!',
+        ]);
+
+        Livewire::actingAs($user)
+            ->test(Dashboard::class)
+            ->set('profileEmail', 'newowner@coin.test')
+            ->call('saveProfileEmail')
+            ->assertHasErrors(['profileEmailPassword']);
+
+        $this->assertSame('owner@coin.test', $user->fresh()->email);
+    }
+
+    public function test_livewire_dashboard_ignores_tampered_user_model(): void
+    {
+        $this->seed(PlanSeeder::class);
+
+        $actor = User::factory()->create([
+            'email' => 'actor@coin.test',
+            'password' => 'SecretPass1!',
+        ]);
+        $victim = User::factory()->create(['email' => 'victim@coin.test']);
+
+        Livewire::actingAs($actor)
+            ->test(Dashboard::class)
+            ->set('user', $victim)
+            ->set('profileEmail', 'hacked@coin.test')
+            ->set('profileEmailPassword', 'SecretPass1!')
+            ->call('saveProfileEmail')
+            ->assertHasNoErrors();
+
+        $this->assertSame('victim@coin.test', $victim->fresh()->email);
+        $this->assertSame('hacked@coin.test', $actor->fresh()->email);
+        $this->assertNull($actor->fresh()->email_verified_at);
+    }
+
+    public function test_plan_purchase_rejects_amount_above_calculator_max(): void
+    {
+        $this->seed(PlanSeeder::class);
+
+        $user = User::factory()->create();
+        $user->wallet->update([
+            'available' => 100_000,
+            'balance' => 100_000,
+        ]);
+
+        $core = Plan::query()->where('slug', 'core')->firstOrFail();
+        $tooMuch = (float) ($core->calculatorMaxAmount() + 1);
+
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('Amount exceeds the maximum investment for this plan.');
+
+        app(PlanPurchaseService::class)->purchase($user, $core, $tooMuch);
+    }
+
+    public function test_viewer_admin_dashboard_hides_financial_metrics(): void
+    {
+        $viewer = Admin::query()->create([
+            'name' => 'Viewer Metrics',
+            'email' => 'viewer-metrics@coin.test',
+            'password' => 'password',
+            'role' => AdminRole::Viewer,
+        ]);
+
+        $this->actingAs($viewer, 'admin')
+            ->get('http://admin.coin.test/dashboard')
+            ->assertOk()
+            ->assertDontSee(__('coin.admin.locked_principal'), false);
+    }
+
+    public function test_registration_is_rate_limited(): void
+    {
+        RateLimiter::clear('127.0.0.1');
+
+        for ($i = 0; $i < 5; $i++) {
+            $this->post('http://coin.test/register', [
+                'name' => 'User '.$i,
+                'email' => "user{$i}@coin.test",
+                'phone' => '+3712000000'.$i,
+                'password' => 'SecretPass1!',
+                'password_confirmation' => 'SecretPass1!',
+            ])->assertRedirect();
+        }
+
+        $this->post('http://coin.test/register', [
+            'name' => 'Blocked User',
+            'email' => 'blocked@coin.test',
+            'phone' => '+37120000099',
+            'password' => 'SecretPass1!',
+            'password_confirmation' => 'SecretPass1!',
+        ])->assertStatus(429);
+    }
+
+    public function test_payment_security_monitor_reads_configured_thresholds(): void
+    {
+        config([
+            'coin.payments.ccapi.security_monitor.lookback_minutes' => 30,
+            'coin.payments.ccapi.security_monitor.invalid_signature_threshold' => 2,
+        ]);
+
+        $this->artisan('coin:monitor-payment-security')
+            ->assertSuccessful();
     }
 }

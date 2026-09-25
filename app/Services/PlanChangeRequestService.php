@@ -8,6 +8,7 @@ use App\Models\Contract;
 use App\Models\Plan;
 use App\Models\PlanChangeRequest;
 use App\Models\User;
+use App\Models\Wallet;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use RuntimeException;
@@ -25,21 +26,29 @@ class PlanChangeRequestService
 
         $topUp = $this->purchases->topUpRequired($contract, $newPlan);
 
-        if ($topUp > 0.009) {
-            $wallet = $user->wallet ?? throw new RuntimeException(__('coin.messages.plan_change_insufficient_balance', [
-                'amount' => number_format($topUp, 2, '.', ' ').' '.($contract->currency ?? config('coin.wallet.base_currency', 'USDT')),
-            ]));
-
-            if ((float) $wallet->available < $topUp) {
-                throw new RuntimeException(__('coin.messages.plan_change_insufficient_balance', [
-                    'amount' => number_format($topUp, 2, '.', ' ').' '.($contract->currency ?? config('coin.wallet.base_currency', 'USDT')),
-                ]));
-            }
-        }
-
         return DB::transaction(function () use ($user, $contract, $newPlan, $topUp) {
+            Contract::query()->whereKey($contract->id)->lockForUpdate()->firstOrFail();
+
+            if (PlanChangeRequest::pendingForContract($contract->id)) {
+                throw new RuntimeException(__('coin.messages.plan_change_pending_exists'));
+            }
+
             if ($topUp > 0.009) {
-                $wallet = $user->wallet ?? throw new RuntimeException('User has no wallet.');
+                $wallet = Wallet::query()
+                    ->where('user_id', $user->id)
+                    ->lockForUpdate()
+                    ->first();
+
+                if (! $wallet instanceof Wallet) {
+                    throw new RuntimeException('User has no wallet.');
+                }
+
+                if ((float) $wallet->available < $topUp) {
+                    throw new RuntimeException(__('coin.messages.plan_change_insufficient_balance', [
+                        'amount' => number_format($topUp, 2, '.', ' ').' '.($contract->currency ?? config('coin.wallet.base_currency', 'USDT')),
+                    ]));
+                }
+
                 $wallet->decrement('available', $topUp);
                 $wallet->increment('pending', $topUp);
             }

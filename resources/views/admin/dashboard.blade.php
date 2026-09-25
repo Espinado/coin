@@ -7,11 +7,15 @@
         <div class="admin-kicker">{{ strtoupper(__('coin.admin.platform_overview')) }}</div>
         <h1 class="admin-title">{{ __('coin.admin.console') }}</h1>
         <p class="admin-subtitle">
-            {!! __('coin.admin.signed_in_as', [
-                'name' => '<strong>'.$admin->name.'</strong>',
-                'count' => $metrics['active_contracts'],
-                'locked' => \App\Support\MoneyFormat::amount($metrics['total_locked'], $metrics['token_symbol']),
-            ]) !!}
+            @if($canAccessFinance ?? false)
+                {!! __('coin.admin.signed_in_as', [
+                    'name' => '<strong>'.$admin->name.'</strong>',
+                    'count' => $metrics['active_contracts'],
+                    'locked' => \App\Support\MoneyFormat::amount($metrics['total_locked'], $metrics['token_symbol']),
+                ]) !!}
+            @else
+                {!! __('coin.admin.signed_in_as_simple', ['name' => '<strong>'.$admin->name.'</strong>']) !!}
+            @endif
         </p>
     </div>
 
@@ -35,11 +39,13 @@
                 <div style="margin-top:6px;font-size:12px;color:rgba(232,237,245,0.62);">{{ __('coin.admin.users_today_kyc', ['today' => $metrics['users_today'], 'kyc' => $metrics['kyc_pending']]) }}</div>
             </div>
         @endif
-        <div class="admin-card">
-            <div class="admin-kicker">{{ strtoupper(__('coin.admin.locked_principal')) }}</div>
-            <div class="admin-stat-value">{{ \App\Support\MoneyFormat::amount($metrics['total_locked'], $metrics['token_symbol'], 0) }}</div>
-            <div style="margin-top:6px;font-size:12px;color:rgba(232,237,245,0.62);">{{ __('coin.admin.active_investments', ['count' => $metrics['active_contracts']]) }}</div>
-        </div>
+        @if($canAccessFinance ?? false)
+            <div class="admin-card">
+                <div class="admin-kicker">{{ strtoupper(__('coin.admin.locked_principal')) }}</div>
+                <div class="admin-stat-value">{{ \App\Support\MoneyFormat::amount($metrics['total_locked'], $metrics['token_symbol'], 0) }}</div>
+                <div style="margin-top:6px;font-size:12px;color:rgba(232,237,245,0.62);">{{ __('coin.admin.active_investments', ['count' => $metrics['active_contracts']]) }}</div>
+            </div>
+        @endif
         @if($canManageWithdrawals ?? false)
             <div class="admin-card">
                 <div class="admin-kicker">{{ strtoupper(__('coin.admin.pending_payouts')) }}</div>

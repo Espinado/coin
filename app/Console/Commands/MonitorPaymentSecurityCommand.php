@@ -26,8 +26,8 @@ class MonitorPaymentSecurityCommand extends Command
 
     private function checkInvalidWebhookSignatures(): void
     {
-        $lookbackMinutes = max(1, (int) config('coin.payments.security_monitor.lookback_minutes', 60));
-        $threshold = max(1, (int) config('coin.payments.security_monitor.invalid_signature_threshold', 5));
+        $lookbackMinutes = max(1, (int) config('coin.payments.ccapi.security_monitor.lookback_minutes', 60));
+        $threshold = max(1, (int) config('coin.payments.ccapi.security_monitor.invalid_signature_threshold', 5));
 
         $count = PaymentWebhookLog::query()
             ->where('signature_valid', false)

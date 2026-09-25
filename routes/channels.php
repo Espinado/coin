@@ -3,7 +3,9 @@
 use App\Models\Admin;
 use App\Models\SupportTicket;
 use App\Models\User;
+use App\Services\AdminAuthorization;
 use App\Services\SupportGuestSession;
+use App\Support\AdminAbility;
 use Illuminate\Support\Facades\Broadcast;
 use Illuminate\Support\Facades\Log;
 
@@ -24,9 +26,10 @@ Broadcast::channel('support.ticket.{ticketId}', function ($user, int $ticketId) 
     }
 
     if ($user instanceof Admin) {
-        logSupportChannelAuth('support.ticket.'.$ticketId, $user, true, 'admin');
+        $allowed = app(AdminAuthorization::class)->allows($user, AdminAbility::ManageSupport);
+        logSupportChannelAuth('support.ticket.'.$ticketId, $user, $allowed, 'admin_support_ability');
 
-        return true;
+        return $allowed;
     }
 
     logSupportChannelAuth('support.ticket.'.$ticketId, $user, false, 'unknown_user_type');
@@ -42,29 +45,33 @@ Broadcast::channel('support.user.{userId}', function ($user, int $userId) {
 });
 
 Broadcast::channel('support.admin', function ($user) {
-    $allowed = $user instanceof Admin;
-    logSupportChannelAuth('support.admin', $user, $allowed, 'admin_only');
+    $allowed = $user instanceof Admin
+        && app(AdminAuthorization::class)->allows($user, AdminAbility::ManageSupport);
+    logSupportChannelAuth('support.admin', $user, $allowed, 'admin_support_ability');
 
     return $allowed;
 });
 
 Broadcast::channel('admin.withdrawals', function ($user) {
-    $allowed = $user instanceof Admin;
-    logSupportChannelAuth('admin.withdrawals', $user, $allowed, 'admin_only');
+    $allowed = $user instanceof Admin
+        && app(AdminAuthorization::class)->allows($user, AdminAbility::ManageWithdrawals);
+    logSupportChannelAuth('admin.withdrawals', $user, $allowed, 'admin_withdrawals_ability');
 
     return $allowed;
 });
 
 Broadcast::channel('admin.deposits', function ($user) {
-    $allowed = $user instanceof Admin;
-    logSupportChannelAuth('admin.deposits', $user, $allowed, 'admin_only');
+    $allowed = $user instanceof Admin
+        && app(AdminAuthorization::class)->allows($user, AdminAbility::ManageDeposits);
+    logSupportChannelAuth('admin.deposits', $user, $allowed, 'admin_deposits_ability');
 
     return $allowed;
 });
 
 Broadcast::channel('admin.plan-changes', function ($user) {
-    $allowed = $user instanceof Admin;
-    logSupportChannelAuth('admin.plan-changes', $user, $allowed, 'admin_only');
+    $allowed = $user instanceof Admin
+        && app(AdminAuthorization::class)->allows($user, AdminAbility::ManagePlanChanges);
+    logSupportChannelAuth('admin.plan-changes', $user, $allowed, 'admin_plan_changes_ability');
 
     return $allowed;
 });

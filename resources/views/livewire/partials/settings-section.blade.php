@@ -106,6 +106,11 @@
           <input type="email" wire:model="profileEmail" autocomplete="email" style="{{ $input }}; margin-top: 8px;" />
         </div>
         @error('profileEmail')<p style="{{ $error }}">{{ $message }}</p>@enderror
+        <div>
+          <div style="{{ $fieldLabel }}">{{ mb_strtoupper(__('coin.profile.current_password')) }}</div>
+          <input type="password" wire:model="profileEmailPassword" autocomplete="current-password" placeholder="{{ __('coin.auth.password_placeholder') }}" style="{{ $input }}; margin-top: 8px;" />
+        </div>
+        @error('profileEmailPassword')<p style="{{ $error }}">{{ $message }}</p>@enderror
         <button type="button" wire:click="saveProfileEmail" wire:loading.attr="disabled" wire:target="saveProfileEmail" style="{{ $btnPrimary }}; margin-top: auto;">
           <span wire:loading.remove wire:target="saveProfileEmail">{{ __('coin.profile.save_email') }}</span>
           <span wire:loading wire:target="saveProfileEmail">{{ __('coin.profile.saving_email') }}</span>

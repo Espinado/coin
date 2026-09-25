@@ -6,12 +6,14 @@ use App\Models\SupportTicket;
 use App\Models\SupportTicketMessage;
 use App\Services\SupportGuestSession;
 use App\Services\SupportTicketService;
+use App\Support\Concerns\ThrottlesSupportActions;
 use Illuminate\Contracts\View\View;
 use Livewire\Attributes\On;
 use Livewire\Component;
 
 class GuestSupportChat extends Component
 {
+    use ThrottlesSupportActions;
     public bool $isOpen = false;
 
     public ?int $ticketId = null;
@@ -88,6 +90,8 @@ class GuestSupportChat extends Component
 
     public function createTicket(SupportTicketService $support): void
     {
+        $this->throttleSupportAction('guest-create-ticket');
+
         $this->guestEmail = strtolower(trim($this->guestEmail));
         $this->newSubject = trim($this->newSubject);
         $this->newBody = trim($this->newBody);
@@ -124,6 +128,8 @@ class GuestSupportChat extends Component
 
     public function sendReply(SupportTicketService $support): void
     {
+        $this->throttleSupportAction('guest-reply', 20);
+
         $ticket = $this->selectedTicket;
 
         abort_unless($ticket !== null, 403);
