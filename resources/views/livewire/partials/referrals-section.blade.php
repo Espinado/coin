@@ -66,26 +66,29 @@
         <div class="coin-data-list__head">
           <span>@include('livewire.partials.sortable-transaction-column', ['column' => 'created_at', 'label' => mb_strtoupper(__('coin.table.date')), 'sortProperty' => 'referralAccrualSort', 'dirProperty' => 'referralAccrualDir', 'sortMethod' => 'sortReferralAccruals'])</span>
           <span>@include('livewire.partials.sortable-transaction-column', ['column' => 'user', 'label' => mb_strtoupper(__('coin.table.user')), 'sortProperty' => 'referralAccrualSort', 'dirProperty' => 'referralAccrualDir', 'sortMethod' => 'sortReferralAccruals'])</span>
-          <span>@include('livewire.partials.sortable-transaction-column', ['column' => 'plan', 'label' => mb_strtoupper(__('coin.table.plan')), 'sortProperty' => 'referralAccrualSort', 'dirProperty' => 'referralAccrualDir', 'sortMethod' => 'sortReferralAccruals'])</span>
-          <span>@include('livewire.partials.sortable-transaction-column', ['column' => 'purchase', 'label' => mb_strtoupper(__('coin.table.purchase')), 'sortProperty' => 'referralAccrualSort', 'dirProperty' => 'referralAccrualDir', 'sortMethod' => 'sortReferralAccruals'])</span>
+          <span>@include('livewire.partials.sortable-transaction-column', ['column' => 'plan', 'label' => mb_strtoupper(__('coin.table.source')), 'sortProperty' => 'referralAccrualSort', 'dirProperty' => 'referralAccrualDir', 'sortMethod' => 'sortReferralAccruals'])</span>
           <span>@include('livewire.partials.sortable-transaction-column', ['column' => 'commission', 'label' => mb_strtoupper(__('coin.table.commission')), 'sortProperty' => 'referralAccrualSort', 'dirProperty' => 'referralAccrualDir', 'sortMethod' => 'sortReferralAccruals', 'align' => 'right'])</span>
         </div>
         @forelse($referralAccrualPage as $commission)
-          <article class="coin-data-list__row">
-            <span style="color: rgba(214,238,248,0.78);">{{ $commission->occurredLabel() }}</span>
-            <span style="font-family: 'JetBrains Mono', monospace; color: rgba(214,238,248,0.78);">{{ $commission->referralLabel() }}</span>
-            <span style="color: rgba(214,238,248,0.78);">{{ $commission->planName() }}</span>
-            <span style="font-family: 'JetBrains Mono', monospace; color: rgba(214,238,248,0.78);">{{ $commission->formattedPurchaseAmount() }}</span>
-            <span style="font-family: 'JetBrains Mono', monospace; text-align: right; color: oklch(0.88 0.12 192);">{{ $commission->formattedCommission() }}</span>
+          <article class="coin-data-list__row coin-referral-accrual">
+            <span class="coin-referral-accrual__date">{{ $commission->occurredLabel() }}</span>
+            <span class="coin-referral-accrual__user">{{ $commission->referralLabel() }}</span>
+            <span class="coin-referral-accrual__detail">
+              <span class="coin-referral-accrual__plan">{{ $commission->planName() }}</span>
+              <span class="coin-referral-accrual__sep" aria-hidden="true">·</span>
+              <span class="coin-referral-accrual__purchase">{{ $commission->formattedPurchaseAmount() }}</span>
+            </span>
+            <span class="coin-referral-accrual__commission">{{ $commission->formattedCommission() }}</span>
           </article>
         @empty
           @foreach($referralAccruals as $accrual)
-            <article class="coin-data-list__row">
-              <span style="color: rgba(214,238,248,0.78);">—</span>
-              <span style="font-family: 'JetBrains Mono', monospace; color: rgba(214,238,248,0.78);">{{ $accrual->user_label }}</span>
-              <span style="color: rgba(214,238,248,0.78);">{{ $accrual->plan_name }}</span>
-              <span style="color: rgba(214,238,248,0.78);">—</span>
-              <span style="font-family: 'JetBrains Mono', monospace; text-align: right; color: oklch(0.88 0.12 192);">{{ $accrual->amount_label }}</span>
+            <article class="coin-data-list__row coin-referral-accrual">
+              <span class="coin-referral-accrual__date">—</span>
+              <span class="coin-referral-accrual__user">{{ $accrual->user_label }}</span>
+              <span class="coin-referral-accrual__detail">
+                <span class="coin-referral-accrual__plan">{{ $accrual->plan_name }}</span>
+              </span>
+              <span class="coin-referral-accrual__commission">{{ $accrual->amount_label }}</span>
             </article>
           @endforeach
           @if($referralAccrualPage->total() === 0 && $referralAccruals->isEmpty())
@@ -112,12 +115,12 @@
           <span>@include('livewire.partials.sortable-transaction-column', ['column' => 'registered_at', 'label' => mb_strtoupper(__('coin.referrals.registered_at')), 'sortProperty' => 'referralInvitedSort', 'dirProperty' => 'referralInvitedDir', 'sortMethod' => 'sortReferralInvited', 'align' => 'right'])</span>
         </div>
         @forelse($referralInvitedPage as $invitation)
-          <article class="coin-data-list__row">
-            <span style="font-family: 'JetBrains Mono', monospace; color: rgba(214,238,248,0.78); word-break: break-word;">{{ $invitation->displayLabel() }}</span>
-            <span style="color: {{ $invitation->isRegistered() ? 'oklch(0.88 0.14 160)' : 'oklch(0.9 0.14 90)' }};">{{ $invitation->statusLabel() }}</span>
-            <span style="color: rgba(214,238,248,0.78);">{{ $invitation->channelLabel() }}</span>
-            <span style="color: rgba(214,238,248,0.78);">{{ $invitation->formattedSentAt() }}</span>
-            <span style="font-family: 'JetBrains Mono', monospace; text-align: right; color: rgba(214,238,248,0.78);">{{ $invitation->formattedRegisteredAt() }}</span>
+          <article class="coin-data-list__row coin-referral-invite">
+            <span class="coin-referral-invite__contact">{{ $invitation->displayLabel() }}</span>
+            <span class="coin-referral-invite__status" style="color: {{ $invitation->isRegistered() ? 'oklch(0.88 0.14 160)' : 'oklch(0.9 0.14 90)' }};">{{ $invitation->statusLabel() }}</span>
+            <span class="coin-referral-invite__channel">{{ $invitation->channelLabel() }}</span>
+            <span class="coin-referral-invite__sent">{{ $invitation->formattedSentAt() }}</span>
+            <span class="coin-referral-invite__registered">{{ $invitation->formattedRegisteredAt() }}</span>
           </article>
         @empty
           <div style="padding: 24px 0; font-size: 13px; color: rgba(214,238,248,0.68);">{{ __('coin.referrals.no_invited') }}</div>

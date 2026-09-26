@@ -1694,7 +1694,64 @@ html.coin-nav-open .coin-nav-mobile {
 
 .coin-data-list--referrals .coin-data-list__head,
 .coin-data-list--referrals .coin-data-list__row {
-  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr) minmax(0, 0.8fr);
+  grid-template-columns: minmax(0, 0.95fr) minmax(0, 1fr) minmax(0, 1.5fr) minmax(0, 0.9fr);
+}
+
+.coin-referral-accrual__date {
+  color: rgba(214, 238, 248, 0.72);
+}
+
+.coin-referral-accrual__user {
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 500;
+  color: rgba(232, 244, 250, 0.92);
+}
+
+.coin-referral-accrual__detail {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px;
+  min-width: 0;
+  color: rgba(214, 238, 248, 0.72);
+}
+
+.coin-referral-accrual__sep {
+  color: rgba(214, 238, 248, 0.38);
+}
+
+.coin-referral-accrual__purchase {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12.5px;
+}
+
+.coin-referral-accrual__commission {
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 600;
+  text-align: right;
+  white-space: nowrap;
+  color: oklch(0.88 0.12 192);
+}
+
+.coin-referral-invite__contact {
+  font-family: 'JetBrains Mono', monospace;
+  color: rgba(232, 244, 250, 0.92);
+  word-break: break-word;
+}
+
+.coin-referral-invite__status {
+  font-weight: 600;
+}
+
+.coin-referral-invite__channel,
+.coin-referral-invite__sent,
+.coin-referral-invite__registered {
+  color: rgba(214, 238, 248, 0.72);
+}
+
+.coin-referral-invite__registered {
+  font-family: 'JetBrains Mono', monospace;
+  text-align: right;
 }
 
 .coin-data-list--invited .coin-data-list__head,
@@ -3442,55 +3499,96 @@ html.coin-nav-open .coin-nav-mobile {
     font-weight: 600;
   }
 
-  .coin-data-list--referrals .coin-data-list__row > :nth-child(1) {
-    grid-column: 1;
-    grid-row: 2;
+  .coin-data-list--referrals .coin-data-list__row,
+  .coin-referral-accrual {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      "user commission"
+      "date commission"
+      "detail detail";
+    gap: 4px 14px;
+    padding: 14px 16px;
+  }
+
+  .coin-referral-accrual__user {
+    grid-area: user;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.3;
+  }
+
+  .coin-referral-accrual__date {
+    grid-area: date;
     font-size: 12px;
-    color: rgba(214, 238, 248, 0.62) !important;
+    color: rgba(214, 238, 248, 0.55) !important;
+    line-height: 1.35;
   }
 
-  .coin-data-list--referrals .coin-data-list__row > :nth-child(2) {
-    grid-column: 1;
-    grid-row: 1;
-    font-weight: 600;
+  .coin-referral-accrual__detail {
+    grid-area: detail;
+    margin-top: 8px;
+    padding-top: 10px;
+    border-top: 1px solid rgba(150, 235, 250, 0.08);
+    font-size: 12.5px;
+    line-height: 1.4;
   }
 
-  .coin-data-list--referrals .coin-data-list__row > :nth-child(3),
-  .coin-data-list--referrals .coin-data-list__row > :nth-child(4) {
-    grid-column: 1 / -1;
-  }
-
-  .coin-data-list--referrals .coin-data-list__row > :nth-child(5) {
-    grid-column: 2;
-    grid-row: 1 / span 2;
+  .coin-referral-accrual__commission {
+    grid-area: commission;
     align-self: start;
-    font-weight: 600;
-  }
-
-  .coin-data-list--invited .coin-data-list__row > :nth-child(1) {
-    grid-column: 1;
-    grid-row: 1;
-    font-weight: 600;
-    word-break: break-word;
-  }
-
-  .coin-data-list--invited .coin-data-list__row > :nth-child(2) {
-    grid-column: 2;
-    grid-row: 1;
-    align-self: start;
+    justify-self: end;
+    font-size: 14px;
+    line-height: 1.3;
     text-align: right;
+  }
+
+  .coin-data-list--invited .coin-data-list__row,
+  .coin-referral-invite {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      "contact status"
+      "channel channel"
+      "sent sent"
+      "registered registered";
+    gap: 4px 14px;
+    padding: 14px 16px;
+  }
+
+  .coin-referral-invite__contact {
+    grid-area: contact;
+    font-size: 13.5px;
     font-weight: 600;
+    line-height: 1.35;
   }
 
-  .coin-data-list--invited .coin-data-list__row > :nth-child(3),
-  .coin-data-list--invited .coin-data-list__row > :nth-child(4),
-  .coin-data-list--invited .coin-data-list__row > :nth-child(5) {
-    grid-column: 1 / -1;
+  .coin-referral-invite__status {
+    grid-area: status;
+    justify-self: end;
+    align-self: start;
+    font-size: 12.5px;
+    text-align: right;
+  }
+
+  .coin-referral-invite__channel,
+  .coin-referral-invite__sent,
+  .coin-referral-invite__registered {
     font-size: 12px;
-    color: rgba(214, 238, 248, 0.72);
+    color: rgba(214, 238, 248, 0.62);
   }
 
-  .coin-data-list--invited .coin-data-list__row > :nth-child(5) {
+  .coin-referral-invite__channel {
+    grid-area: channel;
+    margin-top: 8px;
+    padding-top: 10px;
+    border-top: 1px solid rgba(150, 235, 250, 0.08);
+  }
+
+  .coin-referral-invite__sent {
+    grid-area: sent;
+  }
+
+  .coin-referral-invite__registered {
+    grid-area: registered;
     text-align: left;
   }
 
