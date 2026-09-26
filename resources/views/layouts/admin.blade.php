@@ -114,6 +114,7 @@
         @vite(['resources/js/admin-support-realtime.js'])
     @endauth
     <script src="{{ asset('coin/page-navigate.js') }}?v={{ file_exists(public_path('coin/page-navigate.js')) ? filemtime(public_path('coin/page-navigate.js')) : 1 }}" defer></script>
+    <script src="{{ asset('admin/table-cards.js') }}?v={{ file_exists(public_path('admin/table-cards.js')) ? filemtime(public_path('admin/table-cards.js')) : 1 }}" defer></script>
     @auth('admin')
         @unless(View::hasSection('topbar'))
             <script>

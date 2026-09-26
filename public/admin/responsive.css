@@ -449,8 +449,8 @@ body {
 }
 
 .admin-table-scroll td {
-    overflow-wrap: anywhere;
-    word-break: break-word;
+    overflow-wrap: break-word;
+    word-break: normal;
 }
 
 .payment-logs-table .admin-table-scroll table {
@@ -808,6 +808,106 @@ body {
         visibility: visible;
         pointer-events: auto;
     }
+
+    .admin-table-scroll {
+        margin: 0;
+        overflow-x: visible;
+        overflow-y: visible;
+        background: none;
+    }
+
+    .admin-table-scroll table,
+    .payment-logs-table .admin-table-scroll table {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .admin-table-scroll thead {
+        display: none;
+    }
+
+    .admin-table-scroll tbody {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        padding: 12px;
+    }
+
+    .admin-table-scroll tbody tr {
+        display: block;
+        margin: 0;
+        padding: 14px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 14px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+        background: rgba(7, 10, 16, 0.55);
+        box-sizing: border-box;
+    }
+
+    .admin-table-scroll tbody td {
+        display: grid;
+        grid-template-columns: minmax(96px, 0.85fr) minmax(0, 1.15fr);
+        gap: 6px 12px;
+        align-items: start;
+        padding: 8px 0 !important;
+        border: 0;
+        white-space: normal !important;
+    }
+
+    .admin-table-scroll tbody td:first-child {
+        padding-top: 0 !important;
+    }
+
+    .admin-table-scroll tbody td:last-child {
+        padding-bottom: 0 !important;
+    }
+
+    .admin-table-scroll tbody td::before {
+        content: attr(data-label);
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 10px;
+        letter-spacing: 0.08em;
+        line-height: 1.35;
+        color: rgba(232, 237, 245, 0.55);
+        text-transform: uppercase;
+        padding-top: 2px;
+    }
+
+    .admin-table-scroll tbody td.admin-table-empty,
+    .admin-table-scroll tbody td:not([data-label]) {
+        display: block;
+        grid-template-columns: none;
+        color: rgba(232, 237, 245, 0.65);
+    }
+
+    .admin-table-scroll tbody td.admin-table-empty::before,
+    .admin-table-scroll tbody td:not([data-label])::before {
+        display: none;
+        content: none;
+    }
+
+    .admin-table-scroll tbody td > * {
+        min-width: 0;
+        max-width: 100%;
+    }
+
+    .admin-table-scroll form[style*="display:inline"] {
+        display: block !important;
+        margin: 6px 0 0 !important;
+    }
+
+    .admin-table-scroll .admin-btn {
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .payment-log-group-details__panel {
+        max-width: 100%;
+    }
+
+    .payment-log-group-details__event-head {
+        flex-wrap: wrap;
+    }
 }
 
 @media (max-width: 768px) {
@@ -901,38 +1001,6 @@ body {
     .admin-shell > .admin-topbar {
         padding-top: 32px;
         padding-bottom: 16px;
-    }
-
-    .admin-table-scroll {
-        margin: 0;
-        border-radius: 0;
-        background:
-            linear-gradient(90deg, rgba(12, 15, 20, 0.95), transparent) 0 0 / 24px 100% no-repeat,
-            linear-gradient(270deg, rgba(12, 15, 20, 0.95), transparent) 100% 0 / 24px 100% no-repeat;
-        background-attachment: local, local;
-    }
-
-    .admin-table-scroll table {
-        width: max(100%, 640px);
-        min-width: 640px;
-    }
-
-    .admin-table-scroll th {
-        white-space: nowrap;
-    }
-
-    .admin-table-scroll td[style*="white-space:nowrap"] {
-        white-space: normal !important;
-    }
-
-    .admin-table-scroll form[style*="display:inline"] {
-        display: block !important;
-        margin: 6px 0 0 !important;
-    }
-
-    .admin-table-scroll .admin-btn {
-        width: 100%;
-        box-sizing: border-box;
     }
 
     .admin-card [style*="display:flex"][style*="justify-content:space-between"] {
