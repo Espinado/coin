@@ -232,21 +232,13 @@
 
     @if($section === 3)
       <section data-screen-label="{{ __('coin.nav.statistics') }}" style="padding: 28px 32px 40px; display: flex; flex-direction: column; gap: 16px;">
-        <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
-          <button wire:click="setPeriod(0)" style="position: relative; padding: 10px 20px; border-radius: 10px; border: 1px solid rgba(150,235,250,0.16); background: rgba(150,235,250,0.04); color: #e6f4fa; font-family: inherit; font-size: 13px; cursor: pointer;">
-            @if($period === 0)<span style="position: absolute; inset: -1px; border-radius: 10px; border: 1px solid oklch(0.86 0.11 195 / 0.6); background: oklch(0.6 0.13 200 / 0.22); pointer-events: none;"></span>@endif
-            <span style="position: relative;">{{ __('coin.stats.per_day') }}</span>
-          </button>
-          <button wire:click="setPeriod(1)" style="position: relative; padding: 10px 20px; border-radius: 10px; border: 1px solid rgba(150,235,250,0.16); background: rgba(150,235,250,0.04); color: #e6f4fa; font-family: inherit; font-size: 13px; cursor: pointer;">
-            @if($period === 1)<span style="position: absolute; inset: -1px; border-radius: 10px; border: 1px solid oklch(0.86 0.11 195 / 0.6); background: oklch(0.6 0.13 200 / 0.22); pointer-events: none;"></span>@endif
-            <span style="position: relative;">{{ __('coin.stats.per_week') }}</span>
-          </button>
-          <button wire:click="setPeriod(2)" style="position: relative; padding: 10px 20px; border-radius: 10px; border: 1px solid rgba(150,235,250,0.16); background: rgba(150,235,250,0.04); color: #e6f4fa; font-family: inherit; font-size: 13px; cursor: pointer;">
-            @if($period === 2)<span style="position: absolute; inset: -1px; border-radius: 10px; border: 1px solid oklch(0.86 0.11 195 / 0.6); background: oklch(0.6 0.13 200 / 0.22); pointer-events: none;"></span>@endif
-            <span style="position: relative;">{{ __('coin.stats.per_month') }}</span>
-          </button>
-          <div style="flex: 1;"></div>
-          <button style="padding: 10px 18px; border-radius: 10px; border: 1px solid rgba(150,235,250,0.2); background: rgba(150,235,250,0.06); color: #e6f4fa; font-family: inherit; font-size: 13px; cursor: pointer;">{{ __('coin.stats.export_csv') }}</button>
+        <div class="coin-stats-toolbar">
+          <div class="coin-dash-period-tabs coin-stats-toolbar__periods" role="group" aria-label="{{ __('coin.nav.statistics') }}">
+            <button type="button" wire:click="setPeriod(0)" class="coin-dash-period-tabs__btn {{ $period === 0 ? 'coin-dash-period-tabs__btn--active' : '' }}">{{ __('coin.stats.per_day') }}</button>
+            <button type="button" wire:click="setPeriod(1)" class="coin-dash-period-tabs__btn {{ $period === 1 ? 'coin-dash-period-tabs__btn--active' : '' }}">{{ __('coin.stats.per_week') }}</button>
+            <button type="button" wire:click="setPeriod(2)" class="coin-dash-period-tabs__btn {{ $period === 2 ? 'coin-dash-period-tabs__btn--active' : '' }}">{{ __('coin.stats.per_month') }}</button>
+          </div>
+          <button type="button" class="coin-btn-quiet coin-stats-toolbar__export">{{ __('coin.stats.export_csv') }}</button>
         </div>
 
         <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px;">
