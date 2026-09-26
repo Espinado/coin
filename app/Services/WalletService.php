@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Models\Wallet;
 use App\Models\WalletTransaction;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Carbon;
 
 class WalletService
 {
@@ -52,12 +53,14 @@ class WalletService
         string $tone = 'neutral',
         string $statusLabel = 'COMPLETED',
         ?Model $reference = null,
+        ?\DateTimeInterface $occurredAt = null,
     ): WalletTransaction {
         $prefix = $amount >= 0 ? '+' : '';
+        $occurredAt = $occurredAt ? Carbon::instance($occurredAt) : now();
 
         return WalletTransaction::query()->create([
             'user_id' => $user->id,
-            'occurred_label' => LocaleFormat::shortDateTime(now()),
+            'occurred_label' => LocaleFormat::shortDateTime($occurredAt),
             'type' => $type,
             'source' => $source,
             'amount_label' => $prefix.number_format(abs($amount), 2, '.', '').' '.$currency,
@@ -68,7 +71,7 @@ class WalletService
             'currency' => $currency,
             'reference_type' => $reference ? $reference->getMorphClass() : null,
             'reference_id' => $reference?->getKey(),
-            'occurred_at' => now(),
+            'occurred_at' => $occurredAt,
         ]);
     }
 }

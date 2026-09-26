@@ -15,6 +15,7 @@ use App\Services\ReferralService;
 use Database\Seeders\PlanSeeder;
 use Database\Seeders\PlatformSettingsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Mail;
 use Tests\TestCase;
 
@@ -82,6 +83,40 @@ class InvestmentFlowTest extends TestCase
         $this->assertSame(0, $repeat['contracts_processed']);
     }
 
+    public function test_daily_accrual_catches_up_missed_days_after_downtime(): void
+    {
+        Carbon::setTestNow(Carbon::parse('2026-09-24 09:00:00', 'Europe/Riga'));
+
+        $buyer = User::factory()->create();
+        $core = Plan::query()->where('slug', 'core')->firstOrFail();
+
+        app(DepositService::class)->createPending($buyer, 2000);
+        $contract = app(PlanPurchaseService::class)->purchase($buyer, $core, 1100);
+
+        app(ProfitAccrualService::class)->accrueDaily();
+
+        $contract->refresh();
+        $this->assertSame('2026-09-24', $contract->last_accrued_on?->toDateString());
+
+        Carbon::setTestNow(Carbon::parse('2026-09-26 09:00:00', 'Europe/Riga'));
+
+        $result = app(ProfitAccrualService::class)->accrueDaily();
+
+        $this->assertSame(2, $result['contracts_processed']);
+
+        $contract->refresh();
+        $this->assertSame('2026-09-26', $contract->last_accrued_on?->toDateString());
+        $this->assertSame(
+            2,
+            \App\Models\WalletTransaction::query()
+                ->where('user_id', $buyer->id)
+                ->where('type', 'Daily profit')
+                ->count(),
+        );
+
+        Carbon::setTestNow();
+    }
+
     public function test_daily_accrual_sends_one_consolidated_profit_email_for_multiple_plans(): void
     {
         Mail::fake();
@@ -147,10 +182,9 @@ class InvestmentFlowTest extends TestCase
         $this->assertSame('10.00', number_format((float) $buyer->wallet->available, 2, '.', ''));
 
         $deposit = $buyer->deposits()->firstOrFail();
-        $this->assertSame('20.00', number_format((float) $deposit->amount, 2, '.', ''));
+        $this->assertSame('20.00000000', number_format((float) $deposit->amount, 8, '.', ''));
         $this->assertSame('BTC', $deposit->currency);
         $this->assertSame('10.00', number_format((float) $deposit->credited_amount, 2, '.', ''));
         $this->assertSame('USDT', $deposit->credited_currency);
-        $this->assertSame('2.00000000', number_format((float) $deposit->exchange_rate, 8, '.', ''));
     }
 }

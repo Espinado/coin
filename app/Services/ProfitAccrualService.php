@@ -89,11 +89,15 @@ class ProfitAccrualService
 
                 $this->notifications->maybeSendContractExpiryReminder($contract);
 
-                $profit = $this->accrueContract($contract);
+                foreach ($this->pendingAccrualDates($contract) as $accrualDate) {
+                    $profit = $this->accrueContract($contract, $accrualDate);
 
-                if ($profit > 0) {
-                    $totalProfit += $profit;
-                    $processed++;
+                    if ($profit > 0) {
+                        $totalProfit += $profit;
+                        $processed++;
+                    }
+
+                    $contract->refresh();
                 }
 
                 if ($this->completeIfMature($contract)) {
@@ -114,15 +118,15 @@ class ProfitAccrualService
         return $result;
     }
 
-    public function accrueContract(Contract $contract): float
+    public function accrueContract(Contract $contract, ?string $accrualDate = null): float
     {
         if (! $contract->isActive()) {
             return 0.0;
         }
 
-        $today = $this->accrualCalendarToday();
+        $accrualDate ??= $this->accrualCalendarToday();
 
-        if ($contract->last_accrued_on?->toDateString() === $today) {
+        if ($contract->last_accrued_on?->toDateString() === $accrualDate) {
             return 0.0;
         }
 
@@ -150,10 +154,10 @@ class ProfitAccrualService
             $contract->refresh();
             $contract->update([
                 'progress_percent' => $contract->computedProgressPercent(),
-                'last_accrued_on' => $today,
+                'last_accrued_on' => $accrualDate,
             ]);
         } else {
-            $contract->update(['last_accrued_on' => $today]);
+            $contract->update(['last_accrued_on' => $accrualDate]);
         }
 
         $this->wallets->record(
@@ -165,6 +169,7 @@ class ProfitAccrualService
             'positive',
             'COMPLETED',
             $contract,
+            $this->accrualOccurredAt($accrualDate),
         );
 
         $this->trackUserAccrual($user, $profit, $balanceBefore, $availableBefore, $wallet->fresh(), $contract, $currency);
@@ -444,5 +449,35 @@ class ProfitAccrualService
     private function accrualCalendarToday(): string
     {
         return now($this->settings->profitAccrualTimezone())->toDateString();
+    }
+
+    /** @return list<string> */
+    private function pendingAccrualDates(Contract $contract): array
+    {
+        $timezone = $this->settings->profitAccrualTimezone();
+        $today = Carbon::now($timezone)->startOfDay();
+
+        if ($contract->last_accrued_on) {
+            $cursor = Carbon::parse($contract->last_accrued_on, $timezone)->startOfDay()->addDay();
+        } else {
+            $cursor = $today->copy();
+        }
+
+        $dates = [];
+
+        while ($cursor->lte($today)) {
+            $dates[] = $cursor->toDateString();
+            $cursor->addDay();
+        }
+
+        return $dates;
+    }
+
+    private function accrualOccurredAt(string $accrualDate): Carbon
+    {
+        $timezone = $this->settings->profitAccrualTimezone();
+
+        return Carbon::parse($accrualDate, $timezone)
+            ->setTimeFromTimeString($this->settings->profitAccrualTime());
     }
 }
