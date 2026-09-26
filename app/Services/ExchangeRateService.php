@@ -201,23 +201,24 @@ class ExchangeRateService
             ];
         }
 
-        $usdtPerBtc = $this->fetchLiveUsdtPerBtc();
-        $btcPerUsdt = $this->btcPerUsdtFromUsdtRate($usdtPerBtc);
+        if ($input === 'BTC') {
+            $btcPerUsdt = $this->fetchLiveBtcPerUsdt();
 
-        if ($assertMinimum) {
-            $this->assertMinDeposit($amount, $input, $btcPerUsdt);
+            if ($assertMinimum) {
+                $this->assertMinDeposit($amount, $input, $btcPerUsdt);
+            }
+
+            return [
+                'pay_amount' => round($amount, 8),
+                'pay_currency' => 'BTC',
+                'input_amount' => null,
+                'input_currency' => null,
+                'exchange_rate' => null,
+                'usdt_per_btc' => null,
+            ];
         }
 
-        $conversion = $this->convertToBase($amount, $input, $btcPerUsdt, $usdtPerBtc);
-
-        return [
-            'pay_amount' => $conversion['amount'],
-            'pay_currency' => $base,
-            'input_amount' => $amount,
-            'input_currency' => $input,
-            'exchange_rate' => $btcPerUsdt,
-            'usdt_per_btc' => $usdtPerBtc,
-        ];
+        throw new RuntimeException("Unsupported deposit currency: {$inputCurrency}");
     }
 
     public function prepareGatewayDepositAtLiveRate(float $amount, string $inputCurrency, bool $assertMinimum = true): array

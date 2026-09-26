@@ -401,11 +401,10 @@
             </div>
             @endif
             @error('depositAmount')<p style="margin-top:8px;font-size:12px;color:#ff8f8f;">{{ $message }}</p>@enderror
-            @if($this->depositCreditPreview && $depositCurrency !== $this->walletCurrency)
-            <p style="margin-top:10px;font-size:12px;line-height:1.5;color:rgba(214,238,248,0.72);">{{ __('coin.wallet.deposit_credit_preview', ['amount' => $this->depositCreditPreview]) }}</p>
-            @endif
-            @if($depositCurrency === 'BTC')
-            <p style="margin-top:10px;font-size:12px;line-height:1.5;color:rgba(214,238,248,0.62);">{{ __('coin.wallet.btc_deposit_usdt_hint') }}</p>
+            @if($depositCurrency === 'BTC' && $this->depositCreditPreview)
+            <p style="margin-top:10px;font-size:12px;line-height:1.5;color:rgba(214,238,248,0.72);">{{ __('coin.wallet.deposit_btc_credit_estimate', ['amount' => $this->depositCreditPreview]) }}</p>
+            <p style="margin-top:8px;font-size:12px;line-height:1.5;color:rgba(214,238,248,0.62);">{{ __('coin.wallet.btc_deposit_address_hint') }}</p>
+            <p style="margin-top:8px;font-size:11px;line-height:1.5;color:rgba(214,238,248,0.55);">{{ __('coin.wallet.btc_deposit_live_rate_hint') }}</p>
             @endif
             <div style="margin-top: 14px; display: flex; justify-content: space-between; gap: 14px; font-size: 12.5px;">
               <span style="color: rgba(214,238,248,0.72); min-width: 0;">{{ __('coin.wallet.min_top_up') }}</span>

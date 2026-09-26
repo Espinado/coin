@@ -963,6 +963,51 @@ class Dashboard extends Component
         }
     }
 
+    public function getTopUpPayCurrencyProperty(): string
+    {
+        if ($this->pendingDepositId !== null) {
+            $deposit = Deposit::query()
+                ->whereKey($this->pendingDepositId)
+                ->where('user_id', $this->user->id)
+                ->first();
+
+            if ($deposit !== null) {
+                return strtoupper((string) $deposit->currency);
+            }
+        }
+
+        return strtoupper($this->depositCurrency);
+    }
+
+    public function getTopUpPayAmountFormattedProperty(): string
+    {
+        $amount = $this->topUpPayAmount;
+        $currency = $this->topUpPayCurrency;
+
+        if ($amount <= 0) {
+            return '0';
+        }
+
+        if ($currency === 'BTC') {
+            return rtrim(rtrim(number_format($amount, 8, '.', ''), '0'), '.');
+        }
+
+        return number_format($amount, 2, '.', ',');
+    }
+
+    public function getTopUpEstimatedCreditProperty(): ?string
+    {
+        if ($this->topUpPayCurrency !== 'BTC' || $this->topUpPayAmount <= 0) {
+            return null;
+        }
+
+        try {
+            return app(ExchangeRateService::class)->previewLabel($this->topUpPayAmount, 'BTC');
+        } catch (\Throwable) {
+            return null;
+        }
+    }
+
     public function getTopUpInputEquivalentProperty(): ?string
     {
         if ($this->pendingDepositId !== null) {
@@ -978,17 +1023,7 @@ class Dashboard extends Component
             return null;
         }
 
-        if ($this->depositCurrency !== 'BTC') {
-            return null;
-        }
-
-        $amount = (float) str_replace([',', ' '], '', $this->depositAmount);
-
-        if ($amount <= 0) {
-            return null;
-        }
-
-        return CryptoAmountFormat::amountWithSymbol($amount, 'BTC');
+        return null;
     }
 
     public function getDepositMinLabelProperty(): string

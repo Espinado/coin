@@ -74,7 +74,7 @@ class MockPaymentGatewayFlowTest extends TestCase
         app(DepositService::class)->createPending($user, 10, 'BTC');
     }
 
-    public function test_btc_input_is_converted_to_usdt_before_gateway(): void
+    public function test_btc_deposit_uses_btc_payment_rail(): void
     {
         config([
             'coin.exchange_rates.coinmarketcap.enabled' => true,
@@ -94,10 +94,41 @@ class MockPaymentGatewayFlowTest extends TestCase
 
         $deposit = app(DepositService::class)->createPending($user, 0.000125, 'BTC');
 
-        $this->assertSame('USDT', $deposit->currency);
-        $this->assertSame('10.00', number_format((float) $deposit->amount, 2, '.', ''));
-        $this->assertSame('0.00012500', number_format((float) $deposit->input_amount, 8, '.', ''));
-        $this->assertSame('BTC', $deposit->input_currency);
+        $this->assertSame('BTC', $deposit->currency);
+        $this->assertSame('0.00012500', number_format((float) $deposit->amount, 8, '.', ''));
+        $this->assertNull($deposit->input_amount);
+        $this->assertNull($deposit->input_currency);
+        $this->assertNull($deposit->exchange_rate);
+    }
+
+    public function test_btc_deposit_confirm_credits_usdt_at_live_rate(): void
+    {
+        config([
+            'coin.exchange_rates.coinmarketcap.enabled' => true,
+            'coin.exchange_rates.coinmarketcap.api_key' => 'test-cmc-key',
+            'coin.deposits.auto_confirm_mock' => false,
+        ]);
+
+        \Illuminate\Support\Facades\Http::fake([
+            'pro-api.coinmarketcap.com/v3/cryptocurrency/quotes/latest*' => \Illuminate\Support\Facades\Http::response([
+                'data' => [[
+                    'symbol' => 'BTC',
+                    'quote' => [['symbol' => 'USDT', 'price' => 80000]],
+                ]],
+            ]),
+        ]);
+
+        $user = User::factory()->create();
+        $deposit = app(DepositService::class)->createPending($user, 0.000125, 'BTC');
+
+        app(PaymentSimulatorService::class)->simulateDepositIpn($deposit);
+
+        $user->refresh();
+        $deposit->refresh();
+
+        $this->assertSame(Deposit::STATUS_CONFIRMED, $deposit->status);
+        $this->assertSame('10.00', number_format((float) $deposit->credited_amount, 2, '.', ''));
+        $this->assertSame('10.00', number_format((float) $user->wallet->available, 2, '.', ''));
     }
 
     public function test_withdrawal_processing_triggers_mock_gateway_payout_and_ipn(): void

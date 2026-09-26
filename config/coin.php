@@ -74,7 +74,6 @@ return [
             'api_key' => env('CCAPI_API_KEY', ''),
             'networks' => [
                 'USDT' => ['network' => 'trx', 'token' => 'USDT'],
-                // Legacy: old pending BTC-rail deposits only. New top-ups always use USDT/TRC-20.
                 'BTC' => ['network' => 'btc', 'token' => ''],
             ],
             'deposit_period_minutes' => (int) env('CCAPI_DEPOSIT_PERIOD_MINUTES', 60),

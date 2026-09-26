@@ -35,7 +35,7 @@ class LiveExchangeRateTest extends TestCase
         ]);
     }
 
-    public function test_btc_deposit_locks_live_rate_and_confirm_uses_snapshot(): void
+    public function test_btc_deposit_confirm_uses_live_rate_at_credit_time(): void
     {
         Http::fake([
             'pro-api.coinmarketcap.com/v3/cryptocurrency/quotes/latest*' => Http::response([
@@ -53,7 +53,8 @@ class LiveExchangeRateTest extends TestCase
         $user = User::factory()->create();
         $deposit = app(DepositService::class)->createPending($user, 0.0002, 'BTC');
 
-        $this->assertSame('0.00001250', number_format((float) $deposit->exchange_rate, 8, '.', ''));
+        $this->assertSame('BTC', $deposit->currency);
+        $this->assertNull($deposit->exchange_rate);
 
         app(PlatformSettingsService::class)->setMany([
             'usdt_per_btc' => '100000',

@@ -205,12 +205,7 @@ class DepositService
             $isLiveDeposit = $deposit->method === 'ccapi';
 
             if ($paymentCurrency === 'BTC') {
-                $lockedBtcPerUsdt = $deposit->exchange_rate
-                    ? (float) $deposit->exchange_rate
-                    : null;
-                $conversion = $lockedBtcPerUsdt !== null
-                    ? $this->exchangeRates->convertToBase($paymentAmount, $paymentCurrency, $lockedBtcPerUsdt)
-                    : $this->exchangeRates->convertToBaseAtLiveRate($paymentAmount, $paymentCurrency);
+                $conversion = $this->exchangeRates->convertToBaseAtLiveRate($paymentAmount, $paymentCurrency);
                 $creditedAmount = $conversion['amount'];
                 $sourceKey = $isLiveDeposit ? 'live_top_up_converted' : 'mock_top_up_converted';
                 $source = __(

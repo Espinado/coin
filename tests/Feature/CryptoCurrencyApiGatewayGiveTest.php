@@ -4,7 +4,6 @@ namespace Tests\Feature;
 
 use App\Models\Deposit;
 use App\Models\User;
-use App\Models\Deposit;
 use App\Services\DepositService;
 use App\Services\Payment\CryptoCurrencyApiGateway;
 use App\Services\Payment\PaymentGatewayException;
@@ -69,7 +68,7 @@ class CryptoCurrencyApiGatewayGiveTest extends TestCase
         });
     }
 
-    public function test_btc_input_deposit_uses_usdt_trx_give_endpoint(): void
+    public function test_btc_deposit_uses_btc_give_endpoint(): void
     {
         config([
             'coin.exchange_rates.coinmarketcap.enabled' => true,
@@ -83,9 +82,9 @@ class CryptoCurrencyApiGatewayGiveTest extends TestCase
                     'quote' => [['symbol' => 'USDT', 'price' => 80000]],
                 ]],
             ]),
-            'https://new.cryptocurrencyapi.net/api/trx/.give*' => Http::response([
+            'https://new.cryptocurrencyapi.net/api/btc/.give*' => Http::response([
                 'result' => [
-                    'address' => 'TDepositAddress123456789012345',
+                    'address' => 'bc1qqhza20mal9tdar863pzrlpjgfx6kdhyfssccpf',
                     'publicKey' => '03abc',
                 ],
             ]),
@@ -95,12 +94,15 @@ class CryptoCurrencyApiGatewayGiveTest extends TestCase
 
         $deposit = app(DepositService::class)->createPending($user, 0.000125, 'BTC', 'ccapi');
 
-        $this->assertSame('USDT', $deposit->currency);
+        $this->assertSame('BTC', $deposit->currency);
 
-        app(CryptoCurrencyApiGateway::class)->createDepositIntent($deposit);
+        $intent = app(CryptoCurrencyApiGateway::class)->createDepositIntent($deposit);
+
+        $this->assertSame('btc', $intent->gatewayNetwork);
+        $this->assertSame('bc1qqhza20mal9tdar863pzrlpjgfx6kdhyfssccpf', $intent->paymentAddress);
 
         Http::assertSent(function ($request) {
-            return str_contains($request->url(), '/api/trx/.give');
+            return str_contains($request->url(), '/api/btc/.give');
         });
     }
 

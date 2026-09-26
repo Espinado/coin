@@ -1,7 +1,9 @@
 @if($paymentModal === 'topup')
 @php
   $walletCurrency = $wallet?->currency ?? config('coin.wallet.base_currency', 'USDT');
-  $payAmount = number_format($this->topUpPayAmount, 2, '.', ',');
+  $payCurrency = $this->topUpPayCurrency;
+  $payAmount = $this->topUpPayAmountFormatted;
+  $estimatedCredit = $this->topUpEstimatedCredit;
   $inputEquivalent = $this->topUpInputEquivalent;
   $isMockDriver = ! app(\App\Services\PlatformSettingsService::class)->usesLivePaymentGateway();
   $canDismiss = ! in_array($paymentModalStep, ['processing'], true);
@@ -29,11 +31,19 @@
           <div style="display: flex; justify-content: space-between; gap: 12px;"><span style="color: rgba(214,238,248,0.72);">{{ __('coin.crypto_gateway.purpose') }}</span><span>{{ __('coin.crypto_gateway.top_up_purpose') }}</span></div>
           <div style="display: flex; justify-content: space-between; gap: 12px;"><span style="color: rgba(214,238,248,0.72);">{{ __('coin.crypto_gateway.method') }}</span><span>{{ $isMockDriver ? __('coin.crypto_gateway.method_mock') : __('coin.crypto_gateway.method_live') }}</span></div>
           <div style="height: 1px; background: rgba(150,235,250,0.1);"></div>
-          <div style="display: flex; justify-content: space-between; gap: 12px;"><span style="color: rgba(214,238,248,0.72);">{{ __('coin.payment_modal.total') }}</span><span style="font-family: 'JetBrains Mono', monospace; font-size: 16px; color: #f0fbff;">{{ $payAmount }} {{ $walletCurrency }}</span></div>
+          <div style="display: flex; justify-content: space-between; gap: 12px;"><span style="color: rgba(214,238,248,0.72);">{{ __('coin.payment_modal.total') }}</span><span style="font-family: 'JetBrains Mono', monospace; font-size: 16px; color: #f0fbff;">{{ $payAmount }} {{ $payCurrency }}</span></div>
+          @if($payCurrency === 'BTC')
+          <div style="display: flex; justify-content: space-between; gap: 12px;"><span style="color: rgba(214,238,248,0.72);">{{ __('coin.crypto_gateway.payment_network') }}</span><span style="font-family: 'JetBrains Mono', monospace; font-size: 13px; color: #f0fbff;">{{ __('coin.crypto_gateway.payment_network_bitcoin') }}</span></div>
+          @endif
           @if($inputEquivalent)
           <div style="display: flex; justify-content: space-between; gap: 12px;"><span style="color: rgba(214,238,248,0.72);">{{ __('coin.wallet.deposit_input_equivalent') }}</span><span style="font-family: 'JetBrains Mono', monospace; font-size: 14px; color: #f0fbff;">{{ $inputEquivalent }}</span></div>
           @endif
+          @if($estimatedCredit)
+          <div style="display: flex; justify-content: space-between; gap: 12px;"><span style="color: rgba(214,238,248,0.72);">{{ __('coin.wallet.credit_to_balance') }}</span><span style="font-family: 'JetBrains Mono', monospace; font-size: 14px; color: rgba(214,238,248,0.82);">~{{ $estimatedCredit }}</span></div>
+          <p style="margin: 0; font-size: 11px; line-height: 1.5; color: rgba(214,238,248,0.58);">{{ __('coin.wallet.btc_deposit_live_rate_hint') }}</p>
+          @else
           <div style="display: flex; justify-content: space-between; gap: 12px;"><span style="color: rgba(214,238,248,0.72);">{{ __('coin.wallet.credit_to_balance') }}</span><span style="font-family: 'JetBrains Mono', monospace; font-size: 14px; color: #f0fbff;">{{ $payAmount }} {{ $walletCurrency }}</span></div>
+          @endif
         </div>
         <button type="button" wire:click="proceedToTopUpPayment" wire:loading.attr="disabled" wire:target="proceedToTopUpPayment" style="width: 100%; margin-top: 22px; padding: 13px; border-radius: 11px; border: 1px solid oklch(0.86 0.11 195 / 0.5); background: linear-gradient(140deg, oklch(0.86 0.12 192), oklch(0.66 0.13 205)); color: #04121f; font-family: inherit; font-size: 14px; font-weight: 600; cursor: pointer;">
           <span wire:loading.remove wire:target="proceedToTopUpPayment">{{ __('coin.crypto_gateway.continue') }}</span>
@@ -53,9 +63,15 @@
       </div>
       <div style="padding: 22px;">
         <div style="padding: 16px; border-radius: 14px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.04); display: flex; flex-direction: column; gap: 14px; font-size: 13px;">
-          <div style="display: flex; justify-content: space-between; gap: 12px;"><span style="color: rgba(214,238,248,0.72);">{{ __('coin.payment_modal.total') }}</span><span style="font-family: 'JetBrains Mono', monospace; font-size: 15px; color: #f0fbff;">{{ $payAmount }} {{ $walletCurrency }}</span></div>
+          <div style="display: flex; justify-content: space-between; gap: 12px;"><span style="color: rgba(214,238,248,0.72);">{{ __('coin.payment_modal.total') }}</span><span style="font-family: 'JetBrains Mono', monospace; font-size: 15px; color: #f0fbff;">{{ $payAmount }} {{ $payCurrency }}</span></div>
+          @if($payCurrency === 'BTC')
+          <div style="display: flex; justify-content: space-between; gap: 12px;"><span style="color: rgba(214,238,248,0.72);">{{ __('coin.crypto_gateway.payment_network') }}</span><span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: rgba(214,238,248,0.82);">{{ __('coin.crypto_gateway.payment_network_bitcoin') }}</span></div>
+          @endif
           @if($inputEquivalent)
           <div style="display: flex; justify-content: space-between; gap: 12px;"><span style="color: rgba(214,238,248,0.72);">{{ __('coin.wallet.deposit_input_equivalent') }}</span><span style="font-family: 'JetBrains Mono', monospace; font-size: 13px; color: rgba(214,238,248,0.82);">{{ $inputEquivalent }}</span></div>
+          @endif
+          @if($estimatedCredit)
+          <p style="margin: 0; font-size: 11px; line-height: 1.5; color: rgba(214,238,248,0.58);">{{ __('coin.wallet.btc_deposit_live_rate_hint') }}</p>
           @endif
           <div>
             <div style="font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(214,238,248,0.55); margin-bottom: 8px;">{{ __('coin.crypto_gateway.payment_address') }}</div>
