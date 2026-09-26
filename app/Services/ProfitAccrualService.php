@@ -458,7 +458,9 @@ class ProfitAccrualService
         $today = Carbon::now($timezone)->startOfDay();
 
         if ($contract->last_accrued_on) {
-            $cursor = Carbon::parse($contract->last_accrued_on, $timezone)->startOfDay()->addDay();
+            $cursor = Carbon::parse($contract->last_accrued_on->toDateString(), $timezone)
+                ->startOfDay()
+                ->addDay();
         } else {
             $cursor = $today->copy();
         }
