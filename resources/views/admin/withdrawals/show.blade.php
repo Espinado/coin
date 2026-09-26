@@ -7,26 +7,26 @@
         <div class="admin-card" style="margin-bottom:16px;border-color:{{ session('status_type') === 'error' ? 'rgba(255,143,143,0.35)' : 'rgba(120,230,180,0.35)' }};">{{ session('status') }}</div>
     @endif
 
-    <div style="display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:16px;align-items:start;">
-        <div>
+    <div class="admin-grid-split">
+        <div class="admin-stack">
             <div class="admin-card">
                 <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.12em;color:rgba(232,237,245,0.62);">{{ $withdrawal->reference }}</div>
                 <h1 style="margin:10px 0 0;font-size:22px;font-weight:600;">{{ $withdrawal->formattedAmount() }}</h1>
                 <p style="margin:8px 0 0;font-size:13px;color:rgba(232,237,245,0.72);">{{ $withdrawal->statusLabel() }} · {{ $withdrawal->created_at?->format('M j, Y H:i') }}</p>
-                <div style="margin-top:16px;font-size:13px;line-height:1.7;">
-                    <div><strong>{{ __('coin.admin.payout_address') }}:</strong> {{ $withdrawal->payout_address }}</div>
+                <div class="admin-kv" style="margin-top:16px;font-size:13px;line-height:1.7;">
+                    <div><strong>{{ __('coin.admin.payout_address') }}:</strong> <span class="admin-mono-break">{{ $withdrawal->payout_address }}</span></div>
                     @if($withdrawal->network_label)<div><strong>{{ __('coin.admin.network') }}:</strong> {{ $withdrawal->network_label }}</div>@endif
-                    @if($withdrawal->gateway_request_id)<div><strong>{{ __('coin.admin.gateway_reference') }}:</strong> {{ $withdrawal->gateway_request_id }}</div>@endif
+                    @if($withdrawal->gateway_request_id)<div><strong>{{ __('coin.admin.gateway_reference') }}:</strong> <span class="admin-mono-break">{{ $withdrawal->gateway_request_id }}</span></div>@endif
                     @if($withdrawal->gateway_state)<div><strong>{{ __('coin.admin.gateway_state') }}:</strong> {{ $withdrawal->gateway_state }}</div>@endif
                     @if($withdrawal->status === \App\Models\Withdrawal::STATUS_PROCESSING)
                         @if($withdrawal->gateway_poll_checked_at)
                             <div><strong>{{ __('coin.admin.gateway_poll_checked_at') }}:</strong> {{ $withdrawal->gateway_poll_checked_at->format('M j, Y H:i:s') }}</div>
                         @endif
                         @if($withdrawal->gateway_poll_summary)
-                            <div><strong>{{ __('coin.admin.gateway_poll_summary') }}:</strong> <span style="font-family:'JetBrains Mono',monospace;font-size:12px;">{{ $withdrawal->gateway_poll_summary }}</span></div>
+                            <div><strong>{{ __('coin.admin.gateway_poll_summary') }}:</strong> <span class="admin-mono-break">{{ $withdrawal->gateway_poll_summary }}</span></div>
                         @endif
                     @endif
-                    @if($withdrawal->txid)<div><strong>{{ __('coin.admin.txid') }}:</strong> <span style="font-family:'JetBrains Mono',monospace;font-size:12px;word-break:break-all;">{{ $withdrawal->txid }}</span></div>@endif
+                    @if($withdrawal->txid)<div><strong>{{ __('coin.admin.txid') }}:</strong> <span class="admin-mono-break">{{ $withdrawal->txid }}</span></div>@endif
                     @if($withdrawal->status === \App\Models\Withdrawal::STATUS_REJECTED && $withdrawal->adminRejectionMessage())
                         <div style="margin-top:10px;"><strong>{{ __('coin.admin.status_reason') }}:</strong> {{ $withdrawal->adminRejectionMessage() }}</div>
                         <div style="margin-top:6px;font-size:12px;color:rgba(232,237,245,0.62);"><strong>{{ __('coin.admin.user_facing_reason') }}:</strong> {{ $withdrawal->userRejectionMessage() }}</div>

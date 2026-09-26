@@ -305,7 +305,42 @@ body {
     min-width: 0;
     padding: 28px;
     max-width: none;
-    overflow-x: hidden;
+    overflow-x: clip;
+}
+
+.admin-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    min-width: 0;
+}
+
+.admin-meta-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.admin-mono-break,
+.admin-card .admin-mono-break {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}
+
+.admin-user-context__email {
+    margin-top: 6px;
+    font-size: 13px;
+    color: rgba(232, 237, 245, 0.72);
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}
+
+.admin-kv,
+.admin-card {
+    min-width: 0;
+    overflow-wrap: break-word;
 }
 
 .admin-content--auth {
@@ -352,6 +387,10 @@ body {
     align-items: start;
 }
 
+.admin-grid-split > * {
+    min-width: 0;
+}
+
 .admin-grid-4,
 .admin-grid-3,
 .admin-grid-2,
@@ -383,22 +422,35 @@ body {
 .admin-card--table {
     padding: 0;
     overflow: hidden;
-}
-
-.admin-table-scroll {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-}
-
-.admin-table-scroll {
     max-width: 100%;
 }
 
-.admin-table-scroll table {
+.admin-table-scroll {
+    display: block;
     width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+    scrollbar-gutter: stable;
+}
+
+.admin-table-scroll table {
+    width: max(100%, 720px);
     min-width: 720px;
     border-collapse: collapse;
     font-size: 13px;
+}
+
+.admin-table-scroll th,
+.admin-table-scroll td {
+    vertical-align: top;
+}
+
+.admin-table-scroll td {
+    overflow-wrap: anywhere;
+    word-break: break-word;
 }
 
 .payment-logs-table .admin-table-scroll table {
@@ -441,12 +493,13 @@ body {
 
 .payment-log-group-details__panel {
     margin-top: 10px;
-    min-width: 420px;
-    max-width: min(640px, 70vw);
+    min-width: 0;
+    max-width: min(640px, 100%);
     padding: 10px 12px;
     border-radius: 10px;
     border: 1px solid rgba(255, 255, 255, 0.08);
     background: rgba(7, 10, 16, 0.92);
+    overflow-wrap: anywhere;
 }
 
 .payment-log-group-details__sources {
@@ -665,7 +718,12 @@ body {
 
     .admin-grid-3,
     .admin-grid-split {
-        grid-template-columns: 1fr;
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .admin-content [style*="grid-template-columns:minmax(0,1.4fr)"],
+    .admin-content [style*="grid-template-columns: minmax(0, 1.4fr)"] {
+        grid-template-columns: minmax(0, 1fr) !important;
     }
 
     .admin-main-header {
@@ -763,8 +821,9 @@ body {
 
     .admin-grid-4,
     .admin-grid-2,
-    .admin-form-grid {
-        grid-template-columns: 1fr;
+    .admin-form-grid,
+    .admin-meta-grid {
+        grid-template-columns: minmax(0, 1fr);
     }
 
     .admin-title {
@@ -796,6 +855,7 @@ body {
     .admin-list-toolbar label,
     .admin-list-toolbar .admin-btn {
         width: 100%;
+        box-sizing: border-box;
     }
 
     .admin-list-toolbar input[type="search"] {
@@ -805,16 +865,37 @@ body {
     }
 
     .admin-list-toolbar label {
+        display: flex;
+        align-items: center;
         justify-content: space-between;
+        gap: 12px;
+    }
+
+    .admin-list-toolbar label select {
+        width: auto;
+        min-width: 88px;
+        flex: 0 0 auto;
     }
 
     .admin-pagination {
         flex-direction: column;
         align-items: stretch;
+        gap: 12px;
+    }
+
+    .admin-pagination-meta {
+        text-align: center;
     }
 
     .admin-pagination-actions {
+        display: flex;
         justify-content: space-between;
+        gap: 10px;
+    }
+
+    .admin-pagination-actions .admin-btn {
+        flex: 1 1 0;
+        text-align: center;
     }
 
     .admin-shell > .admin-topbar {
@@ -822,8 +903,22 @@ body {
         padding-bottom: 16px;
     }
 
+    .admin-table-scroll {
+        margin: 0;
+        border-radius: 0;
+        background:
+            linear-gradient(90deg, rgba(12, 15, 20, 0.95), transparent) 0 0 / 24px 100% no-repeat,
+            linear-gradient(270deg, rgba(12, 15, 20, 0.95), transparent) 100% 0 / 24px 100% no-repeat;
+        background-attachment: local, local;
+    }
+
     .admin-table-scroll table {
+        width: max(100%, 640px);
         min-width: 640px;
+    }
+
+    .admin-table-scroll th {
+        white-space: nowrap;
     }
 
     .admin-table-scroll td[style*="white-space:nowrap"] {
@@ -838,6 +933,11 @@ body {
     .admin-table-scroll .admin-btn {
         width: 100%;
         box-sizing: border-box;
+    }
+
+    .admin-card [style*="display:flex"][style*="justify-content:space-between"] {
+        flex-wrap: wrap;
+        gap: 6px 12px;
     }
 }
 

@@ -20,7 +20,7 @@
         <div class="admin-card" style="margin-bottom:16px;border-color:rgba(255,180,84,0.35);">{{ session('status') }}</div>
     @endif
 
-    <div style="display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:16px;align-items:start;">
+    <div class="admin-grid-split">
         <div>
             <div class="admin-card">
                 <div style="display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;">

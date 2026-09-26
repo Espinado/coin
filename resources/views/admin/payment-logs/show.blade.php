@@ -7,7 +7,7 @@
         <a href="{{ route('admin.payment-logs.index') }}" style="font-size:13px;color:rgba(232,237,245,0.72);">&larr; {{ __('coin.admin.payment_logs') }}</a>
     </div>
 
-    <div style="display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:16px;align-items:start;">
+    <div class="admin-grid-split">
         <div>
             <div class="admin-card">
                 <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:10px;">

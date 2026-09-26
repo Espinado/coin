@@ -359,6 +359,7 @@ html.coin-nav-open .coin-nav-mobile {
   justify-content: space-between;
   gap: 12px;
   width: 100%;
+  flex-wrap: nowrap;
 }
 
 .coin-landing-header__logo {
@@ -370,7 +371,7 @@ html.coin-nav-open .coin-nav-mobile {
 
 .coin-landing .coin-nav-desktop {
   gap: clamp(14px, 2vw, 30px);
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
 }
 
 .coin-landing .coin-nav-desktop a {
@@ -570,11 +571,14 @@ html.coin-nav-open .coin-nav-mobile {
 
 .coin-landing-hero__title {
   margin: 26px 0 0;
-  font-size: clamp(34px, 6.4vw, 66px);
+  font-size: clamp(28px, 7.2vw, 66px);
   line-height: 1.08;
   letter-spacing: -0.04em;
   font-weight: 600;
   color: #f0fbff;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  max-width: 100%;
 }
 
 .coin-landing-hero__lead {
@@ -583,6 +587,8 @@ html.coin-nav-open .coin-nav-mobile {
   font-size: 17px;
   line-height: 1.62;
   color: rgba(230, 244, 250, 0.72);
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .coin-landing-hero__actions {
@@ -2905,12 +2911,127 @@ html.coin-nav-open .coin-nav-mobile {
 .coin-scroll-x {
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
   margin: 0 -4px;
   padding: 0 4px;
+  max-width: 100%;
 }
 
 .coin-scroll-x-inner {
   min-width: 520px;
+}
+
+.coin-list-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 18px;
+  flex-wrap: wrap;
+}
+
+.coin-list-toolbar__search {
+  flex: 1;
+  min-width: 0;
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(150, 235, 250, 0.2);
+  background: rgba(4, 16, 28, 0.85);
+  color: #e6f4fa;
+  font-family: inherit;
+  font-size: 16px;
+  box-sizing: border-box;
+}
+
+.coin-list-toolbar__btn {
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(150, 235, 250, 0.2);
+  background: rgba(150, 235, 250, 0.06);
+  color: #e6f4fa;
+  font-family: inherit;
+  font-size: 12.5px;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+
+.coin-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 22px;
+  padding-top: 18px;
+  border-top: 1px solid rgba(150, 235, 250, 0.1);
+  flex-wrap: wrap;
+}
+
+.coin-pagination__meta {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.coin-pagination__range {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: rgba(214, 238, 248, 0.66);
+}
+
+.coin-pagination__per-page {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12.5px;
+  color: rgba(214, 238, 248, 0.72);
+}
+
+.coin-pagination__per-page select {
+  padding: 7px 10px;
+  border-radius: 9px;
+  border: 1px solid rgba(150, 235, 250, 0.2);
+  background: rgba(4, 16, 28, 0.85);
+  color: #e6f4fa;
+  font-family: inherit;
+  font-size: 12.5px;
+  cursor: pointer;
+}
+
+.coin-pagination__actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.coin-pagination__page {
+  padding: 8px 12px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11.5px;
+  color: rgba(214, 238, 248, 0.78);
+}
+
+.coin-pagination__btn {
+  padding: 8px 14px;
+  border-radius: 9px;
+  border: 1px solid rgba(150, 235, 250, 0.1);
+  background: rgba(150, 235, 250, 0.03);
+  color: rgba(214, 238, 248, 0.4);
+  font-family: inherit;
+  font-size: 12.5px;
+  box-sizing: border-box;
+}
+
+.coin-pagination__btn--primary {
+  border-color: oklch(0.86 0.11 195 / 0.5);
+  background: linear-gradient(140deg, oklch(0.86 0.12 192), oklch(0.66 0.13 205));
+  color: #04121f;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.coin-pagination__btn--disabled {
+  pointer-events: none;
 }
 
 .coin-action-toast {
@@ -3029,6 +3150,8 @@ html.coin-nav-open .coin-nav-mobile {
 .coin-table-wrap {
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+  max-width: 100%;
 }
 
 @media (max-width: 1024px) {
@@ -3123,6 +3246,43 @@ html.coin-nav-open .coin-nav-mobile {
   .coin-deposit-presets__btn {
     flex: 1 1 calc(33.333% - 7px);
     min-width: 88px;
+  }
+
+  .coin-list-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .coin-list-toolbar__btn {
+    width: 100%;
+  }
+
+  .coin-scroll-x-inner {
+    min-width: 480px;
+  }
+
+  .coin-pagination {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .coin-pagination__meta {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .coin-pagination__per-page {
+    justify-content: space-between;
+  }
+
+  .coin-pagination__actions {
+    justify-content: space-between;
+  }
+
+  .coin-pagination__btn {
+    flex: 1 1 0;
+    text-align: center;
   }
 }
 

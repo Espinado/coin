@@ -7,12 +7,12 @@
         <div class="admin-card" style="margin-bottom:16px;border-color:rgba(255,180,84,0.35);">{{ session('status') }}</div>
     @endif
 
-    <div style="display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:16px;align-items:start;">
-        <div>
+    <div class="admin-grid-split">
+        <div class="admin-stack">
             <div class="admin-card">
                 <h1 style="margin:0;font-size:24px;font-weight:600;">{{ $user->name }}</h1>
-                <p style="margin:8px 0 0;font-size:14px;color:rgba(232,237,245,0.72);">{{ $user->email }} · {{ $user->accountLabel() }}</p>
-                <div style="margin-top:14px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;font-size:13px;">
+                <p style="margin:8px 0 0;font-size:14px;color:rgba(232,237,245,0.72);word-break:break-word;">{{ $user->email }} · {{ $user->accountLabel() }}</p>
+                <div class="admin-meta-grid" style="margin-top:14px;font-size:13px;">
                     <div><span style="color:rgba(232,237,245,0.62);">{{ __('coin.admin.registered') }}</span><div style="margin-top:4px;">{{ $user->created_at?->format('M j, Y H:i') ?? '—' }}</div></div>
                     <div><span style="color:rgba(232,237,245,0.62);">{{ __('coin.admin.last_login') }}</span><div style="margin-top:4px;">{{ $user->last_login_at?->format('M j, Y H:i') ?? '—' }}</div></div>
                     <div><span style="color:rgba(232,237,245,0.62);">{{ __('coin.admin.phone') }}</span><div style="margin-top:4px;">{{ $user->phone ?: '—' }}</div></div>
@@ -55,6 +55,7 @@
                             data-label-connected="{{ __('coin.voximplant.modal_connected') }}"
                             data-label-ended="{{ __('coin.voximplant.modal_ended') }}"
                             data-label-failed="{{ __('coin.voximplant.modal_failed') }}"
+                            data-label-callee-busy="{{ __('coin.voximplant.modal_callee_busy') }}"
                             data-label-duration="{{ __('coin.voximplant.modal_duration') }}"
                             data-label-to-user="{{ __('coin.voximplant.modal_to_user') }}"
                         >

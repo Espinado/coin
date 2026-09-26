@@ -1,9 +1,9 @@
-<div class="admin-card">
+<div class="admin-card admin-user-context">
     <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.12em;color:rgba(232,237,245,0.62);">{{ mb_strtoupper(__('coin.user_context.title')) }}</div>
     <div style="margin-top:12px;font-size:15px;font-weight:600;">
         <a href="{{ route('admin.users.show', $user) }}">{{ $user->accountLabel() }}</a>
     </div>
-    <div style="margin-top:6px;font-size:13px;color:rgba(232,237,245,0.72);">{{ $user->email }}</div>
+    <div class="admin-user-context__email">{{ $user->email }}</div>
     <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;">
         <span style="font-size:11px;padding:4px 8px;border-radius:6px;background:rgba(255,255,255,0.05);">KYC: {{ $user->kycLabel() }}</span>
         @if($user->is_blocked)
