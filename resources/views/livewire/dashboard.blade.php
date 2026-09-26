@@ -405,6 +405,8 @@
             <p style="margin-top:10px;font-size:12px;line-height:1.5;color:rgba(214,238,248,0.72);">{{ __('coin.wallet.deposit_btc_credit_estimate', ['amount' => $this->depositCreditPreview]) }}</p>
             <p style="margin-top:8px;font-size:12px;line-height:1.5;color:rgba(214,238,248,0.62);">{{ __('coin.wallet.btc_deposit_address_hint') }}</p>
             <p style="margin-top:8px;font-size:11px;line-height:1.5;color:rgba(214,238,248,0.55);">{{ __('coin.wallet.btc_deposit_live_rate_hint') }}</p>
+            @elseif($this->depositCreditPreview && $depositCurrency !== $this->walletCurrency)
+            <p style="margin-top:10px;font-size:12px;line-height:1.5;color:rgba(214,238,248,0.72);">{{ __('coin.wallet.deposit_credit_preview', ['amount' => $this->depositCreditPreview]) }}</p>
             @endif
             <div style="margin-top: 14px; display: flex; justify-content: space-between; gap: 14px; font-size: 12.5px;">
               <span style="color: rgba(214,238,248,0.72); min-width: 0;">{{ __('coin.wallet.min_top_up') }}</span>
@@ -505,37 +507,35 @@
             'searchProperty' => 'walletSearch',
             'placeholder' => __('coin.wallet.search_transactions'),
           ])
-          <div class="coin-scroll-x">
-            <div class="coin-wallet-transactions-table">
-              <div class="coin-wallet-transactions-table__head">
-                <span>@include('livewire.partials.sortable-transaction-column', ['column' => 'occurred_at', 'label' => mb_strtoupper(__('coin.table.date')), 'sortProperty' => 'walletSort', 'dirProperty' => 'walletDir', 'sortMethod' => 'sortWallet'])</span>
-                <span>@include('livewire.partials.sortable-transaction-column', ['column' => 'type', 'label' => mb_strtoupper(__('coin.table.type')), 'sortProperty' => 'walletSort', 'dirProperty' => 'walletDir', 'sortMethod' => 'sortWallet'])</span>
-                <span>@include('livewire.partials.sortable-transaction-column', ['column' => 'source', 'label' => mb_strtoupper(__('coin.table.destination')), 'sortProperty' => 'walletSort', 'dirProperty' => 'walletDir', 'sortMethod' => 'sortWallet'])</span>
-                <span>@include('livewire.partials.sortable-transaction-column', ['column' => 'status', 'label' => mb_strtoupper(__('coin.table.status')), 'sortProperty' => 'walletSort', 'dirProperty' => 'walletDir', 'sortMethod' => 'sortWallet'])</span>
-                <span>@include('livewire.partials.sortable-transaction-column', ['column' => 'amount', 'label' => mb_strtoupper(__('coin.table.amount')), 'sortProperty' => 'walletSort', 'dirProperty' => 'walletDir', 'sortMethod' => 'sortWallet', 'align' => 'right'])</span>
-              </div>
-              @forelse($walletHistory as $entry)
-              <div class="coin-wallet-transactions-table__row" @if($entry->rowBackground) style="background: {{ $entry->rowBackground }};" @endif>
-                <span class="coin-wallet-transactions-table__cell" style="color: rgba(214,238,248,0.78);">{{ \App\Support\LocaleFormat::shortDateTime($entry->occurredAt) }}</span>
-                <span class="coin-wallet-transactions-table__cell" style="color: rgba(214,238,248,0.78);">{{ $entry->typeLabel }}</span>
-                <span class="coin-wallet-transactions-table__cell coin-wallet-transactions-table__destination">
-                  <span style="font-family: 'JetBrains Mono', monospace; color: rgba(214,238,248,0.72);">{{ $entry->sourceLabel }}</span>
-                  @if($entry->canReopenPaymentDetails && $entry->depositId)
-                  <button type="button" wire:click="openTopUpFromHistory({{ $entry->depositId }})" class="coin-wallet-transactions-table__reopen-btn">{{ __('coin.crypto_gateway.view_payment_details') }}</button>
-                  @endif
-                </span>
-                <span class="coin-wallet-transactions-table__cell coin-wallet-transactions-table__status">
-                  <span class="coin-wallet-transactions-table__status-label" style="color: {{ $entry->statusColor }};">{{ $entry->statusLabel }}</span>
-                  @if(filled($entry->detail))
-                  <span class="coin-wallet-transactions-table__status-detail" style="color: {{ $entry->detailColor ?? 'rgba(214,238,248,0.68)' }};">{{ $entry->detail }}</span>
-                  @endif
-                </span>
-                <span class="coin-wallet-transactions-table__cell coin-wallet-transactions-table__amount" style="font-family: 'JetBrains Mono', monospace; color: {{ $entry->amountColor }};">{{ $entry->amountLabel }}</span>
-              </div>
-              @empty
-              <div style="padding: 24px 0; font-size: 13px; color: rgba(214,238,248,0.68);">{{ __('coin.admin.no_transactions') }}</div>
-              @endforelse
+          <div class="coin-wallet-transactions-table">
+            <div class="coin-wallet-transactions-table__head">
+              <span>@include('livewire.partials.sortable-transaction-column', ['column' => 'occurred_at', 'label' => mb_strtoupper(__('coin.table.date')), 'sortProperty' => 'walletSort', 'dirProperty' => 'walletDir', 'sortMethod' => 'sortWallet'])</span>
+              <span>@include('livewire.partials.sortable-transaction-column', ['column' => 'type', 'label' => mb_strtoupper(__('coin.table.type')), 'sortProperty' => 'walletSort', 'dirProperty' => 'walletDir', 'sortMethod' => 'sortWallet'])</span>
+              <span>@include('livewire.partials.sortable-transaction-column', ['column' => 'source', 'label' => mb_strtoupper(__('coin.table.destination')), 'sortProperty' => 'walletSort', 'dirProperty' => 'walletDir', 'sortMethod' => 'sortWallet'])</span>
+              <span>@include('livewire.partials.sortable-transaction-column', ['column' => 'status', 'label' => mb_strtoupper(__('coin.table.status')), 'sortProperty' => 'walletSort', 'dirProperty' => 'walletDir', 'sortMethod' => 'sortWallet'])</span>
+              <span>@include('livewire.partials.sortable-transaction-column', ['column' => 'amount', 'label' => mb_strtoupper(__('coin.table.amount')), 'sortProperty' => 'walletSort', 'dirProperty' => 'walletDir', 'sortMethod' => 'sortWallet', 'align' => 'right'])</span>
             </div>
+            @forelse($walletHistory as $entry)
+            <article class="coin-wallet-transactions-table__row" @if($entry->rowBackground) style="background: {{ $entry->rowBackground }};" @endif>
+              <span class="coin-wallet-transactions-table__cell coin-wallet-transactions-table__date" style="color: rgba(214,238,248,0.78);">{{ \App\Support\LocaleFormat::shortDateTime($entry->occurredAt) }}</span>
+              <span class="coin-wallet-transactions-table__cell coin-wallet-transactions-table__type" style="color: rgba(214,238,248,0.78);">{{ $entry->typeLabel }}</span>
+              <span class="coin-wallet-transactions-table__cell coin-wallet-transactions-table__destination">
+                <span style="font-family: 'JetBrains Mono', monospace; color: rgba(214,238,248,0.72);">{{ $entry->sourceLabel }}</span>
+                @if($entry->canReopenPaymentDetails && $entry->depositId)
+                <button type="button" wire:click="openTopUpFromHistory({{ $entry->depositId }})" class="coin-wallet-transactions-table__reopen-btn">{{ __('coin.crypto_gateway.view_payment_details') }}</button>
+                @endif
+              </span>
+              <span class="coin-wallet-transactions-table__cell coin-wallet-transactions-table__status">
+                <span class="coin-wallet-transactions-table__status-label" style="color: {{ $entry->statusColor }};">{{ $entry->statusLabel }}</span>
+                @if(filled($entry->detail))
+                <span class="coin-wallet-transactions-table__status-detail" style="color: {{ $entry->detailColor ?? 'rgba(214,238,248,0.68)' }};">{{ $entry->detail }}</span>
+                @endif
+              </span>
+              <span class="coin-wallet-transactions-table__cell coin-wallet-transactions-table__amount" style="font-family: 'JetBrains Mono', monospace; color: {{ $entry->amountColor }};">{{ $entry->amountLabel }}</span>
+            </article>
+            @empty
+            <div style="padding: 24px 0; font-size: 13px; color: rgba(214,238,248,0.68);">{{ __('coin.admin.no_transactions') }}</div>
+            @endforelse
           </div>
           @include('livewire.partials.coin-pagination', [
             'paginator' => $walletHistory,

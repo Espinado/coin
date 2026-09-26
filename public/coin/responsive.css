@@ -1565,7 +1565,7 @@ html.coin-nav-open .coin-nav-mobile {
 }
 
 .coin-wallet-transactions-table {
-  min-width: 640px;
+  min-width: 0;
 }
 
 .coin-wallet-transactions-table__head,
@@ -1626,6 +1626,7 @@ html.coin-nav-open .coin-nav-mobile {
 
 .coin-wallet-transactions-table__amount {
   padding-top: 1px;
+  text-align: right;
 }
 
 .coin-wallet-transactions-table__head {
@@ -1649,6 +1650,61 @@ html.coin-nav-open .coin-nav-mobile {
 .coin-wallet-transactions-table__head span:nth-child(4),
 .coin-wallet-transactions-table__head span:last-child,
 .coin-wallet-transactions-table__amount {
+  text-align: right;
+}
+
+/* Shared mobile data cards (wallet / profit / referrals) */
+.coin-data-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  min-width: 0;
+}
+
+.coin-data-list__head {
+  display: grid;
+  padding: 16px 0 12px;
+  border-bottom: 1px solid rgba(150, 235, 250, 0.1);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9.5px;
+  letter-spacing: 0.12em;
+  color: rgba(214, 238, 248, 0.66);
+  gap: 12px;
+  align-items: center;
+}
+
+.coin-data-list__row {
+  display: grid;
+  padding: 13px 0;
+  border-bottom: 1px solid rgba(150, 235, 250, 0.07);
+  font-size: 13px;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.coin-data-list__row:last-child {
+  border-bottom: 0;
+}
+
+.coin-data-list--profit .coin-data-list__head,
+.coin-data-list--profit .coin-data-list__row {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr) minmax(0, 1.4fr) minmax(0, 0.8fr);
+}
+
+.coin-data-list--referrals .coin-data-list__head,
+.coin-data-list--referrals .coin-data-list__row {
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr) minmax(0, 0.8fr);
+}
+
+.coin-data-list--invited .coin-data-list__head,
+.coin-data-list--invited .coin-data-list__row {
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.9fr) minmax(0, 0.9fr) minmax(0, 0.9fr) minmax(0, 1fr);
+}
+
+.coin-data-list--profit .coin-data-list__head > :last-child,
+.coin-data-list--referrals .coin-data-list__head > :last-child,
+.coin-data-list--invited .coin-data-list__head > :last-child {
   text-align: right;
 }
 
@@ -3259,6 +3315,183 @@ html.coin-nav-open .coin-nav-mobile {
 
   .coin-scroll-x-inner {
     min-width: 480px;
+  }
+
+  .coin-wallet-transactions-panel {
+    padding: 16px;
+  }
+
+  .coin-wallet-transactions-table__head {
+    display: none;
+  }
+
+  .coin-wallet-transactions-table {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .coin-wallet-transactions-table__row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      "type amount"
+      "date amount"
+      "dest dest"
+      "status status";
+    gap: 6px 12px;
+    padding: 14px;
+    border: 1px solid rgba(150, 235, 250, 0.12);
+    border-radius: 14px;
+    border-bottom: 1px solid rgba(150, 235, 250, 0.12);
+    background: rgba(4, 16, 28, 0.45);
+  }
+
+  .coin-wallet-transactions-table__row:last-child {
+    border-bottom: 1px solid rgba(150, 235, 250, 0.12);
+  }
+
+  .coin-wallet-transactions-table__date {
+    grid-area: date;
+    font-size: 12px;
+    color: rgba(214, 238, 248, 0.62) !important;
+  }
+
+  .coin-wallet-transactions-table__type {
+    grid-area: type;
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  .coin-wallet-transactions-table__destination {
+    grid-area: dest;
+    margin-top: 4px;
+  }
+
+  .coin-wallet-transactions-table__status {
+    grid-area: status;
+    align-items: flex-start;
+    text-align: left;
+    margin-top: 2px;
+  }
+
+  .coin-wallet-transactions-table__amount {
+    grid-area: amount;
+    align-self: start;
+    padding-top: 0;
+    font-size: 14px;
+    font-weight: 600;
+    text-align: right;
+  }
+
+  .coin-wallet-transactions-table__reopen-btn {
+    width: 100%;
+    text-align: center;
+  }
+
+  .coin-wallet-transactions-table__status-label {
+    white-space: normal;
+  }
+
+  .coin-data-list__head {
+    display: none;
+  }
+
+  .coin-data-list {
+    gap: 10px;
+  }
+
+  .coin-data-list__row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 6px 12px;
+    padding: 14px;
+    border: 1px solid rgba(150, 235, 250, 0.12);
+    border-radius: 14px;
+    border-bottom: 1px solid rgba(150, 235, 250, 0.12);
+    background: rgba(4, 16, 28, 0.45);
+  }
+
+  .coin-data-list__row:last-child {
+    border-bottom: 1px solid rgba(150, 235, 250, 0.12);
+  }
+
+  .coin-data-list--profit .coin-data-list__row > :nth-child(1) {
+    grid-column: 1;
+    grid-row: 2;
+    font-size: 12px;
+    color: rgba(214, 238, 248, 0.62) !important;
+  }
+
+  .coin-data-list--profit .coin-data-list__row > :nth-child(2) {
+    grid-column: 1;
+    grid-row: 1;
+    font-weight: 600;
+  }
+
+  .coin-data-list--profit .coin-data-list__row > :nth-child(3) {
+    grid-column: 1 / -1;
+    grid-row: 3;
+    margin-top: 2px;
+  }
+
+  .coin-data-list--profit .coin-data-list__row > :nth-child(4) {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    align-self: start;
+    font-weight: 600;
+  }
+
+  .coin-data-list--referrals .coin-data-list__row > :nth-child(1) {
+    grid-column: 1;
+    grid-row: 2;
+    font-size: 12px;
+    color: rgba(214, 238, 248, 0.62) !important;
+  }
+
+  .coin-data-list--referrals .coin-data-list__row > :nth-child(2) {
+    grid-column: 1;
+    grid-row: 1;
+    font-weight: 600;
+  }
+
+  .coin-data-list--referrals .coin-data-list__row > :nth-child(3),
+  .coin-data-list--referrals .coin-data-list__row > :nth-child(4) {
+    grid-column: 1 / -1;
+  }
+
+  .coin-data-list--referrals .coin-data-list__row > :nth-child(5) {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    align-self: start;
+    font-weight: 600;
+  }
+
+  .coin-data-list--invited .coin-data-list__row > :nth-child(1) {
+    grid-column: 1;
+    grid-row: 1;
+    font-weight: 600;
+    word-break: break-word;
+  }
+
+  .coin-data-list--invited .coin-data-list__row > :nth-child(2) {
+    grid-column: 2;
+    grid-row: 1;
+    align-self: start;
+    text-align: right;
+    font-weight: 600;
+  }
+
+  .coin-data-list--invited .coin-data-list__row > :nth-child(3),
+  .coin-data-list--invited .coin-data-list__row > :nth-child(4),
+  .coin-data-list--invited .coin-data-list__row > :nth-child(5) {
+    grid-column: 1 / -1;
+    font-size: 12px;
+    color: rgba(214, 238, 248, 0.72);
+  }
+
+  .coin-data-list--invited .coin-data-list__row > :nth-child(5) {
+    text-align: left;
   }
 
   .coin-pagination {

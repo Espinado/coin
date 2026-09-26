@@ -62,35 +62,37 @@
         'searchProperty' => 'referralAccrualSearch',
         'placeholder' => __('coin.referrals.search_accruals'),
       ])
-      <div style="display: grid; grid-template-columns: minmax(0, 0.9fr) minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr) minmax(0, 0.8fr); padding: 16px 0 12px; border-bottom: 1px solid rgba(150,235,250,0.1); font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.12em; color: rgba(214,238,248,0.66);">
-        <span>@include('livewire.partials.sortable-transaction-column', ['column' => 'created_at', 'label' => mb_strtoupper(__('coin.table.date')), 'sortProperty' => 'referralAccrualSort', 'dirProperty' => 'referralAccrualDir', 'sortMethod' => 'sortReferralAccruals'])</span>
-        <span>@include('livewire.partials.sortable-transaction-column', ['column' => 'user', 'label' => mb_strtoupper(__('coin.table.user')), 'sortProperty' => 'referralAccrualSort', 'dirProperty' => 'referralAccrualDir', 'sortMethod' => 'sortReferralAccruals'])</span>
-        <span>@include('livewire.partials.sortable-transaction-column', ['column' => 'plan', 'label' => mb_strtoupper(__('coin.table.plan')), 'sortProperty' => 'referralAccrualSort', 'dirProperty' => 'referralAccrualDir', 'sortMethod' => 'sortReferralAccruals'])</span>
-        <span>@include('livewire.partials.sortable-transaction-column', ['column' => 'purchase', 'label' => mb_strtoupper(__('coin.table.purchase')), 'sortProperty' => 'referralAccrualSort', 'dirProperty' => 'referralAccrualDir', 'sortMethod' => 'sortReferralAccruals'])</span>
-        <span>@include('livewire.partials.sortable-transaction-column', ['column' => 'commission', 'label' => mb_strtoupper(__('coin.table.commission')), 'sortProperty' => 'referralAccrualSort', 'dirProperty' => 'referralAccrualDir', 'sortMethod' => 'sortReferralAccruals', 'align' => 'right'])</span>
-      </div>
-      @forelse($referralAccrualPage as $commission)
-        <div style="display: grid; grid-template-columns: minmax(0, 0.9fr) minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr) minmax(0, 0.8fr); padding: 13px 0;@if(!$loop->last || $referralAccrualPage->total() > 0) border-bottom: 1px solid rgba(150,235,250,0.07);@endif font-size: 13px; align-items: center;">
-          <span style="color: rgba(214,238,248,0.78);">{{ $commission->occurredLabel() }}</span>
-          <span style="font-family: 'JetBrains Mono', monospace; color: rgba(214,238,248,0.78);">{{ $commission->referralLabel() }}</span>
-          <span style="color: rgba(214,238,248,0.78);">{{ $commission->planName() }}</span>
-          <span style="font-family: 'JetBrains Mono', monospace; color: rgba(214,238,248,0.78);">{{ $commission->formattedPurchaseAmount() }}</span>
-          <span style="font-family: 'JetBrains Mono', monospace; text-align: right; color: oklch(0.88 0.12 192);">{{ $commission->formattedCommission() }}</span>
+      <div class="coin-data-list coin-data-list--referrals">
+        <div class="coin-data-list__head">
+          <span>@include('livewire.partials.sortable-transaction-column', ['column' => 'created_at', 'label' => mb_strtoupper(__('coin.table.date')), 'sortProperty' => 'referralAccrualSort', 'dirProperty' => 'referralAccrualDir', 'sortMethod' => 'sortReferralAccruals'])</span>
+          <span>@include('livewire.partials.sortable-transaction-column', ['column' => 'user', 'label' => mb_strtoupper(__('coin.table.user')), 'sortProperty' => 'referralAccrualSort', 'dirProperty' => 'referralAccrualDir', 'sortMethod' => 'sortReferralAccruals'])</span>
+          <span>@include('livewire.partials.sortable-transaction-column', ['column' => 'plan', 'label' => mb_strtoupper(__('coin.table.plan')), 'sortProperty' => 'referralAccrualSort', 'dirProperty' => 'referralAccrualDir', 'sortMethod' => 'sortReferralAccruals'])</span>
+          <span>@include('livewire.partials.sortable-transaction-column', ['column' => 'purchase', 'label' => mb_strtoupper(__('coin.table.purchase')), 'sortProperty' => 'referralAccrualSort', 'dirProperty' => 'referralAccrualDir', 'sortMethod' => 'sortReferralAccruals'])</span>
+          <span>@include('livewire.partials.sortable-transaction-column', ['column' => 'commission', 'label' => mb_strtoupper(__('coin.table.commission')), 'sortProperty' => 'referralAccrualSort', 'dirProperty' => 'referralAccrualDir', 'sortMethod' => 'sortReferralAccruals', 'align' => 'right'])</span>
         </div>
-      @empty
-        @foreach($referralAccruals as $accrual)
-          <div style="display: grid; grid-template-columns: minmax(0, 0.9fr) minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr) minmax(0, 0.8fr); padding: 13px 0;@if(!$loop->last) border-bottom: 1px solid rgba(150,235,250,0.07);@endif font-size: 13px;">
-            <span style="color: rgba(214,238,248,0.78);">—</span>
-            <span style="font-family: 'JetBrains Mono', monospace; color: rgba(214,238,248,0.78);">{{ $accrual->user_label }}</span>
-            <span style="color: rgba(214,238,248,0.78);">{{ $accrual->plan_name }}</span>
-            <span style="color: rgba(214,238,248,0.78);">—</span>
-            <span style="font-family: 'JetBrains Mono', monospace; text-align: right; color: oklch(0.88 0.12 192);">{{ $accrual->amount_label }}</span>
-          </div>
-        @endforeach
-        @if($referralAccrualPage->total() === 0 && $referralAccruals->isEmpty())
-          <div style="padding: 24px 0; font-size: 13px; color: rgba(214,238,248,0.68);">{{ __('coin.referrals.no_commissions') }}</div>
-        @endif
-      @endforelse
+        @forelse($referralAccrualPage as $commission)
+          <article class="coin-data-list__row">
+            <span style="color: rgba(214,238,248,0.78);">{{ $commission->occurredLabel() }}</span>
+            <span style="font-family: 'JetBrains Mono', monospace; color: rgba(214,238,248,0.78);">{{ $commission->referralLabel() }}</span>
+            <span style="color: rgba(214,238,248,0.78);">{{ $commission->planName() }}</span>
+            <span style="font-family: 'JetBrains Mono', monospace; color: rgba(214,238,248,0.78);">{{ $commission->formattedPurchaseAmount() }}</span>
+            <span style="font-family: 'JetBrains Mono', monospace; text-align: right; color: oklch(0.88 0.12 192);">{{ $commission->formattedCommission() }}</span>
+          </article>
+        @empty
+          @foreach($referralAccruals as $accrual)
+            <article class="coin-data-list__row">
+              <span style="color: rgba(214,238,248,0.78);">—</span>
+              <span style="font-family: 'JetBrains Mono', monospace; color: rgba(214,238,248,0.78);">{{ $accrual->user_label }}</span>
+              <span style="color: rgba(214,238,248,0.78);">{{ $accrual->plan_name }}</span>
+              <span style="color: rgba(214,238,248,0.78);">—</span>
+              <span style="font-family: 'JetBrains Mono', monospace; text-align: right; color: oklch(0.88 0.12 192);">{{ $accrual->amount_label }}</span>
+            </article>
+          @endforeach
+          @if($referralAccrualPage->total() === 0 && $referralAccruals->isEmpty())
+            <div style="padding: 24px 0; font-size: 13px; color: rgba(214,238,248,0.68);">{{ __('coin.referrals.no_commissions') }}</div>
+          @endif
+        @endforelse
+      </div>
       @include('livewire.partials.coin-pagination', [
         'paginator' => $referralAccrualPage,
         'perPageProperty' => 'referralAccrualPerPage',
@@ -101,24 +103,26 @@
         'searchProperty' => 'referralInvitedSearch',
         'placeholder' => __('coin.referrals.search_invited'),
       ])
-      <div style="display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.9fr) minmax(0, 0.9fr) minmax(0, 0.9fr) minmax(0, 1fr); padding: 16px 0 12px; border-bottom: 1px solid rgba(150,235,250,0.1); font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.12em; color: rgba(214,238,248,0.66);">
-        <span>@include('livewire.partials.sortable-transaction-column', ['column' => 'email', 'label' => mb_strtoupper(__('coin.referrals.invite_contact')), 'sortProperty' => 'referralInvitedSort', 'dirProperty' => 'referralInvitedDir', 'sortMethod' => 'sortReferralInvited'])</span>
-        <span>@include('livewire.partials.sortable-transaction-column', ['column' => 'status', 'label' => mb_strtoupper(__('coin.table.status')), 'sortProperty' => 'referralInvitedSort', 'dirProperty' => 'referralInvitedDir', 'sortMethod' => 'sortReferralInvited'])</span>
-        <span>@include('livewire.partials.sortable-transaction-column', ['column' => 'channel', 'label' => mb_strtoupper(__('coin.referrals.invite_channel')), 'sortProperty' => 'referralInvitedSort', 'dirProperty' => 'referralInvitedDir', 'sortMethod' => 'sortReferralInvited'])</span>
-        <span>@include('livewire.partials.sortable-transaction-column', ['column' => 'sent_at', 'label' => mb_strtoupper(__('coin.referrals.invited_at')), 'sortProperty' => 'referralInvitedSort', 'dirProperty' => 'referralInvitedDir', 'sortMethod' => 'sortReferralInvited'])</span>
-        <span>@include('livewire.partials.sortable-transaction-column', ['column' => 'registered_at', 'label' => mb_strtoupper(__('coin.referrals.registered_at')), 'sortProperty' => 'referralInvitedSort', 'dirProperty' => 'referralInvitedDir', 'sortMethod' => 'sortReferralInvited', 'align' => 'right'])</span>
-      </div>
-      @forelse($referralInvitedPage as $invitation)
-        <div style="display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.9fr) minmax(0, 0.9fr) minmax(0, 0.9fr) minmax(0, 1fr); padding: 13px 0;@if(!$loop->last || $referralInvitedPage->total() > 0) border-bottom: 1px solid rgba(150,235,250,0.07);@endif font-size: 13px; align-items: center;">
-          <span style="font-family: 'JetBrains Mono', monospace; color: rgba(214,238,248,0.78); word-break: break-word;">{{ $invitation->displayLabel() }}</span>
-          <span style="color: {{ $invitation->isRegistered() ? 'oklch(0.88 0.14 160)' : 'oklch(0.9 0.14 90)' }};">{{ $invitation->statusLabel() }}</span>
-          <span style="color: rgba(214,238,248,0.78);">{{ $invitation->channelLabel() }}</span>
-          <span style="color: rgba(214,238,248,0.78);">{{ $invitation->formattedSentAt() }}</span>
-          <span style="font-family: 'JetBrains Mono', monospace; text-align: right; color: rgba(214,238,248,0.78);">{{ $invitation->formattedRegisteredAt() }}</span>
+      <div class="coin-data-list coin-data-list--invited">
+        <div class="coin-data-list__head">
+          <span>@include('livewire.partials.sortable-transaction-column', ['column' => 'email', 'label' => mb_strtoupper(__('coin.referrals.invite_contact')), 'sortProperty' => 'referralInvitedSort', 'dirProperty' => 'referralInvitedDir', 'sortMethod' => 'sortReferralInvited'])</span>
+          <span>@include('livewire.partials.sortable-transaction-column', ['column' => 'status', 'label' => mb_strtoupper(__('coin.table.status')), 'sortProperty' => 'referralInvitedSort', 'dirProperty' => 'referralInvitedDir', 'sortMethod' => 'sortReferralInvited'])</span>
+          <span>@include('livewire.partials.sortable-transaction-column', ['column' => 'channel', 'label' => mb_strtoupper(__('coin.referrals.invite_channel')), 'sortProperty' => 'referralInvitedSort', 'dirProperty' => 'referralInvitedDir', 'sortMethod' => 'sortReferralInvited'])</span>
+          <span>@include('livewire.partials.sortable-transaction-column', ['column' => 'sent_at', 'label' => mb_strtoupper(__('coin.referrals.invited_at')), 'sortProperty' => 'referralInvitedSort', 'dirProperty' => 'referralInvitedDir', 'sortMethod' => 'sortReferralInvited'])</span>
+          <span>@include('livewire.partials.sortable-transaction-column', ['column' => 'registered_at', 'label' => mb_strtoupper(__('coin.referrals.registered_at')), 'sortProperty' => 'referralInvitedSort', 'dirProperty' => 'referralInvitedDir', 'sortMethod' => 'sortReferralInvited', 'align' => 'right'])</span>
         </div>
-      @empty
-        <div style="padding: 24px 0; font-size: 13px; color: rgba(214,238,248,0.68);">{{ __('coin.referrals.no_invited') }}</div>
-      @endforelse
+        @forelse($referralInvitedPage as $invitation)
+          <article class="coin-data-list__row">
+            <span style="font-family: 'JetBrains Mono', monospace; color: rgba(214,238,248,0.78); word-break: break-word;">{{ $invitation->displayLabel() }}</span>
+            <span style="color: {{ $invitation->isRegistered() ? 'oklch(0.88 0.14 160)' : 'oklch(0.9 0.14 90)' }};">{{ $invitation->statusLabel() }}</span>
+            <span style="color: rgba(214,238,248,0.78);">{{ $invitation->channelLabel() }}</span>
+            <span style="color: rgba(214,238,248,0.78);">{{ $invitation->formattedSentAt() }}</span>
+            <span style="font-family: 'JetBrains Mono', monospace; text-align: right; color: rgba(214,238,248,0.78);">{{ $invitation->formattedRegisteredAt() }}</span>
+          </article>
+        @empty
+          <div style="padding: 24px 0; font-size: 13px; color: rgba(214,238,248,0.68);">{{ __('coin.referrals.no_invited') }}</div>
+        @endforelse
+      </div>
       @include('livewire.partials.coin-pagination', [
         'paginator' => $referralInvitedPage,
         'perPageProperty' => 'referralInvitedPerPage',
