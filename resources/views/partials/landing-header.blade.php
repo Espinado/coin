@@ -2,7 +2,7 @@
 
 <header class="coin-header coin-landing-header" data-screen-label="Header">
   <div class="coin-landing-header__inner">
-    <a href="{{ route('home') }}" class="coin-header-brand">
+    <a href="{{ auth()->check() ? route('dashboard') : route('home') }}" class="coin-header-brand">
       <img src="{{ \App\Support\PlatformBrand::logo('horizontal') }}" alt="CloudFlops" class="coin-brand-logo coin-landing-header__logo" />
     </a>
 
