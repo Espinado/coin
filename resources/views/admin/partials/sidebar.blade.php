@@ -31,14 +31,25 @@
     if (($canManageWithdrawals ?? false) && ($pendingWithdrawalsCount ?? 0) > 0) {
         $financeBadges[] = ['count' => $pendingWithdrawalsCount, 'class' => 'admin-sidebar-badge--red', 'attrs' => 'data-admin-withdrawals-nav-badge'];
     }
+
+    $logsActive = $adminNavActive($routeName, 'admin.payment-logs', 'admin.plan-changes');
+    $showLogsGroup = ($canAccessPaymentLogs ?? false) || ($canManagePlanChanges ?? false);
 @endphp
 
 <aside class="admin-sidebar" id="admin-sidebar">
     <div class="admin-sidebar__inner">
-        <a href="{{ route('admin.dashboard') }}" class="admin-sidebar-brand">
-            <x-brand-logo variant="horizontal" fluid :max-height="44" class="admin-sidebar-brand__logo" />
-            <span class="admin-badge">STAFF ONLY</span>
-        </a>
+        <div class="admin-sidebar-header">
+            <a href="{{ route('admin.dashboard') }}" class="admin-sidebar-brand">
+                <x-brand-logo variant="horizontal" fluid :max-height="44" class="admin-sidebar-brand__logo" />
+            </a>
+            <div class="admin-sidebar-brand__meta">
+                <span class="admin-badge">STAFF ONLY</span>
+                <form method="POST" action="{{ route('admin.logout') }}" class="admin-sidebar-logout-form">
+                    @csrf
+                    <button type="submit" class="admin-sidebar-logout">{{ __('coin.nav.logout') }}</button>
+                </form>
+            </div>
+        </div>
 
         <nav class="admin-sidebar-nav" id="admin-sidebar-nav" aria-label="{{ __('coin.admin.open_menu') }}">
             <a href="{{ route('admin.dashboard') }}" class="{{ $navClass($routeName === 'admin.dashboard') }}">{{ __('coin.admin.overview') }}</a>
@@ -57,16 +68,33 @@
                     @endif
                 </a>
             @endif
-            @if($canAccessPaymentLogs ?? false)
-                <a href="{{ route('admin.payment-logs.index') }}" class="{{ $navClass($adminNavActive($routeName, 'admin.payment-logs')) }}">{{ __('coin.admin.payment_logs') }}</a>
-            @endif
-            @if($canManagePlanChanges ?? false)
-                <a href="{{ route('admin.plan-changes.index') }}" class="{{ $navClass($adminNavActive($routeName, 'admin.plan-changes')) }}" data-admin-plan-changes-nav>
-                    <span>{{ __('coin.admin.plan_changes') }}</span>
-                    @if(($pendingPlanChangesCount ?? 0) > 0)
-                        <span class="admin-sidebar-badge admin-sidebar-badge--blue" data-admin-plan-changes-nav-badge>{{ $pendingPlanChangesCount }}</span>
-                    @endif
-                </a>
+            @if($showLogsGroup)
+                <div class="admin-sidebar-group" data-admin-sidebar-group="logs">
+                    <button
+                        type="button"
+                        class="admin-sidebar-link admin-sidebar-group__toggle {{ $logsActive ? 'admin-sidebar-link--active' : '' }}"
+                        aria-expanded="false"
+                        data-admin-sidebar-group-toggle
+                    >
+                        <span class="admin-sidebar-group__label">
+                            <span>{{ __('coin.admin.logs_nav') }}</span>
+                        </span>
+                        <span class="admin-sidebar-group__chevron" aria-hidden="true"></span>
+                    </button>
+                    <div class="admin-sidebar-subnav">
+                        @if($canAccessPaymentLogs ?? false)
+                            <a href="{{ route('admin.payment-logs.index') }}" class="{{ $navClass($adminNavActive($routeName, 'admin.payment-logs')) }} admin-sidebar-link--sub">{{ __('coin.admin.logs_payments') }}</a>
+                        @endif
+                        @if($canManagePlanChanges ?? false)
+                            <a href="{{ route('admin.plan-changes.index') }}" class="{{ $navClass($adminNavActive($routeName, 'admin.plan-changes')) }} admin-sidebar-link--sub" data-admin-plan-changes-nav>
+                                <span>{{ __('coin.admin.plan_changes') }}</span>
+                                @if(($pendingPlanChangesCount ?? 0) > 0)
+                                    <span class="admin-sidebar-badge admin-sidebar-badge--blue" data-admin-plan-changes-nav-badge>{{ $pendingPlanChangesCount }}</span>
+                                @endif
+                            </a>
+                        @endif
+                    </div>
+                </div>
             @endif
             @if($canManagePlans ?? false)
                 <a href="{{ route('admin.plans.index') }}" class="{{ $navClass($adminNavActive($routeName, 'admin.plans')) }}">{{ __('coin.admin.plans') }}</a>
@@ -80,9 +108,6 @@
             @if($canManageLegal ?? false)
                 <a href="{{ route('admin.legal.index') }}" class="{{ $navClass($adminNavActive($routeName, 'admin.legal')) }}">{{ __('coin.admin.legal.title') }}</a>
             @endif
-        </nav>
-
-        <div class="admin-sidebar-bottom">
             @if($canManageBroadcasts ?? false)
                 <a href="{{ route('admin.broadcasts.index') }}" class="{{ $navClass($adminNavActive($routeName, 'admin.broadcasts')) }}">{{ __('coin.admin.broadcasts.title') }}</a>
             @endif
@@ -94,10 +119,6 @@
                     @endif
                 </a>
             @endif
-            <form method="POST" action="{{ route('admin.logout') }}">
-                @csrf
-                <button type="submit" class="admin-sidebar-link admin-sidebar-link--logout">{{ __('coin.nav.logout') }}</button>
-            </form>
-        </div>
+        </nav>
     </div>
 </aside>

@@ -147,6 +147,32 @@
                         });
                     });
 
+                    document.querySelectorAll('[data-admin-sidebar-group]').forEach(function (group) {
+                        const toggle = group.querySelector('[data-admin-sidebar-group-toggle]');
+                        const storageKey = 'admin-sidebar-group:' + (group.getAttribute('data-admin-sidebar-group') || 'default');
+
+                        if (toggle) {
+                            const savedOpen = localStorage.getItem(storageKey);
+                            const setGroupOpen = function (open) {
+                                group.classList.toggle('admin-sidebar-group--open', open);
+                                toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+                            };
+
+                            if (savedOpen === '1') {
+                                setGroupOpen(true);
+                            } else {
+                                setGroupOpen(false);
+                            }
+
+                            toggle.addEventListener('click', function () {
+                                const open = ! group.classList.contains('admin-sidebar-group--open');
+                                group.classList.toggle('admin-sidebar-group--open', open);
+                                toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+                                localStorage.setItem(storageKey, open ? '1' : '0');
+                            });
+                        }
+                    });
+
                     setOpen(false);
 
                     document.addEventListener('keydown', function (event) {
