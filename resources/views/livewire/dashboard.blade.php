@@ -9,7 +9,7 @@
   <aside class="coin-sidebar">
     <div class="coin-sidebar-nav">
     <div class="coin-sidebar-brand-row">
-      <a href="{{ route('dashboard') }}" class="coin-sidebar-brand" wire:click.prevent="setSection(0)">
+      <a href="{{ route('dashboard') }}" class="coin-sidebar-brand" data-no-page-spinner wire:click.prevent="setSection(0)">
         <x-brand-logo variant="horizontal" fluid :max-height="28" class="coin-sidebar-brand__logo" />
         <div class="coin-sidebar-brand__tagline">{{ mb_strtoupper(__('coin.nav.portal')) }}</div>
       </a>

@@ -95,6 +95,16 @@
             return false;
         }
 
+        if (anchor.hasAttribute('wire:click.prevent') || anchor.getAttribute('wire:click') === 'prevent') {
+            return false;
+        }
+
+        var wireClick = anchor.getAttribute('wire:click') || '';
+
+        if (wireClick.indexOf('.prevent') !== -1) {
+            return false;
+        }
+
         var href = anchor.getAttribute('href') || '';
 
         if (!href || href === '#' || href.indexOf('javascript:') === 0) {
@@ -112,7 +122,8 @@
                 return false;
             }
 
-            if (url.pathname === window.location.pathname && url.search === window.location.search && url.hash) {
+            // Same path/query (hash-only or in-app Livewire section switch) — no full navigation.
+            if (url.pathname === window.location.pathname && url.search === window.location.search) {
                 return false;
             }
         } catch (_) {
@@ -156,9 +167,17 @@
         document.addEventListener('click', function (event) {
             var anchor = event.target.closest('a');
 
-            if (shouldHandleLink(anchor, event)) {
-                markFullPageNavigation();
+            if (! shouldHandleLink(anchor, event)) {
+                return;
             }
+
+            markFullPageNavigation();
+
+            window.setTimeout(function () {
+                if (event.defaultPrevented) {
+                    hideOverlay();
+                }
+            }, 0);
         }, true);
 
         document.addEventListener('submit', function (event) {
