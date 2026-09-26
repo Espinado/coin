@@ -192,7 +192,7 @@ class ExchangeRateService
             }
 
             return [
-                'pay_amount' => round($amount, 2),
+                'pay_amount' => CryptoAmountFormat::normalize($amount, $base),
                 'pay_currency' => $base,
                 'input_amount' => null,
                 'input_currency' => null,
@@ -209,7 +209,7 @@ class ExchangeRateService
             }
 
             return [
-                'pay_amount' => round($amount, 8),
+                'pay_amount' => CryptoAmountFormat::normalize($amount, 'BTC'),
                 'pay_currency' => 'BTC',
                 'input_amount' => null,
                 'input_currency' => null,
@@ -368,7 +368,7 @@ class ExchangeRateService
         if ($to === 'BTC') {
             $rate = $btcPerUsdt ?? $this->btcPerUsdt();
 
-            return round($amountUsdt * $rate, 8);
+            return CryptoAmountFormat::normalize($amountUsdt * $rate, 'BTC');
         }
 
         throw new RuntimeException("Unsupported withdrawal currency: {$toCurrency}");

@@ -39,7 +39,7 @@ class PaymentIpnAmountToleranceTest extends TestCase
     {
         config([
             'coin.payments.ccapi.amount_tolerance' => 0,
-            'coin.payments.ccapi.amount_tolerance_btc' => 0.000005,
+            'coin.payments.ccapi.amount_tolerance_btc' => 0,
         ]);
 
         $this->assertFalse(PaymentIpnService::receivedAmountMatchesDepositAmount(

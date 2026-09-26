@@ -9,6 +9,15 @@ final class CryptoAmountFormat
         return strtoupper(trim($currency)) === 'BTC' ? 8 : 2;
     }
 
+    public static function normalize(float|string|null $amount, string $currency): float
+    {
+        if ($amount === null || $amount === '') {
+            return 0.0;
+        }
+
+        return (float) number_format((float) $amount, self::decimals($currency), '.', '');
+    }
+
     public static function format(float|string|null $amount, string $currency, bool $trimTrailingZeros = true): string
     {
         if ($amount === null || $amount === '') {

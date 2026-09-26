@@ -198,6 +198,8 @@ class Dashboard extends Component
 
     public ?float $pendingTopUpAmount = null;
 
+    public ?string $pendingTopUpCurrency = null;
+
     public ?int $pendingDepositId = null;
 
     public ?string $pendingPaymentAddress = null;
@@ -625,7 +627,7 @@ class Dashboard extends Component
         if ($this->depositCurrency === 'BTC') {
             try {
                 $btc = app(ExchangeRateService::class)->convertFromBase($presetUsdt, 'BTC');
-                $this->depositAmount = rtrim(rtrim(number_format($btc, 8, '.', ''), '0'), '.');
+                $this->depositAmount = CryptoAmountFormat::formatPlain($btc, 'BTC', false);
             } catch (\Throwable) {
                 $this->depositAmount = '0';
             }
@@ -944,8 +946,15 @@ class Dashboard extends Component
                 ->first();
 
             if ($deposit !== null) {
-                return (float) $deposit->amount;
+                return CryptoAmountFormat::normalize($deposit->amount, (string) $deposit->currency);
             }
+        }
+
+        if ($this->pendingTopUpAmount !== null && $this->paymentModal === 'topup') {
+            return CryptoAmountFormat::normalize(
+                $this->pendingTopUpAmount,
+                $this->pendingTopUpCurrency ?? $this->depositCurrency,
+            );
         }
 
         $amount = (float) str_replace([',', ' '], '', $this->depositAmount);
@@ -976,10 +985,14 @@ class Dashboard extends Component
             }
         }
 
+        if ($this->pendingTopUpCurrency !== null && $this->paymentModal === 'topup') {
+            return strtoupper($this->pendingTopUpCurrency);
+        }
+
         return strtoupper($this->depositCurrency);
     }
 
-    public function getTopUpPayAmountFormattedProperty(): string
+    public function getTopUpPayAmountExactProperty(): string
     {
         $amount = $this->topUpPayAmount;
         $currency = $this->topUpPayCurrency;
@@ -988,11 +1001,12 @@ class Dashboard extends Component
             return '0';
         }
 
-        if ($currency === 'BTC') {
-            return rtrim(rtrim(number_format($amount, 8, '.', ''), '0'), '.');
-        }
+        return CryptoAmountFormat::formatPlain($amount, $currency, false);
+    }
 
-        return number_format($amount, 2, '.', ',');
+    public function getTopUpPayAmountFormattedProperty(): string
+    {
+        return $this->topUpPayAmountExact;
     }
 
     public function getTopUpEstimatedCreditProperty(): ?string
@@ -1226,16 +1240,22 @@ class Dashboard extends Component
         $amount = (float) str_replace([',', ' '], '', $this->depositAmount);
 
         try {
-            app(ExchangeRateService::class)->assertMinDepositAtLiveRate($amount, $this->depositCurrency);
+            $prepared = app(ExchangeRateService::class)->prepareGatewayDeposit($amount, $this->depositCurrency);
         } catch (\RuntimeException $exception) {
             throw ValidationException::withMessages([
                 'depositAmount' => [$exception->getMessage()],
             ]);
         }
 
+        $this->depositAmount = CryptoAmountFormat::formatPlain(
+            $prepared['pay_amount'],
+            $prepared['pay_currency'],
+            false,
+        );
         $this->paymentModal = 'topup';
         $this->paymentModalStep = 'gateway';
-        $this->pendingTopUpAmount = $amount;
+        $this->pendingTopUpAmount = (float) $prepared['pay_amount'];
+        $this->pendingTopUpCurrency = $prepared['pay_currency'];
     }
 
     public function proceedToTopUpPayment(DepositService $deposits, PaymentGatewayInterface $gateway): void
@@ -1258,7 +1278,7 @@ class Dashboard extends Component
             $deposit = $deposits->initiateWithGateway(
                 $this->user,
                 $this->pendingTopUpAmount,
-                $this->depositCurrency,
+                $this->pendingTopUpCurrency ?? $this->depositCurrency,
                 $gateway,
             );
 
@@ -1372,9 +1392,10 @@ class Dashboard extends Component
         $this->pendingTopUpAmount = $deposit->hasInputConversion()
             ? (float) $deposit->input_amount
             : (float) $deposit->amount;
-        $this->depositCurrency = $deposit->hasInputConversion()
+        $this->pendingTopUpCurrency = $deposit->hasInputConversion()
             ? strtoupper((string) $deposit->input_currency)
             : strtoupper((string) $deposit->currency);
+        $this->depositCurrency = $this->pendingTopUpCurrency;
         $this->reopenTopUpPaymentModal();
     }
 
@@ -1456,14 +1477,16 @@ class Dashboard extends Component
         $this->pendingTopUpAmount = $deposit->hasInputConversion()
             ? (float) $deposit->input_amount
             : (float) $deposit->amount;
-        $this->depositCurrency = $deposit->hasInputConversion()
+        $this->pendingTopUpCurrency = $deposit->hasInputConversion()
             ? strtoupper((string) $deposit->input_currency)
             : strtoupper((string) $deposit->currency);
+        $this->depositCurrency = $this->pendingTopUpCurrency;
     }
 
     private function clearPendingTopUpTracking(): void
     {
         $this->pendingTopUpAmount = null;
+        $this->pendingTopUpCurrency = null;
         $this->pendingDepositId = null;
         $this->pendingPaymentAddress = null;
     }
