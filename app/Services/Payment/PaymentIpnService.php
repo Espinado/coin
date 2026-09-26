@@ -113,14 +113,17 @@ class PaymentIpnService
                 PaymentStatusLog::SOURCE_IPN,
             );
 
+            $currency = strtoupper((string) $deposit->currency);
+            $decimals = $currency === 'BTC' ? 8 : 2;
+
             return $this->finish(
                 $log,
                 PaymentWebhookLog::RESULT_PROCESSED,
                 sprintf(
                     'Amount mismatch: received %s, expected %s %s.',
-                    number_format((float) ($event->amount ?? 0), 6, '.', ''),
-                    number_format((float) $deposit->amount, 2, '.', ''),
-                    strtoupper((string) $deposit->currency),
+                    number_format((float) ($event->amount ?? 0), $decimals, '.', ''),
+                    number_format((float) $deposit->amount, $decimals, '.', ''),
+                    $currency,
                 ),
             );
         }
@@ -152,12 +155,21 @@ class PaymentIpnService
             return false;
         }
 
-        $tolerance ??= max(0, (float) config('coin.payments.ccapi.amount_tolerance', 0));
         $decimals = strtoupper((string) ($currency ?? 'USDT')) === 'BTC' ? 8 : 2;
+        $tolerance ??= self::amountToleranceFor($currency);
         $normalizedExpected = (float) number_format($expectedAmount, $decimals, '.', '');
         $normalizedReceived = (float) number_format($received, $decimals, '.', '');
 
         return abs($normalizedReceived - $normalizedExpected) <= $tolerance;
+    }
+
+    public static function amountToleranceFor(?string $currency): float
+    {
+        if (strtoupper(trim((string) $currency)) === 'BTC') {
+            return max(0, (float) config('coin.payments.ccapi.amount_tolerance_btc', 0.000005));
+        }
+
+        return max(0, (float) config('coin.payments.ccapi.amount_tolerance', 0));
     }
 
     private function receivedAmountMatchesDeposit(VerifiedIpnEvent $event, Deposit $deposit): bool

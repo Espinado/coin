@@ -85,6 +85,8 @@ return [
             'min_confirmations' => (int) env('CCAPI_MIN_CONFIRMATIONS', 1),
             // IPN amount must match deposit.amount within this tolerance (0 = exact).
             'amount_tolerance' => (float) env('CCAPI_AMOUNT_TOLERANCE', 0),
+            // BTC wallets often round satoshis; default ±500 sat (0.000005 BTC).
+            'amount_tolerance_btc' => (float) env('CCAPI_AMOUNT_TOLERANCE_BTC', 0.000005),
             // Comma-separated CCAPI IPN source IPs (production default applied in middleware when empty).
             'webhook_ips' => array_values(array_filter(array_map(
                 trim(...),
