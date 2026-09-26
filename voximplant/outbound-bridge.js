@@ -85,6 +85,7 @@ function bridgeWebToPstn(event) {
     var destination = normalizeE164(config.destination);
     var callerId = normalizeE164(config.caller_id) || String(config.caller_id || '');
     var mediaBridged = false;
+    var pstnAnswered = false;
     var outbound = null;
 
     if (!destination) {
@@ -104,18 +105,29 @@ function bridgeWebToPstn(event) {
         return;
     }
 
-    var bridgeMedia = function () {
+    var bridgeMediaOnly = function () {
         if (mediaBridged) {
             return;
         }
 
         mediaBridged = true;
         VoxEngine.sendMediaBetween(incoming, outbound);
+    };
+
+    var onPstnAnswered = function () {
+        bridgeMediaOnly();
+
+        if (pstnAnswered) {
+            return;
+        }
+
+        pstnAnswered = true;
         notifyBrowser(incoming, 'pstn_connected');
     };
 
-    outbound.addEventListener(CallEvents.Connected, bridgeMedia);
-    outbound.addEventListener(CallEvents.AudioStarted, bridgeMedia);
+    // AudioStarted may fire for ringback (early media) before the callee answers.
+    outbound.addEventListener(CallEvents.AudioStarted, bridgeMediaOnly);
+    outbound.addEventListener(CallEvents.Connected, onPstnAnswered);
 
     outbound.addEventListener(CallEvents.Ringing, function () {
         notifyBrowser(incoming, 'pstn_ringing');

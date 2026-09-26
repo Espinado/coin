@@ -158,7 +158,7 @@ function createModalController(modal, labels) {
             timerInterval = window.setInterval(updateTimerDisplay, 1000);
             updateTimerDisplay();
         },
-        showEnded(talkSeconds, failed = false) {
+        showEnded(talkSeconds, endKind = 'ok') {
             state = 'ended';
             stopTimer();
 
@@ -166,7 +166,13 @@ function createModalController(modal, labels) {
                 spinner.hidden = true;
             }
             if (title) {
-                title.textContent = failed ? labels.failed : labels.ended;
+                if (endKind === 'busy') {
+                    title.textContent = labels.calleeBusy;
+                } else if (endKind === 'failed') {
+                    title.textContent = labels.failed;
+                } else {
+                    title.textContent = labels.ended;
+                }
             }
             if (timer) {
                 timer.style.display = 'none';
@@ -333,24 +339,24 @@ function attachCallListeners(call, modal, root, onClear, audioSink, userName, de
 
     wireCallAudio(call, audioSink);
 
-    const finish = (failed = false, reason = '') => {
+    const finish = (endKind = 'ok', statusMessage = '') => {
         if (finished) {
             return;
         }
 
         finished = true;
         const talkSeconds = modal.getTalkSeconds();
-        modal.showEnded(talkSeconds, failed);
+        modal.showEnded(talkSeconds, endKind);
         onClear();
 
-        if (failed && reason) {
-            setStatus(root, reason, true);
+        if (endKind !== 'ok' && statusMessage) {
+            setStatus(root, statusMessage, true);
             return;
         }
 
-        setStatus(root, failed
+        setStatus(root, endKind === 'failed'
             ? (root.dataset.statusFailed || 'Call failed.')
-            : (root.dataset.statusEnded || 'Call ended.'), failed);
+            : (root.dataset.statusEnded || 'Call ended.'), endKind === 'failed');
     };
 
     call.on(VoxImplant.CallEvents.Connected, () => {
@@ -377,6 +383,10 @@ function attachCallListeners(call, modal, root, onClear, audioSink, userName, de
         }
 
         if (payload?.type === 'pstn_connected') {
+            if (calleeAnswered) {
+                return;
+            }
+
             calleeAnswered = true;
             modal.showConnected();
             setStatus(root, root.dataset.statusConnected || 'Connected.');
@@ -388,11 +398,11 @@ function attachCallListeners(call, modal, root, onClear, audioSink, userName, de
             const reason = payload?.details?.reason || '';
 
             if (code === 486 || reason === 'Busy Here') {
-                finish(true, root.dataset.statusCalleeBusy || 'The number is busy or rejected the call.');
+                finish('busy', root.dataset.statusCalleeBusy || 'The number is busy or rejected the call.');
                 return;
             }
 
-            finish(true, reason || root.dataset.statusFailed || 'Call failed.');
+            finish('failed', reason || root.dataset.statusFailed || 'Call failed.');
         }
     });
 
@@ -402,11 +412,11 @@ function attachCallListeners(call, modal, root, onClear, audioSink, userName, de
     });
 
     call.on(VoxImplant.CallEvents.Disconnected, () => {
-        finish(! calleeAnswered);
+        finish(calleeAnswered ? 'ok' : 'failed');
     });
 
     call.on(VoxImplant.CallEvents.Failed, (event) => {
-        finish(true, event?.reason || root.dataset.statusFailed || 'Call failed.');
+        finish('failed', event?.reason || root.dataset.statusFailed || 'Call failed.');
     });
 }
 
@@ -432,6 +442,7 @@ export function bootAdminVoxCall(root, modalElement) {
         connected: root.dataset.labelConnected || 'Connected',
         ended: root.dataset.labelEnded || 'Call ended',
         failed: root.dataset.labelFailed || 'Call failed',
+        calleeBusy: root.dataset.labelCalleeBusy || 'Callee busy or rejected the call',
         duration: root.dataset.labelDuration || 'Duration: :duration',
         toUser: root.dataset.labelToUser || ':name · :phone',
     });
@@ -486,7 +497,7 @@ export function bootAdminVoxCall(root, modalElement) {
 
             attachCallListeners(activeCall, modal, root, clearActiveCall, audioSink, userName, destination);
         } catch (error) {
-            modal.showEnded(0, true);
+            modal.showEnded(0, 'failed');
             clearActiveCall();
             setStatus(root, error.message || 'Call failed.', true);
         } finally {
@@ -500,7 +511,7 @@ export function bootAdminVoxCall(root, modalElement) {
             return;
         }
 
-        modal.showEnded(modal.getTalkSeconds(), false);
+        modal.showEnded(modal.getTalkSeconds(), 'ok');
         clearActiveCall();
     });
 
