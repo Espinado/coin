@@ -35,7 +35,7 @@ class CryptoCurrencyApiGateway implements PaymentGatewayInterface
             $params['token'] = $network['token'];
         }
 
-        $params = array_merge($params, $this->giveForwardParams());
+        $params = array_merge($params, $this->giveForwardParams($deposit->currency));
 
         $result = $this->client->call($network['network'], '.give', $params);
 
@@ -123,21 +123,26 @@ class CryptoCurrencyApiGateway implements PaymentGatewayInterface
     }
 
     /** @return array<string, string> */
-    private function giveForwardParams(): array
+    private function giveForwardParams(string $currency): array
     {
-        $forwardTo = trim((string) config('coin.payments.ccapi.forward_to', ''));
+        $currency = strtoupper(trim($currency));
+
+        if ($currency === 'BTC') {
+            $forwardTo = trim((string) config('coin.payments.ccapi.forward_btc', ''));
+            $forwardFrom = trim((string) config('coin.payments.ccapi.forward_btc_from', ''));
+        } else {
+            $forwardTo = trim((string) config('coin.payments.ccapi.forward_to', ''));
+            $forwardFrom = trim((string) config('coin.payments.ccapi.forward_from', ''));
+        }
 
         if ($forwardTo === '') {
             return [];
         }
 
-        $params = ['to' => $forwardTo];
-
-        $forwardFrom = trim((string) config('coin.payments.ccapi.forward_from', ''));
-
-        $params['from'] = $forwardFrom !== '' ? $forwardFrom : $forwardTo;
-
-        return $params;
+        return [
+            'to' => $forwardTo,
+            'from' => $forwardFrom !== '' ? $forwardFrom : $forwardTo,
+        ];
     }
 
     /** @return array{network: string, token: string} */
