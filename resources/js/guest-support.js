@@ -83,6 +83,79 @@ function bootGuestSupportRealtime(ticketId) {
 
 window.bootGuestSupportRealtime = bootGuestSupportRealtime;
 
+let guestTurnstileWidgetId = null;
+let guestTurnstileLoading = false;
+
+function guestSupportLivewireComponent() {
+    const root = document.getElementById('guest-support-root');
+    const wireId = root?.getAttribute('wire:id');
+
+    if (! wireId || typeof Livewire === 'undefined') {
+        return null;
+    }
+
+    return Livewire.find(wireId);
+}
+
+function setGuestTurnstileToken(token) {
+    const component = guestSupportLivewireComponent();
+
+    if (component) {
+        component.set('turnstileToken', token || '');
+    }
+}
+
+function renderGuestTurnstile(forceReset = false) {
+    const el = document.getElementById('guest-turnstile-widget');
+
+    if (! el || ! el.dataset.sitekey) {
+        return;
+    }
+
+    if (typeof window.turnstile === 'undefined') {
+        if (! guestTurnstileLoading) {
+            guestTurnstileLoading = true;
+            window.setTimeout(() => {
+                guestTurnstileLoading = false;
+                renderGuestTurnstile(forceReset);
+            }, 250);
+        }
+
+        return;
+    }
+
+    if (guestTurnstileWidgetId !== null && forceReset) {
+        try {
+            window.turnstile.remove(guestTurnstileWidgetId);
+        } catch (_) {}
+        guestTurnstileWidgetId = null;
+        el.innerHTML = '';
+    }
+
+    if (guestTurnstileWidgetId !== null) {
+        try {
+            window.turnstile.reset(guestTurnstileWidgetId);
+            setGuestTurnstileToken('');
+
+            return;
+        } catch (_) {
+            guestTurnstileWidgetId = null;
+            el.innerHTML = '';
+        }
+    }
+
+    guestTurnstileWidgetId = window.turnstile.render(el, {
+        sitekey: el.dataset.sitekey,
+        theme: 'dark',
+        appearance: 'always',
+        callback: (token) => setGuestTurnstileToken(token),
+        'expired-callback': () => setGuestTurnstileToken(''),
+        'error-callback': () => setGuestTurnstileToken(''),
+    });
+}
+
+window.renderGuestTurnstile = renderGuestTurnstile;
+
 function updateGuestRealtimeConfig(config) {
     window.coinReverb = Object.assign(window.coinReverb ?? {}, config);
 }
@@ -129,6 +202,16 @@ function registerGuestSupportLivewireHandlers() {
 
     Livewire.on('support-message-sent', () => {
         showSupportToast('Сообщение отправлено');
+    });
+
+    Livewire.on('guest-turnstile-reset', () => {
+        window.setTimeout(() => renderGuestTurnstile(true), 50);
+    });
+
+    Livewire.hook('morph.updated', ({ el }) => {
+        if (el?.id === 'guest-support-root' || el?.querySelector?.('#guest-turnstile-widget')) {
+            window.setTimeout(() => renderGuestTurnstile(false), 30);
+        }
     });
 }
 

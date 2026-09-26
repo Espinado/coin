@@ -434,6 +434,8 @@ return [
         'message_placeholder' => 'Write your first message to support…',
         'start_chat' => 'Start chat',
         'too_many_requests' => 'Too many requests. Try again in :seconds sec.',
+        'captcha_required' => 'Please complete the captcha before starting the chat.',
+        'captcha_failed' => 'Captcha verification failed. Please try again.',
         'reply_placeholder' => 'Write a message to the operator…',
         'send_message' => 'Send',
         'chat_closed' => 'Conversation closed. Start a new one if you need further assistance.',

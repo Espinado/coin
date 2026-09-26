@@ -108,6 +108,12 @@ body {
   overflow: hidden;
 }
 
+.coin-guest-turnstile {
+  min-height: 65px;
+  display: flex;
+  justify-content: flex-start;
+}
+
 .coin-support-toast-root {
   position: fixed;
   top: calc(20px + var(--coin-safe-top));

@@ -6,8 +6,10 @@ use App\Models\SupportTicket;
 use App\Models\SupportTicketMessage;
 use App\Services\SupportGuestSession;
 use App\Services\SupportTicketService;
+use App\Services\TurnstileVerifier;
 use App\Support\Concerns\ThrottlesSupportActions;
 use Illuminate\Contracts\View\View;
+use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\On;
 use Livewire\Component;
 
@@ -25,6 +27,10 @@ class GuestSupportChat extends Component
     public string $newCategory = SupportTicket::CATEGORY_OTHER;
 
     public string $newBody = '';
+
+    public string $turnstileToken = '';
+
+    public int $turnstileWidgetKey = 0;
 
     public string $replyBody = '';
 
@@ -52,6 +58,8 @@ class GuestSupportChat extends Component
         if ($this->ticketId) {
             $this->markTicketRead($this->selectedTicket);
             $this->bootGuestRealtime();
+        } else {
+            $this->dispatch('guest-turnstile-reset');
         }
     }
 
@@ -88,7 +96,7 @@ class GuestSupportChat extends Component
             ->all());
     }
 
-    public function createTicket(SupportTicketService $support): void
+    public function createTicket(SupportTicketService $support, TurnstileVerifier $turnstile): void
     {
         $this->throttleSupportAction('guest-create-ticket');
 
@@ -108,6 +116,24 @@ class GuestSupportChat extends Component
             'newBody' => 'message',
         ]);
 
+        if ($turnstile->enabled()) {
+            if (trim($this->turnstileToken) === '') {
+                $this->resetTurnstileWidget();
+
+                throw ValidationException::withMessages([
+                    'turnstileToken' => __('coin.support.captcha_required'),
+                ]);
+            }
+
+            if (! $turnstile->verify($this->turnstileToken, request()->ip())) {
+                $this->resetTurnstileWidget();
+
+                throw ValidationException::withMessages([
+                    'turnstileToken' => __('coin.support.captcha_failed'),
+                ]);
+            }
+        }
+
         $ticket = $support->createForGuest(
             $validated['guestEmail'],
             $validated['newSubject'],
@@ -120,6 +146,7 @@ class GuestSupportChat extends Component
         $this->newSubject = '';
         $this->newBody = '';
         $this->newCategory = SupportTicket::CATEGORY_OTHER;
+        $this->resetTurnstileWidget();
         $this->markTicketRead($ticket);
         $this->bootGuestRealtime($ticket);
         $this->dispatch('support-thread-scroll');
@@ -177,9 +204,26 @@ class GuestSupportChat extends Component
         return SupportTicket::categories();
     }
 
+    public function getTurnstileEnabledProperty(): bool
+    {
+        return app(TurnstileVerifier::class)->enabled();
+    }
+
+    public function getTurnstileSiteKeyProperty(): string
+    {
+        return app(TurnstileVerifier::class)->siteKey();
+    }
+
     public function render(): View
     {
         return view('livewire.guest-support-chat');
+    }
+
+    private function resetTurnstileWidget(): void
+    {
+        $this->turnstileToken = '';
+        $this->turnstileWidgetKey++;
+        $this->dispatch('guest-turnstile-reset');
     }
 
     private function bootGuestRealtime(?SupportTicket $ticket = null): void

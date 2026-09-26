@@ -80,7 +80,14 @@
                                 style="width:100%;box-sizing:border-box;margin-top:8px;padding:12px 14px;border-radius:10px;border:1px solid rgba(150,235,250,0.16);background:rgba(4,16,28,0.6);color:#eafcff;font-size:14px;resize:vertical;"></textarea>
                             @error('newBody')<div style="margin-top:8px;font-size:12px;color:oklch(0.78 0.16 25);">{{ $message }}</div>@enderror
                         </div>
-                        <button type="submit" style="padding:11px 18px;border-radius:10px;border:1px solid oklch(0.86 0.11 195 / 0.5);background:linear-gradient(140deg, oklch(0.86 0.12 192), oklch(0.66 0.13 205));color:#04121f;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;">Start chat</button>
+                        @if($this->turnstileEnabled)
+                            <div wire:ignore wire:key="guest-turnstile-{{ $turnstileWidgetKey }}" class="coin-guest-turnstile"
+                                 id="guest-turnstile-widget"
+                                 data-sitekey="{{ $this->turnstileSiteKey }}"
+                                 data-widget-key="{{ $turnstileWidgetKey }}"></div>
+                            @error('turnstileToken')<div style="font-size:12px;color:oklch(0.78 0.16 25);">{{ $message }}</div>@enderror
+                        @endif
+                        <button type="submit" style="padding:11px 18px;border-radius:10px;border:1px solid oklch(0.86 0.11 195 / 0.5);background:linear-gradient(140deg, oklch(0.86 0.12 192), oklch(0.66 0.13 205));color:#04121f;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;">{{ __('coin.support.start_chat') }}</button>
                     </form>
                 @endif
             </div>

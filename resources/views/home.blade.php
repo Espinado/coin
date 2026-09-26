@@ -146,6 +146,9 @@
 
 @livewire('guest-support-chat')
 @livewireScripts
+@if(config('coin.turnstile.enabled') && filled(config('coin.turnstile.site_key')))
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" async defer></script>
+@endif
 @vite(['resources/js/guest-support.js'])
 </body>
 </html>

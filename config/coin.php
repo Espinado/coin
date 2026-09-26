@@ -112,12 +112,28 @@ return [
         'schedule_timezone' => env('COIN_PROFIT_ACCRUAL_TZ', 'Europe/Riga'),
     ],
 
+    'referrals' => [
+        // Soft anti-abuse: skip commission when referrer/buyer share a payout address.
+        'block_shared_payout_address' => (bool) env('COIN_REFERRAL_BLOCK_SHARED_PAYOUT', true),
+        // Cap total referral commissions credited to one referrer per UTC day (0 = unlimited).
+        'daily_commission_cap_usdt' => (float) env('COIN_REFERRAL_DAILY_CAP_USDT', 500),
+    ],
+
     'admin' => [
         'invitation_ttl_hours' => (int) env('COIN_ADMIN_INVITATION_TTL_HOURS', 72),
     ],
 
     'session' => [
         'idle_minutes' => max(1, (int) env('COIN_SESSION_IDLE_MINUTES', 15)),
+    ],
+
+    'turnstile' => [
+        // Fail-closed when enabled: missing secret or API failure blocks guest ticket creation.
+        'enabled' => (bool) env('TURNSTILE_ENABLED', false),
+        'site_key' => (string) env('TURNSTILE_SITE_KEY', ''),
+        'secret_key' => (string) env('TURNSTILE_SECRET_KEY', ''),
+        'verify_url' => 'https://challenges.cloudflare.com/turnstile/v0/siteverify',
+        'timeout_seconds' => 5,
     ],
 
 ];

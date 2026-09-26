@@ -233,6 +233,75 @@ class SupportTicketTest extends TestCase
         $this->assertSame(2, SupportTicket::totalUnreadForAdmin());
     }
 
+    public function test_guest_livewire_create_ticket_requires_turnstile_when_enabled(): void
+    {
+        config([
+            'coin.turnstile.enabled' => true,
+            'coin.turnstile.site_key' => 'test-site',
+            'coin.turnstile.secret_key' => 'test-secret',
+        ]);
+
+        \Illuminate\Support\Facades\Http::fake([
+            'challenges.cloudflare.com/*' => \Illuminate\Support\Facades\Http::response(['success' => false], 200),
+        ]);
+
+        \Livewire\Livewire::test(\App\Livewire\GuestSupportChat::class)
+            ->set('guestEmail', 'guest@example.com')
+            ->set('newSubject', 'Need help please')
+            ->set('newCategory', SupportTicket::CATEGORY_OTHER)
+            ->set('newBody', 'This is a long enough message for support.')
+            ->set('turnstileToken', 'fake-token')
+            ->call('createTicket')
+            ->assertHasErrors(['turnstileToken']);
+
+        $this->assertDatabaseCount('support_tickets', 0);
+    }
+
+    public function test_guest_livewire_create_ticket_succeeds_with_valid_turnstile(): void
+    {
+        config([
+            'coin.turnstile.enabled' => true,
+            'coin.turnstile.site_key' => 'test-site',
+            'coin.turnstile.secret_key' => 'test-secret',
+        ]);
+
+        \Illuminate\Support\Facades\Http::fake([
+            'challenges.cloudflare.com/*' => \Illuminate\Support\Facades\Http::response(['success' => true], 200),
+        ]);
+
+        \Livewire\Livewire::test(\App\Livewire\GuestSupportChat::class)
+            ->set('guestEmail', 'guest@example.com')
+            ->set('newSubject', 'Need help please')
+            ->set('newCategory', SupportTicket::CATEGORY_OTHER)
+            ->set('newBody', 'This is a long enough message for support.')
+            ->set('turnstileToken', 'valid-token')
+            ->call('createTicket')
+            ->assertHasNoErrors()
+            ->assertSet('ticketId', fn ($id) => is_int($id) && $id > 0);
+
+        $this->assertDatabaseHas('support_tickets', [
+            'guest_email' => 'guest@example.com',
+            'subject' => 'Need help please',
+        ]);
+    }
+
+    public function test_guest_livewire_create_ticket_skips_turnstile_when_disabled(): void
+    {
+        config([
+            'coin.turnstile.enabled' => false,
+        ]);
+
+        \Livewire\Livewire::test(\App\Livewire\GuestSupportChat::class)
+            ->set('guestEmail', 'guest@example.com')
+            ->set('newSubject', 'Need help please')
+            ->set('newCategory', SupportTicket::CATEGORY_OTHER)
+            ->set('newBody', 'This is a long enough message for support.')
+            ->call('createTicket')
+            ->assertHasNoErrors();
+
+        $this->assertDatabaseCount('support_tickets', 1);
+    }
+
     public function test_regular_user_cannot_open_admin_support_pages(): void
     {
         $user = User::factory()->create([
