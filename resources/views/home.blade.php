@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     @include('partials.coin-ios-meta')
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>{{ \App\Support\PlatformBrand::pageTitle('Инвестиционная платформа') }}</title>
+    <title>{{ \App\Support\PlatformBrand::pageTitle(__('coin.landing.meta_title_suffix')) }}</title>
     <link rel="icon" href="{{ asset('cloudflops/logo-mark.png') }}" type="image/png" />
     @livewireStyles
     @include('partials.coin-reverb-config-guest')
@@ -137,7 +137,7 @@
   </footer>
 </div>
 
-<button type="button" id="coin-scroll-top" class="coin-scroll-top" aria-label="Наверх" title="Наверх">
+<button type="button" id="coin-scroll-top" class="coin-scroll-top" aria-label="{{ __('coin.landing.scroll_top') }}" title="{{ __('coin.landing.scroll_top') }}">
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
     <path d="M12 19V5"></path>
     <path d="M5 12l7-7 7 7"></path>

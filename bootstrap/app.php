@@ -41,6 +41,10 @@ return Application::configure(basePath: dirname(__DIR__))
             'webhooks/ccapi',
         ]);
 
+        $middleware->web(prepend: [
+            \App\Http\Middleware\SetLocaleFromDomain::class,
+        ]);
+
         $middleware->web(append: [
             \App\Http\Middleware\EnforceIdleSessionTimeout::class,
         ]);

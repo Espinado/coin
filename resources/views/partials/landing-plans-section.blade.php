@@ -47,12 +47,12 @@
     }
 </style>
 
-<section id="plans" class="coin-landing-section coin-landing-plans" data-screen-label="Тарифы">
+<section id="plans" class="coin-landing-section coin-landing-plans" data-screen-label="Plans">
     <div class="coin-landing-section__inner">
     <div class="coin-landing-plans__intro">
-        <div class="coin-landing-section__kicker">ТАРИФЫ</div>
-        <h2 class="coin-landing-section__title">Выберите объём мощности</h2>
-        <p class="coin-landing-plans__lead">Тарифы с прозрачными условиями и оценкой вознаграждения. Итоговые начисления зависят от загрузки инфраструктуры.</p>
+        <div class="coin-landing-section__kicker">{{ __('coin.landing.plans_kicker') }}</div>
+        <h2 class="coin-landing-section__title">{{ __('coin.landing.plans_title') }}</h2>
+        <p class="coin-landing-plans__lead">{{ __('coin.landing.plans_lead') }}</p>
     </div>
 
     <div id="landing-plans" style="margin-top: 48px;">
@@ -115,7 +115,7 @@
 
             <div class="landing-plans-calculator" style="margin-top: 20px; padding: 32px 36px; border-radius: 20px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.08); display: grid; grid-template-columns: 1fr 320px; gap: 48px; align-items: center; color: #e6f4fa;">
                 <div>
-                    <div class="landing-plans-calculator__title" style="font-size: 20px; font-weight: 600; letter-spacing: -0.02em; color: #f0fbff;">Оценка вознаграждения</div>
+                    <div class="landing-plans-calculator__title" style="font-size: 20px; font-weight: 600; letter-spacing: -0.02em; color: #f0fbff;">{{ __('coin.landing.calculator_title') }}</div>
                     <div style="margin-top: 22px; display: flex; align-items: baseline; justify-content: space-between;">
                         <span style="font-size: 13.5px; color: rgba(230,244,250,0.74);">{{ __('coin.invest.investment_amount') }}</span>
                         <span data-landing-amount style="font-family: 'JetBrains Mono', monospace; font-size: 18px; color: #f0fbff;">{{ number_format($initialAmount, 0, '.', ',') }} <span style="font-size: 12px; color: rgba(230,244,250,0.7);">{{ $currency }}</span></span>
@@ -134,10 +134,10 @@
                         <span data-landing-slider-mid>{{ number_format((int) round(($initialPlan->calculatorMinAmount() + $initialPlan->calculatorMaxAmount()) / 2), 0, '.', ' ') }}</span>
                         <span data-landing-slider-max>{{ number_format($initialPlan->calculatorMaxAmount(), 0, '.', ' ') }}</span>
                     </div>
-                    <p style="margin: 20px 0 0; font-size: 12px; line-height: 1.55; color: rgba(230,244,250,0.65);">Расчёт носит справочный характер. Итоговые начисления зависят от загрузки инфраструктуры и не являются гарантированной доходностью.</p>
+                    <p style="margin: 20px 0 0; font-size: 12px; line-height: 1.55; color: rgba(230,244,250,0.65);">{{ __('coin.landing.calculator_disclaimer') }}</p>
                 </div>
                 <div style="padding: 24px; border-radius: 16px; border: 1px solid rgba(150,235,250,0.16); background: linear-gradient(170deg, rgba(20,55,80,0.75), rgba(6,20,35,0.9));">
-                    <div style="font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.14em; color: rgba(230,244,250,0.72);">ОЦЕНКА ЗА ДЕНЬ</div>
+                    <div style="font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.14em; color: rgba(230,244,250,0.72);">{{ __('coin.landing.calculator_daily_label') }}</div>
                     <div data-landing-daily style="margin-top: 12px; font-family: 'JetBrains Mono', monospace; font-size: 32px; color: oklch(0.9 0.12 192);">{{ number_format($initialDaily, 2, '.', ',') }}</div>
                     <div style="height: 1px; background: rgba(150,235,250,0.14); margin: 20px 0;"></div>
                     <div style="display: flex; justify-content: space-between; gap: 14px; font-size: 13px; margin-bottom: 12px;"><span style="color: rgba(230,244,250,0.72); min-width: 0;">{{ __('coin.invest.per_month') }}</span><span data-landing-monthly class="landing-plans-calculator__stat" style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right; color: #f0fbff;">{{ number_format($initialDaily * 30, 1, '.', ',') }}</span></div>

@@ -31,7 +31,7 @@ function handleGuestAdminMessage(message) {
 
     appendSupportMessage(message, { threadId: 'guest-support-thread' });
     scrollSupportThreadToBottom('guest-support-thread');
-    showIncomingMessageToast(message, 'Получено новое сообщение');
+    showIncomingMessageToast(message, document.getElementById('guest-support-root')?.dataset?.newMessageToast || 'New message');
 }
 
 function bootGuestSupportRealtime(ticketId) {

@@ -4,6 +4,7 @@ namespace App\Mail;
 
 use App\Models\ReferralProfile;
 use App\Models\User;
+use App\Support\UserLocale;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
@@ -17,7 +18,9 @@ class ReferralInvitationMail extends Mailable
     public function __construct(
         public User $referrer,
         public ReferralProfile $profile,
-    ) {}
+    ) {
+        $this->locale(UserLocale::LOCALE);
+    }
 
     public function envelope(): Envelope
     {

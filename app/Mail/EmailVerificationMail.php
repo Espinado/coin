@@ -3,6 +3,7 @@
 namespace App\Mail;
 
 use App\Models\User;
+use App\Support\UserLocale;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
@@ -16,7 +17,9 @@ class EmailVerificationMail extends Mailable
     public function __construct(
         public User $user,
         public string $code,
-    ) {}
+    ) {
+        $this->locale(UserLocale::LOCALE);
+    }
 
     public function envelope(): Envelope
     {

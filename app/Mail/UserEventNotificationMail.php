@@ -3,6 +3,7 @@
 namespace App\Mail;
 
 use App\Models\User;
+use App\Support\UserLocale;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
@@ -20,7 +21,9 @@ class UserEventNotificationMail extends Mailable
         public string $intro,
         public array $lines = [],
         public ?string $footer = null,
-    ) {}
+    ) {
+        $this->locale(UserLocale::LOCALE);
+    }
 
     public function envelope(): Envelope
     {

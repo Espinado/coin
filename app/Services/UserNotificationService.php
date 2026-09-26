@@ -7,6 +7,7 @@ use App\Models\Contract;
 use App\Models\PlanChangeRequest;
 use App\Models\User;
 use App\Models\Withdrawal;
+use App\Support\UserLocale;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Mail;
 
@@ -35,17 +36,19 @@ class UserNotificationService
 
     public function notifyInAppMessageReceived(User $user): void
     {
-        $dashboardUrl = route('dashboard', absolute: true).'?section=8';
+        UserLocale::run(function () use ($user): void {
+            $dashboardUrl = route('dashboard', absolute: true).'?section=8';
 
-        $this->sendAlways(
-            $user,
-            __('coin.notifications.mail.in_app_subject'),
-            __('coin.notifications.mail.in_app_intro', ['name' => $user->name]),
-            [
-                __('coin.notifications.mail.in_app_open', ['url' => $dashboardUrl]),
-            ],
-            __('coin.notifications.mail.in_app_footer'),
-        );
+            $this->sendAlways(
+                $user,
+                __('coin.notifications.mail.in_app_subject'),
+                __('coin.notifications.mail.in_app_intro', ['name' => $user->name]),
+                [
+                    __('coin.notifications.mail.in_app_open', ['url' => $dashboardUrl]),
+                ],
+                __('coin.notifications.mail.in_app_footer'),
+            );
+        });
     }
 
     /** Sends regardless of user notification toggles (payouts, referral commissions, etc.). */
@@ -67,128 +70,138 @@ class UserNotificationService
     /** @param  list<array{plan?: string|null, code?: string|null, profit: float}>  $contractRows */
     public function notifyDailyProfitBatch(User $user, array $contractRows, float $total, string $currency): void
     {
-        if ($contractRows === [] || $total <= 0) {
-            return;
-        }
+        UserLocale::run(function () use ($user, $contractRows, $total, $currency): void {
+            if ($contractRows === [] || $total <= 0) {
+                return;
+            }
 
-        $lines = [];
+            $lines = [];
 
-        foreach ($contractRows as $row) {
-            $lines[] = __('coin.notifications.mail.profit_plan_line', [
-                'plan' => $row['plan'] ?? $row['code'] ?? '—',
-                'amount' => number_format((float) $row['profit'], 2, '.', ','),
+            foreach ($contractRows as $row) {
+                $lines[] = __('coin.notifications.mail.profit_plan_line', [
+                    'plan' => $row['plan'] ?? $row['code'] ?? '—',
+                    'amount' => number_format((float) $row['profit'], 2, '.', ','),
+                    'currency' => $currency,
+                ]);
+            }
+
+            $lines[] = __('coin.notifications.mail.profit_total', [
+                'amount' => number_format($total, 2, '.', ','),
                 'currency' => $currency,
             ]);
-        }
 
-        $lines[] = __('coin.notifications.mail.profit_total', [
-            'amount' => number_format($total, 2, '.', ','),
-            'currency' => $currency,
-        ]);
-
-        $this->send(
-            $user,
-            self::TYPE_PROFIT_CREDIT,
-            __('coin.notifications.mail.profit_subject'),
-            __('coin.notifications.mail.profit_intro', ['name' => $user->name]),
-            $lines,
-        );
+            $this->send(
+                $user,
+                self::TYPE_PROFIT_CREDIT,
+                __('coin.notifications.mail.profit_subject'),
+                __('coin.notifications.mail.profit_intro', ['name' => $user->name]),
+                $lines,
+            );
+        });
     }
 
     public function notifyContractExpiryReminder(User $user, Contract $contract, int $daysLeft): void
     {
-        $this->send(
-            $user,
-            self::TYPE_CONTRACT_EXPIRY,
-            __('coin.notifications.mail.expiry_subject'),
-            __('coin.notifications.mail.expiry_intro', ['name' => $user->name]),
-            [
-                __('coin.notifications.mail.expiry_plan', ['plan' => $contract->plan?->displayName() ?? $contract->code]),
-                $daysLeft === 0
-                    ? __('coin.notifications.mail.expiry_today')
-                    : __('coin.notifications.mail.expiry_days', ['days' => $daysLeft]),
-                __('coin.notifications.mail.expiry_date', ['date' => $contract->formattedEndsAt()]),
-            ],
-        );
+        UserLocale::run(function () use ($user, $contract, $daysLeft): void {
+            $this->send(
+                $user,
+                self::TYPE_CONTRACT_EXPIRY,
+                __('coin.notifications.mail.expiry_subject'),
+                __('coin.notifications.mail.expiry_intro', ['name' => $user->name]),
+                [
+                    __('coin.notifications.mail.expiry_plan', ['plan' => $contract->plan?->displayName() ?? $contract->code]),
+                    $daysLeft === 0
+                        ? __('coin.notifications.mail.expiry_today')
+                        : __('coin.notifications.mail.expiry_days', ['days' => $daysLeft]),
+                    __('coin.notifications.mail.expiry_date', ['date' => $contract->formattedEndsAt()]),
+                ],
+            );
+        });
     }
 
     public function notifyContractMatured(User $user, Contract $contract, float $principal, string $currency): void
     {
-        $this->send(
-            $user,
-            self::TYPE_MATURITY_ALERT,
-            __('coin.notifications.mail.maturity_subject'),
-            __('coin.notifications.mail.maturity_intro', ['name' => $user->name]),
-            [
-                __('coin.notifications.mail.maturity_plan', ['plan' => $contract->plan?->displayName() ?? $contract->code]),
-                __('coin.notifications.mail.maturity_principal', [
-                    'amount' => number_format($principal, 2, '.', ','),
-                    'currency' => $currency,
-                ]),
-                __('coin.notifications.mail.maturity_profit', [
-                    'amount' => number_format((float) $contract->accrued_amount, 2, '.', ','),
-                    'currency' => $currency,
-                ]),
-            ],
-        );
+        UserLocale::run(function () use ($user, $contract, $principal, $currency): void {
+            $this->send(
+                $user,
+                self::TYPE_MATURITY_ALERT,
+                __('coin.notifications.mail.maturity_subject'),
+                __('coin.notifications.mail.maturity_intro', ['name' => $user->name]),
+                [
+                    __('coin.notifications.mail.maturity_plan', ['plan' => $contract->plan?->displayName() ?? $contract->code]),
+                    __('coin.notifications.mail.maturity_principal', [
+                        'amount' => number_format($principal, 2, '.', ','),
+                        'currency' => $currency,
+                    ]),
+                    __('coin.notifications.mail.maturity_profit', [
+                        'amount' => number_format((float) $contract->accrued_amount, 2, '.', ','),
+                        'currency' => $currency,
+                    ]),
+                ],
+            );
+        });
     }
 
     public function notifyWithdrawalPaid(User $user, Withdrawal $withdrawal, float $netAmount, string $currency): void
     {
-        $lines = [
-            __('coin.notifications.mail.payout_reference', ['reference' => $withdrawal->reference]),
-            __('coin.notifications.mail.payout_amount', [
-                'amount' => $withdrawal->formattedAmount(),
-                'currency' => $currency,
-            ]),
-            __('coin.notifications.mail.payout_net', [
-                'amount' => number_format($netAmount, 2, '.', ','),
-                'currency' => $currency,
-            ]),
-        ];
+        UserLocale::run(function () use ($user, $withdrawal, $netAmount, $currency): void {
+            $lines = [
+                __('coin.notifications.mail.payout_reference', ['reference' => $withdrawal->reference]),
+                __('coin.notifications.mail.payout_amount', [
+                    'amount' => $withdrawal->formattedAmount(),
+                    'currency' => $currency,
+                ]),
+                __('coin.notifications.mail.payout_net', [
+                    'amount' => number_format($netAmount, 2, '.', ','),
+                    'currency' => $currency,
+                ]),
+            ];
 
-        if ($withdrawal->payout_address) {
-            $lines[] = __('coin.notifications.mail.payout_address', ['address' => $withdrawal->payout_address]);
-        }
+            if ($withdrawal->payout_address) {
+                $lines[] = __('coin.notifications.mail.payout_address', ['address' => $withdrawal->payout_address]);
+            }
 
-        if ($withdrawal->network_label) {
-            $lines[] = __('coin.notifications.mail.payout_network', ['network' => $withdrawal->network_label]);
-        }
+            if ($withdrawal->network_label) {
+                $lines[] = __('coin.notifications.mail.payout_network', ['network' => $withdrawal->network_label]);
+            }
 
-        $this->send(
-            $user,
-            self::TYPE_PAYOUT_COMPLETED,
-            __('coin.notifications.mail.payout_subject'),
-            __('coin.notifications.mail.payout_intro', ['name' => $user->name]),
-            $lines,
-            __('coin.notifications.mail.payout_footer'),
-        );
+            $this->send(
+                $user,
+                self::TYPE_PAYOUT_COMPLETED,
+                __('coin.notifications.mail.payout_subject'),
+                __('coin.notifications.mail.payout_intro', ['name' => $user->name]),
+                $lines,
+                __('coin.notifications.mail.payout_footer'),
+            );
+        });
     }
 
     public function notifyPlanChangeApproved(User $user, PlanChangeRequest $request): void
     {
-        $request->loadMissing(['contract', 'fromPlan', 'toPlan']);
+        UserLocale::run(function () use ($user, $request): void {
+            $request->loadMissing(['contract', 'fromPlan', 'toPlan']);
 
-        $lines = [
-            __('coin.notifications.mail.plan_change_reference', ['reference' => $request->reference]),
-            __('coin.notifications.mail.plan_change_contract', ['contract' => $request->contract?->code ?? '—']),
-            __('coin.notifications.mail.plan_change_from', ['plan' => $request->fromPlan?->displayName() ?? '—']),
-            __('coin.notifications.mail.plan_change_to', ['plan' => $request->toPlan?->displayName() ?? '—']),
-            __('coin.notifications.mail.plan_change_principal', ['amount' => $request->formattedPrincipalAfter()]),
-        ];
+            $lines = [
+                __('coin.notifications.mail.plan_change_reference', ['reference' => $request->reference]),
+                __('coin.notifications.mail.plan_change_contract', ['contract' => $request->contract?->code ?? '—']),
+                __('coin.notifications.mail.plan_change_from', ['plan' => $request->fromPlan?->displayName() ?? '—']),
+                __('coin.notifications.mail.plan_change_to', ['plan' => $request->toPlan?->displayName() ?? '—']),
+                __('coin.notifications.mail.plan_change_principal', ['amount' => $request->formattedPrincipalAfter()]),
+            ];
 
-        if ((float) $request->top_up_amount > 0.009) {
-            $lines[] = __('coin.notifications.mail.plan_change_top_up', ['amount' => $request->formattedTopUp()]);
-        }
+            if ((float) $request->top_up_amount > 0.009) {
+                $lines[] = __('coin.notifications.mail.plan_change_top_up', ['amount' => $request->formattedTopUp()]);
+            }
 
-        $this->send(
-            $user,
-            self::TYPE_PLAN_CHANGE_APPROVED,
-            __('coin.notifications.mail.plan_change_subject'),
-            __('coin.notifications.mail.plan_change_intro', ['name' => $user->name]),
-            $lines,
-            __('coin.notifications.mail.plan_change_footer'),
-        );
+            $this->send(
+                $user,
+                self::TYPE_PLAN_CHANGE_APPROVED,
+                __('coin.notifications.mail.plan_change_subject'),
+                __('coin.notifications.mail.plan_change_intro', ['name' => $user->name]),
+                $lines,
+                __('coin.notifications.mail.plan_change_footer'),
+            );
+        });
     }
 
     public function notifyReferralCommission(
@@ -198,23 +211,25 @@ class UserNotificationService
         string $currency,
         string $source = 'purchase',
     ): void {
-        $introKey = $source === 'upgrade'
-            ? 'coin.notifications.mail.referral_intro_upgrade'
-            : 'coin.notifications.mail.referral_intro_purchase';
+        UserLocale::run(function () use ($referrer, $referral, $commission, $currency, $source): void {
+            $introKey = $source === 'upgrade'
+                ? 'coin.notifications.mail.referral_intro_upgrade'
+                : 'coin.notifications.mail.referral_intro_purchase';
 
-        $this->send(
-            $referrer,
-            self::TYPE_REFERRAL_ACTIVITY,
-            __('coin.notifications.mail.referral_subject'),
-            __($introKey, ['name' => $referrer->name]),
-            [
-                __('coin.notifications.mail.referral_user', ['user' => $referral->accountLabel()]),
-                __('coin.notifications.mail.referral_amount', [
-                    'amount' => number_format($commission, 2, '.', ','),
-                    'currency' => $currency,
-                ]),
-            ],
-        );
+            $this->send(
+                $referrer,
+                self::TYPE_REFERRAL_ACTIVITY,
+                __('coin.notifications.mail.referral_subject'),
+                __($introKey, ['name' => $referrer->name]),
+                [
+                    __('coin.notifications.mail.referral_user', ['user' => $referral->accountLabel()]),
+                    __('coin.notifications.mail.referral_amount', [
+                        'amount' => number_format($commission, 2, '.', ','),
+                        'currency' => $currency,
+                    ]),
+                ],
+            );
+        });
     }
 
     public function maybeSendContractExpiryReminder(Contract $contract): void

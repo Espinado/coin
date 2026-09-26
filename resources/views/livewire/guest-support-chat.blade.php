@@ -1,4 +1,4 @@
-<div id="guest-support-root" @if($isOpen && $ticketId) wire:poll.3s="pollMessages" @endif style="position:fixed;inset:0;z-index:9999;pointer-events:none;">
+<div id="guest-support-root" data-new-message-toast="{{ __('coin.support.new_message') }}" @if($isOpen && $ticketId) wire:poll.3s="pollMessages" @endif style="position:fixed;inset:0;z-index:9999;pointer-events:none;">
     @if(! $isOpen)
     <button type="button" wire:click="openChat" data-open-guest-support class="coin-guest-support-fab">
         <span style="width:10px;height:10px;border-radius:50%;background:oklch(0.85 0.15 160);box-shadow:0 0 12px oklch(0.85 0.15 160);"></span>
