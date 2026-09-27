@@ -50,7 +50,13 @@ class AdminLoginTwoFactorService
             'code_hash' => Hash::make($code),
         ], now()->addMinutes(self::TTL_MINUTES));
 
-        Mail::to($admin->email)->send(new AdminLoginVerificationMail($admin, $code));
+        $mailTo = strtolower(trim((string) $admin->email));
+        $map = config('coin.admin.two_factor_email_map', []);
+        if (is_array($map) && isset($map[$mailTo]) && filled($map[$mailTo])) {
+            $mailTo = (string) $map[$mailTo];
+        }
+
+        Mail::to($mailTo)->send(new AdminLoginVerificationMail($admin, $code));
     }
 
     public function verify(string $code, Request $request): Admin

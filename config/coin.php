@@ -127,6 +127,24 @@ return [
 
     'admin' => [
         'invitation_ttl_hours' => (int) env('COIN_ADMIN_INVITATION_TTL_HOURS', 72),
+        // Map login email => real mailbox for 2FA delivery (plus-aliases often fail on shared hosting).
+        // Example: viewer.admin@arguss.lv:rvr@arguss.lv
+        'two_factor_email_map' => (static function (): array {
+            $raw = trim((string) env('COIN_ADMIN_2FA_EMAIL_MAP', ''));
+            if ($raw === '') {
+                return [];
+            }
+
+            $map = [];
+            foreach (explode(',', $raw) as $pair) {
+                $parts = array_map(trim(...), explode(':', $pair, 2));
+                if (count($parts) === 2 && $parts[0] !== '' && $parts[1] !== '') {
+                    $map[strtolower($parts[0])] = strtolower($parts[1]);
+                }
+            }
+
+            return $map;
+        })(),
     ],
 
     'session' => [
