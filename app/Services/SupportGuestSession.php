@@ -41,7 +41,8 @@ class SupportGuestSession
 
     public static function canAccessTicket(int $ticketId): bool
     {
-        if (self::sessionMatchesTicket($ticketId)) {
+        // Always verify token against DB (same bar as current()); never trust session ticket_id alone.
+        if (self::tokenMatchesTicket($ticketId, self::token())) {
             return true;
         }
 
@@ -72,14 +73,5 @@ class SupportGuestSession
         $token = $data['token'] ?? null;
 
         return is_string($token) && $token !== '' ? $token : null;
-    }
-
-    private static function sessionMatchesTicket(int $ticketId): bool
-    {
-        $data = session(self::SESSION_KEY);
-
-        return is_array($data)
-            && (int) ($data['ticket_id'] ?? 0) === $ticketId
-            && filled($data['token'] ?? null);
     }
 }

@@ -6,11 +6,13 @@ use App\Livewire\Dashboard;
 use App\Models\Admin;
 use App\Models\Deposit;
 use App\Models\Plan;
+use App\Models\SupportTicket;
 use App\Models\User;
 use App\Models\Withdrawal;
 use App\Services\DepositService;
 use App\Services\Payment\PaymentSimulatorService;
 use App\Services\PlanPurchaseService;
+use App\Services\SupportTicketService;
 use App\Services\WithdrawalService;
 use App\Support\AdminRole;
 use Database\Seeders\AdminSeeder;
@@ -374,6 +376,57 @@ class SecurityHardeningTest extends TestCase
         $this->assertNull($actor->fresh()->email_verified_at);
     }
 
+    public function test_livewire_dashboard_rejects_foreign_ticket_and_contract_ids(): void
+    {
+        $this->seed(PlanSeeder::class);
+        config(['coin.deposits.auto_confirm_mock' => true]);
+
+        $actor = User::factory()->create();
+        $owner = User::factory()->create();
+
+        app(DepositService::class)->createPending($owner, 5000);
+
+        $core = Plan::query()->where('slug', 'core')->firstOrFail();
+        $foreignContract = app(PlanPurchaseService::class)->purchase($owner->fresh(), $core, 1100);
+
+        $foreignTicket = app(SupportTicketService::class)->createForUser(
+            $owner,
+            'Owner ticket',
+            SupportTicket::CATEGORY_OTHER,
+            'This belongs to another user.',
+        );
+
+        $foreignDeposit = Deposit::query()->create([
+            'user_id' => $owner->id,
+            'amount' => 50,
+            'currency' => 'USDT',
+            'status' => Deposit::STATUS_PENDING,
+            'method' => 'ccapi',
+            'payment_address' => 'TForeignDepositAddr1',
+            'gateway_network' => 'trx',
+        ]);
+
+        Livewire::actingAs($actor)
+            ->test(Dashboard::class)
+            ->call('selectTicket', $foreignTicket->id)
+            ->assertForbidden();
+
+        Livewire::actingAs($actor)
+            ->test(Dashboard::class)
+            ->call('openContractDetails', $foreignContract->id)
+            ->assertForbidden();
+
+        Livewire::actingAs($actor)
+            ->test(Dashboard::class)
+            ->call('openChangePlan', $foreignContract->id)
+            ->assertForbidden();
+
+        Livewire::actingAs($actor)
+            ->test(Dashboard::class)
+            ->call('openTopUpFromHistory', $foreignDeposit->id)
+            ->assertSet('pendingDepositId', null);
+    }
+
     public function test_plan_purchase_rejects_amount_above_calculator_max(): void
     {
         $this->seed(PlanSeeder::class);
@@ -406,6 +459,64 @@ class SecurityHardeningTest extends TestCase
             ->get('http://admin.coin.test/dashboard')
             ->assertOk()
             ->assertDontSee(__('coin.admin.locked_principal'), false);
+    }
+
+    public function test_operator_admin_can_access_operational_routes(): void
+    {
+        $operator = Admin::query()->create([
+            'name' => 'Operator',
+            'email' => 'operator-access@coin.test',
+            'password' => 'password',
+            'role' => AdminRole::Operator,
+        ]);
+
+        $this->actingAs($operator, 'admin')
+            ->get('http://admin.coin.test/dashboard')
+            ->assertOk();
+
+        $this->actingAs($operator, 'admin')
+            ->get('http://admin.coin.test/users')
+            ->assertOk();
+
+        $this->actingAs($operator, 'admin')
+            ->get('http://admin.coin.test/withdrawals')
+            ->assertOk();
+
+        $this->actingAs($operator, 'admin')
+            ->get('http://admin.coin.test/support')
+            ->assertOk();
+    }
+
+    public function test_operator_admin_cannot_access_superadmin_sections(): void
+    {
+        $operator = Admin::query()->create([
+            'name' => 'Operator Denied',
+            'email' => 'operator-denied@coin.test',
+            'password' => 'password',
+            'role' => AdminRole::Operator,
+        ]);
+
+        foreach (['settings', 'admins', 'legal', 'broadcasts'] as $path) {
+            $this->actingAs($operator, 'admin')
+                ->get('http://admin.coin.test/'.$path)
+                ->assertForbidden();
+        }
+
+        $this->actingAs($operator, 'admin')
+            ->patch('http://admin.coin.test/settings', [
+                'token_symbol' => 'USDT',
+                'min_deposit' => '10.00',
+                'min_withdrawal' => '10',
+                'network_fee' => '0.50',
+                'withdrawal_processing_hours' => '24',
+                'referral_level1_percent' => '20',
+                'referral_level2_percent' => '0',
+                'kyc_required_for_withdrawal' => false,
+                'maintenance_mode' => false,
+                'usdt_per_btc' => '80000',
+                'profit_accrual_time' => '09:00',
+            ])
+            ->assertForbidden();
     }
 
     public function test_registration_is_rate_limited(): void

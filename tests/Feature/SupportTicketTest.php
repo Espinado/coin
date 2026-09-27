@@ -302,6 +302,25 @@ class SupportTicketTest extends TestCase
         $this->assertDatabaseCount('support_tickets', 1);
     }
 
+    public function test_guest_channel_access_requires_db_matched_token(): void
+    {
+        $ticket = app(SupportTicketService::class)->createForGuest(
+            'guest-auth@example.com',
+            'Auth check',
+            SupportTicket::CATEGORY_OTHER,
+            'Please verify guest channel access.',
+        );
+
+        $this->assertTrue(SupportGuestSession::canAccessTicket($ticket->id));
+
+        session(['guest_support' => [
+            'ticket_id' => $ticket->id,
+            'token' => 'tampered-not-in-database',
+        ]]);
+
+        $this->assertFalse(SupportGuestSession::canAccessTicket($ticket->id));
+    }
+
     public function test_regular_user_cannot_open_admin_support_pages(): void
     {
         $user = User::factory()->create([

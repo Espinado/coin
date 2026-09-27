@@ -1202,7 +1202,7 @@ class Dashboard extends Component
             return null;
         }
 
-        return $this->tickets->firstWhere('id', $this->selectedTicketId);
+        return $this->findOwnedTicket((int) $this->selectedTicketId);
     }
 
     public function getUnreadSupportCountProperty(): int
@@ -1955,10 +1955,10 @@ class Dashboard extends Component
             return;
         }
 
-        $this->user->update([
+        $this->user->forceFill([
             'email' => $newEmail,
             'email_verified_at' => null,
-        ]);
+        ])->save();
 
         $this->reloadPortfolioData();
         $this->profileEmail = (string) $this->user->email;
@@ -2068,8 +2068,6 @@ class Dashboard extends Component
         $this->paymentModalStep = 'processing';
 
         try {
-            sleep(2);
-
             $contract = $purchases->purchase($this->user, $plan, (float) $this->power);
 
             $this->reloadPortfolioData();
@@ -2147,8 +2145,6 @@ class Dashboard extends Component
         $this->paymentModalStep = 'processing';
 
         try {
-            sleep(1);
-
             $request = $planChanges->createRequest($this->user, $contract, $plan);
 
             $this->reloadPortfolioData();
@@ -2295,10 +2291,7 @@ class Dashboard extends Component
 
     public function selectTicket(int $ticketId): void
     {
-        abort_unless(
-            $this->tickets->contains('id', $ticketId),
-            403
-        );
+        abort_unless($this->findOwnedTicket($ticketId) !== null, 403);
 
         $this->selectedTicketId = $ticketId;
         $this->showCreateTicket = false;
@@ -2942,8 +2935,20 @@ class Dashboard extends Component
 
     private function findOwnedContract(int $contractId): ?Contract
     {
-        return $this->activeContracts->firstWhere('id', $contractId)
-            ?? $this->completedContracts->firstWhere('id', $contractId);
+        return Contract::query()
+            ->with('plan')
+            ->whereKey($contractId)
+            ->where('user_id', $this->user->id)
+            ->first();
+    }
+
+    private function findOwnedTicket(int $ticketId): ?SupportTicket
+    {
+        return SupportTicket::query()
+            ->with('messages')
+            ->whereKey($ticketId)
+            ->where('user_id', $this->user->id)
+            ->first();
     }
 
     private function resetPaymentModal(bool $clearPendingDeposit = true): void
@@ -3084,19 +3089,20 @@ class Dashboard extends Component
             return;
         }
 
-        $ticket = $this->tickets->firstWhere('id', $ticketId);
-
-        if (! $ticket) {
-            return;
-        }
-
         $now = now();
 
-        SupportTicket::query()
+        $updated = SupportTicket::query()
             ->whereKey($ticketId)
             ->where('user_id', $this->user->id)
             ->update(['user_last_read_at' => $now]);
 
-        $ticket->user_last_read_at = $now;
+        if ($updated === 0) {
+            return;
+        }
+
+        $collectionTicket = $this->tickets->firstWhere('id', $ticketId);
+        if ($collectionTicket) {
+            $collectionTicket->user_last_read_at = $now;
+        }
     }
 }
