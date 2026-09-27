@@ -32,9 +32,7 @@
                             <input type="checkbox" name="{{ $key }}" value="1" @checked(old($key, filter_var($values[$key] ?? $definition['default'], FILTER_VALIDATE_BOOL)))>
                             {{ __('coin.admin.enabled') }}
                         </label>
-                        @if($key === 'payment_gate_enabled')
-                        <p style="margin:6px 0 0;font-size:12px;color:rgba(232,237,245,0.55);">{{ __('coin.settings.payment_gate_hint') }}</p>
-                        @elseif($key === 'maintenance_mode')
+                        @if($key === 'maintenance_mode')
                         <p style="margin:6px 0 0;font-size:12px;color:rgba(232,237,245,0.55);">{{ __('coin.settings.maintenance_hint') }}</p>
                         @endif
                     @elseif($definition['type'] === 'time')

@@ -119,9 +119,9 @@ class PlanPurchaseService
             ->get()
             ->sum(fn (Contract $contract) => $this->dailyProfitFor($contract));
 
-        $user->update([
+        $user->forceFill([
             'expected_daily_reward' => round($daily, 2),
-        ]);
+        ])->save();
     }
 
     public function dailyProfitFor(Contract $contract): float
@@ -194,6 +194,7 @@ class PlanPurchaseService
 
             if ($topUp > 0.009) {
                 $wallet = $this->wallets->ensureWallet($user);
+                $wallet = Wallet::query()->whereKey($wallet->id)->lockForUpdate()->firstOrFail();
 
                 if ($topUpHeld) {
                     if ((float) $wallet->pending < $topUp) {

@@ -6,7 +6,6 @@ use App\Livewire\Dashboard;
 use App\Models\Deposit;
 use App\Models\User;
 use App\Support\PaymentStatusReason;
-use App\Services\PlatformSettingsService;
 use Database\Seeders\PlatformSettingsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
@@ -28,7 +27,6 @@ class TopUpPaymentPollingTest extends TestCase
         ]);
 
         $this->seed(PlatformSettingsSeeder::class);
-        app(PlatformSettingsService::class)->setMany(['payment_gate_enabled' => true]);
     }
 
     public function test_poll_shows_success_when_live_deposit_is_confirmed(): void
@@ -109,7 +107,7 @@ class TopUpPaymentPollingTest extends TestCase
 
     public function test_poll_is_ignored_in_mock_mode(): void
     {
-        app(PlatformSettingsService::class)->setMany(['payment_gate_enabled' => false]);
+        config(['coin.payments.driver' => 'mock']);
 
         $user = User::factory()->create();
         $deposit = Deposit::query()->create([

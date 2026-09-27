@@ -409,7 +409,7 @@
               <button type="button" wire:click="setDepositPreset(500)" @disabled($topUpLocked) class="coin-deposit-presets__btn coin-btn-quiet">500 USDT</button>
               <button type="button" wire:click="setDepositPreset(1000)" @disabled($topUpLocked) class="coin-deposit-presets__btn coin-btn-quiet">1 000 USDT</button>
             </div>
-            @if(! $this->paymentGateEnabled)
+            @if(! $this->usesLivePaymentGateway)
             <p style="margin: 14px 0 0; font-size: 12px; line-height: 1.5; color: rgba(214,238,248,0.62);">{{ __('coin.wallet.payment_gate_test_mode_hint') }}</p>
             @endif
             <div class="coin-wallet-action-card__footer">
@@ -452,7 +452,7 @@
               @endif
               <div style="display: flex; justify-content: space-between; gap: 14px;"><span style="color: rgba(214,238,248,0.72); min-width: 0;">{{ __('coin.wallet.processing_time') }}</span><span style="font-family: 'JetBrains Mono', monospace; flex: none; text-align: right;">{{ $this->processingTimeLabel }}</span></div>
             </div>
-            @if(! $this->paymentGateEnabled)
+            @if(! $this->usesLivePaymentGateway)
             <p style="margin: 14px 0 0; font-size: 12px; line-height: 1.5; color: rgba(214,238,248,0.62);">{{ __('coin.wallet.payment_gate_test_mode_hint') }}</p>
             @endif
             <div class="coin-wallet-action-card__footer">

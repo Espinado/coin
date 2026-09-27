@@ -7,7 +7,6 @@ use App\Models\Admin;
 use App\Models\Deposit;
 use App\Models\User;
 use App\Services\DepositService;
-use App\Services\PlatformSettingsService;
 use App\Support\PaymentStatusReason;
 use Database\Seeders\AdminSeeder;
 use Database\Seeders\PlatformSettingsSeeder;
@@ -30,7 +29,6 @@ class DepositExpiryTest extends TestCase
 
         $this->seed(AdminSeeder::class);
         $this->seed(PlatformSettingsSeeder::class);
-        app(PlatformSettingsService::class)->setMany(['payment_gate_enabled' => true]);
     }
 
     public function test_expire_if_due_rejects_expired_pending_deposit(): void

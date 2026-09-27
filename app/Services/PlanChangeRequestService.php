@@ -74,12 +74,8 @@ class PlanChangeRequestService
 
     public function approve(PlanChangeRequest $request, Admin $admin, ?string $note = null): PlanChangeRequest
     {
-        if (! $request->isPending()) {
-            throw new RuntimeException(__('coin.admin.plan_change_already_processed'));
-        }
-
         return DB::transaction(function () use ($request, $admin, $note) {
-            $request->refresh();
+            $request = $this->lockPendingRequest($request);
             $request->load(['user', 'contract.plan', 'toPlan']);
 
             $contract = $request->contract;
@@ -118,18 +114,27 @@ class PlanChangeRequestService
 
     public function reject(PlanChangeRequest $request, Admin $admin, ?string $note = null): PlanChangeRequest
     {
-        if (! $request->isPending()) {
-            throw new RuntimeException(__('coin.admin.plan_change_already_processed'));
-        }
-
         return DB::transaction(function () use ($request, $admin, $note) {
-            $request->refresh();
+            $request = $this->lockPendingRequest($request);
             $topUp = (float) $request->top_up_amount;
 
             if ($topUp > 0.009) {
-                $wallet = $request->user->wallet ?? throw new RuntimeException('User has no wallet.');
-                $wallet->decrement('pending', $topUp);
-                $wallet->increment('available', $topUp);
+                $wallet = Wallet::query()
+                    ->where('user_id', $request->user_id)
+                    ->lockForUpdate()
+                    ->first();
+
+                if (! $wallet instanceof Wallet) {
+                    throw new RuntimeException('User has no wallet.');
+                }
+
+                // Only return what is still held in pending (defensive against races).
+                $release = min($topUp, (float) $wallet->pending);
+
+                if ($release > 0.009) {
+                    $wallet->decrement('pending', $release);
+                    $wallet->increment('available', $release);
+                }
             }
 
             $request->update([
@@ -145,6 +150,20 @@ class PlanChangeRequestService
 
             return $request;
         });
+    }
+
+    private function lockPendingRequest(PlanChangeRequest $request): PlanChangeRequest
+    {
+        $locked = PlanChangeRequest::query()
+            ->whereKey($request->id)
+            ->lockForUpdate()
+            ->firstOrFail();
+
+        if (! $locked->isPending()) {
+            throw new RuntimeException(__('coin.admin.plan_change_already_processed'));
+        }
+
+        return $locked;
     }
 
     private function broadcastPlanChangeRequestUpdated(PlanChangeRequest $request): void

@@ -5,7 +5,6 @@ namespace Tests\Feature;
 use App\Models\Deposit;
 use App\Models\User;
 use App\Services\Payment\DepositPollService;
-use App\Services\PlatformSettingsService;
 use App\Support\PaymentStatusReason;
 use Database\Seeders\PlatformSettingsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -27,7 +26,6 @@ class DepositPollTest extends TestCase
         ]);
 
         $this->seed(PlatformSettingsSeeder::class);
-        app(PlatformSettingsService::class)->setMany(['payment_gate_enabled' => true]);
     }
 
     public function test_poll_rejects_expired_pending_deposit(): void

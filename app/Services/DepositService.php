@@ -62,9 +62,7 @@ class DepositService
     {
         $this->settings->assertLivePaymentGatewayReady();
 
-        $driver = $this->settings->paymentGateEnabled()
-            ? (string) config('coin.payments.driver', 'mock')
-            : 'mock';
+        $driver = (string) config('coin.payments.driver', 'mock');
         $deposit = $this->createPending($user, $amount, $currency, $driver);
 
         try {
@@ -203,6 +201,17 @@ class DepositService
             $inputCurrency = strtoupper((string) ($deposit->input_currency ?? ''));
             $walletCurrency = $this->wallets->currencyFor($wallet);
             $isLiveDeposit = $deposit->method === 'ccapi';
+
+            // Prefer on-chain received BTC when present and lower (dust / tolerance underpay).
+            $receivedAmount = $deposit->received_amount !== null ? (float) $deposit->received_amount : null;
+            if (
+                $paymentCurrency === 'BTC'
+                && $receivedAmount !== null
+                && $receivedAmount > 0
+                && $receivedAmount < $paymentAmount
+            ) {
+                $paymentAmount = $receivedAmount;
+            }
 
             if ($paymentCurrency === 'BTC') {
                 $conversion = $this->exchangeRates->convertToBaseAtLiveRate($paymentAmount, $paymentCurrency);

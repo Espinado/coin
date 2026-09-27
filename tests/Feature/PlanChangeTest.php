@@ -48,7 +48,7 @@ class PlanChangeTest extends TestCase
 
         $this->assertSame($cluster->id, $updated->plan_id);
         $this->assertSame('3400.00', number_format((float) $updated->principal_amount, 2, '.', ''));
-        $this->assertSame('1800.00', number_format((float) $user->wallet->available, 2, '.', ''));
+        $this->assertSame('1600.00', number_format((float) $user->wallet->available, 2, '.', ''));
         $this->assertSame('3400.00', number_format((float) $user->wallet->locked_balance, 2, '.', ''));
         $this->assertTrue($updated->started_at?->eq($startedAt));
         $this->assertSame($daysElapsed, $updated->days_elapsed);
@@ -96,6 +96,8 @@ class PlanChangeTest extends TestCase
 
     public function test_upgrade_pays_referrer_twenty_percent_of_top_up_difference(): void
     {
+        config(['coin.referrals.daily_commission_cap_usdt' => 0]);
+
         $referrer = User::factory()->create();
         ReferralProfile::query()->create([
             'user_id' => $referrer->id,

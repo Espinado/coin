@@ -4,7 +4,6 @@ namespace App\Services;
 
 use App\Models\PlatformSetting;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Validation\ValidationException;
 
 class PlatformSettingsService
 {
@@ -22,7 +21,6 @@ class PlatformSettingsService
         'referral_level1_percent' => '20',
         'referral_level2_percent' => '0',
         'kyc_required_for_withdrawal' => '0',
-        'payment_gate_enabled' => '0',
         'maintenance_mode' => '0',
         'btc_per_usdt' => '2',
         'usdt_per_btc' => '',
@@ -77,7 +75,6 @@ class PlatformSettingsService
     /** @param array<string, string|int|float|bool> $values */
     public function setMany(array $values): void
     {
-        $this->assertProductionPaymentGateSafety($values);
         $this->persistKeys($values, self::DEFAULTS);
     }
 
@@ -91,28 +88,6 @@ class PlatformSettingsService
     public function legalInfo(): array
     {
         return array_intersect_key($this->all(), self::LEGAL_DEFAULTS);
-    }
-
-    /** @param array<string, string|int|float|bool> $values */
-    private function assertProductionPaymentGateSafety(array $values): void
-    {
-        if (! app()->environment('production')) {
-            return;
-        }
-
-        if (! array_key_exists('payment_gate_enabled', $values)) {
-            return;
-        }
-
-        if (filter_var($values['payment_gate_enabled'], FILTER_VALIDATE_BOOL)) {
-            return;
-        }
-
-        if ((string) config('coin.payments.driver', 'mock') === 'ccapi') {
-            throw ValidationException::withMessages([
-                'payment_gate_enabled' => __('coin.admin.payment_gate_disable_blocked'),
-            ]);
-        }
     }
 
     /**
@@ -210,25 +185,21 @@ class PlatformSettingsService
         return (string) config('coin.profit_accrual.schedule_timezone', 'Europe/Riga');
     }
 
+    /** Live vs mock is controlled only by COIN_PAYMENT_DRIVER (not an admin toggle). */
     public function paymentGateEnabled(): bool
     {
-        return $this->getBool('payment_gate_enabled');
+        return $this->usesLivePaymentGateway();
     }
 
     public function usesLivePaymentGateway(): bool
     {
-        return $this->paymentGateEnabled()
-            && (string) config('coin.payments.driver', 'mock') === 'ccapi';
+        return (string) config('coin.payments.driver', 'mock') === 'ccapi';
     }
 
     public function assertLivePaymentGatewayReady(): void
     {
-        if (! $this->paymentGateEnabled()) {
+        if (! $this->usesLivePaymentGateway()) {
             return;
-        }
-
-        if ((string) config('coin.payments.driver', 'mock') !== 'ccapi') {
-            throw new \RuntimeException(__('coin.wallet.payment_gate_live_driver_missing'));
         }
 
         if (! filled((string) config('coin.payments.ccapi.api_key'))) {
@@ -250,7 +221,6 @@ class PlatformSettingsService
             'referral_level1_percent' => ['label' => __('coin.settings.referral_percent'), 'type' => 'number', 'default' => self::DEFAULTS['referral_level1_percent']],
             'referral_level2_percent' => ['label' => 'Реферальный % (уровень 2, не использ.)', 'type' => 'number', 'default' => self::DEFAULTS['referral_level2_percent']],
             'kyc_required_for_withdrawal' => ['label' => __('coin.settings.kyc_for_payout'), 'type' => 'boolean', 'default' => self::DEFAULTS['kyc_required_for_withdrawal']],
-            'payment_gate_enabled' => ['label' => __('coin.settings.payment_gate'), 'type' => 'boolean', 'default' => self::DEFAULTS['payment_gate_enabled']],
             'usdt_per_btc' => ['label' => __('coin.settings.usdt_per_btc'), 'type' => 'readonly_decimal', 'default' => self::DEFAULTS['usdt_per_btc'], 'readonly' => true],
             'btc_per_usdt' => ['label' => __('coin.settings.btc_per_usdt'), 'type' => 'readonly_decimal', 'default' => self::DEFAULTS['btc_per_usdt'], 'readonly' => true],
             'maintenance_mode' => ['label' => __('coin.settings.maintenance'), 'type' => 'boolean', 'default' => self::DEFAULTS['maintenance_mode']],

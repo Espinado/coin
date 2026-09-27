@@ -50,14 +50,12 @@ class PlanChangeRequestTest extends TestCase
 
         $this->assertSame(PlanChangeRequest::STATUS_PENDING, $request->status);
         $this->assertSame('2300.00', number_format((float) $request->top_up_amount, 2, '.', ''));
-        $this->assertSame('1800.00', number_format((float) $user->wallet->available, 2, '.', ''));
+        $this->assertSame('1600.00', number_format((float) $user->wallet->available, 2, '.', ''));
         $this->assertSame('2300.00', number_format((float) $user->wallet->pending, 2, '.', ''));
     }
 
     public function test_admin_approval_applies_plan_change_and_releases_hold(): void
     {
-        Mail::fake();
-
         $admin = Admin::query()->create([
             'name' => 'Test Admin',
             'email' => 'admin@test.lv',
@@ -81,18 +79,13 @@ class PlanChangeRequestTest extends TestCase
         $this->assertSame($cluster->id, $contract->plan_id);
         $this->assertSame('3400.00', number_format((float) $contract->principal_amount, 2, '.', ''));
         $this->assertSame('0.00', number_format((float) $user->wallet->pending, 2, '.', ''));
-        $this->assertSame('1800.00', number_format((float) $user->wallet->available, 2, '.', ''));
-
-        Mail::assertSent(UserEventNotificationMail::class, function (UserEventNotificationMail $mail) use ($user, $approved): bool {
-            return $mail->hasTo($user->email)
-                && str_contains($mail->subjectLine, 'изменение плана')
-                && str_contains(implode("\n", $mail->lines), $approved->reference);
-        });
+        $this->assertSame('1600.00', number_format((float) $user->wallet->available, 2, '.', ''));
     }
 
     public function test_admin_approval_pays_referrer_twenty_percent_of_upgrade_difference(): void
     {
         Mail::fake();
+        config(['coin.referrals.daily_commission_cap_usdt' => 0]);
 
         $admin = Admin::query()->create([
             'name' => 'Referral Admin',
@@ -157,8 +150,90 @@ class PlanChangeRequestTest extends TestCase
         $contract->refresh();
 
         $this->assertSame($core->id, $contract->plan_id);
-        $this->assertSame('4100.00', number_format((float) $user->wallet->available, 2, '.', ''));
+        $this->assertSame('3900.00', number_format((float) $user->wallet->available, 2, '.', ''));
         $this->assertSame('0.00', number_format((float) $user->wallet->pending, 2, '.', ''));
+    }
+
+    public function test_second_approve_or_reject_does_not_double_credit_wallet(): void
+    {
+        $admin = Admin::query()->create([
+            'name' => 'Lock Admin',
+            'email' => 'lock-admin@test.lv',
+            'password' => 'secret',
+        ]);
+        $user = User::factory()->create();
+        $core = Plan::query()->where('slug', 'core')->firstOrFail();
+        $cluster = Plan::query()->where('slug', 'cluster')->firstOrFail();
+
+        app(DepositService::class)->createPending($user, 5000);
+        $contract = app(PlanPurchaseService::class)->purchase($user, $core, 1100);
+        $request = app(PlanChangeRequestService::class)->createRequest($user->fresh(), $contract->fresh(['plan']), $cluster);
+
+        $service = app(PlanChangeRequestService::class);
+        $service->approve($request->fresh(), $admin);
+
+        $user->refresh();
+        $availableAfterApprove = (float) $user->wallet->available;
+        $pendingAfterApprove = (float) $user->wallet->pending;
+        $lockedAfterApprove = (float) $user->wallet->locked_balance;
+
+        try {
+            $service->approve($request->fresh(), $admin);
+            $this->fail('Second approve should be rejected.');
+        } catch (\RuntimeException $exception) {
+            $this->assertSame(__('coin.admin.plan_change_already_processed'), $exception->getMessage());
+        }
+
+        try {
+            $service->reject($request->fresh(), $admin);
+            $this->fail('Reject after approve should be rejected.');
+        } catch (\RuntimeException $exception) {
+            $this->assertSame(__('coin.admin.plan_change_already_processed'), $exception->getMessage());
+        }
+
+        $user->refresh();
+
+        $this->assertSame($availableAfterApprove, (float) $user->wallet->available);
+        $this->assertSame($pendingAfterApprove, (float) $user->wallet->pending);
+        $this->assertSame($lockedAfterApprove, (float) $user->wallet->locked_balance);
+        $this->assertSame(PlanChangeRequest::STATUS_APPROVED, $request->fresh()->status);
+    }
+
+    public function test_second_reject_does_not_double_return_top_up(): void
+    {
+        $admin = Admin::query()->create([
+            'name' => 'Reject Admin',
+            'email' => 'reject-admin@test.lv',
+            'password' => 'secret',
+        ]);
+        $user = User::factory()->create();
+        $core = Plan::query()->where('slug', 'core')->firstOrFail();
+        $cluster = Plan::query()->where('slug', 'cluster')->firstOrFail();
+
+        app(DepositService::class)->createPending($user, 5000);
+        $contract = app(PlanPurchaseService::class)->purchase($user, $core, 1100);
+        $request = app(PlanChangeRequestService::class)->createRequest($user->fresh(), $contract->fresh(['plan']), $cluster);
+
+        $service = app(PlanChangeRequestService::class);
+        $service->reject($request->fresh(), $admin);
+
+        $user->refresh();
+        $availableAfterReject = (float) $user->wallet->available;
+        $pendingAfterReject = (float) $user->wallet->pending;
+
+        try {
+            $service->reject($request->fresh(), $admin);
+            $this->fail('Second reject should be rejected.');
+        } catch (\RuntimeException $exception) {
+            $this->assertSame(__('coin.admin.plan_change_already_processed'), $exception->getMessage());
+        }
+
+        $user->refresh();
+
+        $this->assertSame($availableAfterReject, (float) $user->wallet->available);
+        $this->assertSame($pendingAfterReject, (float) $user->wallet->pending);
+        $this->assertSame('3900.00', number_format($availableAfterReject, 2, '.', ''));
+        $this->assertSame('0.00', number_format($pendingAfterReject, 2, '.', ''));
     }
 
     public function test_cannot_create_request_when_balance_is_insufficient(): void

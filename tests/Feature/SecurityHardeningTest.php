@@ -11,7 +11,6 @@ use App\Models\Withdrawal;
 use App\Services\DepositService;
 use App\Services\Payment\PaymentSimulatorService;
 use App\Services\PlanPurchaseService;
-use App\Services\PlatformSettingsService;
 use App\Services\WithdrawalService;
 use App\Support\AdminRole;
 use Database\Seeders\AdminSeeder;
@@ -334,33 +333,6 @@ class SecurityHardeningTest extends TestCase
         $this->expectExceptionMessage(__('coin.wallet.insufficient_funds'));
 
         app(WithdrawalService::class)->createForUser($user, 100);
-    }
-
-    public function test_admin_cannot_disable_payment_gate_in_production_with_ccapi_driver(): void
-    {
-        config(['coin.payments.driver' => 'ccapi']);
-        app()->detectEnvironment(fn () => 'production');
-
-        $admin = Admin::query()->firstOrFail();
-
-        $this->actingAs($admin, 'admin')
-            ->from('http://admin.coin.test/settings')
-            ->patch('http://admin.coin.test/settings', [
-                'token_symbol' => 'USDT',
-                'min_deposit' => '10.00',
-                'min_withdrawal' => '10',
-                'network_fee' => '0.50',
-                'withdrawal_processing_hours' => '24',
-                'referral_level1_percent' => '20',
-                'referral_level2_percent' => '0',
-                'kyc_required_for_withdrawal' => false,
-                'maintenance_mode' => false,
-                'payment_gate_enabled' => false,
-                'profit_accrual_time' => '09:00',
-            ])
-            ->assertSessionHasErrors('payment_gate_enabled');
-
-        $this->assertTrue(app(PlatformSettingsService::class)->paymentGateEnabled());
     }
 
     public function test_save_profile_email_requires_password(): void

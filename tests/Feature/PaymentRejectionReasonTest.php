@@ -9,7 +9,6 @@ use App\Models\Withdrawal;
 use App\Services\DepositService;
 use App\Services\Payment\CcapiIpnVerifier;
 use App\Services\Payment\WithdrawalPollService;
-use App\Services\PlatformSettingsService;
 use App\Services\WithdrawalService;
 use App\Support\PaymentStatusReason;
 use Database\Seeders\AdminSeeder;
@@ -147,7 +146,6 @@ class PaymentRejectionReasonTest extends TestCase
     public function test_gateway_failed_withdrawal_has_user_reason(): void
     {
         config(['coin.payments.ccapi.poll_stuck_withdrawals' => true]);
-        app(PlatformSettingsService::class)->setMany(['payment_gate_enabled' => true]);
 
         $user = User::factory()->create();
         $user->wallet->update([

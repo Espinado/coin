@@ -179,8 +179,6 @@ class AdminModuleTest extends TestCase
             'coin.payments.mock.auto_complete_payout' => false,
         ]);
 
-        app(PlatformSettingsService::class)->setMany(['payment_gate_enabled' => true]);
-
         Http::fake([
             '*' => Http::response(['result' => '12345'], 200),
         ]);

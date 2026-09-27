@@ -133,7 +133,7 @@ class WithdrawalService
     public function approveAndDispatch(Withdrawal $withdrawal, Admin $admin, ?string $note = null): Withdrawal
     {
         return DB::transaction(function () use ($withdrawal, $admin, $note) {
-            $withdrawal->refresh();
+            $withdrawal = $this->lockWithdrawal($withdrawal);
 
             if (! in_array($withdrawal->status, [Withdrawal::STATUS_PENDING, Withdrawal::STATUS_APPROVED], true)) {
                 throw new RuntimeException(__('coin.admin.withdrawal_approve_pending_only'));
@@ -144,7 +144,7 @@ class WithdrawalService
                     'admin_note' => $note,
                     'processed_by' => $admin->id,
                 ]);
-                $withdrawal->refresh();
+                $withdrawal = $this->lockWithdrawal($withdrawal);
             }
 
             return $this->dispatchViaGateway($withdrawal, $admin);
@@ -162,7 +162,7 @@ class WithdrawalService
         }
 
         return DB::transaction(function () use ($withdrawal, $status, $admin, $note) {
-            $withdrawal->refresh();
+            $withdrawal = $this->lockWithdrawal($withdrawal);
             $previous = $withdrawal->status;
 
             if ($previous === $status) {
@@ -452,8 +452,14 @@ class WithdrawalService
 
     private function releasePending(Wallet $wallet, float $amount): void
     {
-        $wallet->decrement('pending', min($amount, (float) $wallet->pending));
-        $wallet->increment('available', $amount);
+        $release = min($amount, (float) $wallet->pending);
+
+        if ($release <= 0) {
+            return;
+        }
+
+        $wallet->decrement('pending', $release);
+        $wallet->increment('available', $release);
     }
 
     private function commitWithdrawalFunds(Wallet $wallet, float $amount): void

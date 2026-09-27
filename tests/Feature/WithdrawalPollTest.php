@@ -6,7 +6,6 @@ use App\Models\PaymentWebhookLog;
 use App\Models\User;
 use App\Models\Withdrawal;
 use App\Services\Payment\WithdrawalPollService;
-use App\Services\PlatformSettingsService;
 use Database\Seeders\PlatformSettingsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
@@ -27,7 +26,6 @@ class WithdrawalPollTest extends TestCase
         ]);
 
         $this->seed(PlatformSettingsSeeder::class);
-        app(PlatformSettingsService::class)->setMany(['payment_gate_enabled' => true]);
     }
 
     public function test_poll_marks_confirmed_processing_withdrawal_as_paid(): void

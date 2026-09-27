@@ -8,7 +8,6 @@ use App\Models\WalletTransaction;
 use App\Models\Withdrawal;
 use App\Services\Payment\Dtos\PayoutRequestDto;
 use App\Services\Payment\PaymentGatewayInterface;
-use App\Services\PlatformSettingsService;
 use App\Services\WithdrawalService;
 use App\Support\PlatformTerms;
 use Database\Seeders\AdminSeeder;
@@ -21,7 +20,7 @@ class WithdrawalConcurrencyTest extends TestCase
 {
     use RefreshDatabase;
 
-    private int $sendPayoutCalls = 0;
+    public int $sendPayoutCalls = 0;
 
     protected function setUp(): void
     {
@@ -35,7 +34,6 @@ class WithdrawalConcurrencyTest extends TestCase
 
         $this->seed(PlatformSettingsSeeder::class);
         $this->seed(AdminSeeder::class);
-        app(PlatformSettingsService::class)->setMany(['payment_gate_enabled' => true]);
 
         $this->app->instance(PaymentGatewayInterface::class, new class($this) implements PaymentGatewayInterface
         {
@@ -123,13 +121,56 @@ class WithdrawalConcurrencyTest extends TestCase
         $this->assertSame($availableBefore + 50.0, (float) $wallet->available);
     }
 
+    public function test_second_admin_reject_of_pending_does_not_double_release(): void
+    {
+        $admin = Admin::query()->firstOrFail();
+        $user = User::factory()->create();
+        $wallet = app(\App\Services\WalletService::class)->ensureWallet($user);
+        $wallet->update([
+            'available' => 0,
+            'balance' => 100,
+            'pending' => 50,
+            'payout_address' => PayoutAddressTest::VALID_TRON_ADDRESS,
+            'network_label' => 'TRC-20',
+        ]);
+
+        $withdrawal = Withdrawal::query()->create([
+            'user_id' => $user->id,
+            'reference' => 'WD-REJ'.random_int(1000, 9999),
+            'amount' => 50,
+            'base_amount' => 50,
+            'currency' => 'USDT',
+            'withdrawal_type' => 'available_balance',
+            'payout_address' => PayoutAddressTest::VALID_TRON_ADDRESS,
+            'network_label' => 'TRC-20',
+            'status' => Withdrawal::STATUS_PENDING,
+        ]);
+
+        $service = app(WithdrawalService::class);
+        $service->updateStatus($withdrawal, Withdrawal::STATUS_REJECTED, $admin);
+
+        $wallet->refresh();
+        $this->assertSame(50.0, (float) $wallet->available);
+        $this->assertSame(0.0, (float) $wallet->pending);
+
+        // Same-status update is a no-op (does not re-release pending).
+        $service->updateStatus($withdrawal->fresh(), Withdrawal::STATUS_REJECTED, $admin);
+
+        $wallet->refresh();
+        $this->assertSame(50.0, (float) $wallet->available);
+        $this->assertSame(0.0, (float) $wallet->pending);
+        $this->assertSame(100.0, (float) $wallet->balance);
+        $this->assertSame(Withdrawal::STATUS_REJECTED, $withdrawal->fresh()->status);
+    }
+
     /**
      * @param  array<string, mixed>  $overrides
      */
     private function makeProcessingWithdrawal(array $overrides = []): Withdrawal
     {
         $user = User::factory()->create();
-        $user->wallet->update([
+        $wallet = app(\App\Services\WalletService::class)->ensureWallet($user);
+        $wallet->update([
             'available' => 0,
             'balance' => 50,
             'pending' => 50,

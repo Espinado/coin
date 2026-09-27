@@ -65,6 +65,12 @@ return [
     'payments' => [
         'driver' => env('COIN_PAYMENT_DRIVER', 'mock'),
 
+        // Force live CCAPI checks even when APP_ENV=local (e.g. public staging domain).
+        'require_live' => (bool) env('COIN_REQUIRE_LIVE_PAYMENTS', false),
+
+        // Escape hatch: allow mock on a non-local hosts entry when APP_ENV is not production|staging.
+        'allow_mock' => (bool) env('COIN_ALLOW_MOCK_PAYMENTS', false),
+
         'mock' => [
             'auto_complete_payout' => env('COIN_MOCK_AUTO_COMPLETE_PAYOUT', true),
         ],
