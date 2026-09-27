@@ -26,7 +26,7 @@
       <div style="{{ $cardBody }}">
         <div>
           <div style="{{ $fieldLabel }}">{{ mb_strtoupper(__('coin.profile.display_name')) }}</div>
-          <div style="margin-top: 8px; padding: 12px 14px; border-radius: 10px; border: 1px solid rgba(150,235,250,0.14); background: rgba(4,16,28,0.5); font-size: 13.5px; color: rgba(214,238,248,0.85);">{{ $user->name }}</div>
+          <input type="text" wire:model="profileName" required autocomplete="name" maxlength="255" style="{{ $input }}; margin-top: 8px;" />
         </div>
         <div>
           <div style="{{ $fieldLabel }}">{{ mb_strtoupper(__('coin.profile.phone')) }}</div>
@@ -40,10 +40,11 @@
           <div style="{{ $fieldLabel }}">{{ mb_strtoupper(__('coin.profile.country_iso')) }}</div>
           <input type="text" wire:model="profileCountry" maxlength="2" style="{{ $input }}; margin-top: 8px;" />
         </div>
+        @error('profileName')<p style="{{ $error }}">{{ $message }}</p>@enderror
         @error('profilePhone')<p style="{{ $error }}">{{ $message }}</p>@enderror
         @error('profileTelegram')<p style="{{ $error }}">{{ $message }}</p>@enderror
         @error('profileCountry')<p style="{{ $error }}">{{ $message }}</p>@enderror
-        <button type="button" wire:click="saveProfile" style="{{ $btnPrimary }}; margin-top: auto;">{{ __('coin.profile.save_contacts') }}</button>
+        <button type="button" wire:click="saveProfile" style="{{ $btnPrimary }}; margin-top: auto;">{{ __('coin.profile.save_profile') }}</button>
       </div>
     </div>
 

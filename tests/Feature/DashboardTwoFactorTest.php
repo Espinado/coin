@@ -60,4 +60,22 @@ class DashboardTwoFactorTest extends TestCase
 
         $this->assertTrue(Hash::check('NewSecret2!', $user->fresh()->password));
     }
+
+    public function test_user_can_update_display_name(): void
+    {
+        $user = User::factory()->create([
+            'name' => 'Old Name',
+            'phone' => '+37126161034',
+        ]);
+
+        Livewire::actingAs($user)
+            ->test(Dashboard::class)
+            ->set('profileName', 'New Display Name')
+            ->set('profilePhone', '+37126161034')
+            ->call('saveProfile')
+            ->assertHasNoErrors()
+            ->assertSet('profileName', 'New Display Name');
+
+        $this->assertSame('New Display Name', $user->fresh()->name);
+    }
 }

@@ -222,6 +222,8 @@ class Dashboard extends Component
 
     public string $profileNewPasswordConfirmation = '';
 
+    public string $profileName = '';
+
     public string $profilePhone = '';
 
     public string $profileTelegram = '';
@@ -385,6 +387,7 @@ class Dashboard extends Component
         $this->primaryContract = $payload['primaryContract'];
         $this->primaryPlan = $payload['primaryPlan'];
         $this->profileEmail = (string) $this->user->email;
+        $this->profileName = (string) $this->user->name;
         $this->profilePhone = (string) ($this->user->phone ?? '');
         $this->profileTelegram = (string) ($this->user->telegram ?? '');
         $this->profileCountry = (string) ($this->user->country_code ?? '');
@@ -1951,16 +1954,19 @@ class Dashboard extends Component
         $this->resetActionFeedback();
 
         $validated = $this->validate([
+            'profileName' => ['required', 'string', 'min:2', 'max:255'],
             'profilePhone' => ['required', 'string', 'max:32', new ContactPhone],
             'profileTelegram' => ['nullable', 'string', 'max:64'],
             'profileCountry' => ['nullable', 'string', 'size:2'],
         ], [], [
+            'profileName' => __('coin.profile.display_name'),
             'profilePhone' => __('coin.profile.phone'),
             'profileTelegram' => 'telegram',
             'profileCountry' => 'country',
         ]);
 
         $this->user->update([
+            'name' => trim($validated['profileName']),
             'phone' => ContactPhone::normalize($validated['profilePhone']),
             'telegram' => $validated['profileTelegram'] ?: null,
             'country_code' => $validated['profileCountry'] ? strtoupper($validated['profileCountry']) : null,
@@ -2610,6 +2616,7 @@ class Dashboard extends Component
         $this->primaryContract = $payload['primaryContract'];
         $this->primaryPlan = $payload['primaryPlan'];
         $this->profileEmail = (string) $this->user->email;
+        $this->profileName = (string) $this->user->name;
         $this->profilePhone = (string) ($this->user->phone ?? '');
         $this->profileTelegram = (string) ($this->user->telegram ?? '');
         $this->profileCountry = (string) ($this->user->country_code ?? '');
