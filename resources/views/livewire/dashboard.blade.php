@@ -136,7 +136,7 @@
               <span>{{ number_format($calcUpperMid, 0, '.', ' ') }} {{ $this->walletCurrency }}</span>
               <span>{{ number_format($calcMax, 0, '.', ' ') }} {{ $this->walletCurrency }}</span>
             </div>
-            <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-top: 26px;">
+            <div class="coin-grid-3" style="gap: 12px; margin-top: 26px;">
               <div style="padding: 16px; border-radius: 13px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.04);">
                 <div style="font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.12em; color: rgba(214,238,248,0.68);">{{ mb_strtoupper(__('coin.invest.per_day')) }}</div>
                 <div style="margin-top: 10px; font-family: 'JetBrains Mono', monospace; font-size: 18px; color: #f0fbff;">{{ $this->daily }}</div>
@@ -194,8 +194,8 @@
     @endif
 
     @if($section === 2)
-      <section data-screen-label="{{ __('coin.nav.my_investments') }}" style="padding: 28px 32px 40px; display: flex; flex-direction: column; gap: 16px;">
-        <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px;">
+      <section data-screen-label="{{ __('coin.nav.my_investments') }}" class="coin-dash-section">
+        <div class="coin-grid-4">
           <div style="padding: 20px; border-radius: 16px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.04);">
             <div style="font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.14em; color: rgba(214,238,248,0.7);">{{ mb_strtoupper(__('coin.invest.active_investments')) }}</div>
             <div style="margin-top: 12px; font-family: 'JetBrains Mono', monospace; font-size: 24px; color: #f0fbff;">{{ $this->activeContractCount }}</div>
@@ -231,7 +231,7 @@
     @endif
 
     @if($section === 3)
-      <section data-screen-label="{{ __('coin.nav.statistics') }}" style="padding: 28px 32px 40px; display: flex; flex-direction: column; gap: 16px;">
+      <section data-screen-label="{{ __('coin.nav.statistics') }}" class="coin-dash-section">
         <div class="coin-stats-toolbar">
           <div class="coin-dash-period-tabs coin-stats-toolbar__periods" role="group" aria-label="{{ __('coin.nav.statistics') }}">
             <button type="button" wire:click="setPeriod(0)" class="coin-dash-period-tabs__btn {{ $period === 0 ? 'coin-dash-period-tabs__btn--active' : '' }}">{{ __('coin.stats.per_day') }}</button>
@@ -241,7 +241,7 @@
           <button type="button" class="coin-btn-quiet coin-stats-toolbar__export">{{ __('coin.stats.export_csv') }}</button>
         </div>
 
-        <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px;">
+        <div class="coin-grid-4">
           <div style="padding: 20px; border-radius: 16px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.04);">
             <div style="font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.14em; color: rgba(214,238,248,0.7);">{{ mb_strtoupper(__('coin.stats.profit')) }} {{ $this->periodLabel }}</div>
             <div style="margin-top: 12px; font-family: 'JetBrains Mono', monospace; font-size: 24px; color: #f0fbff;">{{ $this->periodTotal }}</div>
@@ -284,7 +284,7 @@
         </div>
 
         @php $statsAllocation = $this->planAllocation; @endphp
-        <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px;">
+        <div class="coin-grid-3">
           <div style="padding: 22px; border-radius: 16px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.035);">
             <span style="font-size: 15px; font-weight: 600;">{{ __('coin.stats.by_plan') }}</span>
             @if($statsAllocation['items'])

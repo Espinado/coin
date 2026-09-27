@@ -43,7 +43,7 @@
 
       <div>
         <div style="font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.14em; color: rgba(214,238,248,0.66);">{{ mb_strtoupper(__('coin.contract.investment_section')) }}</div>
-        <div style="margin-top: 14px; padding: 16px; border-radius: 14px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.04); display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; font-size: 13px;">
+        <div class="coin-grid-2" style="margin-top: 14px; padding: 16px; border-radius: 14px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.04); font-size: 13px;">
           <div><div style="font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: 0.12em; color: rgba(214,238,248,0.82);">{{ mb_strtoupper(__('coin.contract.principal')) }}</div><div class="coin-modal-value" style="margin-top: 8px;">{{ $contract->formattedPrincipal() }}</div></div>
           <div><div style="font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: 0.12em; color: rgba(214,238,248,0.82);">{{ mb_strtoupper(__('coin.contract.apr')) }}</div><div class="coin-modal-value" style="margin-top: 8px;">{{ $contract->formattedAnnualProfit() ?? '—' }}</div></div>
           <div><div style="font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: 0.12em; color: rgba(214,238,248,0.82);">{{ mb_strtoupper(__('coin.contract.daily_profit')) }}</div><div class="coin-modal-value" style="margin-top: 8px; color: oklch(0.9 0.12 192);">{{ $contract->formattedDailyProfit() }}</div></div>

@@ -1,4 +1,4 @@
-<section data-screen-label="{{ __('coin.nav.referrals') }}" style="padding: 28px 32px 40px; display: flex; flex-direction: column; gap: 16px;">
+<section data-screen-label="{{ __('coin.nav.referrals') }}" class="coin-dash-section">
   <div style="padding: 28px; border-radius: 18px; border: 1px solid rgba(180,180,255,0.18); background: linear-gradient(120deg, oklch(0.6 0.13 200 / 0.16), rgba(120,110,220,0.12));">
     <div style="font-size: 20px; font-weight: 600; letter-spacing: -0.02em;">{{ __('coin.referrals.hero_title') }}</div>
     <p style="margin: 10px 0 0; max-width: 620px; font-size: 14px; line-height: 1.6; color: rgba(214,238,248,0.75);">{{ __('coin.referrals.hero_sub') }}</p>
@@ -16,7 +16,7 @@
     </div>
   </div>
 
-  <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px;">
+  <div class="coin-grid-4">
     <div style="padding: 20px; border-radius: 16px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.04);">
       <div style="font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.14em; color: rgba(214,238,248,0.7);">{{ mb_strtoupper(__('coin.referrals.invited')) }}</div>
       <div style="margin-top: 12px; font-family: 'JetBrains Mono', monospace; font-size: 24px; color: #f0fbff;">{{ $referral?->invitationsCount() ?? 0 }}</div>
