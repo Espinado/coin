@@ -8,11 +8,10 @@
   $error = 'margin: 0; font-size: 12px; color: #ff8f8f;';
   $btnPrimary = 'padding: 11px 20px; border-radius: 10px; border: 1px solid oklch(0.86 0.11 195 / 0.5); background: linear-gradient(140deg, oklch(0.86 0.12 192), oklch(0.66 0.13 205)); color: #04121f; font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer; align-self: flex-start; box-shadow: 0 20px 46px -22px oklch(0.8 0.13 195 / 0.85);';
   $innerRow = 'padding: 14px 16px; border-radius: 12px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.03);';
-  $grid = 'display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; align-items: stretch;';
 @endphp
 
-<section data-screen-label="{{ __('coin.nav.settings') }}" style="padding: 28px 32px 40px; display: flex; flex-direction: column; gap: 16px;">
-  <div style="{{ $grid }}">
+<section data-screen-label="{{ __('coin.nav.settings') }}" class="coin-dash-section">
+  <div class="coin-grid-2">
     {{-- Профиль и контакты --}}
     <div style="{{ $card }}">
       <h2 style="{{ $cardTitle }}">{{ __('coin.profile.title') }}</h2>
@@ -77,7 +76,7 @@
     </div>
   </div>
 
-  <div style="{{ $grid }}">
+  <div class="coin-grid-2">
     {{-- E-mail --}}
     <div style="{{ $card }}">
       <h2 style="{{ $cardTitle }}">{{ __('coin.profile.email_section') }}</h2>
@@ -128,7 +127,7 @@
     </div>
   </div>
 
-  <div style="{{ $grid }}">
+  <div class="coin-grid-2">
     {{-- Кошелёк --}}
     <div style="{{ $card }}">
       <h2 style="{{ $cardTitle }}">{{ __('coin.profile.connected_wallet') }}</h2>
@@ -148,7 +147,7 @@
             <div style="margin-top: 9px; font-size: 13px; color: rgba(214,238,248,0.68);">{{ __('coin.profile.payout_address_empty') }}</div>
           @endif
         </div>
-        <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px;">
+        <div class="coin-grid-2 coin-grid-2--tight">
           <button type="button" wire:click="openWalletModal('USDT')" style="{{ $btnPrimary }}; width: 100%; text-align: center; align-self: stretch;">{{ filled($wallet?->payout_address) ? __('coin.profile.change_address') : __('coin.profile.add_address') }}</button>
           <button type="button" wire:click="openDisconnectWalletModal('USDT')" @disabled(! filled($wallet?->payout_address)) style="{{ $btnPrimary }}; width: 100%; text-align: center; align-self: stretch; opacity: {{ filled($wallet?->payout_address) ? '1' : '0.45' }};">{{ __('coin.profile.disconnect') }}</button>
         </div>
@@ -167,7 +166,7 @@
             <div style="margin-top: 9px; font-size: 13px; color: rgba(214,238,248,0.68);">{{ __('coin.profile.btc_payout_address_empty') }}</div>
           @endif
         </div>
-        <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px;">
+        <div class="coin-grid-2 coin-grid-2--tight">
           <button type="button" wire:click="openWalletModal('BTC')" style="{{ $btnPrimary }}; width: 100%; text-align: center; align-self: stretch;">{{ filled($wallet?->btc_payout_address) ? __('coin.profile.change_address') : __('coin.profile.add_address') }}</button>
           <button type="button" wire:click="openDisconnectWalletModal('BTC')" @disabled(! filled($wallet?->btc_payout_address)) style="{{ $btnPrimary }}; width: 100%; text-align: center; align-self: stretch; opacity: {{ filled($wallet?->btc_payout_address) ? '1' : '0.45' }};">{{ __('coin.profile.disconnect') }}</button>
         </div>

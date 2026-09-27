@@ -2703,6 +2703,19 @@ html.coin-nav-open .coin-nav-mobile {
   grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
 }
 
+/* Semantic layout grids (Settings first; prefer classes over [style*=] hacks) */
+.coin-grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  align-items: stretch;
+  min-width: 0;
+}
+
+.coin-grid-2--tight {
+  gap: 8px;
+}
+
 .coin-dash-panel {
   padding: 22px;
   border-radius: 16px;
@@ -3799,7 +3812,8 @@ html.coin-nav-open .coin-nav-mobile {
   .coin-dashboard [style*="grid-template-columns: repeat(5, minmax(0, 1fr))"]:not(.coin-contract-stats-grid),
   .coin-dashboard [style*="grid-template-columns: repeat(6, minmax(0, 1fr))"]:not(.coin-contract-stats-grid),
   .coin-dashboard [style*="grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.1fr)"]:not(.coin-contract-stats-grid),
-  .coin-wallet-actions-grid {
+  .coin-wallet-actions-grid,
+  .coin-grid-2 {
     grid-template-columns: minmax(0, 1fr) !important;
   }
 
