@@ -37,12 +37,17 @@
   </div>
 
   <div style="padding: 24px; border-radius: 16px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.035);">
+    @php
+      $referralTabBtnBase = 'box-sizing:border-box;width:100%;min-height:42px;padding:10px 14px;border-radius:10px;font-family:inherit;font-size:13px;text-align:center;cursor:pointer;appearance:none;-webkit-appearance:none;';
+      $referralTabBtnActive = $referralTabBtnBase.'border:1px solid oklch(0.86 0.11 195 / 0.5);background:linear-gradient(140deg, oklch(0.86 0.12 192), oklch(0.66 0.13 205));color:#04121f;font-weight:600;box-shadow:0 20px 46px -22px oklch(0.8 0.13 195 / 0.85);';
+      $referralTabBtnIdle = $referralTabBtnBase.'border:1px solid rgba(150,235,250,0.2);background:rgba(4,16,28,0.55);color:#e6f4fa;font-weight:500;box-shadow:none;';
+    @endphp
     <div class="coin-referral-tabs-bar">
-      <div class="coin-referral-tabs" role="tablist" aria-label="{{ __('coin.nav.referrals') }}">
-        <button type="button" role="tab" wire:click="setReferralTab('accruals')" aria-selected="{{ $referralTab === 'accruals' ? 'true' : 'false' }}" class="coin-referral-tabs__btn {{ $referralTab === 'accruals' ? 'coin-referral-tabs__btn--active' : '' }}">{{ __('coin.referrals.accrual_history') }}</button>
-        <button type="button" role="tab" wire:click="setReferralTab('invited')" aria-selected="{{ $referralTab === 'invited' ? 'true' : 'false' }}" class="coin-referral-tabs__btn {{ $referralTab === 'invited' ? 'coin-referral-tabs__btn--active' : '' }}">{{ __('coin.referrals.invited_list') }}</button>
+      <div class="coin-referral-tabs" role="tablist" aria-label="{{ __('coin.nav.referrals') }}" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;flex:1 1 280px;min-width:0;max-width:420px;">
+        <button type="button" role="tab" wire:click="setReferralTab('accruals')" aria-selected="{{ $referralTab === 'accruals' ? 'true' : 'false' }}" class="coin-referral-tabs__btn {{ $referralTab === 'accruals' ? 'coin-referral-tabs__btn--active' : '' }}" style="{{ $referralTab === 'accruals' ? $referralTabBtnActive : $referralTabBtnIdle }}">{{ __('coin.referrals.accrual_history') }}</button>
+        <button type="button" role="tab" wire:click="setReferralTab('invited')" aria-selected="{{ $referralTab === 'invited' ? 'true' : 'false' }}" class="coin-referral-tabs__btn {{ $referralTab === 'invited' ? 'coin-referral-tabs__btn--active' : '' }}" style="{{ $referralTab === 'invited' ? $referralTabBtnActive : $referralTabBtnIdle }}">{{ __('coin.referrals.invited_list') }}</button>
       </div>
-      <span class="coin-referral-tabs-bar__meta">
+      <span class="coin-referral-tabs-bar__meta" style="font-family:'JetBrains Mono',monospace;font-size:10.5px;color:rgba(214,238,248,0.66);">
         @if($referralTab === 'accruals')
           {{ __('coin.stats.total_entries', ['count' => $referralAccrualPage->total()]) }}
         @else

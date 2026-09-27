@@ -1445,10 +1445,10 @@ html.coin-nav-open .coin-nav-mobile {
 }
 
 /* Ghost / secondary action buttons → brand turquoise */
-.coin-app button[style*="rgba(150,235,250,0."]:not(.coin-burger):not(.coin-nav-item):not(.coin-btn-quiet):not(.coin-dash-period-tabs__btn):not([data-password-toggle]),
-.coin-shell button[style*="rgba(150,235,250,0."]:not(.coin-nav-item):not(.coin-btn-quiet):not(.coin-dash-period-tabs__btn):not([data-password-toggle]),
-.coin-shell button[style*="rgba(150,140,255"]:not(.coin-btn-quiet):not(.coin-dash-period-tabs__btn),
-.coin-shell button[style*="background: oklch(0.6 0.13 200 / 0.22)"]:not(.coin-btn-quiet):not(.coin-dash-period-tabs__btn),
+.coin-app button[style*="rgba(150,235,250,0."]:not(.coin-burger):not(.coin-nav-item):not(.coin-btn-quiet):not(.coin-dash-period-tabs__btn):not(.coin-referral-tabs__btn):not([data-password-toggle]),
+.coin-shell button[style*="rgba(150,235,250,0."]:not(.coin-nav-item):not(.coin-btn-quiet):not(.coin-dash-period-tabs__btn):not(.coin-referral-tabs__btn):not([data-password-toggle]),
+.coin-shell button[style*="rgba(150,140,255"]:not(.coin-btn-quiet):not(.coin-dash-period-tabs__btn):not(.coin-referral-tabs__btn),
+.coin-shell button[style*="background: oklch(0.6 0.13 200 / 0.22)"]:not(.coin-btn-quiet):not(.coin-dash-period-tabs__btn):not(.coin-referral-tabs__btn),
 .coin-auth button[style*="rgba(150,235,250,0."]:not(.coin-btn-quiet):not([data-password-toggle]),
 .coin-payment-overlay button[style*="rgba(150,235,250,0."]:not(.coin-btn-quiet),
 #guest-support-root button[style*="rgba(150,235,250,0."]:not(.coin-btn-quiet),
@@ -1462,10 +1462,10 @@ html.coin-nav-open .coin-nav-mobile {
   box-shadow: var(--coin-btn-shadow);
 }
 
-.coin-app button[style*="rgba(150,235,250,0."]:not(.coin-burger):not(.coin-nav-item):not(.coin-btn-quiet):not(.coin-dash-period-tabs__btn):not([data-password-toggle]):hover,
-.coin-shell button[style*="rgba(150,235,250,0."]:not(.coin-nav-item):not(.coin-btn-quiet):not(.coin-dash-period-tabs__btn):not([data-password-toggle]):hover,
-.coin-shell button[style*="rgba(150,140,255"]:not(.coin-btn-quiet):not(.coin-dash-period-tabs__btn):hover,
-.coin-shell button[style*="background: oklch(0.6 0.13 200 / 0.22)"]:not(.coin-btn-quiet):not(.coin-dash-period-tabs__btn):hover,
+.coin-app button[style*="rgba(150,235,250,0."]:not(.coin-burger):not(.coin-nav-item):not(.coin-btn-quiet):not(.coin-dash-period-tabs__btn):not(.coin-referral-tabs__btn):not([data-password-toggle]):hover,
+.coin-shell button[style*="rgba(150,235,250,0."]:not(.coin-nav-item):not(.coin-btn-quiet):not(.coin-dash-period-tabs__btn):not(.coin-referral-tabs__btn):not([data-password-toggle]):hover,
+.coin-shell button[style*="rgba(150,140,255"]:not(.coin-btn-quiet):not(.coin-dash-period-tabs__btn):not(.coin-referral-tabs__btn):hover,
+.coin-shell button[style*="background: oklch(0.6 0.13 200 / 0.22)"]:not(.coin-btn-quiet):not(.coin-dash-period-tabs__btn):not(.coin-referral-tabs__btn):hover,
 .coin-auth button[style*="rgba(150,235,250,0."]:not(.coin-btn-quiet):not([data-password-toggle]):hover,
 .coin-payment-overlay button[style*="rgba(150,235,250,0."]:not(.coin-btn-quiet):hover,
 #guest-support-root button[style*="rgba(150,235,250,0."]:not(.coin-btn-quiet):hover,
@@ -2849,13 +2849,15 @@ html.coin-nav-open .coin-nav-mobile {
 }
 
 .coin-referral-tabs__btn {
+  appearance: none;
+  -webkit-appearance: none;
   box-sizing: border-box;
   width: 100%;
   min-height: 42px;
   padding: 10px 14px;
   border-radius: 10px;
   border: 1px solid rgba(150, 235, 250, 0.2);
-  background: rgba(150, 235, 250, 0.06);
+  background: rgba(4, 16, 28, 0.55);
   color: #e6f4fa;
   font-family: inherit;
   font-size: 13px;
