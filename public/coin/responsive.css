@@ -3353,6 +3353,36 @@ html.coin-nav-open .coin-nav-mobile {
     overflow-y: auto;
     overscroll-behavior: contain;
   }
+
+  .coin-dashboard .coin-nav-overlay {
+    display: none !important;
+  }
+}
+
+/*
+ * Landing header compact only (≤1024 or short landscape).
+ * Do not fold landing section / footer layouts into tablet here — those stay on 768.
+ */
+@media (max-width: 1024px), (orientation: landscape) and (max-height: 500px) {
+  .coin-landing .coin-nav-desktop,
+  .coin-landing .coin-header-actions {
+    display: none !important;
+  }
+
+  .coin-landing .coin-burger {
+    display: flex !important;
+    margin-left: auto;
+  }
+
+  html.coin-nav-open .coin-landing .coin-header {
+    position: relative;
+    z-index: 130 !important;
+  }
+
+  html.coin-nav-open .coin-landing .coin-nav-overlay {
+    display: block;
+    right: min(340px, 88vw);
+  }
 }
 
 /*
@@ -3369,7 +3399,14 @@ html.coin-nav-open .coin-nav-mobile {
   }
 
   .coin-dashboard .coin-nav-overlay {
-    display: none !important;
+    display: none;
+    z-index: 130;
+    background: rgba(4, 16, 28, 0.58);
+    cursor: pointer;
+  }
+
+  html.coin-nav-open .coin-dashboard .coin-nav-overlay {
+    display: block !important;
   }
 
   .coin-sidebar {
@@ -4098,7 +4135,14 @@ html.coin-nav-open .coin-nav-mobile {
   }
 
   .coin-dashboard .coin-nav-overlay {
-    display: none !important;
+    display: none;
+    z-index: 130;
+    background: rgba(4, 16, 28, 0.58);
+    cursor: pointer;
+  }
+
+  html.coin-nav-open .coin-dashboard .coin-nav-overlay {
+    display: block !important;
   }
 
   html.coin-nav-open .coin-landing .coin-nav-overlay {
