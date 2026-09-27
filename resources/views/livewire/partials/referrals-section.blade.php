@@ -1,9 +1,3 @@
-@php
-  $tabButton = fn (string $tab, string $label) => $referralTab === $tab
-    ? 'padding: 10px 16px; border-radius: 10px; border: 1px solid oklch(0.86 0.11 195 / 0.5); background: linear-gradient(140deg, oklch(0.86 0.12 192), oklch(0.66 0.13 205)); color: #04121f; font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer; box-shadow: 0 20px 46px -22px oklch(0.8 0.13 195 / 0.85);'
-    : 'padding: 10px 16px; border-radius: 10px; border: 1px solid rgba(150,235,250,0.2); background: rgba(150,235,250,0.06); color: #e6f4fa; font-family: inherit; font-size: 13px; font-weight: 500; cursor: pointer;';
-@endphp
-
 <section data-screen-label="{{ __('coin.nav.referrals') }}" style="padding: 28px 32px 40px; display: flex; flex-direction: column; gap: 16px;">
   <div style="padding: 28px; border-radius: 18px; border: 1px solid rgba(180,180,255,0.18); background: linear-gradient(120deg, oklch(0.6 0.13 200 / 0.16), rgba(120,110,220,0.12));">
     <div style="font-size: 20px; font-weight: 600; letter-spacing: -0.02em;">{{ __('coin.referrals.hero_title') }}</div>
@@ -43,12 +37,12 @@
   </div>
 
   <div style="padding: 24px; border-radius: 16px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.035);">
-    <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;">
-      <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-        <button type="button" wire:click="setReferralTab('accruals')" style="{{ $tabButton('accruals', __('coin.referrals.accrual_history')) }}">{{ __('coin.referrals.accrual_history') }}</button>
-        <button type="button" wire:click="setReferralTab('invited')" style="{{ $tabButton('invited', __('coin.referrals.invited_list')) }}">{{ __('coin.referrals.invited_list') }}</button>
+    <div class="coin-referral-tabs-bar">
+      <div class="coin-referral-tabs" role="tablist" aria-label="{{ __('coin.nav.referrals') }}">
+        <button type="button" role="tab" wire:click="setReferralTab('accruals')" aria-selected="{{ $referralTab === 'accruals' ? 'true' : 'false' }}" class="coin-referral-tabs__btn {{ $referralTab === 'accruals' ? 'coin-referral-tabs__btn--active' : '' }}">{{ __('coin.referrals.accrual_history') }}</button>
+        <button type="button" role="tab" wire:click="setReferralTab('invited')" aria-selected="{{ $referralTab === 'invited' ? 'true' : 'false' }}" class="coin-referral-tabs__btn {{ $referralTab === 'invited' ? 'coin-referral-tabs__btn--active' : '' }}">{{ __('coin.referrals.invited_list') }}</button>
       </div>
-      <span style="font-family: 'JetBrains Mono', monospace; font-size: 10.5px; color: rgba(214,238,248,0.66);">
+      <span class="coin-referral-tabs-bar__meta">
         @if($referralTab === 'accruals')
           {{ __('coin.stats.total_entries', ['count' => $referralAccrualPage->total()]) }}
         @else

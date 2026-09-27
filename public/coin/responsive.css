@@ -2831,6 +2831,55 @@ html.coin-nav-open .coin-nav-mobile {
   flex-wrap: wrap;
 }
 
+.coin-referral-tabs-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.coin-referral-tabs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  flex: 1 1 280px;
+  min-width: 0;
+  max-width: 420px;
+}
+
+.coin-referral-tabs__btn {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 42px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(150, 235, 250, 0.2);
+  background: rgba(150, 235, 250, 0.06);
+  color: #e6f4fa;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  text-align: center;
+  cursor: pointer;
+  box-shadow: none;
+}
+
+.coin-referral-tabs__btn--active {
+  border-color: oklch(0.86 0.11 195 / 0.5);
+  background: linear-gradient(140deg, oklch(0.86 0.12 192), oklch(0.66 0.13 205));
+  color: #04121f;
+  font-weight: 600;
+  box-shadow: 0 20px 46px -22px oklch(0.8 0.13 195 / 0.85);
+}
+
+.coin-referral-tabs-bar__meta {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10.5px;
+  color: rgba(214, 238, 248, 0.66);
+  flex: none;
+}
+
 .coin-dash-period-tabs__btn {
   position: relative;
   padding: 7px 12px;
@@ -3576,7 +3625,8 @@ html.coin-nav-open .coin-nav-mobile {
   }
 
   .coin-dash-period-tabs__btn,
-  .coin-stats-toolbar__periods .coin-dash-period-tabs__btn {
+  .coin-stats-toolbar__periods .coin-dash-period-tabs__btn,
+  .coin-referral-tabs__btn {
     min-height: 44px;
     padding-top: 11px;
     padding-bottom: 11px;
