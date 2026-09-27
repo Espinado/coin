@@ -43,7 +43,7 @@
                     @if($ticket->status !== \App\Models\SupportTicket::STATUS_CLOSED)
                         <form wire:submit.prevent="sendReply" wire:key="guest-support-reply-{{ $ticket->id }}-{{ $replyFormKey }}" style="display:flex;flex-direction:column;gap:10px;">
                             <textarea wire:model="replyBody" rows="3" maxlength="5000" placeholder="Type a message..."
-                                style="width:100%;box-sizing:border-box;padding:12px 14px;border-radius:10px;border:1px solid rgba(150,235,250,0.16);background:rgba(4,16,28,0.6);color:#eafcff;font-size:14px;resize:vertical;"></textarea>
+                                style="width:100%;box-sizing:border-box;padding:12px 14px;border-radius:10px;border:1px solid rgba(150,235,250,0.16);background:rgba(4,16,28,0.6);color:#eafcff;font-size:16px;resize:vertical;"></textarea>
                             @error('replyBody')<div style="font-size:12px;color:oklch(0.78 0.16 25);">{{ $message }}</div>@enderror
                             <button type="submit" style="align-self:flex-start;padding:11px 18px;border-radius:10px;border:1px solid oklch(0.86 0.11 195 / 0.5);background:linear-gradient(140deg, oklch(0.86 0.12 192), oklch(0.66 0.13 205));color:#04121f;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;">Send message</button>
                         </form>
@@ -57,18 +57,18 @@
                         <div>
                             <div style="font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.12em;color:rgba(214,238,248,0.68);">EMAIL *</div>
                             <input type="email" wire:model="guestEmail" required maxlength="255" placeholder="you@example.com"
-                                style="width:100%;box-sizing:border-box;margin-top:8px;padding:12px 14px;border-radius:10px;border:1px solid rgba(150,235,250,0.16);background:rgba(4,16,28,0.6);color:#eafcff;font-size:14px;">
+                                style="width:100%;box-sizing:border-box;margin-top:8px;padding:12px 14px;border-radius:10px;border:1px solid rgba(150,235,250,0.16);background:rgba(4,16,28,0.6);color:#eafcff;font-size:16px;">
                             @error('guestEmail')<div style="margin-top:8px;font-size:12px;color:oklch(0.78 0.16 25);">{{ $message }}</div>@enderror
                         </div>
                         <div>
                             <div style="font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.12em;color:rgba(214,238,248,0.68);">SUBJECT</div>
                             <input type="text" wire:model="newSubject" maxlength="120"
-                                style="width:100%;box-sizing:border-box;margin-top:8px;padding:12px 14px;border-radius:10px;border:1px solid rgba(150,235,250,0.16);background:rgba(4,16,28,0.6);color:#eafcff;font-size:14px;">
+                                style="width:100%;box-sizing:border-box;margin-top:8px;padding:12px 14px;border-radius:10px;border:1px solid rgba(150,235,250,0.16);background:rgba(4,16,28,0.6);color:#eafcff;font-size:16px;">
                             @error('newSubject')<div style="margin-top:8px;font-size:12px;color:oklch(0.78 0.16 25);">{{ $message }}</div>@enderror
                         </div>
                         <div>
                             <div style="font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.12em;color:rgba(214,238,248,0.68);">CATEGORY</div>
-                            <select wire:model="newCategory" style="width:100%;box-sizing:border-box;margin-top:8px;padding:12px 14px;border-radius:10px;border:1px solid rgba(150,235,250,0.16);background:rgba(4,16,28,0.6);color:#eafcff;font-size:14px;">
+                            <select wire:model="newCategory" style="width:100%;box-sizing:border-box;margin-top:8px;padding:12px 14px;border-radius:10px;border:1px solid rgba(150,235,250,0.16);background:rgba(4,16,28,0.6);color:#eafcff;font-size:16px;">
                                 @foreach($this->ticketCategories as $value => $label)
                                     <option value="{{ $value }}">{{ $label }}</option>
                                 @endforeach
@@ -77,7 +77,7 @@
                         <div>
                             <div style="font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.12em;color:rgba(214,238,248,0.68);">MESSAGE</div>
                             <textarea wire:model="newBody" rows="4" maxlength="5000" placeholder="How can we help?"
-                                style="width:100%;box-sizing:border-box;margin-top:8px;padding:12px 14px;border-radius:10px;border:1px solid rgba(150,235,250,0.16);background:rgba(4,16,28,0.6);color:#eafcff;font-size:14px;resize:vertical;"></textarea>
+                                style="width:100%;box-sizing:border-box;margin-top:8px;padding:12px 14px;border-radius:10px;border:1px solid rgba(150,235,250,0.16);background:rgba(4,16,28,0.6);color:#eafcff;font-size:16px;resize:vertical;"></textarea>
                             @error('newBody')<div style="margin-top:8px;font-size:12px;color:oklch(0.78 0.16 25);">{{ $message }}</div>@enderror
                         </div>
                         @if($this->turnstileEnabled)

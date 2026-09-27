@@ -31,22 +31,27 @@ body {
   -webkit-tap-highlight-color: rgba(150, 235, 250, 0.12);
 }
 
-/* Prevent iOS Safari zoom on input focus (< 16px triggers zoom) */
+/* Prevent iOS Safari zoom on input focus (< 16px triggers zoom).
+   !important beats accidental inline font-size < 16px. */
 .coin-auth input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]),
 .coin-auth select,
 .coin-auth textarea,
 .coin-shell input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="hidden"]),
 .coin-shell select,
 .coin-shell textarea,
+.coin-payment-overlay input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]),
+.coin-payment-overlay select,
+.coin-payment-overlay textarea,
 #guest-support-root input,
 #guest-support-root select,
 #guest-support-root textarea {
-  font-size: 16px;
+  font-size: 16px !important;
 }
 
 .coin-auth input[inputmode="numeric"][maxlength="6"],
-.coin-auth input[pattern="[0-9]{6}"] {
-  font-size: 24px;
+.coin-auth input[pattern="[0-9]{6}"],
+.coin-payment-overlay input[inputmode="numeric"][maxlength="6"] {
+  font-size: 24px !important;
 }
 
 .coin-payment-overlay__stage {
@@ -3297,7 +3302,8 @@ html.coin-nav-open .coin-nav-mobile {
   }
 }
 
-@media (min-width: 769px) {
+/* Desktop sidebar only when there is enough height — phone landscape stays compact */
+@media (min-width: 769px) and (min-height: 501px) {
   .coin-shell {
     padding-left: 248px;
   }
@@ -3387,7 +3393,7 @@ html.coin-nav-open .coin-nav-mobile {
   }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 768px), (orientation: landscape) and (max-height: 500px) {
   .coin-dashboard section[style*="padding: 28px 32px"],
   .coin-dash-section {
     padding: 20px 16px 32px !important;
@@ -3689,7 +3695,7 @@ html.coin-nav-open .coin-nav-mobile {
   }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 768px), (orientation: landscape) and (max-height: 500px) {
   .coin-dashboard [style*="grid-template-columns: repeat(4, minmax(0, 1fr))"]:not(.coin-contract-stats-grid),
   .coin-dashboard [style*="grid-template-columns: repeat(3, minmax(0, 1fr))"]:not(.coin-contract-stats-grid),
   .coin-dashboard [style*="grid-template-columns: repeat(2, minmax(0, 1fr))"]:not(.coin-contract-stats-grid),
@@ -3725,7 +3731,7 @@ html.coin-nav-open .coin-nav-mobile {
   }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 768px), (orientation: landscape) and (max-height: 500px) {
   .coin-header {
     padding:
       calc(14px + var(--coin-safe-top))
@@ -4168,7 +4174,7 @@ html.coin-nav-open .coin-nav-mobile {
   object-fit: contain;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 768px), (orientation: landscape) and (max-height: 500px) {
   .coin-auth {
     padding: 48px 24px !important;
     gap: 28px !important;
@@ -4274,7 +4280,7 @@ html.coin-nav-open .coin-nav-mobile {
   display: block;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 768px), (orientation: landscape) and (max-height: 500px) {
   .coin-scroll-top {
     right: calc(16px + var(--coin-safe-right));
     bottom: var(--coin-scroll-top-bottom-mobile);

@@ -17,7 +17,7 @@
     <link rel="stylesheet" href="{{ asset('coin/responsive.css') }}?v={{ file_exists(public_path('coin/responsive.css')) ? filemtime(public_path('coin/responsive.css')) : 1 }}" />
     <style>
       body { margin: 0; background: #04101c; color: #e6f4fa; font-family: 'Sora', 'Helvetica Neue', Helvetica, sans-serif; -webkit-font-smoothing: antialiased; }
-      @media (min-width: 769px) {
+      @media (min-width: 769px) and (min-height: 501px) {
         .coin-sidebar {
           position: fixed !important;
           top: 0;
@@ -64,7 +64,7 @@
         .coin-contract-stats-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
         .coin-contract-stats-grid--4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       }
-      @media (max-width: 768px) {
+      @media (max-width: 768px), (orientation: landscape) and (max-height: 500px) {
         .coin-contract-stats-grid,
         .coin-contract-stats-grid--4 {
           grid-template-columns: repeat(2, minmax(0, 1fr));

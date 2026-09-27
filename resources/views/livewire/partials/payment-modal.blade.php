@@ -134,7 +134,7 @@
         @elseif($isPayout)
         <div style="margin-top: 20px;">
           <label style="display: block; font-size: 12.5px; color: rgba(214,238,248,0.78); margin-bottom: 8px;">{{ __('coin.payment_modal.payout_password') }}</label>
-          <input type="password" wire:model="payoutPassword" autocomplete="current-password" placeholder="{{ __('coin.payment_modal.payout_password_placeholder') }}" style="width: 100%; box-sizing: border-box; padding: 12px 14px; border-radius: 10px; border: 1px solid rgba(150,235,250,0.18); background: rgba(4,16,28,0.55); color: #f0fbff; font-family: inherit; font-size: 14px;" />
+          <input type="password" wire:model="payoutPassword" autocomplete="current-password" placeholder="{{ __('coin.payment_modal.payout_password_placeholder') }}" style="width: 100%; box-sizing: border-box; padding: 12px 14px; border-radius: 10px; border: 1px solid rgba(150,235,250,0.18); background: rgba(4,16,28,0.55); color: #f0fbff; font-family: inherit; font-size: 16px;" />
           @error('payoutPassword')<p style="margin: 8px 0 0; font-size: 12px; color: #ff8f8f;">{{ $message }}</p>@enderror
         </div>
         <button type="button" wire:click="beginPayoutVerification" wire:loading.attr="disabled" wire:target="beginPayoutVerification" style="width: 100%; margin-top: 22px; padding: 13px; border-radius: 11px; border: 1px solid oklch(0.86 0.11 195 / 0.5); background: linear-gradient(140deg, oklch(0.86 0.12 192), oklch(0.66 0.13 205)); color: #04121f; font-family: inherit; font-size: 14px; font-weight: 600; cursor: pointer;">

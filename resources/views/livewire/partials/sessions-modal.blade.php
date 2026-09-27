@@ -57,7 +57,7 @@
           <div style="margin-top: 4px; font-size: 12px; color: rgba(214,238,248,0.66); line-height: 1.45;">{{ __('coin.profile.sessions_revoke_all_hint') }}</div>
         </div>
         <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
-          <input type="password" wire:model="sessionsRevokePassword" autocomplete="current-password" placeholder="{{ __('coin.profile.sessions_password_placeholder') }}" style="flex: 1; min-width: 180px; box-sizing: border-box; padding: 10px 12px; border-radius: 10px; border: 1px solid rgba(150,235,250,0.14); background: rgba(4,16,28,0.5); font-size: 13px; color: #f0fbff;" />
+          <input type="password" wire:model="sessionsRevokePassword" autocomplete="current-password" placeholder="{{ __('coin.profile.sessions_password_placeholder') }}" style="flex: 1; min-width: 180px; box-sizing: border-box; padding: 10px 12px; border-radius: 10px; border: 1px solid rgba(150,235,250,0.14); background: rgba(4,16,28,0.5); font-size: 16px; color: #f0fbff;" />
           <button type="button" wire:click="revokeOtherSessions" wire:loading.attr="disabled" wire:target="revokeOtherSessions" style="padding: 10px 16px; border-radius: 10px; border: 1px solid oklch(0.86 0.11 195 / 0.5); background: linear-gradient(140deg, oklch(0.86 0.12 192), oklch(0.66 0.13 205)); color: #04121f; font-family: inherit; font-size: 12.5px; font-weight: 600; cursor: pointer;">
             {{ __('coin.profile.sessions_revoke_all') }}
           </button>

@@ -32,8 +32,13 @@
     }
   });
 
+  function isCompactViewport() {
+    return window.innerWidth <= 768
+      || (window.matchMedia('(orientation: landscape)').matches && window.innerHeight <= 500);
+  }
+
   window.addEventListener('resize', function () {
-    if (window.innerWidth > 768) {
+    if (! isCompactViewport()) {
       closeNav();
     }
   });
