@@ -51,31 +51,12 @@
     <div style="{{ $card }}">
       <h2 style="{{ $cardTitle }}">{{ __('coin.profile.security') }}</h2>
       <div style="{{ $cardBody }}; gap: 12px;">
-        <div style="{{ $innerRow }}; display: flex; flex-direction: column; gap: 14px;">
-          <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;">
-            <div>
-              <div style="font-size: 13.5px;">{{ __('coin.profile.two_factor') }}</div>
-              <div style="margin-top: 4px; {{ $hint }}">{{ __('coin.profile.email_two_factor_hint') }}</div>
-            </div>
-            @if($user->hasEmailTwoFactorEnabled())
-            <span style="padding: 5px 11px; border-radius: 7px; background: oklch(0.6 0.14 160 / 0.2); border: 1px solid oklch(0.7 0.14 160 / 0.4); font-family: 'JetBrains Mono', monospace; font-size: 10px; color: oklch(0.88 0.14 160);">{{ mb_strtoupper(__('coin.profile.enabled')) }}</span>
-            @else
-            <span style="padding: 5px 11px; border-radius: 7px; background: rgba(150,235,250,0.06); border: 1px solid rgba(150,235,250,0.16); font-family: 'JetBrains Mono', monospace; font-size: 10px; color: rgba(214,238,248,0.68);">{{ mb_strtoupper(__('coin.profile.disabled')) }}</span>
-            @endif
+        <div style="{{ $innerRow }}; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;">
+          <div>
+            <div style="font-size: 13.5px;">{{ __('coin.profile.two_factor') }}</div>
+            <div style="margin-top: 4px; {{ $hint }}">{{ __('coin.profile.email_two_factor_hint') }}</div>
           </div>
-          @if($user->hasEmailTwoFactorEnabled())
-          <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
-            <input type="password" wire:model="profileTwoFactorPassword" autocomplete="current-password" placeholder="{{ __('coin.profile.two_factor_password_placeholder') }}" style="{{ $input }}; flex: 1; min-width: 180px;" />
-            <button type="button" wire:click="disableEmailTwoFactor" wire:loading.attr="disabled" wire:target="disableEmailTwoFactor" style="{{ $btnPrimary }}; padding: 10px 16px; font-size: 12.5px;">{{ __('coin.profile.disable_two_factor') }}</button>
-          </div>
-          @error('profileTwoFactorPassword')<p style="{{ $error }}">{{ $message }}</p>@enderror
-          @else
-          <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
-            <input type="password" wire:model="profileTwoFactorPassword" autocomplete="current-password" placeholder="{{ __('coin.profile.two_factor_password_placeholder') }}" style="{{ $input }}; flex: 1; min-width: 180px;" />
-            <button type="button" wire:click="enableEmailTwoFactor" wire:loading.attr="disabled" wire:target="enableEmailTwoFactor" style="{{ $btnPrimary }}; padding: 10px 16px; font-size: 12.5px;">{{ __('coin.profile.enable_two_factor') }}</button>
-          </div>
-          @error('profileTwoFactorPassword')<p style="{{ $error }}">{{ $message }}</p>@enderror
-          @endif
+          <span style="padding: 5px 11px; border-radius: 7px; background: oklch(0.6 0.14 160 / 0.2); border: 1px solid oklch(0.7 0.14 160 / 0.4); font-family: 'JetBrains Mono', monospace; font-size: 10px; color: oklch(0.88 0.14 160);">{{ mb_strtoupper(__('coin.profile.required')) }}</span>
         </div>
         <div style="{{ $innerRow }}; display: flex; align-items: center; justify-content: space-between; gap: 16px;">
           <div>

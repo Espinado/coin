@@ -31,6 +31,7 @@ class RegisteredUserController extends Controller
             'email' => $validated['email'],
             'phone' => $validated['phone'],
             'password' => Hash::make($validated['password']),
+            'email_two_factor_enabled' => true,
         ]);
 
         app(ReferralService::class)->attributeReferrerOnSignup($user, $request);

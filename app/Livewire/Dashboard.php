@@ -222,8 +222,6 @@ class Dashboard extends Component
 
     public string $profileNewPasswordConfirmation = '';
 
-    public string $profileTwoFactorPassword = '';
-
     public string $profilePhone = '';
 
     public string $profileTelegram = '';
@@ -1665,28 +1663,6 @@ class Dashboard extends Component
         }
     }
 
-    public function enableEmailTwoFactor(): void
-    {
-        $this->resetActionFeedback();
-
-        if ($this->user->hasEmailTwoFactorEnabled()) {
-            return;
-        }
-
-        $this->validate([
-            'profileTwoFactorPassword' => ['required', 'string'],
-        ], [], [
-            'profileTwoFactorPassword' => __('coin.profile.two_factor_password'),
-        ]);
-
-        $this->assertCurrentUserPassword($this->profileTwoFactorPassword, 'profileTwoFactorPassword');
-
-        $this->user->update(['email_two_factor_enabled' => true]);
-        $this->profileTwoFactorPassword = '';
-        $this->reloadPortfolioData();
-        $this->setActionFeedback(__('coin.messages.two_factor_enabled'), 'success');
-    }
-
     public function toggleNotifyProfitCredit(): void
     {
         $this->toggleNotificationPreference(
@@ -1721,28 +1697,6 @@ class Dashboard extends Component
             'coin.messages.notify_referral_activity_enabled',
             'coin.messages.notify_referral_activity_disabled',
         );
-    }
-
-    public function disableEmailTwoFactor(): void
-    {
-        $this->resetActionFeedback();
-
-        if (! $this->user->hasEmailTwoFactorEnabled()) {
-            return;
-        }
-
-        $this->validate([
-            'profileTwoFactorPassword' => ['required', 'string'],
-        ], [], [
-            'profileTwoFactorPassword' => __('coin.profile.two_factor_password'),
-        ]);
-
-        $this->assertCurrentUserPassword($this->profileTwoFactorPassword, 'profileTwoFactorPassword');
-
-        $this->user->update(['email_two_factor_enabled' => false]);
-        $this->profileTwoFactorPassword = '';
-        $this->reloadPortfolioData();
-        $this->setActionFeedback(__('coin.messages.two_factor_disabled'), 'success');
     }
 
     public function openSessionsModal(): void

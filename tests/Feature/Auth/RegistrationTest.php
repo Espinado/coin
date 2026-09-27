@@ -32,6 +32,7 @@ class RegistrationTest extends TestCase
         $this->assertDatabaseHas('users', [
             'email' => 'test@example.com',
             'phone' => '+79001234567',
+            'email_two_factor_enabled' => true,
         ]);
     }
 

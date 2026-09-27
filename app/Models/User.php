@@ -33,21 +33,14 @@ class User extends Authenticatable implements MustVerifyEmail
         'telegram',
         'country_code',
         'last_login_at',
-        'admin_lead_note',
         'password',
-        'referred_by_user_id',
         'account_slug',
         'epoch_label',
-        'active_tflops',
         'nodes_label',
-        'expected_daily_reward',
-        'is_blocked',
-        'kyc_status',
         'avg_epoch_label',
         'availability_label',
         'load_label',
         'next_expiry_label',
-        'email_verified_at',
         'email_two_factor_enabled',
         'notify_profit_credit',
         'notify_contract_expiry',
@@ -78,7 +71,8 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function hasEmailTwoFactorEnabled(): bool
     {
-        return (bool) $this->email_two_factor_enabled;
+        // Login email 2FA is mandatory for all users; the DB flag is legacy/unused.
+        return true;
     }
 
     public function sendEmailVerificationNotification(): void

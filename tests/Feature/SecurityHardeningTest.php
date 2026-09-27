@@ -112,22 +112,13 @@ class SecurityHardeningTest extends TestCase
             ->assertRedirect(route('login', absolute: false));
     }
 
-    public function test_enable_email_two_factor_requires_password(): void
+    public function test_login_email_two_factor_is_always_enabled(): void
     {
-        $user = User::factory()->create(['password' => 'SecretPass1!']);
+        $user = User::factory()->create([
+            'email_two_factor_enabled' => false,
+        ]);
 
-        Livewire::actingAs($user)
-            ->test(Dashboard::class)
-            ->call('enableEmailTwoFactor')
-            ->assertHasErrors(['profileTwoFactorPassword']);
-
-        Livewire::actingAs($user)
-            ->test(Dashboard::class)
-            ->set('profileTwoFactorPassword', 'SecretPass1!')
-            ->call('enableEmailTwoFactor')
-            ->assertHasNoErrors();
-
-        $this->assertTrue($user->fresh()->hasEmailTwoFactorEnabled());
+        $this->assertTrue($user->hasEmailTwoFactorEnabled());
     }
 
     public function test_rejected_withdrawal_cannot_be_marked_paid(): void

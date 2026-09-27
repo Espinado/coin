@@ -133,7 +133,11 @@ class LoginTwoFactorService
 
     private function cacheKey(Request $request): string
     {
-        return self::CACHE_PREFIX.$request->session()->getId();
+        $userId = (int) $request->session()->get(self::SESSION_USER_KEY);
+
+        // Key by user id so a session-id rotation between password and code steps
+        // does not invalidate a still-pending challenge.
+        return self::CACHE_PREFIX.($userId > 0 ? (string) $userId : $request->session()->getId());
     }
 
     private function throttleKey(Request $request): string

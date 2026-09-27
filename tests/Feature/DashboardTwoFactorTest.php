@@ -6,6 +6,7 @@ use App\Livewire\Dashboard;
 use App\Models\User;
 use Database\Seeders\PlanSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Hash;
 use Livewire\Livewire;
 use Tests\TestCase;
 
@@ -25,7 +26,7 @@ class DashboardTwoFactorTest extends TestCase
         $this->seed(PlanSeeder::class);
     }
 
-    public function test_user_can_enable_email_two_factor_with_current_password(): void
+    public function test_profile_shows_two_factor_as_required_without_toggle(): void
     {
         $user = User::factory()->create([
             'password' => 'SecretPass1!',
@@ -33,48 +34,19 @@ class DashboardTwoFactorTest extends TestCase
 
         Livewire::actingAs($user)
             ->test(Dashboard::class)
-            ->set('profileTwoFactorPassword', 'SecretPass1!')
-            ->call('enableEmailTwoFactor')
-            ->assertHasNoErrors()
-            ->assertSet('user.email_two_factor_enabled', true);
+            ->call('setSection', 6)
+            ->assertSee(__('coin.profile.two_factor'), false)
+            ->assertSee(mb_strtoupper(__('coin.profile.required')), false)
+            ->assertDontSee(__('coin.profile.enable_two_factor'), false)
+            ->assertDontSee(__('coin.profile.disable_two_factor'), false);
 
-        $this->assertTrue($user->fresh()->hasEmailTwoFactorEnabled());
+        $this->assertFalse(method_exists(Dashboard::class, 'enableEmailTwoFactor'));
+        $this->assertFalse(method_exists(Dashboard::class, 'disableEmailTwoFactor'));
     }
 
-    public function test_user_can_disable_email_two_factor_with_current_password(): void
+    public function test_password_change_still_works_without_two_factor_toggle(): void
     {
-        $user = User::factory()->withEmailTwoFactor()->create([
-            'password' => 'SecretPass1!',
-        ]);
-
-        Livewire::actingAs($user)
-            ->test(Dashboard::class)
-            ->set('profileTwoFactorPassword', 'SecretPass1!')
-            ->call('disableEmailTwoFactor')
-            ->assertHasNoErrors()
-            ->assertSet('user.email_two_factor_enabled', false);
-
-        $this->assertFalse($user->fresh()->hasEmailTwoFactorEnabled());
-    }
-
-    public function test_disable_email_two_factor_rejects_wrong_password(): void
-    {
-        $user = User::factory()->withEmailTwoFactor()->create([
-            'password' => 'SecretPass1!',
-        ]);
-
-        Livewire::actingAs($user)
-            ->test(Dashboard::class)
-            ->set('profileTwoFactorPassword', 'WrongPass1!')
-            ->call('disableEmailTwoFactor')
-            ->assertHasErrors(['profileTwoFactorPassword' => __('coin.auth.login_password_invalid')]);
-
-        $this->assertTrue($user->fresh()->hasEmailTwoFactorEnabled());
-    }
-
-    public function test_disable_email_two_factor_works_after_password_change_in_same_session(): void
-    {
-        $user = User::factory()->withEmailTwoFactor()->create([
+        $user = User::factory()->create([
             'password' => 'SecretPass1!',
         ]);
 
@@ -84,11 +56,8 @@ class DashboardTwoFactorTest extends TestCase
             ->set('profileNewPassword', 'NewSecret2!')
             ->set('profileNewPasswordConfirmation', 'NewSecret2!')
             ->call('saveProfilePassword')
-            ->assertHasNoErrors()
-            ->set('profileTwoFactorPassword', 'NewSecret2!')
-            ->call('disableEmailTwoFactor')
             ->assertHasNoErrors();
 
-        $this->assertFalse($user->fresh()->hasEmailTwoFactorEnabled());
+        $this->assertTrue(Hash::check('NewSecret2!', $user->fresh()->password));
     }
 }

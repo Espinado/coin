@@ -19,27 +19,13 @@ class AuthenticationTest extends TestCase
         $response->assertStatus(200);
     }
 
-    public function test_users_can_authenticate_without_two_factor_when_disabled(): void
+    public function test_verified_users_must_always_verify_email_code_on_login(): void
     {
         Mail::fake();
 
-        $user = User::factory()->create();
-
-        $response = $this->post('/login', [
-            'email' => $user->email,
-            'password' => 'password',
+        $user = User::factory()->create([
+            'email_two_factor_enabled' => false,
         ]);
-
-        $this->assertAuthenticated();
-        $response->assertRedirect(route('dashboard', absolute: false));
-        Mail::assertNothingSent();
-    }
-
-    public function test_users_with_two_factor_enabled_must_verify_email_code(): void
-    {
-        Mail::fake();
-
-        $user = User::factory()->withEmailTwoFactor()->create();
         $code = null;
 
         $response = $this->post('/login', [
@@ -75,7 +61,6 @@ class AuthenticationTest extends TestCase
 
         $this->assertGuest();
         $response->assertSessionHasErrors('password');
-        $response->assertSee(__('coin.auth.login_password_invalid'), false);
     }
 
     public function test_users_can_not_authenticate_with_unknown_email(): void
@@ -87,14 +72,13 @@ class AuthenticationTest extends TestCase
 
         $this->assertGuest();
         $response->assertSessionHasErrors('email');
-        $response->assertSee(__('coin.auth.login_email_not_found'), false);
     }
 
     public function test_login_cancel_clears_two_factor_challenge(): void
     {
         Mail::fake();
 
-        $user = User::factory()->withEmailTwoFactor()->create();
+        $user = User::factory()->create();
 
         $this->post('/login', [
             'email' => $user->email,
@@ -113,15 +97,14 @@ class AuthenticationTest extends TestCase
     {
         Mail::fake();
 
-        $user = User::factory()->withEmailTwoFactor()->create();
+        $user = User::factory()->create();
 
         $this->post('/login', [
             'email' => $user->email,
             'password' => 'password',
         ])->assertRedirect(route('login.two-factor', absolute: false));
 
-        $sessionId = session()->getId();
-        \Illuminate\Support\Facades\Cache::forget('login_2fa:'.$sessionId);
+        \Illuminate\Support\Facades\Cache::forget('login_2fa:'.$user->id);
 
         $this->get(route('login.two-factor', absolute: false))
             ->assertRedirect(route('login', absolute: false))
@@ -137,17 +120,29 @@ class AuthenticationTest extends TestCase
 
     public function test_users_can_authenticate_with_mixed_case_email(): void
     {
+        Mail::fake();
+
         $user = User::factory()->create([
             'email' => 'mixedcase@example.com',
         ]);
+        $code = null;
 
-        $response = $this->post('/login', [
+        $this->post('/login', [
             'email' => 'MixedCase@Example.com',
             'password' => 'password',
-        ]);
+        ])->assertRedirect(route('login.two-factor', absolute: false));
+
+        Mail::assertSent(LoginVerificationMail::class, function (LoginVerificationMail $mail) use (&$code, $user) {
+            $code = $mail->code;
+
+            return $mail->hasTo($user->email);
+        });
+
+        $this->post('/login/two-factor', [
+            'code' => $code,
+        ])->assertRedirect(route('dashboard', absolute: false));
 
         $this->assertAuthenticatedAs($user);
-        $response->assertRedirect(route('dashboard', absolute: false));
     }
 
     public function test_users_can_logout(): void

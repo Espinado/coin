@@ -4,10 +4,8 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
-use App\Support\SessionIdleTracker;
 use App\Services\EmailVerificationAccess;
 use App\Services\LoginTwoFactorService;
-use App\Services\UserLoginRecorder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -41,7 +39,6 @@ class AuthenticatedSessionController extends Controller
     public function store(
         LoginRequest $request,
         LoginTwoFactorService $twoFactor,
-        UserLoginRecorder $loginRecorder,
         EmailVerificationAccess $verificationAccess,
     ): RedirectResponse {
         $user = $request->validateCredentials();
@@ -55,18 +52,10 @@ class AuthenticatedSessionController extends Controller
             );
         }
 
-        if ($user->hasEmailTwoFactorEnabled()) {
-            $twoFactor->beginChallenge($user, $request->boolean('remember'), $request);
+        // Login always requires email 2FA (not a user-toggleable preference).
+        $twoFactor->beginChallenge($user, $request->boolean('remember'), $request);
 
-            return redirect()->route('login.two-factor');
-        }
-
-        Auth::login($user, $request->boolean('remember'));
-        $request->session()->regenerate();
-        SessionIdleTracker::markNow($request);
-        $loginRecorder->record($user, $request);
-
-        return redirect()->intended(route('dashboard', absolute: false));
+        return redirect()->route('login.two-factor');
     }
 
     /**
