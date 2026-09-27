@@ -15,7 +15,7 @@
 
                 <div style="margin-top: 26px;">
                     <label for="email" style="display: block; font-size: 12.5px; color: rgba(230,244,250,0.78);">E-mail</label>
-                    <input id="email" type="email" name="email" value="{{ old('email') }}" required autofocus placeholder="you@example.com" style="width: 100%; box-sizing: border-box; margin-top: 9px; padding: 14px 16px; border-radius: 12px; border: 1px solid rgba(150,235,250,0.18); background: rgba(4,16,28,0.7); color: #f0fbff; font-family: inherit; font-size: 14.5px;" />
+                    <input id="email" type="email" name="email" value="{{ old('email') }}" required autofocus placeholder="you@example.com" style="width: 100%; box-sizing: border-box; margin-top: 9px; padding: 14px 16px; border-radius: 12px; border: 1px solid rgba(150,235,250,0.18); background: rgba(4,16,28,0.7); color: #f0fbff; font-family: inherit; font-size: 16px;" />
                     @error('email')<div class="coin-auth-error">{{ $message }}</div>@enderror
                 </div>
 

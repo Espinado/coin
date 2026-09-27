@@ -2290,7 +2290,7 @@ html.coin-nav-open .coin-nav-mobile {
   border: 1px solid rgba(150, 235, 250, 0.16);
   background: rgba(4, 16, 28, 0.6);
   color: #eafcff;
-  font-size: 14px;
+  font-size: 16px;
   font-family: inherit;
 }
 
@@ -3421,6 +3421,27 @@ html.coin-nav-open .coin-nav-mobile {
   .coin-deposit-presets__btn {
     flex: 1 1 calc(33.333% - 7px);
     min-width: 88px;
+    min-height: 44px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    font-size: 12px;
+  }
+
+  .coin-dash-period-tabs__btn,
+  .coin-stats-toolbar__periods .coin-dash-period-tabs__btn {
+    min-height: 44px;
+    padding-top: 11px;
+    padding-bottom: 11px;
+  }
+
+  .coin-list-toolbar__btn,
+  .coin-pagination__btn,
+  .coin-stats-toolbar__export {
+    min-height: 44px;
+  }
+
+  .coin-nav-item {
+    min-height: 44px;
   }
 
   .coin-list-toolbar {
