@@ -17,7 +17,7 @@
     <link rel="stylesheet" href="{{ asset('coin/responsive.css') }}?v={{ file_exists(public_path('coin/responsive.css')) ? filemtime(public_path('coin/responsive.css')) : 1 }}" />
     <style>
       body { margin: 0; background: #04101c; color: #e6f4fa; font-family: 'Sora', 'Helvetica Neue', Helvetica, sans-serif; -webkit-font-smoothing: antialiased; }
-      @media (min-width: 769px) and (min-height: 501px) {
+      @media (min-width: 1025px) and (min-height: 501px) {
         .coin-sidebar {
           position: fixed !important;
           top: 0;

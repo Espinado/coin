@@ -33,7 +33,7 @@
   });
 
   function isCompactViewport() {
-    return window.innerWidth <= 768
+    return window.innerWidth <= 1024
       || (window.matchMedia('(orientation: landscape)').matches && window.innerHeight <= 500);
   }
 

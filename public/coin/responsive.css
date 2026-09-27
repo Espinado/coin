@@ -3302,8 +3302,8 @@ html.coin-nav-open .coin-nav-mobile {
   }
 }
 
-/* Desktop sidebar only when there is enough height — phone landscape stays compact */
-@media (min-width: 769px) and (min-height: 501px) {
+/* Desktop sidebar: wide + tall enough (iPad portrait / phone landscape stay compact) */
+@media (min-width: 1025px) and (min-height: 501px) {
   .coin-shell {
     padding-left: 248px;
   }
@@ -3319,6 +3319,82 @@ html.coin-nav-open .coin-nav-mobile {
     overflow-x: hidden;
     overflow-y: auto;
     overscroll-behavior: contain;
+  }
+}
+
+/*
+ * Compact shell/nav only (≤1024 or short landscape).
+ * Content grids keep their own 768 / 1024 breakpoints — do not fold phone layouts into tablet here.
+ */
+@media (max-width: 1024px), (orientation: landscape) and (max-height: 500px) {
+  .coin-shell {
+    padding-left: 0 !important;
+  }
+
+  .coin-dashboard {
+    flex-direction: column !important;
+  }
+
+  .coin-dashboard .coin-nav-overlay {
+    display: none !important;
+  }
+
+  .coin-sidebar {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    z-index: 140 !important;
+    width: min(288px, 86vw) !important;
+    height: 100vh !important;
+    height: 100dvh !important;
+    margin: 0 !important;
+    padding-top: calc(22px + var(--coin-safe-top)) !important;
+    padding-bottom: calc(16px + var(--coin-safe-bottom)) !important;
+    transform: translate3d(-100%, 0, 0);
+    box-shadow: 8px 0 40px rgba(0, 0, 0, 0.35);
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch;
+    background: #04101c !important;
+    isolation: isolate;
+    will-change: transform;
+    -webkit-transform: translate3d(-100%, 0, 0);
+  }
+
+  html.coin-nav-open .coin-sidebar {
+    transform: translate3d(0, 0, 0);
+    -webkit-transform: translate3d(0, 0, 0);
+  }
+
+  html.coin-nav-open .coin-nav-overlay,
+  html.coin-nav-open .coin-header,
+  html.coin-nav-open .coin-nav-mobile,
+  html.coin-nav-open .coin-sidebar,
+  html.coin-nav-open .coin-page-loading-overlay {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    filter: none !important;
+  }
+
+  .coin-dash-header {
+    padding:
+      calc(14px + var(--coin-safe-top))
+      calc(16px + var(--coin-safe-right))
+      14px
+      calc(16px + var(--coin-safe-left)) !important;
+    gap: 12px !important;
+  }
+
+  .coin-dash-header .coin-burger {
+    display: flex !important;
+  }
+
+  .coin-hide-mobile {
+    display: none !important;
+  }
+
+  .coin-sidebar-close {
+    display: grid;
+    place-items: center;
   }
 }
 
