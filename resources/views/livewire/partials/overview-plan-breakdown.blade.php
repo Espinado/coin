@@ -24,7 +24,7 @@
           <div style="width: {{ min(100, max(0, (int) ($plan->capacity_percent ?? 0))) }}%; height: 100%; border-radius: 3px; background: linear-gradient(90deg, oklch(0.72 0.11 215), oklch(0.88 0.12 192));"></div>
         </div>
         @endif
-        <div style="margin-top: 10px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; font-size: 11px;">
+        <div class="coin-grid-3 coin-grid-3--tight" style="margin-top: 10px; font-size: 11px;">
           <div>
             <div style="font-family: 'JetBrains Mono', monospace; font-size: 8px; letter-spacing: 0.1em; color: rgba(214,238,248,0.58);">{{ mb_strtoupper(__('coin.invest.min_investment')) }}</div>
             <div style="margin-top: 4px; font-family: 'JetBrains Mono', monospace; font-size: 10.5px; color: rgba(214,238,248,0.82);">{{ $plan->formattedMinDeposit() ?? $plan->formattedComputeLabel() }}</div>
