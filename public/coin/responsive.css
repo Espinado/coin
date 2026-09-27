@@ -2728,6 +2728,14 @@ html.coin-nav-open .coin-nav-mobile {
   gap: 10px;
 }
 
+.coin-grid-4 {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+  align-items: stretch;
+  min-width: 0;
+}
+
 .coin-dash-panel {
   padding: 22px;
   border-radius: 16px;
@@ -3477,7 +3485,8 @@ html.coin-nav-open .coin-nav-mobile {
   .coin-dashboard [style*="grid-template-columns: repeat(3, minmax(0, 1fr))"]:not(.coin-contract-stats-grid),
   .coin-dashboard [style*="grid-template-columns: repeat(5, minmax(0, 1fr))"]:not(.coin-contract-stats-grid),
   .coin-dashboard [style*="grid-template-columns: repeat(6, minmax(0, 1fr))"]:not(.coin-contract-stats-grid),
-  .coin-grid-3 {
+  .coin-grid-3,
+  .coin-grid-4 {
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
   }
 
@@ -3827,7 +3836,8 @@ html.coin-nav-open .coin-nav-mobile {
   .coin-dashboard [style*="grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.1fr)"]:not(.coin-contract-stats-grid),
   .coin-wallet-actions-grid,
   .coin-grid-2,
-  .coin-grid-3 {
+  .coin-grid-3,
+  .coin-grid-4 {
     grid-template-columns: minmax(0, 1fr) !important;
   }
 
