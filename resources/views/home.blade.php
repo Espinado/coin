@@ -76,7 +76,7 @@
         <h2 style="margin: 18px 0 0; font-size: 42px; line-height: 1.08; letter-spacing: -0.035em; font-weight: 600; color: #f0fbff;">{{ $faqPage?->title ?? 'Frequently asked questions' }}</h2>
 @include('partials.landing-faq-contact')
         <p style="margin: 14px 0 0; font-size: 14px;">
-          <a href="{{ route('legal.show', ['legalPage' => 'faq']) }}">{{ __('coin.legal.open_full_faq') }}</a>
+          <a href="{{ route('legal.show', ['legalPage' => 'faq']) }}" target="_blank" rel="noopener noreferrer">{{ __('coin.legal.open_full_faq') }}</a>
         </p>
       </div>
       <div>
@@ -108,15 +108,15 @@
           <div class="coin-landing-footer__heading">LEGAL</div>
           <div class="coin-landing-footer__nav">
             @foreach($legalPages as $legalPage)
-              <a href="{{ route('legal.show', $legalPage) }}">{{ $legalPage->slugLabel() }}</a>
+              <a href="{{ route('legal.show', $legalPage) }}" target="_blank" rel="noopener noreferrer">{{ $legalPage->slugLabel() }}</a>
             @endforeach
           </div>
         </div>
         <div class="coin-landing-footer__col">
           <div class="coin-landing-footer__heading">SUPPORT</div>
           <div class="coin-landing-footer__nav">
-            <a href="{{ route('legal.show', ['legalPage' => 'faq']) }}">{{ __('coin.legal.slugs.faq') }}</a>
-            <a href="{{ route('legal.show', ['legalPage' => 'risks']) }}">{{ __('coin.legal.slugs.risks') }}</a>
+            <a href="{{ route('legal.show', ['legalPage' => 'faq']) }}" target="_blank" rel="noopener noreferrer">{{ __('coin.legal.slugs.faq') }}</a>
+            <a href="{{ route('legal.show', ['legalPage' => 'risks']) }}" target="_blank" rel="noopener noreferrer">{{ __('coin.legal.slugs.risks') }}</a>
 @include('partials.landing-footer-contact', ['companyLegal' => $companyLegal])
           </div>
         </div>

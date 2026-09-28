@@ -20,6 +20,6 @@
         @if($index > 0)
             <span class="coin-legal-links__sep" aria-hidden="true">{{ $separator }}</span>
         @endif
-        <a href="{{ route('legal.show', ['legalPage' => $item['slug']]) }}" class="coin-legal-links__item">{{ $item['label'] }}</a>
+        <a href="{{ route('legal.show', ['legalPage' => $item['slug']]) }}" class="coin-legal-links__item" target="_blank" rel="noopener noreferrer">{{ $item['label'] }}</a>
     @endforeach
 </nav>
