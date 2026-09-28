@@ -77,21 +77,31 @@ class RegistrationTest extends TestCase
     public function test_registration_requires_phone(): void
     {
         $response = $this->post('/register', $this->validRegistrationPayload([
-            'phone' => null,
+            'phone_national' => null,
         ]));
 
-        $response->assertSessionHasErrors('phone');
+        $response->assertSessionHasErrors(['phone_national', 'phone']);
         $this->assertGuest();
     }
 
     public function test_registration_rejects_invalid_phone(): void
     {
         $response = $this->post('/register', $this->validRegistrationPayload([
-            'phone' => '123',
+            'phone_national' => '123',
         ]));
 
-        $response->assertSessionHasErrors('phone');
+        $response->assertSessionHasErrors(['phone_national', 'phone']);
         $this->assertGuest();
+    }
+
+    public function test_registration_screen_shows_country_code_select(): void
+    {
+        $this->get('/register')
+            ->assertOk()
+            ->assertSee('name="phone_country"', false)
+            ->assertSee('name="phone_national"', false)
+            ->assertSee('+371', false)
+            ->assertSee('Latvia', false);
     }
 
     public function test_registration_requires_legal_acceptances(): void

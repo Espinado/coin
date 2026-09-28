@@ -1,0 +1,28 @@
+<?php
+
+namespace Tests\Unit;
+
+use App\Support\PhoneCountries;
+use Tests\TestCase;
+
+class PhoneCountriesTest extends TestCase
+{
+    public function test_compose_builds_international_number(): void
+    {
+        $this->assertSame('+37126161034', PhoneCountries::compose('LV', '26161034'));
+        $this->assertSame('+37126161034', PhoneCountries::compose('lv', '026161034'));
+        $this->assertSame('+79001234567', PhoneCountries::compose('RU', '9001234567'));
+    }
+
+    public function test_option_label_includes_flag_name_and_dial(): void
+    {
+        $latvia = collect(PhoneCountries::all())->firstWhere('iso', 'LV');
+
+        $this->assertNotNull($latvia);
+        $label = PhoneCountries::optionLabel($latvia);
+
+        $this->assertStringContainsString('Latvia', $label);
+        $this->assertStringContainsString('+371', $label);
+        $this->assertStringContainsString(PhoneCountries::flag('LV'), $label);
+    }
+}

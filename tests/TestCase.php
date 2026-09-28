@@ -15,7 +15,8 @@ abstract class TestCase extends BaseTestCase
         return array_merge([
             'name' => 'Test User',
             'email' => 'test@example.com',
-            'phone' => '+79001234567',
+            'phone_country' => 'RU',
+            'phone_national' => '9001234567',
             'password' => 'password',
             'password_confirmation' => 'password',
             'accept_terms' => '1',

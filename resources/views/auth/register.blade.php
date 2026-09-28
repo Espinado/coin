@@ -23,8 +23,25 @@
                 </div>
 
                 <div style="margin-top: 18px;">
-                    <label for="phone" style="display: block; font-size: 12.5px; color: rgba(230,244,250,0.78);">{{ __('coin.auth.phone') }}</label>
-                    <input id="phone" type="tel" name="phone" value="{{ old('phone') }}" autocomplete="tel" inputmode="tel" placeholder="{{ __('coin.auth.phone_placeholder') }}" aria-invalid="{{ $errors->has('phone') ? 'true' : 'false' }}" style="width: 100%; box-sizing: border-box; margin-top: 9px; padding: 14px 16px; border-radius: 12px; border: 1px solid {{ $errors->has('phone') ? 'oklch(0.72 0.22 25)' : 'rgba(150,235,250,0.18)' }}; background: rgba(4,16,28,0.7); color: #f0fbff; font-family: inherit; font-size: 16px;" />
+                    <label for="phone_national" style="display: block; font-size: 12.5px; color: rgba(230,244,250,0.78);">{{ __('coin.auth.phone') }}</label>
+                    @php
+                        $phoneCountry = old('phone_country', \App\Support\PhoneCountries::DEFAULT_ISO);
+                        $phoneHasError = $errors->has('phone') || $errors->has('phone_country') || $errors->has('phone_national');
+                        $phoneBorder = $phoneHasError ? 'oklch(0.72 0.22 25)' : 'rgba(150,235,250,0.18)';
+                    @endphp
+                    <div class="coin-auth-phone" style="display: flex; gap: 10px; margin-top: 9px; align-items: stretch;">
+                        <label for="phone_country" class="sr-only" style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;">{{ __('coin.auth.phone_country') }}</label>
+                        <select id="phone_country" name="phone_country" aria-invalid="{{ $errors->has('phone_country') ? 'true' : 'false' }}" style="flex: 1.15 1 0; min-width: 0; max-width: 58%; box-sizing: border-box; padding: 14px 12px; border-radius: 12px; border: 1px solid {{ $phoneBorder }}; background: rgba(4,16,28,0.7); color: #f0fbff; font-family: inherit; font-size: 15px;">
+                            @foreach(\App\Support\PhoneCountries::all() as $country)
+                                <option value="{{ $country['iso'] }}" @selected($phoneCountry === $country['iso'])>
+                                    {{ \App\Support\PhoneCountries::optionLabel($country) }}
+                                </option>
+                            @endforeach
+                        </select>
+                        <input id="phone_national" type="tel" name="phone_national" value="{{ old('phone_national') }}" autocomplete="tel-national" inputmode="tel" placeholder="{{ __('coin.auth.phone_national_placeholder') }}" aria-invalid="{{ $phoneHasError ? 'true' : 'false' }}" style="flex: 1 1 0; min-width: 0; box-sizing: border-box; padding: 14px 16px; border-radius: 12px; border: 1px solid {{ $phoneBorder }}; background: rgba(4,16,28,0.7); color: #f0fbff; font-family: inherit; font-size: 16px;" />
+                    </div>
+                    @error('phone_country')<div class="coin-auth-error" role="alert">{{ $message }}</div>@enderror
+                    @error('phone_national')<div class="coin-auth-error" role="alert">{{ $message }}</div>@enderror
                     @error('phone')<div class="coin-auth-error" role="alert">{{ $message }}</div>@enderror
                 </div>
 

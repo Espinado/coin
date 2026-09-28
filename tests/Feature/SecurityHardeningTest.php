@@ -518,7 +518,8 @@ class SecurityHardeningTest extends TestCase
             $this->post('http://coin.test/register', $this->validRegistrationPayload([
                 'name' => 'User '.$i,
                 'email' => "user{$i}@coin.test",
-                'phone' => '+3712000000'.$i,
+                'phone_country' => 'LV',
+                'phone_national' => '2000000'.$i,
                 'password' => 'SecretPass1!',
                 'password_confirmation' => 'SecretPass1!',
             ]))->assertRedirect();
@@ -531,7 +532,8 @@ class SecurityHardeningTest extends TestCase
         $this->post('http://coin.test/register', $this->validRegistrationPayload([
             'name' => 'Blocked User',
             'email' => 'blocked@coin.test',
-            'phone' => '+37120000099',
+            'phone_country' => 'LV',
+            'phone_national' => '20000099',
             'password' => 'SecretPass1!',
             'password_confirmation' => 'SecretPass1!',
         ]))->assertStatus(429);
