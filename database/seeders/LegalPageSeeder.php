@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\LegalPage;
 use App\Support\LegalFaq;
 use Illuminate\Database\Seeder;
+use RuntimeException;
 
 class LegalPageSeeder extends Seeder
 {
@@ -14,19 +15,19 @@ class LegalPageSeeder extends Seeder
             [
                 'slug' => LegalPage::SLUG_TERMS,
                 'title' => 'Условия использования',
-                'body' => "Здесь размещаются условия использования платформы CloudFlops.\n\nАдминистратор может отредактировать этот текст в разделе Legal админ-панели.",
+                'body' => $this->legalBody('terms.ru.txt'),
                 'sort_order' => 10,
             ],
             [
                 'slug' => LegalPage::SLUG_PRIVACY,
                 'title' => 'Политика конфиденциальности',
-                'body' => "Здесь размещается политика конфиденциальности CloudFlops.\n\nОпишите, какие данные собираются, как хранятся и кому передаются.",
+                'body' => $this->legalBody('privacy.ru.txt'),
                 'sort_order' => 20,
             ],
             [
                 'slug' => LegalPage::SLUG_RISKS,
                 'title' => 'Раскрытие рисков',
-                'body' => "Инвестиции связаны с риском. Доходность в прошлом не гарантирует доходность в будущем.\n\nДобавьте полный текст предупреждения о рисках для инвесторов.",
+                'body' => $this->legalBody('risks.ru.txt'),
                 'sort_order' => 30,
             ],
             [
@@ -48,5 +49,22 @@ class LegalPageSeeder extends Seeder
                 ],
             );
         }
+    }
+
+    private function legalBody(string $filename): string
+    {
+        $path = database_path('seeders/data/legal/'.$filename);
+
+        if (! is_file($path)) {
+            throw new RuntimeException("Legal seed file missing: {$filename}");
+        }
+
+        $body = file_get_contents($path);
+
+        if ($body === false || trim($body) === '') {
+            throw new RuntimeException("Legal seed file empty: {$filename}");
+        }
+
+        return trim($body)."\n";
     }
 }
