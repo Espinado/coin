@@ -126,6 +126,8 @@ return [
         'notifications_sub' => 'Alerts and messages from the platform',
         'support_title' => 'Support',
         'support_sub' => 'Chat with the CloudFlops team',
+        'legal_sub' => 'Terms, privacy, risks, and platform information',
+        'legal_empty' => 'This legal page is not available.',
     ],
 
     // ——— Wallet and actions ———

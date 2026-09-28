@@ -18,10 +18,12 @@
             return $index === false ? 1000 + (int) $page->sort_order : $index;
         })
         ->values();
+
+    $legalSectionActive = (int) $section === 9;
 @endphp
 
 @if($legalNavPages->isNotEmpty())
-    <details class="coin-nav-legal">
+    <details class="coin-nav-legal {{ $legalSectionActive ? 'is-active' : '' }}" @if($legalSectionActive) open @endif>
         <summary class="coin-nav-item coin-nav-legal__summary">
             <span class="coin-nav-dot" aria-hidden="true"></span>
             <span class="coin-nav-item__label">{{ __('coin.nav.legal_information') }}</span>
@@ -29,13 +31,11 @@
         </summary>
         <div class="coin-nav-legal__list">
             @foreach($legalNavPages as $legalPage)
-                <a
-                    href="{{ route('legal.show', $legalPage) }}"
-                    class="coin-nav-legal__link"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    wire:click="closeMenu"
-                >{{ $legalPage->slugLabel() }}</a>
+                <button
+                    type="button"
+                    wire:click="openLegalPage({{ json_encode($legalPage->slug) }})"
+                    class="coin-nav-legal__link {{ $legalSectionActive && $legalSlug === $legalPage->slug ? 'coin-nav-legal__link--active' : '' }}"
+                >{{ $legalPage->slugLabel() }}</button>
             @endforeach
         </div>
     </details>

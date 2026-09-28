@@ -554,6 +554,10 @@
     @if($section === 8)
       @include('livewire.partials.notifications-section')
     @endif
+
+    @if($section === 9)
+      @include('livewire.partials.legal-section')
+    @endif
   </main>
   </div>
 

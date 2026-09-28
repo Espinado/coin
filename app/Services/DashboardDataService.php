@@ -90,6 +90,7 @@ class DashboardDataService
             [__('coin.sections.settings_title'), __('coin.sections.settings_sub')],
             [__('coin.sections.support_title'), __('coin.sections.support_sub')],
             [__('coin.sections.notifications_title'), __('coin.sections.notifications_sub')],
+            [__('coin.nav.legal_information'), __('coin.sections.legal_sub')],
         ];
     }
 

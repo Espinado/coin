@@ -4,6 +4,7 @@ namespace App\Livewire;
 
 use App\Models\Contract;
 use App\Models\Deposit;
+use App\Models\LegalPage;
 use App\Models\Plan;
 use App\Models\ReferralCommission;
 use App\Models\ReferralInvitation;
@@ -59,6 +60,9 @@ class Dashboard extends Component
 
     #[Url(as: 'section', history: true, keep: false)]
     public int $section = 0;
+
+    #[Url(as: 'legal', history: true, keep: false)]
+    public string $legalSlug = '';
 
     public int $power = 1200;
 
@@ -406,8 +410,14 @@ class Dashboard extends Component
         $this->reloadUserNotifications();
         $this->resumePendingTopUpSession();
 
-        if ($this->section < 0 || $this->section > 8) {
+        if ($this->section < 0 || $this->section > 9) {
             $this->section = 0;
+        }
+
+        if ($this->section === 9) {
+            $this->ensureLegalSlug();
+        } else {
+            $this->legalSlug = '';
         }
 
         if ($this->showFullProfitHistory && $this->section !== 3) {
@@ -423,6 +433,10 @@ class Dashboard extends Component
 
         if ($section !== 3) {
             $this->showFullProfitHistory = false;
+        }
+
+        if ($section !== 9) {
+            $this->legalSlug = '';
         }
 
         $this->section = $section;
@@ -447,6 +461,23 @@ class Dashboard extends Component
         if ($section !== 8) {
             $this->syncNotificationsUnreadBadge();
         }
+    }
+
+    public function openLegalPage(string $slug): void
+    {
+        $page = LegalPage::query()
+            ->published()
+            ->where('slug', $slug)
+            ->first();
+
+        if (! $page) {
+            return;
+        }
+
+        $this->legalSlug = $page->slug;
+        $this->section = 9;
+        $this->menuOpen = false;
+        $this->resetActionFeedback();
     }
 
     public function openNotification(int $notificationId): void
@@ -690,6 +721,10 @@ class Dashboard extends Component
 
     public function getTitleProperty(): string
     {
+        if ($this->section === 9) {
+            return $this->legalPage?->title ?? __('coin.nav.legal_information');
+        }
+
         return app(DashboardDataService::class)->sectionMeta()[$this->section][0];
     }
 
@@ -699,7 +734,48 @@ class Dashboard extends Component
             return __('coin.sections.overview_sub').' · '.$this->activeContractCount.' '.__('coin.invest.active_count');
         }
 
+        if ($this->section === 9) {
+            return __('coin.sections.legal_sub');
+        }
+
         return app(DashboardDataService::class)->sectionMeta()[$this->section][1];
+    }
+
+    public function getLegalPageProperty(): ?LegalPage
+    {
+        if ($this->section !== 9 || $this->legalSlug === '') {
+            return null;
+        }
+
+        return LegalPage::query()
+            ->published()
+            ->where('slug', $this->legalSlug)
+            ->first();
+    }
+
+    private function ensureLegalSlug(): void
+    {
+        $page = LegalPage::query()
+            ->published()
+            ->where('slug', $this->legalSlug)
+            ->first();
+
+        if ($page) {
+            $this->legalSlug = $page->slug;
+
+            return;
+        }
+
+        $fallback = LegalPage::query()->published()->ordered()->first();
+
+        if (! $fallback) {
+            $this->section = 0;
+            $this->legalSlug = '';
+
+            return;
+        }
+
+        $this->legalSlug = $fallback->slug;
     }
 
     public function getActiveContractCountProperty(): int
