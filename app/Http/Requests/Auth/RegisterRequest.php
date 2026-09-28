@@ -30,13 +30,22 @@ class RegisterRequest extends FormRequest
             $merged['phone_country'] = strtoupper(trim($this->string('phone_country')->toString()));
         }
 
-        if ($this->has('phone_national')) {
-            $merged['phone_national'] = preg_replace('/\D+/', '', $this->string('phone_national')->toString()) ?? '';
+        $phoneCountry = $merged['phone_country'] ?? $this->input('phone_country');
+        $rawNational = $this->has('phone_national')
+            ? trim($this->string('phone_national')->toString())
+            : null;
+
+        if ($rawNational !== null) {
+            $merged['phone_national_includes_dial'] = PhoneCountries::nationalIncludesCountryCode(
+                is_string($phoneCountry) ? $phoneCountry : null,
+                $rawNational,
+            );
+            $merged['phone_national'] = preg_replace('/\D+/', '', $rawNational) ?? '';
         }
 
         if ($this->filled('phone_country') || $this->has('phone_national')) {
             $merged['phone'] = PhoneCountries::compose(
-                $merged['phone_country'] ?? $this->input('phone_country'),
+                is_string($phoneCountry) ? $phoneCountry : null,
                 $merged['phone_national'] ?? $this->input('phone_national'),
             );
         } elseif ($this->has('phone')) {
@@ -69,7 +78,17 @@ class RegisterRequest extends FormRequest
                 },
             ],
             'phone_country' => ['required', 'string', Rule::in(PhoneCountries::isos())],
-            'phone_national' => ['required', 'string', 'min:4', 'max:15'],
+            'phone_national' => [
+                'required',
+                'string',
+                'min:4',
+                'max:15',
+                function (string $attribute, mixed $value, \Closure $fail): void {
+                    if ($this->boolean('phone_national_includes_dial')) {
+                        $fail(__('coin.auth.phone_national_no_country_code'));
+                    }
+                },
+            ],
             'phone' => ['required', 'string', 'max:32', new ContactPhone],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
             'password_confirmation' => ['required'],

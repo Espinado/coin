@@ -155,4 +155,26 @@ final class PhoneCountries
 
         return $dial.$digits;
     }
+
+    /**
+     * True when the national field already includes the selected country calling code
+     * (or a leading + / 00 international prefix).
+     */
+    public static function nationalIncludesCountryCode(?string $iso, ?string $rawNational): bool
+    {
+        $raw = trim((string) $rawNational);
+
+        if ($raw === '') {
+            return false;
+        }
+
+        if (str_contains($raw, '+') || str_starts_with($raw, '00')) {
+            return true;
+        }
+
+        $digits = preg_replace('/\D+/', '', $raw) ?? '';
+        $selectedDialDigits = preg_replace('/\D+/', '', (string) self::dialFor($iso)) ?? '';
+
+        return $selectedDialDigits !== '' && $digits !== '' && str_starts_with($digits, $selectedDialDigits);
+    }
 }

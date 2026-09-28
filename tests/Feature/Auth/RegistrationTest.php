@@ -94,6 +94,20 @@ class RegistrationTest extends TestCase
         $this->assertGuest();
     }
 
+    public function test_registration_rejects_national_number_with_country_code(): void
+    {
+        $response = $this->from('/register')->post('/register', $this->validRegistrationPayload([
+            'phone_country' => 'LV',
+            'phone_national' => '37126161034',
+        ]));
+
+        $response->assertRedirect('/register')
+            ->assertSessionHasErrors([
+                'phone_national' => __('coin.auth.phone_national_no_country_code'),
+            ]);
+        $this->assertGuest();
+    }
+
     public function test_registration_screen_shows_country_code_select(): void
     {
         $this->get('/register')

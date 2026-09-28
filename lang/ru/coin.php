@@ -1343,6 +1343,7 @@ return [
         'phone_country_required' => 'Выберите код страны.',
         'phone_national_required' => 'Укажите номер телефона.',
         'phone_national_invalid' => 'Укажите корректный номер телефона.',
+        'phone_national_no_country_code' => 'Введите номер без кода страны — код уже выбран слева.',
         'password_required' => 'Укажите пароль.',
         'password_confirmed' => 'Пароли не совпадают.',
         'password_confirm_required' => 'Повторите пароль.',

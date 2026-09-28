@@ -29,4 +29,14 @@ class PhoneCountriesTest extends TestCase
     {
         $this->assertSame('https://flagcdn.com/w40/lv.png', PhoneCountries::flagUrl('LV'));
     }
+
+    public function test_national_includes_country_code_detection(): void
+    {
+        $this->assertTrue(PhoneCountries::nationalIncludesCountryCode('LV', '+37126161034'));
+        $this->assertTrue(PhoneCountries::nationalIncludesCountryCode('LV', '37126161034'));
+        $this->assertTrue(PhoneCountries::nationalIncludesCountryCode('LV', '0037126161034'));
+        $this->assertTrue(PhoneCountries::nationalIncludesCountryCode('RU', '79001234567'));
+        $this->assertFalse(PhoneCountries::nationalIncludesCountryCode('LV', '26161034'));
+        $this->assertFalse(PhoneCountries::nationalIncludesCountryCode('RU', '9001234567'));
+    }
 }

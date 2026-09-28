@@ -1343,6 +1343,7 @@ return [
         'phone_country_required' => 'Please select a country code.',
         'phone_national_required' => 'Please enter your phone number.',
         'phone_national_invalid' => 'Please enter a valid phone number.',
+        'phone_national_no_country_code' => 'Enter the number without the country code — it is already selected on the left.',
         'password_required' => 'Please enter a password.',
         'password_confirmed' => 'Password confirmation does not match.',
         'password_confirm_required' => 'Please confirm your password.',
