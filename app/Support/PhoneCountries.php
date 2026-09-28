@@ -108,9 +108,37 @@ final class PhoneCountries
         return $flag;
     }
 
+    public static function flagUrl(string $iso, int $width = 40): string
+    {
+        $iso = strtolower($iso);
+        $width = in_array($width, [20, 40, 80, 160], true) ? $width : 40;
+
+        return 'https://flagcdn.com/w'.$width.'/'.$iso.'.png';
+    }
+
     public static function optionLabel(array $country): string
     {
-        return trim(self::flag($country['iso']).' '.$country['name'].' ('.$country['dial'].')');
+        return $country['name'].' ('.$country['dial'].')';
+    }
+
+    /**
+     * @return array{iso: string, name: string, dial: string}|null
+     */
+    public static function find(?string $iso): ?array
+    {
+        if (! self::isValidIso($iso)) {
+            return null;
+        }
+
+        $iso = strtoupper((string) $iso);
+
+        foreach (self::all() as $country) {
+            if ($country['iso'] === $iso) {
+                return $country;
+            }
+        }
+
+        return null;
     }
 
     public static function compose(?string $iso, ?string $national): ?string

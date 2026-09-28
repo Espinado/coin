@@ -14,7 +14,7 @@ class PhoneCountriesTest extends TestCase
         $this->assertSame('+79001234567', PhoneCountries::compose('RU', '9001234567'));
     }
 
-    public function test_option_label_includes_flag_name_and_dial(): void
+    public function test_option_label_includes_name_and_dial(): void
     {
         $latvia = collect(PhoneCountries::all())->firstWhere('iso', 'LV');
 
@@ -23,6 +23,10 @@ class PhoneCountriesTest extends TestCase
 
         $this->assertStringContainsString('Latvia', $label);
         $this->assertStringContainsString('+371', $label);
-        $this->assertStringContainsString(PhoneCountries::flag('LV'), $label);
+    }
+
+    public function test_flag_url_uses_flagcdn(): void
+    {
+        $this->assertSame('https://flagcdn.com/w40/lv.png', PhoneCountries::flagUrl('LV'));
     }
 }

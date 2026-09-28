@@ -100,6 +100,8 @@ class RegistrationTest extends TestCase
             ->assertOk()
             ->assertSee('name="phone_country"', false)
             ->assertSee('name="phone_national"', false)
+            ->assertSee('data-phone-country', false)
+            ->assertSee('flagcdn.com/w40/lv.png', false)
             ->assertSee('+371', false)
             ->assertSee('Latvia', false);
     }
