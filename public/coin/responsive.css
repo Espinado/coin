@@ -4654,3 +4654,58 @@ html.coin-nav-open .coin-nav-mobile {
     height: 18px;
   }
 }
+
+/*
+ * Mid-desktop / high-DPI laptop band (e.g. 2560×1600 @150% ≈ 1707 CSS px,
+ * or a non-maximized window in the 1025–1600 range).
+ * Additive only: does not change ≤768 phone, ≤1024 burger, or >1600 TV/wide desktop.
+ * Scoped to .coin-landing — dashboard untouched.
+ */
+@media (min-width: 1025px) and (max-width: 1600px) {
+  .coin-landing .coin-nav-desktop {
+    gap: clamp(10px, 1.2vw, 18px);
+  }
+
+  .coin-landing .coin-nav-desktop a {
+    font-size: 13px;
+  }
+
+  .coin-landing .coin-header-login,
+  .coin-landing .coin-header-cta {
+    padding: 9px 16px;
+    font-size: 13px;
+  }
+
+  .coin-landing-hero__grid {
+    grid-template-columns: minmax(0, 1.12fr) minmax(0, 0.88fr);
+    gap: clamp(28px, 3vw, 44px);
+  }
+
+  .coin-landing-hero__title {
+    font-size: clamp(28px, 3.2vw, 50px);
+  }
+
+  .coin-landing-metrics__grid {
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
+  }
+
+  .coin-landing-metric-card__value {
+    font-size: clamp(22px, 2.4vw, 30px);
+  }
+
+  .coin-landing #faq {
+    padding-left: clamp(24px, 3.5vw, 56px) !important;
+    padding-right: clamp(24px, 3.5vw, 56px) !important;
+  }
+
+  .coin-landing #faq > div[style*="grid-template-columns: 380px 1fr"],
+  .coin-landing [style*="grid-template-columns: 380px 1fr"] {
+    grid-template-columns: minmax(240px, 300px) minmax(0, 1fr) !important;
+    gap: 40px !important;
+  }
+
+  .coin-landing section[style*="padding: 48px 72px"] {
+    padding-left: clamp(24px, 3.5vw, 56px) !important;
+    padding-right: clamp(24px, 3.5vw, 56px) !important;
+  }
+}
