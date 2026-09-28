@@ -13,6 +13,12 @@ class LegalPageSeeder extends Seeder
     {
         $pages = [
             [
+                'slug' => LegalPage::SLUG_ABOUT,
+                'title' => 'About CloudFlops',
+                'body' => $this->legalBody('about.en.txt'),
+                'sort_order' => 50,
+            ],
+            [
                 'slug' => LegalPage::SLUG_TERMS,
                 'title' => 'Terms of Use',
                 'body' => $this->legalBody('terms.en.txt'),

@@ -27,6 +27,7 @@
 
     <div style="font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: 0.16em; color: rgba(214,238,248,0.55); padding: 22px 12px 10px;">{{ mb_strtoupper(__('coin.nav.account')) }}</div>
     @include('livewire.partials.dashboard-nav-item', ['sectionId' => 6, 'label' => __('coin.nav.settings'), 'currentSection' => $section])
+    @include('livewire.partials.dashboard-legal-nav')
     <button type="button" wire:click="setSection(8)" wire:key="notifications-nav-{{ $this->unreadNotificationsCount }}" data-unread-notifications="{{ $this->unreadNotificationsCount }}" class="coin-nav-item coin-nav-notifications {{ $section === 8 ? 'coin-nav-item--active' : '' }} {{ $this->unreadNotificationsCount > 0 ? 'coin-nav-notifications--unread' : '' }}">
       @if($section === 8)<span class="coin-nav-item__bg" aria-hidden="true"></span>@elseif($this->unreadNotificationsCount > 0)<span data-user-notifications-nav-bg class="coin-nav-notifications__unread-bg" aria-hidden="true"></span>@endif
       <span class="coin-nav-notifications-dot" style="position: relative; width: 7px; height: 7px; border-radius: 2px; background: {{ $this->unreadNotificationsCount > 0 ? 'oklch(0.86 0.12 192)' : ($section === 8 ? 'oklch(0.86 0.12 192)' : 'rgba(150,235,250,0.3)') }}; {{ $this->unreadNotificationsCount > 0 ? 'box-shadow: 0 0 10px oklch(0.86 0.12 192 / 0.8);' : '' }}"></span>

@@ -77,12 +77,18 @@ class SeoDiscoverabilityTest extends TestCase
 
     public function test_about_page_is_public_and_describes_platform(): void
     {
-        $this->get('http://coin.test/about')
+        $this->get('http://coin.test/legal/about')
             ->assertOk()
             ->assertSee('investment-plan platform', false)
             ->assertSee('CloudFlops LLC', false)
             ->assertSee('name="robots" content="noindex, nofollow"', false)
             ->assertSee('"@type":"Organization"', false);
+    }
+
+    public function test_legacy_about_path_redirects_to_legal_about(): void
+    {
+        $this->get('http://coin.test/about')
+            ->assertRedirect('/legal/about');
     }
 
     public function test_faq_page_includes_faq_json_ld(): void
@@ -120,7 +126,7 @@ class SeoDiscoverabilityTest extends TestCase
         $response->assertOk()
             ->assertHeader('Content-Type', 'application/xml; charset=UTF-8')
             ->assertSee('<loc>'.route('home').'</loc>', false)
-            ->assertSee('<loc>'.route('about').'</loc>', false)
+            ->assertSee('<loc>'.route('legal.show', ['legalPage' => 'about']).'</loc>', false)
             ->assertSee('<loc>'.route('legal.show', ['legalPage' => 'terms']).'</loc>', false)
             ->assertSee('<loc>'.route('legal.show', ['legalPage' => 'faq']).'</loc>', false);
     }

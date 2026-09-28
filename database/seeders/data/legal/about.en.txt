@@ -1,0 +1,26 @@
+ABOUT CLOUDFLOPS
+
+Published: 28 March 2026
+Platform operator: CloudFlops LLC
+
+CloudFlops is an investment-plan platform with a transparent user dashboard.
+
+You top up in USDT or BTC (BTC is converted to USDT at the platform rate), choose a plan with a minimum amount, APR, and term, open a contract, and receive daily accruals to your available balance. At maturity, principal returns to available balance. You can withdraw available funds to your own crypto wallet. A Level-1 referral program is available.
+
+How it works
+1. Register and verify your email.
+2. Top up your wallet (USDT / BTC).
+3. Buy an investment plan — a contract is created.
+4. Receive daily profit accruals per plan rules.
+5. At maturity, principal returns to available balance.
+6. Request a withdrawal to your external address.
+
+What CloudFlops is not
+CloudFlops is not a crypto exchange, not a bank, and does not guarantee returns. Live plan parameters and accruals are shown in the dashboard; landing-page estimates are indicative only.
+
+Risks
+Investing involves risk. Past performance does not guarantee future results. Please read the Risk Disclosure (/legal/risks) and Terms of Use (/legal/terms) before participating.
+
+Company and contact
+Platform operator: CloudFlops LLC.
+Support: live chat on the website and in the dashboard; email — the contact address published on the site.

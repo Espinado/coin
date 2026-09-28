@@ -77,12 +77,6 @@ class SeoController extends Controller
                 'changefreq' => 'weekly',
                 'priority' => '1.0',
             ],
-            [
-                'loc' => route('about'),
-                'lastmod' => Carbon::now()->toAtomString(),
-                'changefreq' => 'monthly',
-                'priority' => '0.8',
-            ],
         ];
 
         $pages = LegalPage::query()->published()->ordered()->get(['slug', 'updated_at']);
@@ -92,7 +86,7 @@ class SeoController extends Controller
                 'loc' => route('legal.show', $page),
                 'lastmod' => optional($page->updated_at)->toAtomString() ?? Carbon::now()->toAtomString(),
                 'changefreq' => 'monthly',
-                'priority' => '0.7',
+                'priority' => $page->slug === LegalPage::SLUG_ABOUT ? '0.8' : '0.7',
             ];
         }
 
@@ -108,7 +102,7 @@ class SeoController extends Controller
         $brand = PlatformBrand::name();
         $legal = PlatformBrand::legalName();
         $home = route('home');
-        $about = route('about');
+        $about = route('legal.show', ['legalPage' => LegalPage::SLUG_ABOUT]);
         $faq = route('legal.show', ['legalPage' => LegalPage::SLUG_FAQ]);
         $terms = route('legal.show', ['legalPage' => LegalPage::SLUG_TERMS]);
         $privacy = route('legal.show', ['legalPage' => LegalPage::SLUG_PRIVACY]);

@@ -95,6 +95,7 @@ return [
         'wallet' => 'Кошелёк',
         'referrals' => 'Рефералы',
         'settings' => 'Настройки',
+        'legal_information' => 'Правовая информация',
         'notifications' => 'Уведомления',
         'support' => 'Поддержка',
         'live_support' => 'Онлайн-поддержка',
@@ -1531,6 +1532,7 @@ return [
         'nav_label' => 'Правовая информация',
         'open_full_faq' => 'Открыть полный FAQ',
         'slugs' => [
+            'about' => 'О нас',
             'terms' => 'Terms',
             'privacy' => 'Privacy',
             'risks' => 'Risks',

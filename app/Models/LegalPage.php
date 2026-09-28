@@ -16,6 +16,8 @@ class LegalPage extends Model
 
     public const SLUG_FAQ = 'faq';
 
+    public const SLUG_ABOUT = 'about';
+
     protected $fillable = [
         'slug',
         'title',
@@ -43,6 +45,7 @@ class LegalPage extends Model
     public static function slugs(): array
     {
         return [
+            self::SLUG_ABOUT,
             self::SLUG_TERMS,
             self::SLUG_PRIVACY,
             self::SLUG_RISKS,
@@ -71,6 +74,11 @@ class LegalPage extends Model
     public function isFaq(): bool
     {
         return $this->slug === self::SLUG_FAQ;
+    }
+
+    public function isAbout(): bool
+    {
+        return $this->slug === self::SLUG_ABOUT;
     }
 
     /**

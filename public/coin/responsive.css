@@ -1983,6 +1983,56 @@ html.coin-nav-open .coin-nav-mobile {
   flex-shrink: 0;
 }
 
+.coin-nav-legal {
+  width: 100%;
+}
+
+.coin-nav-legal__summary {
+  list-style: none;
+}
+
+.coin-nav-legal__summary::-webkit-details-marker {
+  display: none;
+}
+
+.coin-nav-legal__chevron {
+  position: relative;
+  width: 8px;
+  height: 8px;
+  margin-left: auto;
+  border-right: 1.5px solid rgba(214, 238, 248, 0.55);
+  border-bottom: 1.5px solid rgba(214, 238, 248, 0.55);
+  transform: rotate(45deg);
+  transition: transform 0.18s ease;
+  flex-shrink: 0;
+}
+
+.coin-nav-legal[open] > .coin-nav-legal__summary .coin-nav-legal__chevron {
+  transform: rotate(225deg);
+  margin-top: 4px;
+}
+
+.coin-nav-legal__list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 2px 0 8px 30px;
+}
+
+.coin-nav-legal__link {
+  display: block;
+  padding: 8px 10px;
+  border-radius: 8px;
+  font-size: 13px;
+  color: rgba(230, 244, 250, 0.68);
+  text-decoration: none;
+}
+
+.coin-nav-legal__link:hover {
+  color: #f0fbff;
+  background: rgba(150, 235, 250, 0.06);
+}
+
 .coin-nav-support--unread:not(.coin-nav-item--active) {
   color: #f0fbff;
 }

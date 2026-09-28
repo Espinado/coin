@@ -1,12 +1,27 @@
+@php
+    $jsonLd = null;
+    if ($page->isFaq()) {
+        $jsonLd = \App\Support\SeoSchema::faqPage($page, $page->faqItems());
+    } elseif ($page->isAbout()) {
+        $jsonLd = \App\Support\SeoSchema::about();
+    }
+
+    $metaDescription = $page->isAbout()
+        ? __('coin.about.meta_description', ['brand' => \App\Support\PlatformBrand::name()])
+        : __('coin.seo.legal_meta_description', [
+            'title' => $page->title,
+            'brand' => \App\Support\PlatformBrand::name(),
+        ]);
+@endphp
 <x-coin-legal-layout
     :title="$page->title"
-    :description="__('coin.seo.legal_meta_description', ['title' => $page->title, 'brand' => \App\Support\PlatformBrand::name()])"
+    :description="$metaDescription"
     :canonical="route('legal.show', $page)"
-    :json-ld="$page->isFaq() ? \App\Support\SeoSchema::faqPage($page, $page->faqItems()) : null"
+    :json-ld="$jsonLd"
     :legal-nav="$legalNav"
     :current-page="$page"
 >
-    <div class="coin-legal-kicker">{{ mb_strtoupper(__('coin.admin.legal.title')) }}</div>
+    <div class="coin-legal-kicker">{{ mb_strtoupper($page->slugLabel()) }}</div>
     <h1 class="coin-legal-title">{{ $page->title }}</h1>
 
     @if($page->isFaq())

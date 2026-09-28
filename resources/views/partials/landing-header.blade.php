@@ -11,7 +11,7 @@
       <a href="#how">{{ __('coin.landing.nav_how') }}</a>
       <a href="#plans">{{ __('coin.landing.nav_plans') }}</a>
       <a href="#infra">{{ __('coin.landing.nav_infra') }}</a>
-      <a href="{{ route('about') }}">{{ __('coin.landing.nav_about') }}</a>
+      <a href="{{ route('legal.show', ['legalPage' => 'about']) }}">{{ __('coin.landing.nav_about') }}</a>
       <a href="{{ url('/dashboard') }}">{{ __('coin.landing.nav_dashboard') }}</a>
       <a href="#faq">{{ __('coin.landing.nav_faq') }}</a>
     </nav>
@@ -34,7 +34,7 @@
   <a href="#how" class="coin-landing-drawer__link">{{ __('coin.landing.nav_how') }}</a>
   <a href="#plans" class="coin-landing-drawer__link">{{ __('coin.landing.nav_plans') }}</a>
   <a href="#infra" class="coin-landing-drawer__link">{{ __('coin.landing.nav_infra') }}</a>
-  <a href="{{ route('about') }}" class="coin-landing-drawer__link">{{ __('coin.landing.nav_about') }}</a>
+  <a href="{{ route('legal.show', ['legalPage' => 'about']) }}" class="coin-landing-drawer__link">{{ __('coin.landing.nav_about') }}</a>
   <a href="{{ url('/dashboard') }}" class="coin-landing-drawer__link">{{ __('coin.landing.nav_dashboard') }}</a>
   <a href="#faq" class="coin-landing-drawer__link">{{ __('coin.landing.nav_faq') }}</a>
   <div class="coin-landing-drawer__divider" aria-hidden="true"></div>

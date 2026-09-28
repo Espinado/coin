@@ -112,14 +112,14 @@ class LegalPageTest extends TestCase
             ->assertSee('landing-faq', false);
     }
 
-    public function test_admin_can_update_legal_page(): void
+    public function test_admin_can_update_about_page(): void
     {
-        $page = LegalPage::query()->where('slug', LegalPage::SLUG_RISKS)->firstOrFail();
+        $page = LegalPage::query()->where('slug', LegalPage::SLUG_ABOUT)->firstOrFail();
 
         $response = $this->actingAs($this->admin, 'admin')
             ->patch('http://admin.coin.test/legal/'.$page->slug, [
-                'title' => 'Обновлённые риски',
-                'body' => 'Новый текст раскрытия рисков.',
+                'title' => 'About updated',
+                'body' => 'Updated about body for CloudFlops.',
                 'is_published' => '1',
             ]);
 
@@ -127,8 +127,21 @@ class LegalPageTest extends TestCase
 
         $page->refresh();
 
-        $this->assertSame('Обновлённые риски', $page->title);
-        $this->assertSame('Новый текст раскрытия рисков.', $page->body);
+        $this->assertSame('About updated', $page->title);
+        $this->assertSame('Updated about body for CloudFlops.', $page->body);
         $this->assertTrue($page->is_published);
+
+        $this->get('http://coin.test/legal/about')
+            ->assertOk()
+            ->assertSee('Updated about body for CloudFlops.', false);
+    }
+
+    public function test_admin_legal_index_lists_about(): void
+    {
+        $this->actingAs($this->admin, 'admin')
+            ->get('http://admin.coin.test/legal')
+            ->assertOk()
+            ->assertSee(__('coin.legal.slugs.about'), false)
+            ->assertSee('About CloudFlops', false);
     }
 }

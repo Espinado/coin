@@ -95,6 +95,7 @@ return [
         'wallet' => 'Wallet',
         'referrals' => 'Referrals',
         'settings' => 'Settings',
+        'legal_information' => 'Legal information',
         'notifications' => 'Notifications',
         'support' => 'Support',
         'live_support' => 'Live support',
@@ -1531,6 +1532,7 @@ return [
         'nav_label' => 'Legal',
         'open_full_faq' => 'Open full FAQ',
         'slugs' => [
+            'about' => 'About',
             'terms' => 'Terms',
             'privacy' => 'Privacy',
             'risks' => 'Risks',
