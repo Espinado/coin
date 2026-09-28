@@ -55,11 +55,11 @@ class LandingStatsService
             'active_contracts' => $activeContractCount,
             'active_users' => $activeUsers,
             'total_locked' => $totalLocked,
-            'total_locked_compact' => $this->compactAmount($totalLocked),
+            'total_locked_label' => $this->fullAmount($totalLocked),
             'total_power' => $totalPower,
-            'total_power_compact' => $this->compactUnits($totalPower),
+            'total_power_label' => $this->fullInteger($totalPower),
             'total_rewards_paid' => $totalRewardsPaid,
-            'total_rewards_compact' => $this->compactAmount($totalRewardsPaid),
+            'total_rewards_label' => $this->fullAmount($totalRewardsPaid),
             'today_profit' => $todayProfit,
             'today_profit_label' => $this->signedAmount($todayProfit),
             'referral_invited' => $referralInvited,
@@ -69,11 +69,11 @@ class LandingStatsService
             'featured_plan_name' => $featuredPlan?->displayName(),
             'featured_power' => $featuredPower,
             'featured_power_label' => $featuredPower > 0
-                ? number_format($featuredPower, 0, '.', ' ').' ед.'
+                ? $this->fullInteger($featuredPower)
                 : '—',
             'featured_daily' => $featuredDaily,
             'featured_daily_label' => $featuredDaily > 0
-                ? '+'.number_format($featuredDaily, 2, ',', ' ')
+                ? '+'.$this->fullAmount($featuredDaily)
                 : '—',
         ];
     }
@@ -99,36 +99,20 @@ class LandingStatsService
         return round($amount * ($apr / 100) / 365, 2);
     }
 
-    private function compactAmount(float $value, int $decimals = 1): string
+    private function fullAmount(float $value): string
     {
-        if ($value >= 1_000_000) {
-            return number_format($value / 1_000_000, $decimals, ',', '').' млн';
-        }
-
-        if ($value >= 1_000) {
-            return number_format($value / 1_000, $decimals, ',', '').' тыс';
-        }
-
-        return number_format($value, 0, '.', ' ');
+        return number_format($value, 2, ',', ' ');
     }
 
-    private function compactUnits(int $value, int $decimals = 1): string
+    private function fullInteger(int $value): string
     {
-        if ($value >= 1_000_000) {
-            return number_format($value / 1_000_000, $decimals, ',', '').' млн ед.';
-        }
-
-        if ($value >= 1_000) {
-            return number_format($value, 0, '.', ' ').' ед.';
-        }
-
-        return number_format($value, 0, '.', ' ').' ед.';
+        return number_format($value, 0, '.', ' ');
     }
 
     private function signedAmount(float $value): string
     {
         $prefix = $value >= 0 ? '+' : '−';
 
-        return $prefix.number_format(abs($value), 2, ',', ' ');
+        return $prefix.$this->fullAmount(abs($value));
     }
 }

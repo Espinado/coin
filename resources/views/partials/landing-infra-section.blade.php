@@ -13,7 +13,7 @@
           </div>
           <div class="coin-landing-infra-stat">
             <div class="coin-landing-infra-stat__label">{{ __('coin.landing.infra_stat_invested') }}</div>
-            <div class="coin-landing-infra-stat__value">{{ $landingStats['total_locked_compact'] }}</div>
+            <div class="coin-landing-infra-stat__value">{{ $landingStats['total_locked_label'] }}</div>
           </div>
           <div class="coin-landing-infra-stat">
             <div class="coin-landing-infra-stat__label">{{ __('coin.landing.infra_stat_contracts') }}</div>
