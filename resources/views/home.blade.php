@@ -5,6 +5,12 @@
     @include('partials.coin-ios-meta')
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ \App\Support\PlatformBrand::pageTitle(__('coin.landing.meta_title_suffix')) }}</title>
+    @include('partials.coin-seo-meta', [
+        'title' => \App\Support\PlatformBrand::pageTitle(__('coin.landing.meta_title_suffix')),
+        'description' => __('coin.seo.meta_description', ['brand' => \App\Support\PlatformBrand::name()]),
+        'canonical' => route('home'),
+        'jsonLd' => \App\Support\SeoSchema::landing(),
+    ])
     <link rel="icon" href="{{ asset('cloudflops/logo-mark.png') }}" type="image/png" />
     @livewireStyles
     @include('partials.coin-reverb-config-guest')

@@ -1,5 +1,8 @@
 @props([
     'title' => '',
+    'description' => null,
+    'canonical' => null,
+    'jsonLd' => null,
     'legalNav' => null,
     'currentPage' => null,
 ])
@@ -10,6 +13,15 @@
     <meta charset="utf-8">
     @include('partials.coin-ios-meta')
     <title>{{ \App\Support\PlatformBrand::pageTitle($title) }}</title>
+    @include('partials.coin-seo-meta', [
+        'title' => \App\Support\PlatformBrand::pageTitle($title),
+        'description' => $description ?? __('coin.seo.legal_meta_description', [
+            'title' => $title,
+            'brand' => \App\Support\PlatformBrand::name(),
+        ]),
+        'canonical' => $canonical ?? url()->current(),
+        'jsonLd' => $jsonLd,
+    ])
     <link rel="icon" href="{{ asset('cloudflops/logo-mark.png') }}" type="image/png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />

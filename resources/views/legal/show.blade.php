@@ -1,4 +1,11 @@
-<x-coin-legal-layout :title="$page->title" :legal-nav="$legalNav" :current-page="$page">
+<x-coin-legal-layout
+    :title="$page->title"
+    :description="__('coin.seo.legal_meta_description', ['title' => $page->title, 'brand' => \App\Support\PlatformBrand::name()])"
+    :canonical="route('legal.show', $page)"
+    :json-ld="$page->isFaq() ? \App\Support\SeoSchema::faqPage($page, $page->faqItems()) : null"
+    :legal-nav="$legalNav"
+    :current-page="$page"
+>
     <div class="coin-legal-kicker">{{ mb_strtoupper(__('coin.admin.legal.title')) }}</div>
     <h1 class="coin-legal-title">{{ $page->title }}</h1>
 

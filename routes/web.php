@@ -7,6 +7,7 @@ use App\Http\Controllers\PaymentWebhookController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReferralInviteController;
 use App\Http\Controllers\ReverbDebugLogController;
+use App\Http\Controllers\SeoController;
 use App\Livewire\Dashboard;
 use App\Livewire\ProfitHistory;
 use Illuminate\Support\Facades\Broadcast;
@@ -16,6 +17,10 @@ Route::domain(config('coin.user_domain'))
     ->middleware(['user.domain', 'platform.maintenance'])
     ->group(function () {
         Route::get('/', HomeController::class)->name('home');
+
+        Route::get('/robots.txt', [SeoController::class, 'robots'])->name('seo.robots');
+        Route::get('/sitemap.xml', [SeoController::class, 'sitemap'])->name('seo.sitemap');
+        Route::get('/llms.txt', [SeoController::class, 'llms'])->name('seo.llms');
 
         Route::get('/legal/{legalPage:slug}', [LegalPageController::class, 'show'])
             ->where('legalPage', 'terms|privacy|risks|faq')

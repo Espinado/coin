@@ -19,6 +19,22 @@ return [
 
     'admin_domain' => env('COIN_ADMIN_DOMAIN', 'admin.coin.test'),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Public SEO / AI discoverability
+    |--------------------------------------------------------------------------
+    |
+    | indexable_hosts: only these hosts may emit index,follow when APP_ENV=production.
+    | Empty list = never index (safe default until a production domain is configured).
+    |
+    */
+    'seo' => [
+        'indexable_hosts' => array_values(array_filter(array_map(
+            trim(...),
+            explode(',', (string) env('COIN_SEO_INDEXABLE_HOSTS', '')),
+        ))),
+    ],
+
     // Comma-separated proxy IPs (or *). Empty = do not trust X-Forwarded-For.
     'trusted_proxies' => array_values(array_filter(array_map(
         trim(...),

@@ -4,6 +4,11 @@
     <meta charset="utf-8">
     @include('partials.coin-ios-meta')
     <title>{{ $title ?? \App\Support\PlatformBrand::name() }}</title>
+    @include('partials.coin-seo-meta', [
+        'title' => $title ?? \App\Support\PlatformBrand::name(),
+        'description' => __('coin.seo.auth_meta_description', ['brand' => \App\Support\PlatformBrand::name()]),
+        'noindex' => true,
+    ])
     <link rel="icon" href="{{ asset('cloudflops/logo-mark.png') }}" type="image/png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />

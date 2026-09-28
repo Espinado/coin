@@ -1361,6 +1361,13 @@ return [
         'verify_email_mail_footer' => 'The code is valid for 10 minutes. If you did not register, ignore this email.',
     ],
 
+    'seo' => [
+        'meta_description' => ':brand — AI compute investment platform. Choose a plan, allocate data-center power, and track rewards in your dashboard.',
+        'legal_meta_description' => ':title — official :brand legal information.',
+        'auth_meta_description' => 'Sign in or create a :brand account. This page is not indexed.',
+        'dashboard_meta_description' => ':brand user dashboard. This area requires authentication and is not indexed.',
+    ],
+
     'landing' => [
         'meta_title_suffix' => 'Investment platform',
         'scroll_top' => 'Back to top',

@@ -9,6 +9,11 @@
     <meta name="coin-idle-redirect" content="{{ route('session.expired') }}">
     @endauth
     <title>{{ $title ?? \App\Support\PlatformBrand::name() }}</title>
+    @include('partials.coin-seo-meta', [
+        'title' => $title ?? \App\Support\PlatformBrand::name(),
+        'description' => __('coin.seo.dashboard_meta_description', ['brand' => \App\Support\PlatformBrand::name()]),
+        'noindex' => true,
+    ])
     <link rel="icon" href="{{ asset('cloudflops/logo-mark.png') }}" type="image/png" />
     @livewireStyles
     <link rel="preconnect" href="https://fonts.googleapis.com" />
