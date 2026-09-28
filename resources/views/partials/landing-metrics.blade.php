@@ -3,7 +3,7 @@
     <div class="coin-landing-metrics__grid">
       <div class="coin-landing-metric-card">
         <div class="coin-landing-metric-card__label">{{ __('coin.landing.metric_total_power') }}</div>
-        <div class="coin-landing-metric-card__value">{{ $landingStats['total_power_label'] }}</div>
+        <div class="coin-landing-metric-card__value">{{ $landingStats['total_locked_label'] }}</div>
       </div>
       <div class="coin-landing-metric-card">
         <div class="coin-landing-metric-card__label">{{ __('coin.landing.metric_active_users') }}</div>

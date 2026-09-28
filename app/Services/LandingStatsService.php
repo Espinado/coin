@@ -101,7 +101,7 @@ class LandingStatsService
 
     private function fullAmount(float $value): string
     {
-        return number_format($value, 2, ',', ' ');
+        return number_format($value, 2, ',', ' ').' USDT';
     }
 
     private function fullInteger(int $value): string
