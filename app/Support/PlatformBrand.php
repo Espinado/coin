@@ -33,6 +33,21 @@ final class PlatformBrand
         return $version ? $url.'?v='.$version : $url;
     }
 
+    public static function ogImageUrl(): string
+    {
+        $path = ltrim((string) config('coin.seo.og_image', 'cloudflops/og-default.png'), '/');
+        $fullPath = public_path($path);
+
+        if (! is_file($fullPath)) {
+            return self::logoUrl('mark');
+        }
+
+        $url = asset($path);
+        $version = (int) filemtime($fullPath);
+
+        return $url.'?v='.$version;
+    }
+
     private static function logoVersion(string $path): ?int
     {
         $fullPath = public_path($path);

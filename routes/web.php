@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AboutController;
 use App\Http\Controllers\GuestBroadcastAuthController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\LegalPageController;
@@ -17,6 +18,7 @@ Route::domain(config('coin.user_domain'))
     ->middleware(['user.domain', 'platform.maintenance'])
     ->group(function () {
         Route::get('/', HomeController::class)->name('home');
+        Route::get('/about', AboutController::class)->name('about');
 
         Route::get('/robots.txt', [SeoController::class, 'robots'])->name('seo.robots');
         Route::get('/sitemap.xml', [SeoController::class, 'sitemap'])->name('seo.sitemap');

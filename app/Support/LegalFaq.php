@@ -9,32 +9,64 @@ class LegalFaq
      */
     public static function defaultItems(): array
     {
+        $host = self::publicHost();
+
         return [
             [
                 'question' => 'What is CloudFlops?',
-                'answer' => 'An investment platform where you top up USDT, buy a plan with fixed APR, and receive daily profit to your available balance.',
+                'answer' => "CloudFlops is an investment-plan platform at {$host}. You top up USDT (or BTC converted to USDT), buy a plan with a stated APR and term, receive daily profit to your available balance, and can withdraw to your own wallet. Investing involves risk — see the Risk Disclosure.",
             ],
             [
-                'question' => 'How do plans work?',
-                'answer' => 'A plan defines minimum investment, APR, and contract term. When you buy a plan, principal is locked until maturity.',
+                'question' => 'How do investment plans work?',
+                'answer' => 'A plan defines minimum investment, APR, and contract duration. When you buy a plan, principal is locked in a contract until maturity. Daily profit is credited to your available balance according to platform rules.',
             ],
             [
-                'question' => 'Where does profit come from?',
-                'answer' => 'Daily profit is calculated as principal × APR / 365 and credited to your available balance. At maturity, principal returns to available balance.',
+                'question' => 'How is daily profit calculated?',
+                'answer' => 'Accruals follow the plan’s APR and the platform’s daily accrual schedule (shown in your dashboard). Landing-page calculators are estimates only and are not a guarantee of returns.',
             ],
             [
-                'question' => 'How do referrals work?',
-                'answer' => 'When someone you invited purchases a plan, you receive a one-time commission (default 20%) credited to your available balance.',
+                'question' => 'What happens when a contract matures?',
+                'answer' => 'When the contract term ends, principal returns to your available balance (subject to Terms). Accrued profit already credited remains in available balance unless otherwise stated in Terms.',
             ],
             [
-                'question' => 'How do I request a payout?',
-                'answer' => 'Submit a request in the Wallet section of your dashboard. Fee and processing time are shown before confirmation. Specific terms are subject to change.',
+                'question' => 'Which currencies can I deposit?',
+                'answer' => 'USDT and BTC. Accounting is in USDT; BTC deposits are converted using the platform exchange rate.',
             ],
             [
-                'question' => 'What can I see in the dashboard?',
-                'answer' => 'Balance, investments, profit history, wallet, payouts, referrals, and support.',
+                'question' => 'How do withdrawals work?',
+                'answer' => 'Open Wallet in the dashboard, submit a withdrawal request to your payout address, and confirm any required checks (for example verification or fees shown before confirm). Processing status is visible in the dashboard and admin review may apply.',
+            ],
+            [
+                'question' => 'How does the referral program work?',
+                'answer' => 'Share your referral link. When someone you invited buys a plan, you may receive a Level-1 commission (default percentage is configured by the platform, commonly 20% of the purchase). On an approved plan upgrade, commission may apply to the top-up difference only. Level-2 is not used.',
+            ],
+            [
+                'question' => 'Is CloudFlops an exchange or a bank?',
+                'answer' => 'No. CloudFlops is not a crypto exchange and not a bank. It offers investment plans through a user dashboard under its Terms and Risk Disclosure.',
+            ],
+            [
+                'question' => 'Are returns guaranteed?',
+                'answer' => 'No. Returns are not guaranteed. Past performance does not guarantee future results. Read /legal/risks before investing.',
+            ],
+            [
+                'question' => 'How do I contact support?',
+                'answer' => 'Use Live support on the landing page (guest) or inside the dashboard after sign-in. You can also use the platform contact email published on the site.',
+            ],
+            [
+                'question' => 'Where are the legal documents?',
+                'answer' => "Terms: /legal/terms · Privacy: /legal/privacy · Risks: /legal/risks · FAQ: /legal/faq (on {$host})",
             ],
         ];
+    }
+
+    private static function publicHost(): string
+    {
+        $fromApp = parse_url((string) config('app.url'), PHP_URL_HOST);
+        $fromUser = (string) config('coin.user_domain', '');
+
+        $host = is_string($fromApp) && $fromApp !== '' ? $fromApp : $fromUser;
+
+        return $host !== '' ? $host : 'CloudFlops';
     }
 
     /**

@@ -8,7 +8,7 @@
     $robots = SeoVisibility::robotsMeta(isset($noindex) ? (bool) $noindex : null);
     $resolvedOgTitle = $ogTitle ?? $pageTitle;
     $resolvedOgDescription = $ogDescription ?? $metaDescription;
-    $resolvedOgImage = $ogImage ?? PlatformBrand::logoUrl('mark');
+    $resolvedOgImage = $ogImage ?? PlatformBrand::ogImageUrl();
     $resolvedOgType = $ogType ?? 'website';
     $siteName = PlatformBrand::name();
     $locale = str_replace('_', '-', app()->getLocale());
@@ -25,9 +25,11 @@
 <meta property="og:description" content="{{ $resolvedOgDescription }}">
 <meta property="og:url" content="{{ $canonicalUrl }}">
 <meta property="og:image" content="{{ $resolvedOgImage }}">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
 <meta property="og:locale" content="{{ $locale }}">
 
-<meta name="twitter:card" content="summary">
+<meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="{{ $resolvedOgTitle }}">
 <meta name="twitter:description" content="{{ $resolvedOgDescription }}">
 <meta name="twitter:image" content="{{ $resolvedOgImage }}">

@@ -3,6 +3,7 @@
 namespace App\Support;
 
 use App\Models\LegalPage;
+use App\Services\PlatformSettingsService;
 
 final class SeoSchema
 {
@@ -11,26 +12,51 @@ final class SeoSchema
      */
     public static function landing(): array
     {
-        $name = PlatformBrand::name();
-        $url = route('home');
-        $logo = PlatformBrand::logoUrl('mark');
-
         return [
-            [
-                '@context' => 'https://schema.org',
-                '@type' => 'Organization',
-                'name' => $name,
-                'legalName' => PlatformBrand::legalName(),
-                'url' => $url,
-                'logo' => $logo,
-            ],
+            self::organization(),
             [
                 '@context' => 'https://schema.org',
                 '@type' => 'WebSite',
-                'name' => $name,
-                'url' => $url,
+                'name' => PlatformBrand::name(),
+                'url' => route('home'),
+                'description' => __('coin.seo.meta_description', ['brand' => PlatformBrand::name()]),
             ],
         ];
+    }
+
+    /**
+     * @return list<array<string, mixed>>
+     */
+    public static function about(): array
+    {
+        return [self::organization()];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public static function organization(): array
+    {
+        $name = PlatformBrand::name();
+        $url = route('home');
+        $logo = PlatformBrand::logoUrl('mark');
+        $email = self::contactEmail();
+
+        $org = [
+            '@context' => 'https://schema.org',
+            '@type' => 'Organization',
+            'name' => $name,
+            'legalName' => PlatformBrand::legalName(),
+            'url' => $url,
+            'logo' => $logo,
+            'description' => __('coin.seo.meta_description', ['brand' => $name]),
+        ];
+
+        if ($email !== '') {
+            $org['email'] = $email;
+        }
+
+        return $org;
     }
 
     /**
@@ -72,5 +98,16 @@ final class SeoSchema
                 'name' => $page->title,
             ],
         ];
+    }
+
+    private static function contactEmail(): string
+    {
+        try {
+            $fromSettings = trim(app(PlatformSettingsService::class)->get('company_email'));
+        } catch (\Throwable) {
+            $fromSettings = '';
+        }
+
+        return $fromSettings !== '' ? $fromSettings : trim((string) config('coin.contact_email', ''));
     }
 }

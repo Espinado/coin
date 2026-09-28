@@ -33,6 +33,7 @@ return [
             trim(...),
             explode(',', (string) env('COIN_SEO_INDEXABLE_HOSTS', '')),
         ))),
+        'og_image' => env('COIN_SEO_OG_IMAGE', 'cloudflops/og-default.png'),
     ],
 
     // Comma-separated proxy IPs (or *). Empty = do not trust X-Forwarded-For.

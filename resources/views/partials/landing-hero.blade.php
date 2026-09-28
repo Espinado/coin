@@ -6,6 +6,10 @@
       </div>
       <h1 class="coin-landing-hero__title">{{ __('coin.landing.hero_title') }}</h1>
       <p class="coin-landing-hero__lead">{{ __('coin.landing.hero_lead') }}</p>
+      <p style="margin: 12px 0 0; font-size: 13px; line-height: 1.5; color: rgba(230,244,250,0.58);">
+        {{ __('coin.landing.risk_note') }}
+        <a href="{{ route('legal.show', ['legalPage' => 'risks']) }}" target="_blank" rel="noopener noreferrer">{{ __('coin.legal.slugs.risks') }}</a>
+      </p>
       <div class="coin-landing-hero__actions">
         @include('partials.landing-hero-cta')
       </div>
