@@ -2007,9 +2007,28 @@ html.coin-nav-open .coin-nav-mobile {
   flex-shrink: 0;
 }
 
+.coin-nav-legal[open] > .coin-nav-legal__summary {
+  color: #e6f4fa;
+}
+
+.coin-nav-legal[open] > .coin-nav-legal__summary .coin-nav-dot {
+  background: oklch(0.86 0.12 192);
+}
+
+.coin-nav-legal[open] > .coin-nav-legal__summary::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 10px;
+  background: oklch(0.6 0.13 200 / 0.22);
+  border: 1px solid oklch(0.86 0.11 195 / 0.3);
+  pointer-events: none;
+}
+
 .coin-nav-legal[open] > .coin-nav-legal__summary .coin-nav-legal__chevron {
   transform: rotate(225deg);
   margin-top: 4px;
+  border-color: oklch(0.86 0.12 192);
 }
 
 .coin-nav-legal__list {
