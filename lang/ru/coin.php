@@ -1496,6 +1496,8 @@ return [
 
     'legal' => [
         'back_home' => 'На главную',
+        'nav_label' => 'Правовая информация',
+        'open_full_faq' => 'Открыть полный FAQ',
         'slugs' => [
             'terms' => 'Terms',
             'privacy' => 'Privacy',

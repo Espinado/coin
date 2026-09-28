@@ -75,6 +75,9 @@
         <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.16em; color: oklch(0.88 0.11 195);">FAQ</div>
         <h2 style="margin: 18px 0 0; font-size: 42px; line-height: 1.08; letter-spacing: -0.035em; font-weight: 600; color: #f0fbff;">{{ $faqPage?->title ?? 'Frequently asked questions' }}</h2>
 @include('partials.landing-faq-contact')
+        <p style="margin: 14px 0 0; font-size: 14px;">
+          <a href="{{ route('legal.show', ['legalPage' => 'faq']) }}">{{ __('coin.legal.open_full_faq') }}</a>
+        </p>
       </div>
       <div>
 @include('partials.landing-faq-accordion')
@@ -112,8 +115,8 @@
         <div class="coin-landing-footer__col">
           <div class="coin-landing-footer__heading">SUPPORT</div>
           <div class="coin-landing-footer__nav">
-            <a href="{{ ($faqPage ?? null) ? route('legal.show', $faqPage) : '#faq' }}">{{ __('coin.legal.slugs.faq') }}</a>
-            <a href="#support">Help</a>
+            <a href="{{ route('legal.show', ['legalPage' => 'faq']) }}">{{ __('coin.legal.slugs.faq') }}</a>
+            <a href="{{ route('legal.show', ['legalPage' => 'risks']) }}">{{ __('coin.legal.slugs.risks') }}</a>
 @include('partials.landing-footer-contact', ['companyLegal' => $companyLegal])
           </div>
         </div>
@@ -138,6 +141,7 @@
               {{ __('coin.footer.registration_number') }} {{ $footerReg }}.
           @endif
       </span>
+      @include('partials.coin-legal-links', ['class' => 'coin-landing-footer__legal'])
       <span class="coin-landing-footer__status">NETWORK ONLINE</span>
     </div>
   </footer>

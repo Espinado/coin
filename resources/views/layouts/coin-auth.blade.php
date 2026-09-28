@@ -25,6 +25,7 @@
       input::placeholder { color: rgba(230,244,250,0.42); }
       input:focus { outline: none; }
       .coin-auth-error { margin-top: 8px; font-size: 13px; font-weight: 600; line-height: 1.35; color: #ff4d4f; }
+      .coin-auth-legal-links .coin-legal-links__sep { color: rgba(230,244,250,0.35); }
       .coin-auth-status { margin-bottom: 16px; padding: 12px 14px; border-radius: 10px; border: 1px solid oklch(0.86 0.11 195 / 0.35); background: oklch(0.6 0.13 200 / 0.15); color: #eafcff; font-size: 13px; }
     </style>
 </head>

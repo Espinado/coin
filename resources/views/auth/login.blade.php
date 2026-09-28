@@ -44,6 +44,11 @@
                     </div>
                 </div>
             </form>
+
+            @include('partials.coin-legal-links', [
+                'class' => 'coin-auth-legal-links',
+                'style' => 'margin-top: 18px; display: flex; flex-wrap: wrap; justify-content: center; gap: 8px 10px; font-size: 12.5px;',
+            ])
         </div>
     </div>
 </x-coin-auth-layout>

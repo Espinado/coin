@@ -1496,6 +1496,8 @@ return [
 
     'legal' => [
         'back_home' => 'Back to home',
+        'nav_label' => 'Legal',
+        'open_full_faq' => 'Open full FAQ',
         'slugs' => [
             'terms' => 'Terms',
             'privacy' => 'Privacy',

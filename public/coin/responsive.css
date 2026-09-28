@@ -286,6 +286,18 @@ html.coin-nav-open .coin-nav-overlay {
   color: rgba(230, 244, 250, 0.62);
 }
 
+.coin-landing-footer__legal {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 6px 8px;
+}
+
+.coin-landing-footer__legal .coin-legal-links__sep {
+  color: rgba(230, 244, 250, 0.35);
+}
+
 .coin-landing-footer__status {
   font-family: 'JetBrains Mono', monospace;
   letter-spacing: 0.1em;
