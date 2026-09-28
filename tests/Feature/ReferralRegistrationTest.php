@@ -51,13 +51,10 @@ class ReferralRegistrationTest extends TestCase
 
         $response = $this
             ->withCookie('coin_referral_code', 'COIN-REF02')
-            ->post('/register', [
+            ->post('/register', $this->validRegistrationPayload([
                 'name' => 'Invited User',
                 'email' => 'invited@example.com',
-                'phone' => '+79001234567',
-                'password' => 'password',
-                'password_confirmation' => 'password',
-            ]);
+            ]));
 
         $response->assertRedirect(route('verification.notice', absolute: false));
 
@@ -79,13 +76,10 @@ class ReferralRegistrationTest extends TestCase
     {
         $response = $this
             ->withCookie('coin_referral_code', 'COIN-NOPE')
-            ->post('/register', [
+            ->post('/register', $this->validRegistrationPayload([
                 'name' => 'Solo User',
                 'email' => 'solo@example.com',
-                'phone' => '+79001234567',
-                'password' => 'password',
-                'password_confirmation' => 'password',
-            ]);
+            ]));
 
         $response->assertRedirect(route('verification.notice', absolute: false));
 
@@ -106,13 +100,10 @@ class ReferralRegistrationTest extends TestCase
 
         $this
             ->withCookie('coin_referral_code', 'COIN-REF03')
-            ->post('/register', [
+            ->post('/register', $this->validRegistrationPayload([
                 'name' => 'Linked User',
                 'email' => 'linked@example.com',
-                'phone' => '+79001234567',
-                'password' => 'password',
-                'password_confirmation' => 'password',
-            ]);
+            ]));
 
         $this->assertDatabaseHas('referral_invitations', [
             'referrer_user_id' => $referrer->id,

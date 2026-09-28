@@ -515,22 +515,26 @@ class SecurityHardeningTest extends TestCase
         RateLimiter::clear('127.0.0.1');
 
         for ($i = 0; $i < 5; $i++) {
-            $this->post('http://coin.test/register', [
+            $this->post('http://coin.test/register', $this->validRegistrationPayload([
                 'name' => 'User '.$i,
                 'email' => "user{$i}@coin.test",
                 'phone' => '+3712000000'.$i,
                 'password' => 'SecretPass1!',
                 'password_confirmation' => 'SecretPass1!',
-            ])->assertRedirect();
+            ]))->assertRedirect();
+
+            // Guest middleware would otherwise skip throttle after the first authenticated signup.
+            auth()->logout();
+            $this->flushSession();
         }
 
-        $this->post('http://coin.test/register', [
+        $this->post('http://coin.test/register', $this->validRegistrationPayload([
             'name' => 'Blocked User',
             'email' => 'blocked@coin.test',
             'phone' => '+37120000099',
             'password' => 'SecretPass1!',
             'password_confirmation' => 'SecretPass1!',
-        ])->assertStatus(429);
+        ]))->assertStatus(429);
     }
 
     public function test_payment_security_monitor_reads_configured_thresholds(): void

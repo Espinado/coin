@@ -13,18 +13,18 @@ class RegistrationTest extends TestCase
     {
         $response = $this->get('/register');
 
-        $response->assertStatus(200);
+        $response->assertStatus(200)
+            ->assertSee('name="accept_terms"', false)
+            ->assertSee('name="accept_privacy"', false)
+            ->assertSee('name="accept_risks"', false)
+            ->assertSee(route('legal.show', ['legalPage' => 'terms']), false)
+            ->assertSee(route('legal.show', ['legalPage' => 'privacy']), false)
+            ->assertSee(route('legal.show', ['legalPage' => 'risks']), false);
     }
 
     public function test_new_users_can_register(): void
     {
-        $response = $this->post('/register', [
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-            'phone' => '+79001234567',
-            'password' => 'password',
-            'password_confirmation' => 'password',
-        ]);
+        $response = $this->post('/register', $this->validRegistrationPayload());
 
         $this->assertAuthenticated();
         $response->assertRedirect(route('verification.notice', absolute: false));
@@ -38,13 +38,9 @@ class RegistrationTest extends TestCase
 
     public function test_users_can_register_with_mixed_case_email(): void
     {
-        $response = $this->post('/register', [
-            'name' => 'Test User',
+        $response = $this->post('/register', $this->validRegistrationPayload([
             'email' => 'MixedCase@Example.com',
-            'phone' => '+79001234567',
-            'password' => 'password',
-            'password_confirmation' => 'password',
-        ]);
+        ]));
 
         $this->assertAuthenticated();
         $response->assertRedirect(route('verification.notice', absolute: false));
@@ -55,23 +51,16 @@ class RegistrationTest extends TestCase
 
     public function test_registration_rejects_duplicate_email_ignoring_case(): void
     {
-        $this->post('/register', [
-            'name' => 'First User',
-            'email' => 'test@example.com',
-            'phone' => '+79001234567',
-            'password' => 'password',
-            'password_confirmation' => 'password',
-        ])->assertRedirect(route('verification.notice', absolute: false));
+        $this->post('/register', $this->validRegistrationPayload())
+            ->assertRedirect(route('verification.notice', absolute: false));
 
         auth()->logout();
 
-        $response = $this->post('/register', [
+        $response = $this->post('/register', $this->validRegistrationPayload([
             'name' => 'Second User',
             'email' => 'TEST@example.com',
             'phone' => '+79007654321',
-            'password' => 'password',
-            'password_confirmation' => 'password',
-        ]);
+        ]));
 
         $response->assertSessionHasErrors('email');
         $this->assertGuest();
@@ -79,13 +68,7 @@ class RegistrationTest extends TestCase
 
     public function test_new_users_cannot_access_dashboard_before_email_verification(): void
     {
-        $this->post('/register', [
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-            'phone' => '+79001234567',
-            'password' => 'password',
-            'password_confirmation' => 'password',
-        ]);
+        $this->post('/register', $this->validRegistrationPayload());
 
         $this->get(route('dashboard', absolute: false))
             ->assertRedirect(route('verification.notice', absolute: false));
@@ -93,12 +76,9 @@ class RegistrationTest extends TestCase
 
     public function test_registration_requires_phone(): void
     {
-        $response = $this->post('/register', [
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-            'password' => 'password',
-            'password_confirmation' => 'password',
-        ]);
+        $response = $this->post('/register', $this->validRegistrationPayload([
+            'phone' => null,
+        ]));
 
         $response->assertSessionHasErrors('phone');
         $this->assertGuest();
@@ -106,15 +86,23 @@ class RegistrationTest extends TestCase
 
     public function test_registration_rejects_invalid_phone(): void
     {
-        $response = $this->post('/register', [
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+        $response = $this->post('/register', $this->validRegistrationPayload([
             'phone' => '123',
-            'password' => 'password',
-            'password_confirmation' => 'password',
-        ]);
+        ]));
 
         $response->assertSessionHasErrors('phone');
+        $this->assertGuest();
+    }
+
+    public function test_registration_requires_legal_acceptances(): void
+    {
+        $response = $this->post('/register', $this->validRegistrationPayload([
+            'accept_terms' => null,
+            'accept_privacy' => null,
+            'accept_risks' => null,
+        ]));
+
+        $response->assertSessionHasErrors(['accept_terms', 'accept_privacy', 'accept_risks']);
         $this->assertGuest();
     }
 }

@@ -42,6 +42,35 @@
                     <input id="password_confirmation" type="password" name="password_confirmation" required autocomplete="new-password" class="js-password-input" placeholder="{{ __('coin.auth.password_confirm_placeholder') }}" style="width: 100%; box-sizing: border-box; margin-top: 9px; padding: 14px 16px; border-radius: 12px; border: 1px solid rgba(150,235,250,0.18); background: rgba(4,16,28,0.7); color: #f0fbff; font-family: inherit; font-size: 16px;" />
                 </div>
 
+                <div class="coin-auth-legal" style="margin-top: 22px; display: flex; flex-direction: column; gap: 12px;">
+                    <label for="accept_terms" style="display: flex; gap: 10px; align-items: flex-start; font-size: 12.5px; line-height: 1.45; color: rgba(230,244,250,0.82); cursor: pointer;">
+                        <input id="accept_terms" type="checkbox" name="accept_terms" value="1" @checked(old('accept_terms')) required style="margin-top: 2px; flex-shrink: 0; width: 16px; height: 16px; accent-color: oklch(0.8 0.13 192);" />
+                        <span>
+                            {{ __('coin.auth.accept_terms_prefix') }}
+                            <a href="{{ route('legal.show', ['legalPage' => 'terms']) }}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()">{{ __('coin.legal.slugs.terms') }}</a>.
+                        </span>
+                    </label>
+                    @error('accept_terms')<div class="coin-auth-error" style="margin-top: -4px;">{{ $message }}</div>@enderror
+
+                    <label for="accept_privacy" style="display: flex; gap: 10px; align-items: flex-start; font-size: 12.5px; line-height: 1.45; color: rgba(230,244,250,0.82); cursor: pointer;">
+                        <input id="accept_privacy" type="checkbox" name="accept_privacy" value="1" @checked(old('accept_privacy')) required style="margin-top: 2px; flex-shrink: 0; width: 16px; height: 16px; accent-color: oklch(0.8 0.13 192);" />
+                        <span>
+                            {{ __('coin.auth.accept_privacy_prefix') }}
+                            <a href="{{ route('legal.show', ['legalPage' => 'privacy']) }}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()">{{ __('coin.legal.slugs.privacy') }}</a>.
+                        </span>
+                    </label>
+                    @error('accept_privacy')<div class="coin-auth-error" style="margin-top: -4px;">{{ $message }}</div>@enderror
+
+                    <label for="accept_risks" style="display: flex; gap: 10px; align-items: flex-start; font-size: 12.5px; line-height: 1.45; color: rgba(230,244,250,0.82); cursor: pointer;">
+                        <input id="accept_risks" type="checkbox" name="accept_risks" value="1" @checked(old('accept_risks')) required style="margin-top: 2px; flex-shrink: 0; width: 16px; height: 16px; accent-color: oklch(0.8 0.13 192);" />
+                        <span>
+                            {{ __('coin.auth.accept_risks_prefix') }}
+                            <a href="{{ route('legal.show', ['legalPage' => 'risks']) }}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()">{{ __('coin.legal.slugs.risks') }}</a>.
+                        </span>
+                    </label>
+                    @error('accept_risks')<div class="coin-auth-error" style="margin-top: -4px;">{{ $message }}</div>@enderror
+                </div>
+
                 <button type="submit" style="width: 100%; margin-top: 24px; padding: 15px; border-radius: 12px; border: 1px solid oklch(0.86 0.11 195 / 0.5); background: linear-gradient(140deg, oklch(0.86 0.12 192), oklch(0.66 0.13 205)); color: #04121f; font-family: inherit; font-size: 15px; font-weight: 600; cursor: pointer; box-shadow: 0 20px 46px -22px oklch(0.8 0.13 195 / 0.85);">{{ __('coin.auth.register') }}</button>
 
                 <div style="margin-top: 24px; padding-top: 20px; border-top: 1px solid rgba(150,235,250,0.1); text-align: center; font-size: 13px; color: rgba(230,244,250,0.72);">

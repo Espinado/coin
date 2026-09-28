@@ -22,13 +22,10 @@ class UserLastLoginTest extends TestCase
 
     public function test_registration_does_not_record_last_login_until_email_is_verified(): void
     {
-        $this->post('/register', [
+        $this->post('/register', $this->validRegistrationPayload([
             'name' => 'Evgen',
             'email' => 'evgenfit@gmail.com',
-            'phone' => '+79001234567',
-            'password' => 'password',
-            'password_confirmation' => 'password',
-        ])->assertRedirect(route('verification.notice', absolute: false));
+        ]))->assertRedirect(route('verification.notice', absolute: false));
 
         $user = User::query()->where('email', 'evgenfit@gmail.com')->firstOrFail();
         $this->assertNull($user->last_login_at);
