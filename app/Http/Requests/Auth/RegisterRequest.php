@@ -55,9 +55,10 @@ class RegisterRequest extends FormRequest
             ],
             'phone' => ['required', 'string', 'max:32', new ContactPhone],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
-            'accept_terms' => ['accepted'],
-            'accept_privacy' => ['accepted'],
-            'accept_risks' => ['accepted'],
+            'password_confirmation' => ['required'],
+            'accept_terms' => ['required', 'accepted'],
+            'accept_privacy' => ['required', 'accepted'],
+            'accept_risks' => ['required', 'accepted'],
         ];
     }
 
@@ -67,8 +68,18 @@ class RegisterRequest extends FormRequest
     public function messages(): array
     {
         return [
+            'name.required' => __('coin.auth.name_required'),
+            'email.required' => __('coin.auth.email_required'),
+            'email.email' => __('coin.auth.email_invalid'),
+            'phone.required' => __('coin.auth.phone_required'),
+            'password.required' => __('coin.auth.password_required'),
+            'password.confirmed' => __('coin.auth.password_confirmed'),
+            'password_confirmation.required' => __('coin.auth.password_confirm_required'),
+            'accept_terms.required' => __('coin.auth.accept_terms_required'),
             'accept_terms.accepted' => __('coin.auth.accept_terms_required'),
+            'accept_privacy.required' => __('coin.auth.accept_privacy_required'),
             'accept_privacy.accepted' => __('coin.auth.accept_privacy_required'),
+            'accept_risks.required' => __('coin.auth.accept_risks_required'),
             'accept_risks.accepted' => __('coin.auth.accept_risks_required'),
         ];
     }

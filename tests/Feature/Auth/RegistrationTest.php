@@ -96,13 +96,24 @@ class RegistrationTest extends TestCase
 
     public function test_registration_requires_legal_acceptances(): void
     {
-        $response = $this->post('/register', $this->validRegistrationPayload([
+        $response = $this->from('/register')->post('/register', $this->validRegistrationPayload([
             'accept_terms' => null,
             'accept_privacy' => null,
             'accept_risks' => null,
         ]));
 
-        $response->assertSessionHasErrors(['accept_terms', 'accept_privacy', 'accept_risks']);
+        $response->assertRedirect('/register')
+            ->assertSessionHasErrors([
+                'accept_terms' => __('coin.auth.accept_terms_required'),
+                'accept_privacy' => __('coin.auth.accept_privacy_required'),
+                'accept_risks' => __('coin.auth.accept_risks_required'),
+            ]);
         $this->assertGuest();
+
+        $this->get('/register')
+            ->assertOk()
+            ->assertSee(__('coin.auth.accept_terms_required'), false)
+            ->assertSee(__('coin.auth.accept_privacy_required'), false)
+            ->assertSee(__('coin.auth.accept_risks_required'), false);
     }
 }
