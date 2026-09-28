@@ -140,7 +140,7 @@ html.coin-modal-open body {
 .coin-shell,
 .coin-dashboard {
   width: 100% !important;
-  max-width: 1440px;
+  max-width: 1680px;
   box-sizing: border-box;
 }
 
@@ -363,7 +363,7 @@ html.coin-nav-open .coin-nav-mobile {
 }
 
 .coin-landing-header__inner {
-  max-width: 1296px;
+  max-width: 1536px;
   margin: 0 auto;
   display: flex;
   align-items: center;
@@ -516,7 +516,7 @@ html.coin-nav-open .coin-nav-mobile {
 }
 
 .coin-landing-hero__grid {
-  max-width: 1296px;
+  max-width: 1536px;
   margin: 0 auto;
   display: grid;
   grid-template-columns: minmax(0, 1fr);
@@ -624,7 +624,7 @@ html.coin-nav-open .coin-nav-mobile {
 }
 
 .coin-landing-section__inner {
-  max-width: 1296px;
+  max-width: 1536px;
   margin: 0 auto;
 }
 
@@ -3395,7 +3395,7 @@ html.coin-nav-open .coin-nav-mobile {
   .coin-sidebar {
     position: fixed;
     top: 0;
-    left: max(0px, calc((100vw - min(1440px, 100vw)) / 2));
+    left: max(0px, calc((100vw - min(1680px, 100vw)) / 2));
     bottom: 0;
     z-index: 40;
     height: 100vh;
@@ -4374,7 +4374,7 @@ html.coin-nav-open .coin-nav-mobile {
 
 .coin-auth {
   width: 100% !important;
-  max-width: 1440px;
+  max-width: 1680px;
   min-height: 100vh !important;
   min-height: 100dvh !important;
   box-sizing: border-box;

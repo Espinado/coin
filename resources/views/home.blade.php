@@ -18,7 +18,7 @@
     <script src="{{ asset('coin/landing-faq.js') }}?v={{ file_exists(public_path('coin/landing-faq.js')) ? filemtime(public_path('coin/landing-faq.js')) : 1 }}" defer></script>
     <style>
       body { margin: 0; background: #04101c; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
-      .coin-app { width: 100%; max-width: 1440px; margin: 0 auto; box-sizing: border-box; overflow-x: hidden; }
+      .coin-app { width: 100%; max-width: 1680px; margin: 0 auto; box-sizing: border-box; overflow-x: hidden; }
       .coin-brand-logo { width: min(260px, 54vw); height: auto; max-height: 56px; display: block; object-fit: contain; }
       a { color: oklch(0.86 0.11 195); text-decoration: none; }
       a:hover { color: oklch(0.92 0.09 195); }

@@ -22,7 +22,7 @@
           position: fixed !important;
           top: 0;
           bottom: 0;
-          left: max(0px, calc((100vw - min(1440px, 100vw)) / 2));
+          left: max(0px, calc((100vw - min(1680px, 100vw)) / 2));
           z-index: 40;
           display: flex !important;
           flex-direction: column !important;
