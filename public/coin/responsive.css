@@ -2031,6 +2031,28 @@ html.coin-nav-open .coin-nav-mobile {
   border-color: oklch(0.86 0.12 192);
 }
 
+.coin-sidebar-nav:has(.coin-nav-legal[open]) .coin-nav-item--active:not(.coin-nav-legal__summary) {
+  color: rgba(230, 244, 250, 0.72);
+}
+
+.coin-sidebar-nav:has(.coin-nav-legal[open]) .coin-nav-item--active:not(.coin-nav-legal__summary) .coin-nav-item__bg,
+.coin-sidebar-nav:has(.coin-nav-legal[open]) .coin-nav-item--active:not(.coin-nav-legal__summary) .coin-nav-notifications__unread-bg,
+.coin-sidebar-nav:has(.coin-nav-legal[open]) .coin-nav-item--active:not(.coin-nav-legal__summary) .coin-nav-support__unread-bg {
+  display: none;
+}
+
+.coin-sidebar-nav:has(.coin-nav-legal[open]) .coin-nav-item--active:not(.coin-nav-legal__summary) .coin-nav-dot,
+.coin-sidebar-nav:has(.coin-nav-legal[open]) .coin-nav-item--active:not(.coin-nav-legal__summary) .coin-nav-notifications-dot,
+.coin-sidebar-nav:has(.coin-nav-legal[open]) .coin-nav-item--active:not(.coin-nav-legal__summary) .coin-nav-support-dot {
+  background: rgba(150, 235, 250, 0.3);
+  box-shadow: none;
+}
+
+.coin-sidebar-nav:has(.coin-nav-legal[open]) .coin-nav-item--active:not(.coin-nav-legal__summary) .coin-nav-notifications-label,
+.coin-sidebar-nav:has(.coin-nav-legal[open]) .coin-nav-item--active:not(.coin-nav-legal__summary) .coin-nav-support-label {
+  font-weight: 400;
+}
+
 .coin-nav-legal__list {
   display: flex;
   flex-direction: column;
