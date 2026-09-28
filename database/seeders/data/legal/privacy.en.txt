@@ -1,0 +1,56 @@
+PRIVACY POLICY — CLOUDFLOPS
+
+Published: 28 March 2026
+Data controller / operator: CloudFlops LLC (“Company”, “we”, “us”)
+Service: the CloudFlops platform (“Platform”)
+
+1. Overview
+1.1. This Policy explains what personal data we process, why, and what rights you have.
+1.2. By using the Platform and accepting this Policy at registration, you acknowledge that you have read it.
+1.3. We aim to follow applicable data-protection requirements (including GDPR principles for EEA users, where applicable).
+
+2. Data we process
+2.1. Account data: name/display name, email, phone number (with country code), hashed password, email verification status, security settings (such as 2FA flags).
+2.2. Usage data: dashboard actions, IP address and technical logs (as needed for security and support), interface locale, session data.
+2.3. Operational/financial dashboard data: balances, deposits and withdrawals, payout wallet addresses, transaction/provider identifiers, request statuses, accrual history, and referral links (invite code, linked referrer).
+2.4. Support: messages in support tickets/chat and attachments you send.
+2.5. Data you voluntarily provide in your profile or during KYC/checks (if enabled).
+2.6. We do not request and should never receive seed phrases / private keys for your external wallet. Do not share them with support.
+
+3. Purposes and legal bases
+We process data to:
+— register, authenticate, and provide the dashboard;
+— perform the contractual relationship under the Terms (deposits, plans, accruals, withdrawals, referrals);
+— maintain security and help prevent fraud, within reasonable AML/sanctions controls;
+— support users and send service notices (verification codes, operation statuses);
+— comply with law and respond to lawful requests;
+— monitor service reliability in aggregated/minimized form where appropriate.
+
+Legal bases (where applicable): contract performance; legitimate interest in platform security; consent (if separately requested); legal obligation.
+
+4. Payment and technical providers
+4.1. Crypto deposits and payouts are processed with external payment/crypto providers. They may receive data needed to execute the operation (amount, asset, network, address, payment identifiers).
+4.2. Hosting, email, bot-protection (for example Turnstile), and other contractors process data on our instructions or as independent controllers within their role.
+4.3. Transfers outside the EEA may occur where a lawful mechanism applies.
+
+5. Retention
+Data is kept while the account is active and for as long as needed for the purposes above, including retention of operational/financial records and defense against claims. After account deletion/blocking, data may remain to the extent required by law or security.
+
+6. Cookies and similar technologies
+The Platform uses necessary cookies/sessions for login and dashboard operation. Technical protection tools (including bot challenges) may be used. Details depend on configuration at the time of use.
+
+7. Your rights
+Depending on applicable law, you may request access, correction, deletion, restriction, objection, portability, or withdrawal of consent (where processing is based on consent). Use the Platform contact channels. We may ask you to verify identity. You may also lodge a complaint with a data-protection authority.
+
+8. Security
+We apply organizational and technical measures (password hashing, access control, logging of significant events, session timeouts). Absolute security on the internet does not exist; you remain responsible for your device, email, and password security.
+
+9. Children
+The Platform is not intended for persons under 18. We do not knowingly collect children’s data.
+
+10. Changes
+We may update this Policy. The current version is published on the Platform. For material changes we may ask you to review it again.
+
+11. Contact
+For privacy questions: the contact email shown on the Platform / in support.
+Legal entity: CloudFlops LLC (company details appear in the footer/company section when configured in settings).

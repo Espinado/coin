@@ -1,0 +1,57 @@
+TERMS OF USE — CLOUDFLOPS
+
+Published: 28 March 2026
+Platform operator: CloudFlops LLC (“Company”, “we”, “us”)
+Platform: the CloudFlops website and user dashboard (“Platform”)
+
+1. Acceptance
+1.1. By registering, accepting Terms / Privacy / Risks, and using the Platform, you confirm that you are at least 18 years old, have legal capacity, and agree to these Terms, the Privacy Policy, and the Risk Disclosure.
+1.2. If you do not agree, do not register or use the Platform.
+
+2. Nature of the service
+2.1. CloudFlops is an online platform where users select a plan related to allocated AI compute capacity, top up a balance in cryptocurrency, and track accruals in a personal dashboard.
+2.2. The Platform is not a bank, credit institution, or stock exchange, and does not provide classic deposit-insurance coverage. Cryptocurrency operations carry network and market risks.
+2.3. Website materials are informational. Yield projections, APR figures, and calculator examples are illustrative and do not guarantee results.
+
+3. Account
+3.1. Access requires an account with a verified email address. You must provide accurate information and keep your password confidential.
+3.2. The Company may require additional verification (including KYC) for withdrawals or in other cases under its compliance procedures.
+3.3. We may restrict, suspend, or block access if we suspect fraud, Terms violations, sanctions/AML risk, or where required by law.
+3.4. Sessions may end due to inactivity. Sensitive actions (such as withdrawals) may require additional confirmation.
+
+4. Balance, deposits, and withdrawals
+4.1. Dashboard balances are kept in the Platform’s base accounting currency (typically USDT). Supported networks and assets for deposits/withdrawals (for example USDT and BTC) are shown in the interface and may change.
+4.2. Deposits: you initiate a deposit and transfer funds to the address/details provided by the payment provider within the allowed time. Crediting occurs after network/provider confirmation. Wrong network, memo, or amount may result in loss of funds; the Company is not obliged to reimburse user errors.
+4.3. Withdrawals: requests are created from available balance subject to minimum amounts, fees, and timing shown in the dashboard. The Company may decline or delay withdrawals for security checks, incomplete data, provider issues, or legal requirements.
+4.4. Conversion rates (if applicable) and fees are set by the Platform/provider at the time of the operation.
+
+5. Plans and accruals
+5.1. A plan defines parameters (including minimum amount, term, and calculated yield). Purchasing a plan locks principal under that plan’s rules.
+5.2. Profit accruals are calculated under Platform rules (typically daily) and credited to available balance. Formulas, accrual time, and timezone are shown in the interface/settings and may be updated.
+5.3. At maturity, principal returns to available balance according to the plan logic, unless a specific plan or an approved plan change provides otherwise.
+5.4. Plan changes (where available) may require a top-up and/or approval; conditions are shown before confirmation.
+
+6. Referral program
+6.1. Where a referral program is enabled, rewards follow the rules shown in the dashboard (percentage, levels, caps). Abuse (self-referrals, artificial volume, limit evasion) is prohibited and may result in reward cancellation and account restrictions.
+
+7. Prohibited use
+You must not: engage in unlawful activity; launder money or evade sanctions; hack or disrupt the Platform; use another person’s account; provide false information; or automate access in a way that harms the service without permission.
+
+8. Intellectual property
+Platform design, content, logos, and software belong to the Company or its licensors. Copying or use outside permitted Platform access is prohibited.
+
+9. Limitation of liability
+9.1. The Platform is provided “as is” to the extent permitted by applicable law.
+9.2. The Company is not liable for: blockchain or third-party payment provider failures; loss of access to your external wallet/keys; crypto market volatility; third-party acts; indirect losses; or lost profits — except where liability cannot be excluded by law.
+9.3. The Company’s aggregate liability related to Platform use is limited to fees you actually paid to the Company in the three (3) months before the event, or a lower amount if required by law.
+
+10. Changes
+We may update these Terms, fees, and features. Material changes will be reflected on the Platform where practicable. Continued use after publication means acceptance, unless law requires otherwise.
+
+11. Governing law and disputes
+Unless mandatory rules provide otherwise, these Terms are governed by the laws applicable to CloudFlops LLC’s place of incorporation. Parties should first attempt to resolve disputes amicably; otherwise disputes are submitted to the competent courts for that place of incorporation, subject to mandatory consumer-protection rules.
+
+12. Contact
+For questions about these Terms, use the contact email shown on the Platform / in support.
+
+Acceptance of the Risk Disclosure and Privacy Policy is an integral part of using the Platform.

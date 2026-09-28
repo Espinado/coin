@@ -16,7 +16,7 @@ final class PlatformBrand
 
     public static function legalName(): string
     {
-        return (string) config('coin.brand.legal_name', self::name().' SIA');
+        return (string) config('coin.brand.legal_name', self::name().' LLC');
     }
 
     public static function logo(string $variant = 'horizontal'): string

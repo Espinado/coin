@@ -1,0 +1,49 @@
+RISK DISCLOSURE — CLOUDFLOPS
+
+Published: 28 March 2026
+Operator: CloudFlops LLC
+Product: CloudFlops platform (plans related to AI compute, accounted in crypto assets)
+
+WARNING: Participation involves the risk of partial or total loss of funds. Do not use money you cannot afford to lose. Past or illustrative performance does not guarantee future results.
+
+1. Product and expectation risk
+1.1. The Platform offers plans with calculated yield parameters (including APR) and a term. Calculators and marketing materials are estimates. Actual accruals depend on Platform rules, service status, and other factors.
+1.2. The Company does not guarantee profit, capital preservation, uninterrupted accruals, or unrestricted withdrawals at any time.
+1.3. CloudFlops is not a bank deposit, deposit insurance product, or government guarantee.
+
+2. Crypto-asset and network risk
+2.1. BTC, USDT, and other assets are volatile; stablecoins may also lose parity or face issuer/infrastructure risk.
+2.2. Transfer errors (wrong network, address, memo, or amount), mempool/confirmation delays, chain reorganizations, node failures, and provider outages may delay, prevent credit, or cause loss of funds.
+2.3. Deposit addresses may expire; transfers after expiry or outside interface instructions are at your risk.
+
+3. Liquidity and withdrawal risk
+3.1. Withdrawals may be delayed or declined due to security checks, limits, maintenance, provider queues, KYC/AML requirements, or law.
+3.2. Network and platform fees reduce the net amount received. Conversion rates (if any) may change before execution.
+
+4. Operational and cyber risk
+4.1. Software, hosting, email, 2FA, payment APIs, calculation errors, and accrual delays may occur.
+4.2. Phishing sites, malware, and compromise of your email/device may lead to account takeover. The Company does not restore assets withdrawn by an attacker after a successful login with your credentials, except where required by law or where the Company’s fault is established.
+4.3. Never share passwords, email codes, or seed phrases with third-party “support”.
+
+5. Regulatory and tax risk
+5.1. Legal treatment of crypto assets and compute/investment-style services differs by jurisdiction and may change. The Company may restrict access from certain countries or change the product.
+5.2. Taxation of income is your responsibility in your jurisdiction. The Company may not act as a tax withholding agent.
+
+6. Counterparty and third-party risk
+6.1. Some functions depend on external providers (crypto payments, infrastructure). Their downtime or insolvency affects the service.
+6.2. Referral rewards depend on invitee activity and program rules; they may be changed or discontinued.
+
+7. Restriction risk
+For Terms violations, suspected fraud/AML issues, sanctions risk, or lawful requests, access, operations, and withdrawals may be limited during review or permanently within the limits of law.
+
+8. No personal advice
+Platform information is not personal investment, tax, or legal advice. Seek independent advisers if needed.
+
+9. Acknowledgement
+By accepting Risks at registration and continuing to use the Platform, you confirm that you:
+— have read and understood this disclosure;
+— understand losses are possible;
+— assess suitability yourself;
+— do not rely on promises of guaranteed yield.
+
+The current version is published on the Platform under Risks and may be updated.

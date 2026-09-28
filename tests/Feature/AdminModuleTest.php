@@ -367,7 +367,7 @@ class AdminModuleTest extends TestCase
 
         $this->actingAs($this->admin, 'admin')
             ->patch('http://admin.coin.test/settings/legal', [
-                'company_name' => 'CloudFlops SIA',
+                'company_name' => 'CloudFlops LLC',
                 'company_legal_address' => 'Rīga, Brīvības iela 1',
                 'company_physical_address' => 'Rīga, Brīvības iela 1',
                 'company_registration_number' => '40103123456',
@@ -379,7 +379,7 @@ class AdminModuleTest extends TestCase
 
         $legal = app(PlatformSettingsService::class)->legalInfo();
 
-        $this->assertSame('CloudFlops SIA', $legal['company_name']);
+        $this->assertSame('CloudFlops LLC', $legal['company_name']);
         $this->assertSame('legal@cloudflops.example', $legal['company_email']);
     }
 

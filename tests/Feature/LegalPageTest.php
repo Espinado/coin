@@ -76,7 +76,7 @@ class LegalPageTest extends TestCase
     public function test_landing_renders_company_legal_info_in_footer(): void
     {
         app(PlatformSettingsService::class)->setLegalMany([
-            'company_name' => 'CloudFlops SIA',
+            'company_name' => 'CloudFlops LLC',
             'company_legal_address' => 'Rīga, Brīvības iela 1',
             'company_physical_address' => 'Rīga, Brīvības iela 1',
             'company_registration_number' => '40103123456',
@@ -87,7 +87,7 @@ class LegalPageTest extends TestCase
 
         $this->get('http://coin.test/')
             ->assertOk()
-            ->assertSee('CloudFlops SIA', false)
+            ->assertSee('CloudFlops LLC', false)
             ->assertSee('40103123456', false)
             ->assertSee('LV-12345', false)
             ->assertSee('Rīga, Brīvības iela 1', false)

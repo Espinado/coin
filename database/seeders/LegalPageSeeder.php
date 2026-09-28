@@ -14,20 +14,20 @@ class LegalPageSeeder extends Seeder
         $pages = [
             [
                 'slug' => LegalPage::SLUG_TERMS,
-                'title' => 'Условия использования',
-                'body' => $this->legalBody('terms.ru.txt'),
+                'title' => 'Terms of Use',
+                'body' => $this->legalBody('terms.en.txt'),
                 'sort_order' => 10,
             ],
             [
                 'slug' => LegalPage::SLUG_PRIVACY,
-                'title' => 'Политика конфиденциальности',
-                'body' => $this->legalBody('privacy.ru.txt'),
+                'title' => 'Privacy Policy',
+                'body' => $this->legalBody('privacy.en.txt'),
                 'sort_order' => 20,
             ],
             [
                 'slug' => LegalPage::SLUG_RISKS,
-                'title' => 'Раскрытие рисков',
-                'body' => $this->legalBody('risks.ru.txt'),
+                'title' => 'Risk Disclosure',
+                'body' => $this->legalBody('risks.en.txt'),
                 'sort_order' => 30,
             ],
             [
