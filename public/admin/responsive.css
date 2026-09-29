@@ -123,7 +123,7 @@ body {
     width: auto;
     max-width: 100%;
     height: auto;
-    max-height: 44px;
+    max-height: 52px;
     display: block;
     object-fit: contain;
 }
@@ -678,8 +678,8 @@ body {
 .admin-topbar-brand__logo {
     width: auto;
     height: auto;
-    max-height: 44px;
-    max-width: min(280px, 58vw);
+    max-height: 52px;
+    max-width: min(300px, 62vw);
     display: block;
     object-fit: contain;
 }

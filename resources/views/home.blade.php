@@ -25,7 +25,7 @@
     <style>
       body { margin: 0; background: #061423; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
       .coin-app { width: 100%; max-width: none; margin: 0; box-sizing: border-box; overflow-x: hidden; }
-      .coin-brand-logo { width: min(260px, 54vw); height: auto; max-height: 56px; display: block; object-fit: contain; }
+      .coin-brand-logo { width: min(300px, 58vw); height: auto; max-height: 66px; display: block; object-fit: contain; }
       a { color: oklch(0.86 0.11 195); text-decoration: none; }
       a:hover { color: oklch(0.92 0.09 195); }
       @@keyframes paiPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }

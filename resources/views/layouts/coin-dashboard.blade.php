@@ -38,8 +38,8 @@
       a:hover { color: oklch(0.92 0.09 195); }
       @keyframes dbPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
       input[type="range"] { accent-color: oklch(0.8 0.13 192); }
-      .coin-sidebar-brand__logo { max-width: 100%; max-height: 52px; height: auto; width: auto; object-fit: contain; }
-      .coin-brand-logo { width: min(260px, 54vw); height: auto; max-height: 56px; display: block; object-fit: contain; }
+      .coin-sidebar-brand__logo { max-width: 100%; max-height: 60px; height: auto; width: auto; object-fit: contain; }
+      .coin-brand-logo { width: min(300px, 58vw); height: auto; max-height: 66px; display: block; object-fit: contain; }
       .coin-contract-stats-grid {
         display: grid;
         grid-template-columns: repeat(6, minmax(0, 1fr));

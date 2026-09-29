@@ -33,7 +33,7 @@
         box-shadow: 0 32px 80px -24px rgba(0, 0, 0, 0.75);
       }
       .coin-maintenance__logo {
-        width: min(220px, 60vw);
+        width: min(260px, 66vw);
         height: auto;
         margin: 0 auto 24px;
         display: block;

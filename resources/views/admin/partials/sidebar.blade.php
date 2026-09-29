@@ -40,7 +40,7 @@
     <div class="admin-sidebar__inner">
         <div class="admin-sidebar-header">
             <a href="{{ route('admin.dashboard') }}" class="admin-sidebar-brand">
-                <x-brand-logo variant="horizontal" fluid :max-height="44" class="admin-sidebar-brand__logo" />
+                <x-brand-logo variant="horizontal" fluid :max-height="52" class="admin-sidebar-brand__logo" />
             </a>
             <div class="admin-sidebar-brand__meta">
                 <span class="admin-badge">STAFF ONLY</span>

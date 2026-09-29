@@ -33,7 +33,7 @@
       a:hover { color: oklch(0.92 0.09 195); }
       .coin-legal-shell { width: 100%; max-width: 860px; margin: 0 auto; padding: calc(32px + env(safe-area-inset-top, 0px)) calc(24px + env(safe-area-inset-right, 0px)) calc(72px + env(safe-area-inset-bottom, 0px)) calc(24px + env(safe-area-inset-left, 0px)); box-sizing: border-box; }
       .coin-legal-top { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 36px; padding-bottom: 22px; border-bottom: 1px solid rgba(150,235,250,0.12); }
-      .coin-brand-logo { width: min(220px, 54vw); height: auto; max-height: 48px; display: block; object-fit: contain; }
+      .coin-brand-logo { width: min(250px, 58vw); height: auto; max-height: 56px; display: block; object-fit: contain; }
       .coin-legal-back { font-size: 14px; color: rgba(230,244,250,0.78); }
       .coin-legal-kicker { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.14em; color: oklch(0.88 0.11 195); }
       .coin-legal-title { margin: 14px 0 0; font-size: clamp(28px, 4vw, 40px); line-height: 1.12; letter-spacing: -0.03em; font-weight: 600; color: #f0fbff; }

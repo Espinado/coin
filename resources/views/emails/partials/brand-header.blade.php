@@ -4,10 +4,10 @@
     <table role="presentation" cellspacing="0" cellpadding="0">
       <tr>
         <td style="padding-right:14px;vertical-align:middle;">
-          <img src="{{ \App\Support\PlatformBrand::logoUrl('mark') }}" alt="" height="44" width="44" style="height:44px;width:44px;display:block;border:0;" />
+          <img src="{{ \App\Support\PlatformBrand::logoUrl('mark') }}" alt="" height="52" width="52" style="height:52px;width:52px;display:block;border:0;" />
         </td>
         <td style="vertical-align:middle;">
-          <div style="font-family:Arial,Helvetica,sans-serif;font-size:24px;font-weight:700;letter-spacing:-0.02em;color:#f0fbff;line-height:1.1;">{{ $brandName }}</div>
+          <div style="font-family:Arial,Helvetica,sans-serif;font-size:26px;font-weight:700;letter-spacing:-0.02em;color:#f0fbff;line-height:1.1;">{{ $brandName }}</div>
         </td>
       </tr>
     </table>

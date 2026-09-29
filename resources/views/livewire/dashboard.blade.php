@@ -10,7 +10,7 @@
     <div class="coin-sidebar-nav">
     <div class="coin-sidebar-brand-row">
       <a href="{{ route('dashboard') }}" class="coin-sidebar-brand" data-no-page-spinner wire:click.prevent="setSection(0)">
-        <x-brand-logo variant="horizontal" fluid :max-height="28" class="coin-sidebar-brand__logo" />
+        <x-brand-logo variant="horizontal" fluid :max-height="36" class="coin-sidebar-brand__logo" />
         <div class="coin-sidebar-brand__tagline">{{ mb_strtoupper(__('coin.nav.portal')) }}</div>
       </a>
       <button type="button" class="coin-sidebar-close" wire:click="closeMenu" aria-label="{{ __('coin.nav.close_menu') }}">×</button>

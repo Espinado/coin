@@ -1,8 +1,8 @@
 @props([
     'variant' => 'horizontal',
-    'height' => 32,
+    'height' => 38,
     'fluid' => false,
-    'maxHeight' => 52,
+    'maxHeight' => 60,
 ])
 
 <img
