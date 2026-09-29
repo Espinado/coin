@@ -2,6 +2,7 @@
 
 namespace App\Mail;
 
+use App\Mail\Concerns\UsesEnglishLocale;
 use App\Models\Admin;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
@@ -11,12 +12,14 @@ use Illuminate\Queue\SerializesModels;
 
 class AdminLoginVerificationMail extends Mailable
 {
-    use Queueable, SerializesModels;
+    use Queueable, SerializesModels, UsesEnglishLocale;
 
     public function __construct(
         public Admin $admin,
         public string $code,
-    ) {}
+    ) {
+        $this->forceEnglishLocale();
+    }
 
     public function envelope(): Envelope
     {

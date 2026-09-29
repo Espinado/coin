@@ -2,8 +2,8 @@
 
 namespace App\Mail;
 
+use App\Mail\Concerns\UsesEnglishLocale;
 use App\Models\User;
-use App\Support\UserLocale;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
@@ -12,7 +12,7 @@ use Illuminate\Queue\SerializesModels;
 
 class UserEventNotificationMail extends Mailable
 {
-    use Queueable, SerializesModels;
+    use Queueable, SerializesModels, UsesEnglishLocale;
 
     /** @param  list<string>  $lines */
     public function __construct(
@@ -22,7 +22,7 @@ class UserEventNotificationMail extends Mailable
         public array $lines = [],
         public ?string $footer = null,
     ) {
-        $this->locale(UserLocale::LOCALE);
+        $this->forceEnglishLocale();
     }
 
     public function envelope(): Envelope

@@ -2,6 +2,7 @@
 
 namespace App\Mail;
 
+use App\Mail\Concerns\UsesEnglishLocale;
 use App\Models\Admin;
 use App\Models\AdminInvitation;
 use App\Services\AdminInvitationService;
@@ -13,13 +14,15 @@ use Illuminate\Queue\SerializesModels;
 
 class AdminInvitationMail extends Mailable
 {
-    use Queueable, SerializesModels;
+    use Queueable, SerializesModels, UsesEnglishLocale;
 
     public function __construct(
         public AdminInvitation $invitation,
         public Admin $inviter,
         public string $plainToken,
-    ) {}
+    ) {
+        $this->forceEnglishLocale();
+    }
 
     public function envelope(): Envelope
     {

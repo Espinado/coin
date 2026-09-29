@@ -21,13 +21,13 @@
     <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="{{ asset('coin/responsive.css') }}?v={{ file_exists(public_path('coin/responsive.css')) ? filemtime(public_path('coin/responsive.css')) : 1 }}" />
     <style>
-      body { margin: 0; background: #04101c; color: #e6f4fa; font-family: 'Sora', 'Helvetica Neue', Helvetica, sans-serif; -webkit-font-smoothing: antialiased; }
+      body { margin: 0; background: #061423; color: #e6f4fa; font-family: 'Sora', 'Helvetica Neue', Helvetica, sans-serif; -webkit-font-smoothing: antialiased; }
       @media (min-width: 1025px) and (min-height: 501px) {
         .coin-sidebar {
           position: fixed !important;
           top: 0;
           bottom: 0;
-          left: max(0px, calc((100vw - min(1680px, 100vw)) / 2));
+          left: 0;
           z-index: 40;
           display: flex !important;
           flex-direction: column !important;

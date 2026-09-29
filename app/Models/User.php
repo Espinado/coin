@@ -4,7 +4,9 @@ namespace App\Models;
 
 use App\Services\EmailVerificationCodeService;
 use App\Support\MoneyFormat;
+use App\Support\UserLocale;
 use Database\Factories\UserFactory;
+use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -78,6 +80,11 @@ class User extends Authenticatable implements MustVerifyEmail
     public function sendEmailVerificationNotification(): void
     {
         app(EmailVerificationCodeService::class)->sendCode($this);
+    }
+
+    public function sendPasswordResetNotification(#[\SensitiveParameter] $token): void
+    {
+        $this->notify((new ResetPassword($token))->locale(UserLocale::LOCALE));
     }
 
     public function wantsNotification(string $type): bool

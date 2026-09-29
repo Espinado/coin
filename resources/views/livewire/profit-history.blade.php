@@ -2,7 +2,7 @@
     $user = auth()->user();
     $wallet = $user->wallet;
 @endphp
-<div class="coin-dashboard" style="display: flex; min-height: 100vh; width: 100%; max-width: 1680px; margin: 0 auto; background: #061423; color: #e6f4fa; font-family: 'Sora', 'Helvetica Neue', Helvetica, sans-serif;">
+<div class="coin-dashboard" style="display: flex; min-height: 100vh; width: 100%; max-width: none; margin: 0; background: #061423; color: #e6f4fa; font-family: 'Sora', 'Helvetica Neue', Helvetica, sans-serif;">
   <main style="flex: 1; min-width: 0; display: flex; flex-direction: column;">
     <header class="coin-dash-header" style="display: flex; align-items: center; gap: 20px; padding: 20px 32px; border-bottom: 1px solid rgba(150,235,250,0.1); background: rgba(4,16,28,0.4);">
       <a href="{{ route('dashboard', ['section' => 3, 'profit' => 1]) }}" wire:navigate style="display: inline-flex; align-items: center; gap: 8px; padding: 9px 14px; border-radius: 10px; border: 1px solid rgba(150,235,250,0.2); background: rgba(150,235,250,0.06); color: #e6f4fa; font-size: 13px; text-decoration: none;">
