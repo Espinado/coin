@@ -69,7 +69,7 @@
 
   @include('partials.landing-referrals-section')
 
-  <section id="faq" data-screen-label="FAQ" style="position: relative; z-index: 5; padding: 48px 72px; border-top: 1px solid rgba(150,235,250,0.08);">
+  <section id="faq" data-screen-label="FAQ" style="position: relative; z-index: 5; padding: 40px 72px; border-top: 1px solid rgba(150,235,250,0.08);">
     <div style="display: grid; grid-template-columns: 380px 1fr; gap: 72px;">
       <div>
         <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.16em; color: oklch(0.88 0.11 195);">FAQ</div>
