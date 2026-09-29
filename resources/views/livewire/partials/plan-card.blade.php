@@ -66,10 +66,8 @@
   <div class="coin-plan-card__divider"></div>
 
   <div class="coin-plan-card__specs">
-    @if($isEnterprise)
     <div class="coin-plan-card__spec-row"><span>{{ __('coin.invest.min_investment') }}</span><span>{{ $plan->formattedMinDeposit() ?? $plan->formattedComputeLabel() }}</span></div>
     <div class="coin-plan-card__spec-row"><span>{{ __('coin.invest.term') }}</span><span>{{ $plan->formattedDuration() }}</span></div>
-    @endif
     <div class="coin-plan-card__spec-row"><span>{{ __('coin.invest.annual_return') }}</span><span>{{ $plan->formattedAnnualProfit() ?? ($plan->formattedDailyEstimate() ?? __('coin.invest.estimated')) }}</span></div>
     <div class="coin-plan-card__spec-row"><span>{{ __('coin.invest.infrastructure') }}</span><span>{{ $plan->displayInfra() }}</span></div>
     @if($offerExpiresAt)
