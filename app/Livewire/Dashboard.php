@@ -2727,6 +2727,7 @@ class Dashboard extends Component
             : (is_array($payload) ? ($payload['message']['ticket_id'] ?? $payload['ticket']['id'] ?? null) : null);
 
         $this->reloadTickets();
+        $this->reloadPortfolioData();
 
         $viewingTicket = $this->section === 7 && $this->selectedTicketId;
 

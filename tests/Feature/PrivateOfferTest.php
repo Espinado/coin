@@ -106,14 +106,13 @@ class PrivateOfferTest extends TestCase
         $this->assertSame('Roma VIP Core', $offer->plan->name);
         $this->assertSame('Roma VIP Core', $offer->plan->displayName());
 
-        $this->assertDatabaseHas('user_notifications', [
+        $this->assertDatabaseHas('support_tickets', [
             'user_id' => $owner->id,
-            'title' => 'Personal investment offer',
+            'category' => SupportTicket::CATEGORY_ENTERPRISE,
         ]);
-        $notification = \App\Models\UserNotification::query()->where('user_id', $owner->id)->latest('id')->first();
-        $this->assertNotNull($notification);
-        $this->assertStringContainsString('Roma VIP Core', (string) $notification->body);
-        $this->assertStringContainsString('section=1', (string) $notification->body);
+        $this->assertDatabaseMissing('user_notifications', [
+            'user_id' => $owner->id,
+        ]);
 
         $ownerPlans = app(\App\Services\DashboardDataService::class)->forUser($owner->fresh())['plans'];
         $otherPlans = app(\App\Services\DashboardDataService::class)->forUser($other->fresh())['plans'];

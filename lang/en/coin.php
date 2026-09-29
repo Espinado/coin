@@ -1061,7 +1061,7 @@ return [
         'private_offer_already_processed' => 'This offer has already been processed.',
         'private_offers_archive' => 'Offer archive',
         'private_offers_archive_sub' => 'Accepted, expired, and revoked offers remain here for history.',
-        'private_offer_chat_summary' => "Personal offer created:\nPlan: :name\nAmount: :amount\nTerm: :days days\nAPR: :apr\nExpires: :expires\nThe offer is now available in the client's Investment plans section.",
+        'private_offer_chat_summary' => "Personal offer created:\nPlan: :name\nAmount: :amount\nTerm: :days days\nAnnual return: :apr\nValid until: :expires\nThe offer is now available in the Investment plans section.",
         'plans' => 'Plans',
         'profit_accrual' => 'Profit accrual',
         'settings' => 'Settings',

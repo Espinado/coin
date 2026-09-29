@@ -1061,7 +1061,7 @@ return [
         'private_offer_already_processed' => 'Эта оферта уже обработана.',
         'private_offers_archive' => 'Архив оферт',
         'private_offers_archive_sub' => 'Принятые, истёкшие и отозванные оферты остаются здесь в истории.',
-        'private_offer_chat_summary' => "Создана персональная оферта:\nПлан: :name\nСумма: :amount\nСрок: :days дн.\nAPR: :apr\nДействует до: :expires\nОферта уже доступна клиенту в разделе Investment plans.",
+        'private_offer_chat_summary' => "Создана персональная оферта:\nПлан: :name\nСумма: :amount\nСрок: :days дн.\nГодовая доходность: :apr\nДействует до: :expires\nОферта уже доступна в разделе «Инвестиционные планы».",
         'plans' => 'Планы',
         'profit_accrual' => 'Начисление прибыли',
         'settings' => 'Настройки',

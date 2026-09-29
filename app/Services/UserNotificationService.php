@@ -3,11 +3,9 @@
 namespace App\Services;
 
 use App\Mail\UserEventNotificationMail;
-use App\Models\Admin;
 use App\Models\Contract;
 use App\Models\EarlyUnlockRequest;
 use App\Models\PlanChangeRequest;
-use App\Models\PlanOffer;
 use App\Models\User;
 use App\Models\Withdrawal;
 use App\Support\UserLocale;
@@ -29,12 +27,6 @@ class UserNotificationService
     public const TYPE_PLAN_CHANGE_APPROVED = 'plan_change_approved';
 
     public const TYPE_EARLY_UNLOCK_APPROVED = 'early_unlock_approved';
-
-    public const TYPE_PRIVATE_OFFER = 'private_offer';
-
-    public function __construct(
-        private PlatformBroadcastService $broadcasts,
-    ) {}
 
     public function send(User $user, string $type, string $subject, string $intro, array $lines = [], ?string $footer = null): void
     {
@@ -232,46 +224,6 @@ class UserNotificationService
                     __('coin.notifications.mail.early_unlock_fee', ['amount' => $request->formattedFee()]),
                 ],
                 __('coin.notifications.mail.early_unlock_footer'),
-            );
-        });
-    }
-
-    public function notifyPrivateOfferCreated(User $user, PlanOffer $offer): void
-    {
-        UserLocale::run(function () use ($user, $offer): void {
-            $offer->loadMissing(['plan', 'createdByAdmin']);
-            $dashboardUrl = route('dashboard', absolute: true).'?section=1';
-            $planName = $offer->plan?->displayName() ?? '—';
-            $expires = $offer->expires_at?->format('M j, Y H:i') ?? '—';
-
-            $title = __('coin.notifications.in_app.private_offer_title');
-            $body = __('coin.notifications.in_app.private_offer_body', [
-                'name' => $planName,
-                'amount' => $offer->formattedAmount(),
-                'days' => $offer->duration_days,
-                'apr' => $offer->formattedApr(),
-                'expires' => $expires,
-                'url' => $dashboardUrl,
-            ]);
-
-            $admin = $offer->createdByAdmin;
-            if ($admin instanceof Admin) {
-                $this->broadcasts->sendToUser($admin, $user, $title, $body);
-            }
-
-            $this->sendAlways(
-                $user,
-                __('coin.notifications.mail.private_offer_subject'),
-                __('coin.notifications.mail.private_offer_intro', ['name' => $user->name]),
-                [
-                    __('coin.notifications.mail.private_offer_plan', ['name' => $planName]),
-                    __('coin.notifications.mail.private_offer_amount', ['amount' => $offer->formattedAmount()]),
-                    __('coin.notifications.mail.private_offer_term', ['days' => $offer->duration_days]),
-                    __('coin.notifications.mail.private_offer_apr', ['apr' => $offer->formattedApr()]),
-                    __('coin.notifications.mail.private_offer_expires', ['expires' => $expires]),
-                    __('coin.notifications.mail.private_offer_open', ['url' => $dashboardUrl]),
-                ],
-                __('coin.notifications.mail.private_offer_footer'),
             );
         });
     }

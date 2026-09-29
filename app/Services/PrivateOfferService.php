@@ -18,7 +18,6 @@ class PrivateOfferService
     public const DEFAULT_TTL_HOURS = 48;
 
     public function __construct(
-        private UserNotificationService $notifications,
         private SupportTicketService $support,
     ) {}
 
@@ -127,7 +126,6 @@ class PrivateOfferService
             ])->fresh(['plan', 'user', 'createdByAdmin']);
         });
 
-        $this->notifications->notifyPrivateOfferCreated($user, $offer);
         $this->postOfferSummaryToSupport($admin, $user, $offer);
 
         return $offer;
@@ -313,6 +311,8 @@ class PrivateOfferService
 
     private function postOfferSummaryToSupport(Admin $admin, User $user, PlanOffer $offer): void
     {
+        $offer->loadMissing('plan');
+
         $ticket = SupportTicket::query()
             ->where('user_id', $user->id)
             ->where('category', SupportTicket::CATEGORY_ENTERPRISE)
@@ -321,7 +321,18 @@ class PrivateOfferService
             ->first();
 
         if (! $ticket instanceof SupportTicket) {
-            return;
+            try {
+                $ticket = $this->support->createForUser(
+                    $user,
+                    __('coin.ticket.enterprise_subject'),
+                    SupportTicket::CATEGORY_ENTERPRISE,
+                    __('coin.ticket.enterprise_body'),
+                );
+            } catch (\Throwable $exception) {
+                report($exception);
+
+                return;
+            }
         }
 
         $body = __('coin.admin.private_offer_chat_summary', [
@@ -329,7 +340,9 @@ class PrivateOfferService
             'amount' => $offer->formattedAmount(),
             'days' => $offer->duration_days,
             'apr' => $offer->formattedApr(),
-            'expires' => $offer->expires_at?->format('M j, Y H:i') ?? '—',
+            'expires' => $offer->expires_at
+                ? \App\Support\LocaleFormat::dateTimeLocal($offer->expires_at)
+                : '—',
         ]);
 
         try {
