@@ -144,6 +144,20 @@ html.coin-modal-open body {
   box-sizing: border-box;
 }
 
+/*
+ * Landing is full-bleed: body/app share one background edge-to-edge.
+ * Inner sections keep max-width: 1536px. Dashboard shell stays capped at 1680.
+ */
+.coin-app.coin-landing {
+  max-width: none;
+  margin: 0;
+  background: #061423;
+}
+
+body:has(.coin-app.coin-landing) {
+  background: #061423;
+}
+
 .coin-burger {
   display: none;
   flex-direction: column;

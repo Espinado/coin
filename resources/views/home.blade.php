@@ -23,8 +23,8 @@
     <script src="{{ asset('coin/landing-scroll-top.js') }}?v={{ file_exists(public_path('coin/landing-scroll-top.js')) ? filemtime(public_path('coin/landing-scroll-top.js')) : 1 }}" defer></script>
     <script src="{{ asset('coin/landing-faq.js') }}?v={{ file_exists(public_path('coin/landing-faq.js')) ? filemtime(public_path('coin/landing-faq.js')) : 1 }}" defer></script>
     <style>
-      body { margin: 0; background: #04101c; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
-      .coin-app { width: 100%; max-width: 1680px; margin: 0 auto; box-sizing: border-box; overflow-x: hidden; }
+      body { margin: 0; background: #061423; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+      .coin-app { width: 100%; max-width: none; margin: 0; box-sizing: border-box; overflow-x: hidden; }
       .coin-brand-logo { width: min(260px, 54vw); height: auto; max-height: 56px; display: block; object-fit: contain; }
       a { color: oklch(0.86 0.11 195); text-decoration: none; }
       a:hover { color: oklch(0.92 0.09 195); }
@@ -50,7 +50,7 @@
     }
 })();
 </script>
-<div class="coin-app coin-landing" style="margin: 0 auto; position: relative; background: #061423; color: #e6f4fa; font-family: 'Sora', 'Helvetica Neue', Helvetica, sans-serif; overflow: hidden;">
+<div class="coin-app coin-landing" style="margin: 0; position: relative; background: #061423; color: #e6f4fa; font-family: 'Sora', 'Helvetica Neue', Helvetica, sans-serif; overflow: hidden;">
   <div style="position: absolute; top: -240px; right: -80px; width: 820px; height: 660px; border-radius: 50%; background: radial-gradient(closest-side, oklch(0.62 0.13 198 / 0.28), transparent 72%); filter: blur(30px); pointer-events: none;"></div>
 
   @include('partials.landing-header')
