@@ -15,6 +15,8 @@ class Contract extends Model
 
     public const STATUS_CANCELLED = 'cancelled';
 
+    public const STATUS_EARLY_CLOSED = 'early_closed';
+
     /** Demo/seed purge only — production contracts are archived, not deleted. */
     public static bool $allowDeletion = false;
 
@@ -73,7 +75,11 @@ class Contract extends Model
 
     public function scopeArchived($query)
     {
-        return $query->whereIn('status', [self::STATUS_COMPLETED, self::STATUS_CANCELLED]);
+        return $query->whereIn('status', [
+            self::STATUS_COMPLETED,
+            self::STATUS_CANCELLED,
+            self::STATUS_EARLY_CLOSED,
+        ]);
     }
 
     public function isActive(): bool
@@ -84,6 +90,11 @@ class Contract extends Model
     public function isCompleted(): bool
     {
         return $this->status === self::STATUS_COMPLETED;
+    }
+
+    public function isEarlyClosed(): bool
+    {
+        return $this->status === self::STATUS_EARLY_CLOSED;
     }
 
     public function user(): BelongsTo
@@ -111,7 +122,7 @@ class Contract extends Model
             return (int) $this->days_elapsed;
         }
 
-        if ($this->isCompleted()) {
+        if ($this->isCompleted() || $this->isEarlyClosed()) {
             return $term;
         }
 

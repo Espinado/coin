@@ -26,6 +26,7 @@ use App\Rules\TronPayoutAddress;
 use App\Services\Payment\PaymentSimulatorService;
 use App\Services\PayoutAddressService;
 use App\Services\PlanChangeRequestService;
+use App\Services\EarlyUnlockRequestService;
 use App\Services\PlanPurchaseService;
 use App\Services\PlatformSettingsService;
 use App\Services\ReferralService;
@@ -131,6 +132,9 @@ class Dashboard extends Component
     public Collection $pendingPlanChanges;
 
     /** @var Collection<int, mixed> */
+    public Collection $pendingEarlyUnlocks;
+
+    /** @var Collection<int, mixed> */
     public Collection $transactions;
 
     /** @var Collection<string, mixed> */
@@ -199,6 +203,17 @@ class Dashboard extends Component
     public string $payoutVerificationCode = '';
 
     public ?int $changingContractId = null;
+
+    public ?int $earlyUnlockContractId = null;
+
+    public string $earlyUnlockModalStep = 'review';
+
+    public ?string $earlyUnlockModalError = null;
+
+    public ?string $earlyUnlockModalReference = null;
+
+    /** @var array<string, float|null>|null */
+    public ?array $earlyUnlockQuote = null;
 
     public ?float $pendingTopUpAmount = null;
 
@@ -383,6 +398,7 @@ class Dashboard extends Component
         $this->activeContracts = $payload['activeContracts'];
         $this->completedContracts = $payload['completedContracts'];
         $this->pendingPlanChanges = $payload['pendingPlanChanges'];
+        $this->pendingEarlyUnlocks = $payload['pendingEarlyUnlocks'];
         $this->transactions = $payload['transactions'];
         $this->periodTotals = $payload['periodTotals'];
         $this->referral = $payload['referral'];
@@ -568,6 +584,14 @@ class Dashboard extends Component
             return;
         }
 
+        if ($this->pendingEarlyUnlocks->has($contract->id)) {
+            $this->actionMessage = __('coin.messages.early_unlock_pending_exists');
+            $this->actionMessageTone = 'warning';
+            $this->section = 2;
+
+            return;
+        }
+
         $this->changingContractId = $contract->id;
 
         $alternative = $this->plans->first(
@@ -591,6 +615,95 @@ class Dashboard extends Component
     {
         $this->changingContractId = null;
         $this->resetActionFeedback();
+    }
+
+    public function openEarlyUnlock(int $contractId): void
+    {
+        $contract = $this->findOwnedContract($contractId);
+
+        abort_unless($contract instanceof Contract && $contract->isActive(), 403);
+
+        if ($this->pendingEarlyUnlocks->has($contract->id)) {
+            $this->actionMessage = __('coin.messages.early_unlock_pending_exists');
+            $this->actionMessageTone = 'warning';
+            $this->section = 2;
+
+            return;
+        }
+
+        if ($this->pendingPlanChanges->has($contract->id)) {
+            $this->actionMessage = __('coin.messages.early_unlock_plan_change_pending');
+            $this->actionMessageTone = 'warning';
+            $this->section = 2;
+
+            return;
+        }
+
+        $quote = app(EarlyUnlockRequestService::class)->quote($contract);
+
+        if ($quote['credit_amount'] <= 0) {
+            $this->actionMessage = __('coin.messages.early_unlock_credit_too_low');
+            $this->actionMessageTone = 'warning';
+            $this->section = 2;
+
+            return;
+        }
+
+        $this->earlyUnlockContractId = $contract->id;
+        $this->earlyUnlockQuote = $quote;
+        $this->earlyUnlockModalStep = 'review';
+        $this->earlyUnlockModalError = null;
+        $this->earlyUnlockModalReference = null;
+        $this->resetActionFeedback();
+    }
+
+    public function closeEarlyUnlockModal(): void
+    {
+        $this->earlyUnlockContractId = null;
+        $this->earlyUnlockQuote = null;
+        $this->earlyUnlockModalStep = 'review';
+        $this->earlyUnlockModalError = null;
+        $this->earlyUnlockModalReference = null;
+    }
+
+    public function confirmEarlyUnlock(EarlyUnlockRequestService $earlyUnlocks): void
+    {
+        if ($this->earlyUnlockContractId === null) {
+            return;
+        }
+
+        $contract = $this->findOwnedContract($this->earlyUnlockContractId);
+
+        if (! $contract instanceof Contract || ! $contract->isActive()) {
+            $this->earlyUnlockModalStep = 'error';
+            $this->earlyUnlockModalError = __('coin.messages.early_unlock_inactive');
+
+            return;
+        }
+
+        $this->earlyUnlockModalStep = 'processing';
+        $this->earlyUnlockModalError = null;
+
+        try {
+            $request = $earlyUnlocks->createRequest($this->user, $contract);
+            $this->earlyUnlockModalReference = $request->reference;
+            $this->earlyUnlockModalStep = 'pending_approval';
+            $this->reloadPortfolioData();
+            $this->actionMessage = __('coin.messages.early_unlock_submitted');
+            $this->actionMessageTone = 'success';
+        } catch (\Throwable $exception) {
+            $this->earlyUnlockModalStep = 'error';
+            $this->earlyUnlockModalError = $exception->getMessage();
+        }
+    }
+
+    public function getEarlyUnlockContractProperty(): ?Contract
+    {
+        if ($this->earlyUnlockContractId === null) {
+            return null;
+        }
+
+        return $this->findOwnedContract($this->earlyUnlockContractId);
     }
 
     public function getChangingContractProperty(): ?Contract
@@ -2683,6 +2796,7 @@ class Dashboard extends Component
         $this->activeContracts = $payload['activeContracts'];
         $this->completedContracts = $payload['completedContracts'];
         $this->pendingPlanChanges = $payload['pendingPlanChanges'];
+        $this->pendingEarlyUnlocks = $payload['pendingEarlyUnlocks'];
         $this->transactions = $payload['transactions'];
         $this->resetPage('walletPage');
         $this->periodTotals = $payload['periodTotals'];

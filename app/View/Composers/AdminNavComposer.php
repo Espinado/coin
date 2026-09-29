@@ -4,6 +4,7 @@ namespace App\View\Composers;
 
 use App\Models\Admin;
 use App\Models\Deposit;
+use App\Models\EarlyUnlockRequest;
 use App\Models\PlanChangeRequest;
 use App\Models\SupportTicket;
 use App\Models\Withdrawal;
@@ -41,6 +42,9 @@ class AdminNavComposer
                 : 0,
             'pendingWithdrawalsCount' => $canManageWithdrawals
                 ? Withdrawal::pendingCountForAdmin()
+                : 0,
+            'pendingEarlyUnlocksCount' => $canManageWithdrawals
+                ? EarlyUnlockRequest::pendingCountForAdmin()
                 : 0,
             'pendingPlanChangesCount' => $canManagePlanChanges
                 ? PlanChangeRequest::pendingCountForAdmin()

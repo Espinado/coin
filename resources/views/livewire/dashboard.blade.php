@@ -218,7 +218,12 @@
 
         <div style="display: flex; flex-direction: column; gap: 14px;">
           @foreach($activeContracts as $contract)
-            @include('livewire.partials.contract-active-card', ['contract' => $contract, 'primaryContract' => $primaryContract, 'pendingPlanChange' => $pendingPlanChanges->get($contract->id)])
+            @include('livewire.partials.contract-active-card', [
+                'contract' => $contract,
+                'primaryContract' => $primaryContract,
+                'pendingPlanChange' => $pendingPlanChanges->get($contract->id),
+                'pendingEarlyUnlock' => $pendingEarlyUnlocks->get($contract->id),
+            ])
           @endforeach
 
           @if($completedContracts->isNotEmpty())
@@ -563,6 +568,7 @@
 
 @include('livewire.partials.payment-gateway')
 @include('livewire.partials.payment-modal')
+@include('livewire.partials.early-unlock-modal')
 @include('livewire.partials.contract-details-modal')
 @include('livewire.partials.sessions-modal')
 @include('livewire.partials.wallet-address-modal')

@@ -27,6 +27,8 @@ class PlatformSettingsService
         'btc_rate_updated_at' => '',
         'btc_rate_source' => 'manual',
         'profit_accrual_time' => '09:00',
+        'early_unlock_fee_percent' => '30',
+        'early_unlock_fee_min' => '50.00',
     ];
 
     /** @var array<string, string> */
@@ -165,6 +167,25 @@ class PlatformSettingsService
         return $rate > 0 ? $rate : 2.0;
     }
 
+    public function earlyUnlockFeePercent(): float
+    {
+        return max(0, round($this->getFloat('early_unlock_fee_percent'), 2));
+    }
+
+    public function earlyUnlockFeeMin(): float
+    {
+        return max(0, round($this->getFloat('early_unlock_fee_min'), 2));
+    }
+
+    public function calculateEarlyUnlockFeeAmount(float $principal): float
+    {
+        $principal = max(0, round($principal, 2));
+        $percentFee = round($principal * ($this->earlyUnlockFeePercent() / 100), 2);
+        $fee = max($percentFee, $this->earlyUnlockFeeMin());
+
+        return min($fee, $principal);
+    }
+
     public function profitAccrualTime(): string
     {
         $time = trim($this->get('profit_accrual_time'));
@@ -225,6 +246,8 @@ class PlatformSettingsService
             'btc_per_usdt' => ['label' => __('coin.settings.btc_per_usdt'), 'type' => 'readonly_decimal', 'default' => self::DEFAULTS['btc_per_usdt'], 'readonly' => true],
             'maintenance_mode' => ['label' => __('coin.settings.maintenance'), 'type' => 'boolean', 'default' => self::DEFAULTS['maintenance_mode']],
             'profit_accrual_time' => ['label' => __('coin.settings.profit_accrual_time'), 'type' => 'time', 'default' => self::DEFAULTS['profit_accrual_time']],
+            'early_unlock_fee_percent' => ['label' => __('coin.settings.early_unlock_fee_percent'), 'type' => 'number', 'default' => self::DEFAULTS['early_unlock_fee_percent']],
+            'early_unlock_fee_min' => ['label' => __('coin.settings.early_unlock_fee_min'), 'type' => 'number', 'default' => self::DEFAULTS['early_unlock_fee_min']],
         ];
     }
 

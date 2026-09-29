@@ -55,11 +55,33 @@ class Plan extends Model
 
     public function formattedDailyEstimate(): ?string
     {
-        if ($this->daily_estimate === null) {
+        $daily = $this->estimatedDailyProfit();
+
+        if ($daily === null) {
             return null;
         }
 
-        return '~'.MoneyFormat::amount($this->daily_estimate, $this->displayCurrency(), 1).' / day';
+        return '~'.MoneyFormat::amount($daily, $this->displayCurrency(), 1).' / day';
+    }
+
+    /**
+     * Daily profit estimate at minimum purchase from plan APR.
+     * Falls back to stored daily_estimate only when APR/principal are missing.
+     */
+    public function estimatedDailyProfit(?float $amount = null): ?float
+    {
+        $apr = (float) ($this->annual_profit_percent ?? 0);
+        $principal = $amount ?? (float) ($this->min_deposit ?? $this->price_amount ?? 0);
+
+        if ($apr > 0 && $principal > 0) {
+            return round($principal * ($apr / 100) / 365, 2);
+        }
+
+        if ($this->daily_estimate !== null) {
+            return (float) $this->daily_estimate;
+        }
+
+        return null;
     }
 
     public function displayTierLabel(): string

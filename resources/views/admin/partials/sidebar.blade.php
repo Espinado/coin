@@ -19,6 +19,7 @@
         $routeName,
         'admin.deposits',
         'admin.withdrawals',
+        'admin.early-unlocks',
         'admin.commissions',
         'admin.profit-accrual',
         'admin.epochs',
@@ -30,6 +31,9 @@
     }
     if (($canManageWithdrawals ?? false) && ($pendingWithdrawalsCount ?? 0) > 0) {
         $financeBadges[] = ['count' => $pendingWithdrawalsCount, 'class' => 'admin-sidebar-badge--red', 'attrs' => 'data-admin-withdrawals-nav-badge'];
+    }
+    if (($canManageWithdrawals ?? false) && ($pendingEarlyUnlocksCount ?? 0) > 0) {
+        $financeBadges[] = ['count' => $pendingEarlyUnlocksCount, 'class' => 'admin-sidebar-badge--amber', 'attrs' => 'data-admin-early-unlocks-nav-badge'];
     }
 
     $logsActive = $adminNavActive($routeName, 'admin.payment-logs', 'admin.plan-changes');

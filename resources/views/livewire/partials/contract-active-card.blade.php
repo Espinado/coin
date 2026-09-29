@@ -7,20 +7,24 @@
     <div style="display: flex; align-items: center; gap: 16px; min-width: 0;">
       <div style="width: 46px; height: 46px; flex: none; border-radius: 13px; background: {{ $isPrimary ? 'linear-gradient(150deg, oklch(0.72 0.13 198), oklch(0.44 0.12 215))' : 'linear-gradient(150deg, #1a4055, #0b2030)' }}; border: 1px solid {{ $isPrimary ? 'rgba(190,250,255,0.35)' : 'rgba(150,235,250,0.22)' }}; display: grid; place-items: center;"><span style="width: 15px; height: 15px; border-radius: 4px; background: {{ $isPrimary ? '#eafcff' : 'oklch(0.7 0.1 200)' }};"></span></div>
       <div>
-        <div style="display: flex; align-items: center; gap: 10px;">
+        <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
           <span style="font-size: 16.5px; font-weight: 600;">{{ $contract->title() }}</span>
           <span style="padding: 3px 9px; border-radius: 6px; background: oklch(0.6 0.14 160 / 0.2); border: 1px solid oklch(0.7 0.14 160 / 0.4); font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.1em; color: oklch(0.88 0.14 160);">{{ $contract->statusLabel() }}</span>
           @if(! empty($pendingPlanChange))
           <span style="padding: 3px 9px; border-radius: 6px; background: rgba(255,180,84,0.16); border: 1px solid rgba(255,180,84,0.35); font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.08em; color: #ffb454;">{{ __('coin.invest.plan_change_pending_badge', ['plan' => $pendingPlanChange->toPlan?->displayName()]) }}</span>
           @endif
+          @if(! empty($pendingEarlyUnlock))
+          <span style="padding: 3px 9px; border-radius: 6px; background: rgba(255,180,84,0.16); border: 1px solid rgba(255,180,84,0.35); font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.08em; color: #ffb454;">{{ __('coin.invest.early_unlock_pending_badge') }}</span>
+          @endif
         </div>
         <div style="margin-top: 5px; font-family: 'JetBrains Mono', monospace; font-size: 11.5px; color: rgba(214,238,248,0.7);">{{ $contract->code }} · {{ $contract->displayLocationLabel() }}</div>
       </div>
     </div>
-    <div class="coin-contract-card__actions" style="display: flex; gap: 8px;">
+    <div class="coin-contract-card__actions" style="display: flex; flex-direction: column; gap: 8px; align-items: stretch; min-width: 148px;">
       <button type="button" wire:click="openContractDetails({{ $contract->id }})" style="padding: 10px 16px; border-radius: 10px; border: 1px solid oklch(0.86 0.11 195 / 0.5); background: linear-gradient(140deg, oklch(0.86 0.12 192), oklch(0.66 0.13 205)); color: #04121f; font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer; box-shadow: 0 20px 46px -22px oklch(0.8 0.13 195 / 0.85);">{{ __('coin.contract.details') }}</button>
-      @if(empty($pendingPlanChange))
+      @if(empty($pendingPlanChange) && empty($pendingEarlyUnlock))
       <button type="button" wire:click="openChangePlan({{ $contract->id }})" style="padding: 10px 16px; border-radius: 10px; border: 1px solid oklch(0.86 0.11 195 / 0.5); background: linear-gradient(140deg, oklch(0.86 0.12 192), oklch(0.66 0.13 205)); color: #04121f; font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer; box-shadow: 0 20px 46px -22px oklch(0.8 0.13 195 / 0.85);">{{ __('coin.invest.change_plan') }}</button>
+      <button type="button" wire:click="openEarlyUnlock({{ $contract->id }})" style="padding: 10px 16px; border-radius: 10px; border: 1px solid rgba(255,180,84,0.42); background: linear-gradient(160deg, rgba(255,180,84,0.14), rgba(255,180,84,0.05)); color: #ffd39a; font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer;">{{ __('coin.invest.close_early') }}</button>
       @endif
     </div>
   </div>

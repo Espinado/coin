@@ -11,6 +11,7 @@ use App\Http\Controllers\ReverbDebugLogController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\DepositController;
 use App\Http\Controllers\Admin\EpochController;
+use App\Http\Controllers\Admin\EarlyUnlockRequestController;
 use App\Http\Controllers\Admin\LegalPageController;
 use App\Http\Controllers\Admin\ProfitAccrualController;
 use App\Http\Controllers\Admin\PlanChangeRequestController;
@@ -100,6 +101,13 @@ Route::middleware(['admin.domain', 'reject.web.on.admin'])->group(function () {
             Route::get('withdrawals/{withdrawal}', [WithdrawalController::class, 'show'])->name('admin.withdrawals.show');
 
             Route::get('commissions', [CommissionController::class, 'index'])->name('admin.commissions.index');
+
+            Route::get('early-unlocks', [EarlyUnlockRequestController::class, 'index'])->name('admin.early-unlocks.index');
+            Route::get('early-unlocks/{earlyUnlock}', [EarlyUnlockRequestController::class, 'show'])->name('admin.early-unlocks.show');
+            Route::post('early-unlocks/{earlyUnlock}/approve', [EarlyUnlockRequestController::class, 'approve'])
+                ->name('admin.early-unlocks.approve');
+            Route::post('early-unlocks/{earlyUnlock}/reject', [EarlyUnlockRequestController::class, 'reject'])
+                ->name('admin.early-unlocks.reject');
         });
         Route::post('withdrawals/{withdrawal}/approve', [WithdrawalController::class, 'approve'])
             ->middleware('admin.ability:manage_withdrawals')

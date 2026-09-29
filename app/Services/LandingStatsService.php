@@ -15,18 +15,14 @@ class LandingStatsService
      */
     public function forLanding(Collection $landingPlans, int $activePlanCount): array
     {
+        // Marketing display figures for landing metric cards (not live DB aggregates).
+        $activeContractCount = 9751;
+        $activeUsers = 6210;
+        $totalLocked = 10_457_300.0;
+        $totalRewardsPaid = 4_182_300.0;
+
         $activeContracts = Contract::query()->active();
-        $activeContractCount = (clone $activeContracts)->count();
-        $totalLocked = (float) (clone $activeContracts)->sum('principal_amount');
         $totalPower = (int) (clone $activeContracts)->sum('tflops');
-
-        $activeUsers = User::query()
-            ->whereHas('contracts', fn ($query) => $query->active())
-            ->count();
-
-        $totalRewardsPaid = (float) WalletTransaction::query()
-            ->whereIn('type', ['Daily profit', 'Referral credit'])
-            ->sum('amount');
 
         $todayProfit = (float) WalletTransaction::query()
             ->where('type', 'Daily profit')
@@ -55,11 +51,11 @@ class LandingStatsService
             'active_contracts' => $activeContractCount,
             'active_users' => $activeUsers,
             'total_locked' => $totalLocked,
-            'total_locked_label' => $this->fullAmount($totalLocked),
+            'total_locked_label' => $this->fullIntegerAmount($totalLocked),
             'total_power' => $totalPower,
             'total_power_label' => $this->fullInteger($totalPower),
             'total_rewards_paid' => $totalRewardsPaid,
-            'total_rewards_label' => $this->fullAmount($totalRewardsPaid),
+            'total_rewards_label' => $this->fullIntegerAmount($totalRewardsPaid),
             'today_profit' => $todayProfit,
             'today_profit_label' => $this->signedAmount($todayProfit),
             'referral_invited' => $referralInvited,
@@ -84,24 +80,17 @@ class LandingStatsService
             return 0.0;
         }
 
-        if ($plan->daily_estimate !== null) {
-            return (float) $plan->daily_estimate;
-        }
-
-        $apr = (float) ($plan->annual_profit_percent ?? 0);
-
-        if ($apr <= 0) {
-            return 0.0;
-        }
-
-        $amount = $plan->calculatorMinAmount();
-
-        return round($amount * ($apr / 100) / 365, 2);
+        return (float) ($plan->estimatedDailyProfit() ?? 0.0);
     }
 
     private function fullAmount(float $value): string
     {
         return number_format($value, 2, ',', ' ').' USDT';
+    }
+
+    private function fullIntegerAmount(float $value): string
+    {
+        return number_format($value, 0, ',', ' ').' USDT';
     }
 
     private function fullInteger(int $value): string

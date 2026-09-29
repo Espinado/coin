@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Events\PlanChangeRequestUpdated;
 use App\Models\Admin;
 use App\Models\Contract;
+use App\Models\EarlyUnlockRequest;
 use App\Models\Plan;
 use App\Models\PlanChangeRequest;
 use App\Models\User;
@@ -31,6 +32,10 @@ class PlanChangeRequestService
 
             if (PlanChangeRequest::pendingForContract($contract->id)) {
                 throw new RuntimeException(__('coin.messages.plan_change_pending_exists'));
+            }
+
+            if (EarlyUnlockRequest::pendingForContract($contract->id)) {
+                throw new RuntimeException(__('coin.messages.plan_change_early_unlock_pending'));
             }
 
             if ($topUp > 0.009) {
@@ -230,6 +235,10 @@ class PlanChangeRequestService
 
         if (PlanChangeRequest::pendingForContract($contract->id)) {
             throw new RuntimeException(__('coin.messages.plan_change_pending_exists'));
+        }
+
+        if (EarlyUnlockRequest::pendingForContract($contract->id)) {
+            throw new RuntimeException(__('coin.messages.plan_change_early_unlock_pending'));
         }
     }
 

@@ -1,6 +1,6 @@
 @php
     $active = $active ?? 'deposits';
-    if (! in_array($active, ['deposits', 'withdrawals', 'profit-accrual', 'commissions'], true)) {
+    if (! in_array($active, ['deposits', 'withdrawals', 'profit-accrual', 'commissions', 'early-unlocks'], true)) {
         $active = 'deposits';
     }
 
@@ -23,6 +23,15 @@
             'badge_class' => 'admin-sidebar-badge--red',
             'nav_attrs' => 'data-admin-withdrawals-nav',
             'badge_attrs' => 'data-admin-withdrawals-nav-badge',
+        ];
+
+        $tabs['early-unlocks'] = [
+            'label' => __('coin.admin.early_unlocks'),
+            'url' => route('admin.early-unlocks.index'),
+            'badge' => ($pendingEarlyUnlocksCount ?? 0) > 0 ? (int) $pendingEarlyUnlocksCount : null,
+            'badge_class' => 'admin-sidebar-badge--amber',
+            'nav_attrs' => 'data-admin-early-unlocks-nav',
+            'badge_attrs' => 'data-admin-early-unlocks-nav-badge',
         ];
 
         $tabs['commissions'] = [

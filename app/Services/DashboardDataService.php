@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Contract;
+use App\Models\EarlyUnlockRequest;
 use App\Models\Plan;
 use App\Models\PlanChangeRequest;
 use App\Models\User;
@@ -40,7 +41,7 @@ class DashboardDataService
             'contracts' => $user->contracts,
             'activeContracts' => $user->contracts->where('status', Contract::STATUS_ACTIVE)->values(),
             'completedContracts' => $user->contracts
-                ->where('status', Contract::STATUS_COMPLETED)
+                ->whereIn('status', [Contract::STATUS_COMPLETED, Contract::STATUS_EARLY_CLOSED])
                 ->sortByDesc(fn (Contract $contract) => $contract->ends_at ?? $contract->updated_at)
                 ->values(),
             'transactions' => $user->walletTransactions->sortBy('sort_order')->values(),
@@ -57,6 +58,11 @@ class DashboardDataService
                 ->where('user_id', $user->id)
                 ->where('status', PlanChangeRequest::STATUS_PENDING)
                 ->with(['fromPlan', 'toPlan'])
+                ->get()
+                ->keyBy('contract_id'),
+            'pendingEarlyUnlocks' => EarlyUnlockRequest::query()
+                ->where('user_id', $user->id)
+                ->where('status', EarlyUnlockRequest::STATUS_PENDING)
                 ->get()
                 ->keyBy('contract_id'),
         ];

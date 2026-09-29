@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Mail\UserEventNotificationMail;
 use App\Models\Contract;
+use App\Models\EarlyUnlockRequest;
 use App\Models\PlanChangeRequest;
 use App\Models\User;
 use App\Models\Withdrawal;
@@ -24,6 +25,8 @@ class UserNotificationService
     public const TYPE_PAYOUT_COMPLETED = 'payout_completed';
 
     public const TYPE_PLAN_CHANGE_APPROVED = 'plan_change_approved';
+
+    public const TYPE_EARLY_UNLOCK_APPROVED = 'early_unlock_approved';
 
     public function send(User $user, string $type, string $subject, string $intro, array $lines = [], ?string $footer = null): void
     {
@@ -200,6 +203,27 @@ class UserNotificationService
                 __('coin.notifications.mail.plan_change_intro', ['name' => $user->name]),
                 $lines,
                 __('coin.notifications.mail.plan_change_footer'),
+            );
+        });
+    }
+
+    public function notifyEarlyUnlockApproved(User $user, EarlyUnlockRequest $request): void
+    {
+        UserLocale::run(function () use ($user, $request): void {
+            $request->loadMissing(['contract.plan']);
+
+            $this->send(
+                $user,
+                self::TYPE_EARLY_UNLOCK_APPROVED,
+                __('coin.notifications.mail.early_unlock_subject'),
+                __('coin.notifications.mail.early_unlock_intro', ['name' => $user->name]),
+                [
+                    __('coin.notifications.mail.early_unlock_reference', ['reference' => $request->reference]),
+                    __('coin.notifications.mail.early_unlock_contract', ['contract' => $request->contract?->code ?? '—']),
+                    __('coin.notifications.mail.early_unlock_credit', ['amount' => $request->formattedCredit()]),
+                    __('coin.notifications.mail.early_unlock_fee', ['amount' => $request->formattedFee()]),
+                ],
+                __('coin.notifications.mail.early_unlock_footer'),
             );
         });
     }

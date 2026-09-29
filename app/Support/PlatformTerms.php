@@ -19,6 +19,12 @@ final class PlatformTerms
     /** Platform commission charged on withdrawal. */
     public const TX_PLATFORM_FEE = 'Platform fee';
 
+    /** Principal returned after approved early contract close (net of fee). */
+    public const TX_EARLY_UNLOCK = 'Early unlock';
+
+    /** Platform fee retained on early contract close. */
+    public const TX_EARLY_UNLOCK_FEE = 'Early unlock fee';
+
     public static function displayTransactionType(string $type): string
     {
         $normalized = match ($type) {
@@ -27,6 +33,8 @@ final class PlatformTerms
             self::TX_PLATFORM_FEE => self::TX_PLATFORM_FEE,
             'Plan purchase', self::TX_INVESTMENT => self::TX_INVESTMENT,
             'Plan upgrade', self::TX_PLAN_UPGRADE => self::TX_PLAN_UPGRADE,
+            self::TX_EARLY_UNLOCK => self::TX_EARLY_UNLOCK,
+            self::TX_EARLY_UNLOCK_FEE => self::TX_EARLY_UNLOCK_FEE,
             default => $type,
         };
 
