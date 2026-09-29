@@ -2698,6 +2698,24 @@ class Dashboard extends Component
     {
         $this->reloadUserNotifications();
         $this->syncNotificationsUnreadBadge();
+        $this->reloadPortfolioData();
+
+        $toast = is_array($payload)
+            ? (data_get($payload, 'user_toast') ?? data_get($payload, '0.user_toast'))
+            : null;
+
+        if (is_string($toast) && $toast !== '') {
+            $this->actionMessage = $toast;
+            $this->actionMessageTone = 'success';
+        }
+    }
+
+    public function openPlansFromNotification(): void
+    {
+        $this->section = 1;
+        $this->menuOpen = false;
+        $this->reloadPortfolioData();
+        $this->resetActionFeedback();
     }
 
     #[On('echo-private:support.user.{user.id},.SupportTicketMessageSent')]

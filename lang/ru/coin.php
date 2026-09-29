@@ -625,6 +625,11 @@ return [
         'open_hint' => 'Выберите уведомление, чтобы прочитать его полностью.',
         'from_platform' => 'CloudFlops',
         'received' => 'Новое уведомление',
+        'open_plans' => 'Открыть Investment plans',
+        'in_app' => [
+            'private_offer_title' => 'Персональное инвестиционное предложение',
+            'private_offer_body' => "Менеджер отправил вам персональную оферту.\n\nПлан: :name\nСумма: :amount\nСрок: :days дн.\nГодовая доходность: :apr\nОферта действует до: :expires\n\nОткрыть Investment plans: :url",
+        ],
         'mail' => [
             'footer' => 'You received this email because you enabled notifications in CloudFlops settings.',
             'profit_subject' => 'CloudFlops — profit credited',
@@ -680,6 +685,7 @@ return [
             'early_unlock_footer' => 'This is an automatic confirmation of an early investment close on CloudFlops.',
             'private_offer_subject' => 'CloudFlops — personal investment offer',
             'private_offer_intro' => 'Hello, :name! A manager prepared a personal investment offer for you.',
+            'private_offer_plan' => 'Plan: :name',
             'private_offer_amount' => 'Amount: :amount',
             'private_offer_term' => 'Term: :days days',
             'private_offer_apr' => 'Annual return: :apr',

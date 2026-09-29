@@ -46,6 +46,16 @@
         <div style="font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.12em; color: rgba(214,238,248,0.68);">{{ mb_strtoupper(__('coin.notifications.from_platform')) }} · {{ $selected->created_at?->format('d.m.Y H:i') }}</div>
         <h2 style="margin: 12px 0 0; font-size: 20px; font-weight: 600;">{{ $selected->title }}</h2>
         <div style="margin-top: 18px; font-size: 14px; line-height: 1.7; color: rgba(240,251,255,0.92); white-space: pre-wrap;">{{ $selected->body }}</div>
+        @if(str_contains((string) $selected->body, 'section=1'))
+          <div style="margin-top: 18px;">
+            <button
+              type="button"
+              wire:click="openPlansFromNotification"
+              class="coin-btn-quiet"
+              style="padding: 10px 16px; border-radius: 10px; border: 1px solid oklch(0.86 0.11 195 / 0.5); background: linear-gradient(140deg, oklch(0.86 0.12 192), oklch(0.66 0.13 205)); color: #04121f; font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer;"
+            >{{ __('coin.notifications.open_plans') }}</button>
+          </div>
+        @endif
         <div style="margin-top: 18px; font-size: 12px; color: rgba(214,238,248,0.62);">{{ $selected->isRead() ? __('coin.notifications.read') : __('coin.notifications.unread') }}</div>
       @else
         <p style="margin: 0; {{ $hint }}">{{ __('coin.notifications.open_hint') }}</p>
