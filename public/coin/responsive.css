@@ -151,6 +151,8 @@ html.coin-modal-open body {
 .coin-app.coin-landing {
   margin: 0;
   background: #061423;
+  /* Shared section rhythm — adjacent top+bottom paddings stack, keep modest */
+  --landing-section-y: clamp(24px, 3vw, 40px);
 }
 
 body:has(.coin-app.coin-landing),
@@ -229,7 +231,7 @@ html.coin-nav-open .coin-nav-overlay {
 .coin-landing-footer {
   position: relative;
   z-index: 5;
-  padding: 44px 72px 28px;
+  padding: 32px 72px 24px;
   border-top: 1px solid rgba(150, 235, 250, 0.1);
   background: rgba(150, 235, 250, 0.02);
 }
@@ -294,8 +296,8 @@ html.coin-nav-open .coin-nav-overlay {
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  margin-top: 44px;
-  padding-top: 22px;
+  margin-top: 32px;
+  padding-top: 20px;
   border-top: 1px solid rgba(150, 235, 250, 0.1);
   font-size: 12.5px;
   color: rgba(230, 244, 250, 0.62);
@@ -539,7 +541,7 @@ html.coin-nav-open .coin-nav-mobile {
 .coin-landing-hero {
   position: relative;
   z-index: 5;
-  padding: clamp(40px, 5.5vw, 72px) clamp(16px, 4vw, 72px) clamp(44px, 5.5vw, 80px);
+  padding: clamp(32px, 4.5vw, 56px) clamp(16px, 4vw, 72px) clamp(32px, 4vw, 48px);
 }
 
 .coin-landing-hero__grid {
@@ -672,7 +674,7 @@ html.coin-nav-open .coin-nav-mobile {
 }
 
 .coin-landing-metrics {
-  padding: 0 clamp(16px, 4vw, 72px) clamp(40px, 5vw, 72px);
+  padding: 0 clamp(16px, 4vw, 72px) var(--landing-section-y);
 }
 
 .coin-landing-metrics__grid {
@@ -731,7 +733,7 @@ html.coin-nav-open .coin-nav-mobile {
 }
 
 .coin-landing-how {
-  padding: clamp(40px, 5vw, 72px) clamp(16px, 4vw, 72px);
+  padding: var(--landing-section-y) clamp(16px, 4vw, 72px);
   border-top: 1px solid rgba(150, 235, 250, 0.08);
 }
 
@@ -754,7 +756,7 @@ html.coin-nav-open .coin-nav-mobile {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 210px), 1fr));
   gap: 16px;
-  margin-top: 48px;
+  margin-top: 28px;
 }
 
 .coin-landing-step-card {
@@ -827,7 +829,7 @@ html.coin-nav-open .coin-nav-mobile {
 }
 
 .coin-landing-benefits {
-  padding: clamp(40px, 5vw, 72px) clamp(16px, 4vw, 72px);
+  padding: var(--landing-section-y) clamp(16px, 4vw, 72px);
   border-top: 1px solid rgba(150, 235, 250, 0.08);
 }
 
@@ -839,7 +841,7 @@ html.coin-nav-open .coin-nav-mobile {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 380px), 1fr));
   gap: 16px;
-  margin-top: 48px;
+  margin-top: 28px;
 }
 
 .coin-landing-benefit-card {
@@ -882,7 +884,7 @@ html.coin-nav-open .coin-nav-mobile {
 }
 
 .coin-landing-infra {
-  padding: clamp(40px, 5vw, 72px) clamp(16px, 4vw, 72px);
+  padding: var(--landing-section-y) clamp(16px, 4vw, 72px);
   border-top: 1px solid rgba(150, 235, 250, 0.08);
 }
 
@@ -905,7 +907,7 @@ html.coin-nav-open .coin-nav-mobile {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 14px;
-  margin-top: 36px;
+  margin-top: 28px;
   max-width: 460px;
 }
 
@@ -1061,7 +1063,7 @@ html.coin-nav-open .coin-nav-mobile {
 }
 
 .coin-landing-plans {
-  padding: clamp(40px, 5vw, 72px) clamp(16px, 4vw, 72px);
+  padding: var(--landing-section-y) clamp(16px, 4vw, 72px);
   border-top: 1px solid rgba(150, 235, 250, 0.08);
   color: #e6f4fa;
 }
@@ -1080,7 +1082,7 @@ html.coin-nav-open .coin-nav-mobile {
 }
 
 .coin-landing-referrals {
-  padding: clamp(40px, 5vw, 72px) clamp(16px, 4vw, 72px);
+  padding: var(--landing-section-y) clamp(16px, 4vw, 72px);
   border-top: 1px solid rgba(150, 235, 250, 0.08);
 }
 
@@ -4131,6 +4133,7 @@ html.coin-nav-open .coin-nav-mobile {
     margin-left: auto;
   }
 
+  .coin-landing section[style*="padding: 32px 72px"],
   .coin-landing section[style*="padding: 40px 72px"],
   .coin-landing section[style*="padding: 48px 72px"],
   .coin-landing section[style*="padding: 72px 72px"],
@@ -4726,6 +4729,7 @@ body:has(.coin-auth) {
     gap: 40px !important;
   }
 
+  .coin-landing section[style*="padding: 32px 72px"],
   .coin-landing section[style*="padding: 40px 72px"],
   .coin-landing section[style*="padding: 48px 72px"] {
     padding-left: clamp(24px, 3.5vw, 56px) !important;

@@ -55,7 +55,7 @@
         <p class="coin-landing-plans__lead">{{ __('coin.landing.plans_lead') }}</p>
     </div>
 
-    <div id="landing-plans" style="margin-top: 32px;">
+    <div id="landing-plans" style="margin-top: 24px;">
         <script type="application/json" id="landing-plans-data">@json($landingPlansPayload)</script>
 
         @if($plans->isEmpty())
