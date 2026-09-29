@@ -585,6 +585,13 @@ class Dashboard extends Component
         }
 
         $this->selectedPlanId = $plan->id;
+
+        if ($plan->isPrivate()) {
+            $this->power = $plan->calculatorMinAmount();
+
+            return;
+        }
+
         $this->power = max(
             $plan->calculatorMinAmount(),
             min($plan->calculatorMaxAmount(), (int) $this->power)
