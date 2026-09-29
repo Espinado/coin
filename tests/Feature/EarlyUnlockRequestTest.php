@@ -100,9 +100,18 @@ class EarlyUnlockRequestTest extends TestCase
         ]);
         $this->assertDatabaseHas('wallet_transactions', [
             'user_id' => $user->id,
-            'type' => PlatformTerms::TX_EARLY_UNLOCK_FEE,
+            'type' => PlatformTerms::TX_PLATFORM_FEE,
             'amount' => -330,
         ]);
+        $this->assertDatabaseHas('platform_commissions', [
+            'user_id' => $user->id,
+            'kind' => 'early_unlock',
+            'amount' => 330,
+            'reference' => $request->reference,
+        ]);
+        $this->assertFalse(
+            $user->contracts()->where('status', Contract::STATUS_ACTIVE)->whereKey($contract->id)->exists()
+        );
     }
 
     public function test_admin_reject_leaves_contract_active(): void

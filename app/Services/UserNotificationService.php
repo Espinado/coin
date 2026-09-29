@@ -228,6 +228,30 @@ class UserNotificationService
         });
     }
 
+    public function notifyPrivateOfferCreated(User $user, \App\Models\PlanOffer $offer): void
+    {
+        UserLocale::run(function () use ($user, $offer): void {
+            $offer->loadMissing('plan');
+            $dashboardUrl = route('dashboard', absolute: true).'?section=1';
+
+            $this->sendAlways(
+                $user,
+                __('coin.notifications.mail.private_offer_subject'),
+                __('coin.notifications.mail.private_offer_intro', ['name' => $user->name]),
+                [
+                    __('coin.notifications.mail.private_offer_amount', ['amount' => $offer->formattedAmount()]),
+                    __('coin.notifications.mail.private_offer_term', ['days' => $offer->duration_days]),
+                    __('coin.notifications.mail.private_offer_apr', ['apr' => $offer->formattedApr()]),
+                    __('coin.notifications.mail.private_offer_expires', [
+                        'expires' => $offer->expires_at?->format('M j, Y H:i') ?? '—',
+                    ]),
+                    __('coin.notifications.mail.private_offer_open', ['url' => $dashboardUrl]),
+                ],
+                __('coin.notifications.mail.private_offer_footer'),
+            );
+        });
+    }
+
     public function notifyReferralCommission(
         User $referrer,
         User $referral,

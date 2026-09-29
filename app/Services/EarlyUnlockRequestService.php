@@ -2,10 +2,12 @@
 
 namespace App\Services;
 
+use App\Events\EarlyUnlockRequestUpdated;
 use App\Models\Admin;
 use App\Models\Contract;
 use App\Models\EarlyUnlockRequest;
 use App\Models\PlanChangeRequest;
+use App\Models\PlatformCommission;
 use App\Models\User;
 use App\Models\Wallet;
 use App\Support\MoneyFormat;
@@ -20,6 +22,7 @@ class EarlyUnlockRequestService
         private PlatformSettingsService $settings,
         private WalletService $wallets,
         private UserNotificationService $notifications,
+        private PlanPurchaseService $purchases,
     ) {}
 
     /**
@@ -119,6 +122,10 @@ class EarlyUnlockRequestService
             $wallet->decrement('locked_balance', $releaseLocked);
             $wallet->increment('available', $creditAmount);
 
+            if ($feeAmount > 0.009) {
+                $wallet->decrement('balance', min($feeAmount, (float) $wallet->balance));
+            }
+
             $this->wallets->record(
                 $user,
                 PlatformTerms::TX_EARLY_UNLOCK,
@@ -133,13 +140,28 @@ class EarlyUnlockRequestService
             if ($feeAmount > 0.009) {
                 $this->wallets->record(
                     $user,
-                    PlatformTerms::TX_EARLY_UNLOCK_FEE,
-                    $contract->code,
+                    PlatformTerms::TX_PLATFORM_FEE,
+                    $request->reference,
                     -$feeAmount,
                     $currency,
                     'negative',
                     'COMPLETED',
-                    $contract,
+                    $request,
+                );
+
+                PlatformCommission::query()->updateOrCreate(
+                    [
+                        'kind' => PlatformCommission::KIND_EARLY_UNLOCK,
+                        'reference' => $request->reference,
+                    ],
+                    [
+                        'user_id' => $user->id,
+                        'amount' => $feeAmount,
+                        'currency' => $currency,
+                        'source_type' => $request->getMorphClass(),
+                        'source_id' => $request->id,
+                        'processed_at' => now(),
+                    ],
                 );
             }
 
@@ -159,9 +181,13 @@ class EarlyUnlockRequestService
                 'processed_at' => now(),
             ]);
 
-            $request = $request->fresh(['user', 'contract.plan', 'processedByAdmin']);
+            $this->purchases->refreshExpectedDailyProfit($user);
+
+            $request = $request->fresh(['user.wallet', 'contract.plan', 'processedByAdmin']);
 
             DB::afterCommit(function () use ($request): void {
+                event(new EarlyUnlockRequestUpdated($request));
+
                 $user = $request->user;
                 if ($user instanceof User) {
                     $this->notifications->notifyEarlyUnlockApproved($user, $request);
@@ -184,7 +210,13 @@ class EarlyUnlockRequestService
                 'processed_at' => now(),
             ]);
 
-            return $request->fresh(['user', 'contract.plan', 'processedByAdmin']);
+            $request = $request->fresh(['user', 'contract.plan', 'processedByAdmin']);
+
+            DB::afterCommit(function () use ($request): void {
+                event(new EarlyUnlockRequestUpdated($request));
+            });
+
+            return $request;
         });
     }
 

@@ -4,11 +4,25 @@ namespace App\Models;
 
 use App\Support\MoneyFormat;
 use App\Support\PlanLabels;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Plan extends Model
 {
+    public const VISIBILITY_PUBLIC = 'public';
+
+    public const VISIBILITY_PRIVATE = 'private';
+
+    public const OFFER_STATUS_PENDING = 'pending';
+
+    public const OFFER_STATUS_ACCEPTED = 'accepted';
+
+    public const OFFER_STATUS_EXPIRED = 'expired';
+
+    public const OFFER_STATUS_REVOKED = 'revoked';
+
     protected $fillable = [
         'slug',
         'name',
@@ -28,6 +42,8 @@ class Plan extends Model
         'is_featured',
         'is_active',
         'capacity_percent',
+        'visibility',
+        'offer_status',
     ];
 
     protected function casts(): array
@@ -46,6 +62,31 @@ class Plan extends Model
     public function contracts(): HasMany
     {
         return $this->hasMany(Contract::class);
+    }
+
+    public function offer(): HasOne
+    {
+        return $this->hasOne(PlanOffer::class);
+    }
+
+    public function scopePublicCatalog(Builder $query): Builder
+    {
+        return $query
+            ->where('is_active', true)
+            ->where(function (Builder $inner) {
+                $inner->where('visibility', self::VISIBILITY_PUBLIC)
+                    ->orWhereNull('visibility');
+            });
+    }
+
+    public function isPrivate(): bool
+    {
+        return $this->visibility === self::VISIBILITY_PRIVATE;
+    }
+
+    public function isPublicCatalog(): bool
+    {
+        return ! $this->isPrivate();
     }
 
     public function formattedTflops(): string
@@ -235,6 +276,10 @@ class Plan extends Model
 
     public function calculatorMinAmount(): int
     {
+        if ($this->isPrivate()) {
+            return (int) max(1, round((float) ($this->min_deposit ?? $this->price_amount ?? 1)));
+        }
+
         if ($this->isEnterprise()) {
             return 10_000;
         }
@@ -244,6 +289,10 @@ class Plan extends Model
 
     public function calculatorMaxAmount(): int
     {
+        if ($this->isPrivate()) {
+            return $this->calculatorMinAmount();
+        }
+
         if ($this->isEnterprise()) {
             return 50_000;
         }

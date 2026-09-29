@@ -16,7 +16,7 @@ class HomeController extends Controller
     {
         /** @var Collection<int, Plan> $allActive */
         $allActive = Plan::query()
-            ->where('is_active', true)
+            ->publicCatalog()
             ->orderBy('sort_order')
             ->get();
 

@@ -7,6 +7,7 @@ use App\Support\PlatformTerms;
 
 use App\Models\Contract;
 use App\Models\Plan;
+use App\Models\PlanOffer;
 use App\Models\User;
 use App\Models\Wallet;
 use Illuminate\Support\Facades\DB;
@@ -30,6 +31,12 @@ class PlanPurchaseService
             throw new RuntimeException('Contact sales for Enterprise plans.');
         }
 
+        $privateOffer = null;
+
+        if ($plan->isPrivate()) {
+            $privateOffer = app(PrivateOfferService::class)->assertPurchasable($user, $plan);
+        }
+
         $amount = $amount ?? (float) ($plan->price_amount ?? $plan->min_deposit ?? 0);
         $minDeposit = (float) ($plan->min_deposit ?? 0);
 
@@ -41,6 +48,18 @@ class PlanPurchaseService
             throw new RuntimeException('Amount is below the minimum investment for this plan.');
         }
 
+        if ($privateOffer instanceof PlanOffer) {
+            $offerAmount = round((float) $privateOffer->amount, 2);
+
+            if (abs(round($amount, 2) - $offerAmount) > 0.009) {
+                throw new RuntimeException(__('coin.messages.private_offer_amount_mismatch', [
+                    'amount' => number_format($offerAmount, 2, '.', ' ').' '.($privateOffer->currency ?: config('coin.wallet.base_currency', 'USDT')),
+                ]));
+            }
+
+            $amount = $offerAmount;
+        }
+
         $maxAmount = $plan->calculatorMaxAmount();
 
         if ($amount > $maxAmount) {
@@ -49,7 +68,7 @@ class PlanPurchaseService
 
         $wallet = $this->wallets->ensureWallet($user);
 
-        return DB::transaction(function () use ($user, $plan, $amount, $wallet) {
+        return DB::transaction(function () use ($user, $plan, $amount, $wallet, $privateOffer) {
             $lockedWallet = Wallet::query()->whereKey($wallet->id)->lockForUpdate()->firstOrFail();
 
             if ((float) $lockedWallet->available < $amount) {
@@ -96,6 +115,10 @@ class PlanPurchaseService
                 $contract,
             );
 
+            if ($privateOffer instanceof PlanOffer) {
+                app(PrivateOfferService::class)->markAccepted($privateOffer);
+            }
+
             $this->referralCommissions->onContractPurchased($contract);
             $this->refreshUserDailyProfitExpectation($user);
 
@@ -110,6 +133,11 @@ class PlanPurchaseService
         } while (Contract::query()->where('code', $code)->exists());
 
         return $code;
+    }
+
+    public function refreshExpectedDailyProfit(User $user): void
+    {
+        $this->refreshUserDailyProfitExpectation($user);
     }
 
     private function refreshUserDailyProfitExpectation(User $user): void

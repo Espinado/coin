@@ -76,6 +76,14 @@ Broadcast::channel('admin.plan-changes', function ($user) {
     return $allowed;
 });
 
+Broadcast::channel('admin.early-unlocks', function ($user) {
+    $allowed = $user instanceof Admin
+        && app(AdminAuthorization::class)->allows($user, AdminAbility::ManageWithdrawals);
+    logSupportChannelAuth('admin.early-unlocks', $user, $allowed, 'admin_withdrawals_ability');
+
+    return $allowed;
+});
+
 Broadcast::channel('wallet.user.{userId}', function ($user, int $userId) {
     $allowed = $user instanceof User && (int) $user->id === (int) $userId;
     logSupportChannelAuth('wallet.user.'.$userId, $user, $allowed, 'user_self');

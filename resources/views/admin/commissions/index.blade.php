@@ -55,23 +55,25 @@
             <thead>
                 <tr style="text-align:left;border-bottom:1px solid rgba(255,255,255,0.08);">
                     @include('admin.partials.sortable-th', ['column' => 'processed_at', 'label' => strtoupper(__('coin.admin.time')), 'sort' => $sort, 'dir' => $dir])
+                    @include('admin.partials.sortable-th', ['column' => 'kind', 'label' => strtoupper(__('coin.admin.commission_type')), 'sort' => $sort, 'dir' => $dir])
                     @include('admin.partials.sortable-th', ['column' => 'reference', 'label' => strtoupper(__('coin.admin.reference')), 'sort' => $sort, 'dir' => $dir])
                     @include('admin.partials.sortable-th', ['column' => 'user', 'label' => strtoupper(__('coin.user')), 'sort' => $sort, 'dir' => $dir])
-                    @include('admin.partials.sortable-th', ['column' => 'amount', 'label' => strtoupper(__('coin.admin.payout_amount')), 'sort' => $sort, 'dir' => $dir])
+                    <th style="padding:14px 18px;">{{ strtoupper(__('coin.admin.base_amount')) }}</th>
                     @include('admin.partials.sortable-th', ['column' => 'platform_fee', 'label' => strtoupper(__('coin.admin.commission_amount')), 'sort' => $sort, 'dir' => $dir])
                 </tr>
             </thead>
             <tbody>
-                @forelse($commissions as $withdrawal)
+                @forelse($commissions as $row)
                     <tr style="border-bottom:1px solid rgba(255,255,255,0.06);">
-                        <td style="padding:14px 18px;white-space:nowrap;">{{ \App\Support\LocaleFormat::dateTimeLocal($withdrawal->processed_at) }}</td>
-                        <td style="padding:14px 18px;"><a href="{{ route('admin.withdrawals.show', $withdrawal) }}">{{ $withdrawal->reference }}</a></td>
-                        <td style="padding:14px 18px;">{{ $withdrawal->user?->email }}</td>
-                        <td style="padding:14px 18px;">{{ $withdrawal->formattedAmount() }}</td>
-                        <td style="padding:14px 18px;">{{ number_format((float) $withdrawal->platform_fee, 2, '.', ',') }} {{ $currency }}</td>
+                        <td style="padding:14px 18px;white-space:nowrap;">{{ \App\Support\LocaleFormat::dateTimeLocal($row['processed_at']) }}</td>
+                        <td style="padding:14px 18px;">{{ $row['kind_label'] }}</td>
+                        <td style="padding:14px 18px;"><a href="{{ $row['url'] }}">{{ $row['reference'] }}</a></td>
+                        <td style="padding:14px 18px;">{{ $row['user_email'] }}</td>
+                        <td style="padding:14px 18px;">{{ $row['base_amount_label'] }}</td>
+                        <td style="padding:14px 18px;">{{ number_format((float) $row['amount'], 2, '.', ',') }} {{ $currency }}</td>
                     </tr>
                 @empty
-                    <tr><td colspan="5" style="padding:18px;color:rgba(232,237,245,0.65);">{{ __('coin.admin.no_commissions') }}</td></tr>
+                    <tr><td colspan="6" style="padding:18px;color:rgba(232,237,245,0.65);">{{ __('coin.admin.no_commissions') }}</td></tr>
                 @endforelse
             </tbody>
         </table>

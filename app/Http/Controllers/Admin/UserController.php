@@ -9,6 +9,7 @@ use App\Models\Admin;
 use App\Models\User;
 use App\Models\Wallet;
 use App\Services\PlatformBroadcastService;
+use App\Services\PrivateOfferService;
 use App\Services\UserNotificationService;
 use App\Services\Voximplant\VoximplantCallService;
 use Illuminate\Http\RedirectResponse;
@@ -59,7 +60,7 @@ class UserController extends Controller
         ]);
     }
 
-    public function show(Request $request, User $user, VoximplantCallService $voximplant): View
+    public function show(Request $request, User $user, VoximplantCallService $voximplant, PrivateOfferService $offers): View
     {
         $activityTab = $request->string('activity')->toString();
         if (! in_array($activityTab, ['investments', 'deposits', 'withdrawals', 'transactions'], true)) {
@@ -86,6 +87,7 @@ class UserController extends Controller
             'kycStatuses' => User::kycStatuses(),
             'referralVolume' => (float) $user->referralCommissionsEarned->sum('purchase_amount'),
             'referralEarnings' => (float) $user->referralCommissionsEarned->sum('commission_amount'),
+            'pendingPrivateOffers' => $offers->pendingOffersForUser($user),
             'voximplantReady' => $voximplant->isReady(),
             'voximplantDestination' => $voximplant->normalizeDestination($user),
             'voximplantUsername' => $voximplant->sdkUsername(),
@@ -105,7 +107,7 @@ class UserController extends Controller
             'country_code' => ['nullable', 'string', 'size:2'],
         ]);
 
-        $user->update($validated);
+        $user->forceFill($validated)->save();
 
         return $this->adminSuccess('coin.admin.flash.user_updated', 'admin.users.index');
     }

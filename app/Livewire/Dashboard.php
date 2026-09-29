@@ -4,6 +4,7 @@ namespace App\Livewire;
 
 use App\Models\Contract;
 use App\Models\Deposit;
+use App\Models\EarlyUnlockRequest;
 use App\Models\LegalPage;
 use App\Models\Plan;
 use App\Models\ReferralCommission;
@@ -551,10 +552,30 @@ class Dashboard extends Component
             return;
         }
 
+        if ($plan->isEnterprise() && ! $this->changingContractId) {
+            $this->contactEnterpriseSales();
+
+            return;
+        }
+
+        if ($plan->isPrivate() && $this->changingContractId) {
+            $this->actionMessage = __('coin.messages.plan_change_private_forbidden');
+            $this->actionMessageTone = 'warning';
+
+            return;
+        }
+
         if ($this->changingContractId) {
             $changing = $this->changingContract;
 
             if ($changing && (int) $plan->id === (int) $changing->plan_id) {
+                return;
+            }
+
+            if ($changing?->plan?->isPrivate()) {
+                $this->actionMessage = __('coin.messages.plan_change_private_forbidden');
+                $this->actionMessageTone = 'warning';
+
                 return;
             }
 
@@ -570,11 +591,58 @@ class Dashboard extends Component
         );
     }
 
+    public function contactEnterpriseSales(): void
+    {
+        $this->section = 7;
+        $this->menuOpen = false;
+        $this->resetActionFeedback();
+
+        $existing = SupportTicket::query()
+            ->where('user_id', $this->user->id)
+            ->where('category', SupportTicket::CATEGORY_ENTERPRISE)
+            ->whereIn('status', [SupportTicket::STATUS_OPEN, SupportTicket::STATUS_PENDING])
+            ->latest('id')
+            ->first();
+
+        if ($existing instanceof SupportTicket) {
+            $this->reloadTickets();
+            $this->selectedTicketId = $existing->id;
+            $this->showCreateTicket = false;
+            $this->markTicketRead($existing->id);
+            $this->syncSupportUnreadBadge();
+
+            return;
+        }
+
+        $ticket = app(SupportTicketService::class)->createForUser(
+            $this->user,
+            __('coin.ticket.enterprise_subject'),
+            SupportTicket::CATEGORY_ENTERPRISE,
+            __('coin.ticket.enterprise_body'),
+        );
+
+        $this->reloadTickets();
+        $this->selectedTicketId = $ticket->id;
+        $this->showCreateTicket = false;
+        $this->markTicketRead($ticket->id);
+        $this->syncSupportUnreadBadge();
+        $this->actionMessage = __('coin.messages.enterprise_chat_opened');
+        $this->actionMessageTone = 'success';
+    }
+
     public function openChangePlan(int $contractId): void
     {
         $contract = $this->findOwnedContract($contractId);
 
         abort_unless($contract instanceof Contract && $contract->isActive(), 403);
+
+        if ($contract->plan?->isPrivate()) {
+            $this->actionMessage = __('coin.messages.plan_change_private_forbidden');
+            $this->actionMessageTone = 'warning';
+            $this->section = 2;
+
+            return;
+        }
 
         if ($this->pendingPlanChanges->has($contract->id)) {
             $this->actionMessage = __('coin.messages.plan_change_pending_exists');
@@ -596,6 +664,8 @@ class Dashboard extends Component
 
         $alternative = $this->plans->first(
             fn (Plan $plan) => (int) $plan->id !== (int) $contract->plan_id
+                && ! $plan->isPrivate()
+                && ! ($plan->isEnterprise() && $plan->min_deposit === null)
         );
 
         $this->selectedPlanId = $alternative?->id;
@@ -2578,6 +2648,30 @@ class Dashboard extends Component
 
         return data_get($payload, 'request.status')
             ?? data_get($payload, '0.request.status');
+    }
+
+    #[On('echo-private:wallet.user.{user.id},.EarlyUnlockRequestUpdated')]
+    public function onEarlyUnlockRequestUpdated(mixed $payload = null): void
+    {
+        $status = is_array($payload)
+            ? (data_get($payload, 'request.status') ?? data_get($payload, '0.request.status'))
+            : null;
+
+        $this->reloadPortfolioData();
+        $this->closeEarlyUnlockModal();
+
+        $message = is_array($payload)
+            ? (data_get($payload, 'user_toast') ?? data_get($payload, '0.user_toast'))
+            : null;
+
+        if (is_string($message) && $message !== '') {
+            $this->actionMessage = $message;
+            $this->actionMessageTone = $status === EarlyUnlockRequest::STATUS_REJECTED ? 'warning' : 'success';
+        }
+
+        if ($status === EarlyUnlockRequest::STATUS_APPROVED) {
+            $this->section = 2;
+        }
     }
 
     #[On('echo-private:wallet.user.{user.id},.PlanChangeRequestUpdated')]

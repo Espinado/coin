@@ -22,6 +22,8 @@ class SupportTicket extends Model
 
     public const CATEGORY_ACCOUNT = 'account';
 
+    public const CATEGORY_ENTERPRISE = 'enterprise';
+
     public const CATEGORY_OTHER = 'other';
 
     protected $fillable = [
@@ -122,6 +124,7 @@ class SupportTicket extends Model
             self::CATEGORY_CONTRACT => __('coin.ticket.category.contract'),
             self::CATEGORY_KYC => __('coin.ticket.category.kyc'),
             self::CATEGORY_ACCOUNT => __('coin.ticket.category.account'),
+            self::CATEGORY_ENTERPRISE => __('coin.ticket.category.enterprise'),
             self::CATEGORY_OTHER => __('coin.ticket.category.other'),
         ];
     }

@@ -77,6 +77,36 @@
                 </div>
             @endif
 
+            @if($canManagePlans ?? false)
+            <div class="admin-card" style="margin-top:16px;">
+                <div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;">
+                    <div>
+                        <h2 style="margin:0;font-size:16px;font-weight:600;">{{ __('coin.admin.private_offers') }}</h2>
+                        <p style="margin:8px 0 0;font-size:13px;color:rgba(232,237,245,0.72);">{{ __('coin.admin.private_offers_user_sub') }}</p>
+                    </div>
+                    <a href="{{ route('admin.users.private-offers.create', $user) }}" class="admin-btn admin-btn-primary">{{ __('coin.admin.private_offer_create') }}</a>
+                </div>
+                @if(($pendingPrivateOffers ?? collect())->isNotEmpty())
+                <div style="margin-top:14px;display:grid;gap:10px;">
+                    @foreach($pendingPrivateOffers as $offer)
+                        <div style="display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px;padding:12px;border-radius:10px;border:1px solid rgba(255,180,84,0.25);font-size:13px;">
+                            <div>
+                                <strong>{{ $offer->formattedAmount() }}</strong> · {{ $offer->duration_days }}d · {{ $offer->formattedApr() }}
+                                <div style="margin-top:4px;color:rgba(232,237,245,0.62);">{{ __('coin.invest.offer_expires') }}: {{ $offer->expires_at?->format('M j, Y H:i') }}</div>
+                            </div>
+                            <form method="POST" action="{{ route('admin.users.private-offers.revoke', [$user, $offer]) }}">
+                                @csrf
+                                <button type="submit" class="admin-btn" style="border-color:rgba(255,143,143,0.45);color:#ff8f8f;">{{ __('coin.admin.private_offer_revoke') }}</button>
+                            </form>
+                        </div>
+                    @endforeach
+                </div>
+                @else
+                <p style="margin:14px 0 0;font-size:13px;color:rgba(232,237,245,0.55);">{{ __('coin.admin.private_offers_empty') }}</p>
+                @endif
+            </div>
+            @endif
+
             <div class="admin-card" style="margin-top:16px;">
                 <h2 style="margin:0 0 16px;font-size:16px;font-weight:600;">{{ __('coin.admin.account_controls') }}</h2>
                 <form method="POST" action="{{ route('admin.users.update', $user) }}" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">

@@ -225,12 +225,18 @@ class PlanChangeRequestService
             throw new RuntimeException(__('coin.messages.plan_change_same_plan'));
         }
 
+        $contract->loadMissing('plan');
+
         if (! $newPlan->is_active) {
             throw new RuntimeException(__('coin.messages.plan_change_unavailable'));
         }
 
         if ($newPlan->isEnterprise() && $newPlan->min_deposit === null) {
             throw new RuntimeException(__('coin.invest.contact_sales'));
+        }
+
+        if ($contract->plan?->isPrivate() || $newPlan->isPrivate()) {
+            throw new RuntimeException(__('coin.messages.plan_change_private_forbidden'));
         }
 
         if (PlanChangeRequest::pendingForContract($contract->id)) {

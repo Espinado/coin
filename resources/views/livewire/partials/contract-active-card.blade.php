@@ -22,8 +22,10 @@
     </div>
     <div class="coin-contract-card__actions" style="display: flex; flex-direction: column; gap: 8px; align-items: stretch; min-width: 148px;">
       <button type="button" wire:click="openContractDetails({{ $contract->id }})" style="padding: 10px 16px; border-radius: 10px; border: 1px solid oklch(0.86 0.11 195 / 0.5); background: linear-gradient(140deg, oklch(0.86 0.12 192), oklch(0.66 0.13 205)); color: #04121f; font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer; box-shadow: 0 20px 46px -22px oklch(0.8 0.13 195 / 0.85);">{{ __('coin.contract.details') }}</button>
-      @if(empty($pendingPlanChange) && empty($pendingEarlyUnlock))
+      @if(empty($pendingPlanChange) && empty($pendingEarlyUnlock) && ! $contract->plan?->isPrivate())
       <button type="button" wire:click="openChangePlan({{ $contract->id }})" style="padding: 10px 16px; border-radius: 10px; border: 1px solid oklch(0.86 0.11 195 / 0.5); background: linear-gradient(140deg, oklch(0.86 0.12 192), oklch(0.66 0.13 205)); color: #04121f; font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer; box-shadow: 0 20px 46px -22px oklch(0.8 0.13 195 / 0.85);">{{ __('coin.invest.change_plan') }}</button>
+      <button type="button" wire:click="openEarlyUnlock({{ $contract->id }})" style="padding: 10px 16px; border-radius: 10px; border: 1px solid rgba(255,180,84,0.42); background: linear-gradient(160deg, rgba(255,180,84,0.14), rgba(255,180,84,0.05)); color: #ffd39a; font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer;">{{ __('coin.invest.close_early') }}</button>
+      @elseif(empty($pendingPlanChange) && empty($pendingEarlyUnlock) && $contract->plan?->isPrivate())
       <button type="button" wire:click="openEarlyUnlock({{ $contract->id }})" style="padding: 10px 16px; border-radius: 10px; border: 1px solid rgba(255,180,84,0.42); background: linear-gradient(160deg, rgba(255,180,84,0.14), rgba(255,180,84,0.05)); color: #ffd39a; font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer;">{{ __('coin.invest.close_early') }}</button>
       @endif
     </div>

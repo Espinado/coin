@@ -21,6 +21,10 @@ class PlanController extends Controller
         $search = $this->adminSearchTerm($request);
 
         $query = Plan::query()
+            ->where(function ($inner) {
+                $inner->where('visibility', Plan::VISIBILITY_PUBLIC)
+                    ->orWhereNull('visibility');
+            })
             ->when($search !== '', function ($query) use ($search) {
                 $query->where(function ($inner) use ($search) {
                     $inner->where('name', 'like', "%{$search}%")
@@ -118,6 +122,8 @@ class PlanController extends Controller
         $validated['is_featured'] = $request->boolean('is_featured');
         $validated['is_active'] = $request->boolean('is_active');
         $validated['currency'] = (string) config('coin.wallet.base_currency', 'USDT');
+        $validated['visibility'] = Plan::VISIBILITY_PUBLIC;
+        $validated['offer_status'] = null;
 
         return $validated;
     }

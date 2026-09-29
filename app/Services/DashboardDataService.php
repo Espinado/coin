@@ -33,7 +33,19 @@ class DashboardDataService
 
         $wallet = $user->wallet;
         $primaryContract = $user->contracts->firstWhere('status', Contract::STATUS_ACTIVE);
-        $plans = Plan::query()->where('is_active', true)->orderBy('sort_order')->get();
+
+        $offers = app(PrivateOfferService::class);
+        $offers->expireStaleForUser($user);
+
+        $publicPlans = Plan::query()
+            ->publicCatalog()
+            ->orderBy('sort_order')
+            ->get();
+        $privatePlans = $offers->activePlansForUser($user);
+        $plans = $publicPlans
+            ->concat($privatePlans)
+            ->unique('id')
+            ->values();
 
         return [
             'wallet' => $wallet,
@@ -72,7 +84,7 @@ class DashboardDataService
     public function calculatorTiers(): Collection
     {
         return Plan::query()
-            ->where('is_active', true)
+            ->publicCatalog()
             ->orderBy('sort_order')
             ->get()
             ->map(fn (Plan $plan) => [
@@ -117,7 +129,7 @@ class DashboardDataService
     public function planForPower(int $power): ?Plan
     {
         return Plan::query()
-            ->where('is_active', true)
+            ->publicCatalog()
             ->orderBy('sort_order')
             ->get()
             ->first(fn (Plan $plan) => $power <= ($plan->max_tflops ?? PHP_INT_MAX));

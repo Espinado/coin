@@ -16,6 +16,7 @@ use App\Http\Controllers\Admin\LegalPageController;
 use App\Http\Controllers\Admin\ProfitAccrualController;
 use App\Http\Controllers\Admin\PlanChangeRequestController;
 use App\Http\Controllers\Admin\PlanController;
+use App\Http\Controllers\Admin\PrivateOfferController;
 use App\Http\Controllers\Admin\SettingsController;
 use App\Http\Controllers\Admin\SupportTicketController;
 use App\Http\Controllers\Admin\UserController;
@@ -132,6 +133,13 @@ Route::middleware(['admin.domain', 'reject.web.on.admin'])->group(function () {
             Route::get('plans/{plan}/edit', [PlanController::class, 'edit'])->name('admin.plans.edit');
             Route::patch('plans/{plan}', [PlanController::class, 'update'])->name('admin.plans.update');
             Route::delete('plans/{plan}', [PlanController::class, 'destroy'])->name('admin.plans.destroy');
+
+            Route::get('users/{user}/private-offers/create', [PrivateOfferController::class, 'create'])
+                ->name('admin.users.private-offers.create');
+            Route::post('users/{user}/private-offers', [PrivateOfferController::class, 'store'])
+                ->name('admin.users.private-offers.store');
+            Route::post('users/{user}/private-offers/{planOffer}/revoke', [PrivateOfferController::class, 'revoke'])
+                ->name('admin.users.private-offers.revoke');
 
             Route::get('profit-accrual', [ProfitAccrualController::class, 'index'])->name('admin.profit-accrual.index');
 
