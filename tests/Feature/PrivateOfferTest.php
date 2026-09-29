@@ -92,7 +92,19 @@ class PrivateOfferTest extends TestCase
         $owner = User::factory()->create();
         $other = User::factory()->create();
 
-        $offer = app(PrivateOfferService::class)->create($admin, $owner, 12_000, 120, 16.5, null, 48);
+        $offer = app(PrivateOfferService::class)->create(
+            $admin,
+            $owner,
+            12_000,
+            120,
+            16.5,
+            null,
+            48,
+            'Roma VIP Core',
+        );
+
+        $this->assertSame('Roma VIP Core', $offer->plan->name);
+        $this->assertSame('Roma VIP Core', $offer->plan->displayName());
 
         $ownerPlans = app(\App\Services\DashboardDataService::class)->forUser($owner->fresh())['plans'];
         $otherPlans = app(\App\Services\DashboardDataService::class)->forUser($other->fresh())['plans'];
@@ -102,6 +114,25 @@ class PrivateOfferTest extends TestCase
         $this->assertFalse(
             Plan::query()->publicCatalog()->whereKey($offer->plan_id)->exists()
         );
+    }
+
+    public function test_expired_offer_stays_in_admin_archive(): void
+    {
+        $admin = Admin::query()->create([
+            'name' => 'Archive Admin',
+            'email' => 'archive-admin@test.lv',
+            'password' => 'secret',
+        ]);
+        $user = User::factory()->create();
+        $offer = app(PrivateOfferService::class)->create($admin, $user, 5_000, 90, 18, null, 48, 'Archive Plan');
+        $offer->update(['expires_at' => now()->subMinute()]);
+
+        $pending = app(PrivateOfferService::class)->pendingOffersForUser($user->fresh());
+        $history = app(PrivateOfferService::class)->offersHistoryForUser($user->fresh());
+
+        $this->assertTrue($pending->isEmpty());
+        $this->assertTrue($history->contains('id', $offer->id));
+        $this->assertSame(PlanOffer::STATUS_EXPIRED, $history->firstWhere('id', $offer->id)?->status);
     }
 
     public function test_expired_offer_cannot_be_purchased(): void

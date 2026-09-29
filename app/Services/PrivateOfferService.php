@@ -52,10 +52,12 @@ class PrivateOfferService
         float $apr,
         CarbonInterface|string|null $expiresAt = null,
         ?int $ttlHours = null,
+        string $name = '',
     ): PlanOffer {
         $amount = round($amount, 2);
         $durationDays = (int) $durationDays;
         $apr = round($apr, 2);
+        $name = trim($name);
 
         if ($amount < 1) {
             throw new RuntimeException(__('coin.messages.private_offer_invalid_amount'));
@@ -69,13 +71,25 @@ class PrivateOfferService
             throw new RuntimeException(__('coin.messages.private_offer_invalid_apr'));
         }
 
+        if ($name === '') {
+            $name = __('coin.invest.private_offer_name', ['user' => $user->accountLabel()]);
+        }
+
+        if (mb_strlen($name) > 120) {
+            throw new RuntimeException(__('coin.messages.private_offer_invalid_name'));
+        }
+
         $expires = $this->resolveExpiresAt($expiresAt, $ttlHours);
+
+        if ($expires->lessThanOrEqualTo(now())) {
+            throw new RuntimeException(__('coin.messages.private_offer_invalid_expires'));
+        }
+
         $currency = (string) config('coin.wallet.base_currency', 'USDT');
         $quote = $this->quotePreview($amount, $durationDays, $apr);
 
-        $offer = DB::transaction(function () use ($admin, $user, $amount, $durationDays, $apr, $expires, $currency, $quote) {
+        $offer = DB::transaction(function () use ($admin, $user, $amount, $durationDays, $apr, $expires, $currency, $quote, $name) {
             $slug = $this->generateSlug((int) $user->id);
-            $name = __('coin.invest.private_offer_name', ['user' => $user->accountLabel()]);
 
             $plan = Plan::query()->create([
                 'slug' => $slug,
@@ -250,6 +264,19 @@ class PrivateOfferService
             ->get();
     }
 
+    /** @return Collection<int, PlanOffer> */
+    public function offersHistoryForUser(User $user, int $limit = 50): Collection
+    {
+        $this->expireStaleForUser($user);
+
+        return PlanOffer::query()
+            ->with('plan')
+            ->where('user_id', $user->id)
+            ->orderByDesc('id')
+            ->limit($limit)
+            ->get();
+    }
+
     public function expireStaleForUser(User $user): void
     {
         PlanOffer::query()
@@ -298,6 +325,7 @@ class PrivateOfferService
         }
 
         $body = __('coin.admin.private_offer_chat_summary', [
+            'name' => $offer->plan?->displayName() ?? '—',
             'amount' => $offer->formattedAmount(),
             'days' => $offer->duration_days,
             'apr' => $offer->formattedApr(),

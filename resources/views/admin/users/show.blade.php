@@ -91,7 +91,8 @@
                     @foreach($pendingPrivateOffers as $offer)
                         <div style="display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px;padding:12px;border-radius:10px;border:1px solid rgba(255,180,84,0.25);font-size:13px;">
                             <div>
-                                <strong>{{ $offer->formattedAmount() }}</strong> · {{ $offer->duration_days }}d · {{ $offer->formattedApr() }}
+                                <strong>{{ $offer->plan?->displayName() ?? '—' }}</strong>
+                                <div style="margin-top:4px;">{{ $offer->formattedAmount() }} · {{ $offer->duration_days }}d · {{ $offer->formattedApr() }}</div>
                                 <div style="margin-top:4px;color:rgba(232,237,245,0.62);">{{ __('coin.invest.offer_expires') }}: {{ $offer->expires_at?->format('M j, Y H:i') }}</div>
                             </div>
                             <form method="POST" action="{{ route('admin.users.private-offers.revoke', [$user, $offer]) }}">
@@ -103,6 +104,23 @@
                 </div>
                 @else
                 <p style="margin:14px 0 0;font-size:13px;color:rgba(232,237,245,0.55);">{{ __('coin.admin.private_offers_empty') }}</p>
+                @endif
+                @if(($privateOfferArchive ?? collect())->isNotEmpty())
+                <div style="margin-top:18px;padding-top:14px;border-top:1px solid rgba(255,255,255,0.08);">
+                    <h3 style="margin:0 0 8px;font-size:14px;font-weight:600;">{{ __('coin.admin.private_offers_archive') }}</h3>
+                    <p style="margin:0 0 10px;font-size:12px;color:rgba(232,237,245,0.55);">{{ __('coin.admin.private_offers_archive_sub') }}</p>
+                    <div style="display:grid;gap:8px;">
+                        @foreach($privateOfferArchive as $offer)
+                            <div style="padding:10px 12px;border-radius:8px;border:1px solid rgba(255,255,255,0.06);font-size:12.5px;">
+                                <div style="display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px;">
+                                    <strong>{{ $offer->plan?->displayName() ?? '—' }}</strong>
+                                    <span style="color:rgba(232,237,245,0.7);">{{ $offer->statusLabel() }}</span>
+                                </div>
+                                <div style="margin-top:4px;color:rgba(232,237,245,0.65);">{{ $offer->formattedAmount() }} · {{ $offer->duration_days }}d · {{ $offer->formattedApr() }}</div>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
                 @endif
             </div>
             @endif

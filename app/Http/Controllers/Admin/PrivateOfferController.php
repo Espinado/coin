@@ -9,6 +9,7 @@ use App\Models\User;
 use App\Services\PrivateOfferService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\View\View;
 use RuntimeException;
 
@@ -18,12 +19,13 @@ class PrivateOfferController extends Controller
 
     public function create(User $user, PrivateOfferService $offers): View
     {
-        $pending = $offers->pendingOffersForUser($user);
+        $history = $offers->offersHistoryForUser($user);
 
         return view('admin.private-offers.create', [
             'user' => $user,
-            'pendingOffers' => $pending,
-            'defaultTtlHours' => PrivateOfferService::DEFAULT_TTL_HOURS,
+            'pendingOffers' => $history->where('status', PlanOffer::STATUS_PENDING)->values(),
+            'offerArchive' => $history->where('status', '!=', PlanOffer::STATUS_PENDING)->values(),
+            'defaultExpiresAt' => now()->addHours(PrivateOfferService::DEFAULT_TTL_HOURS)->format('Y-m-d\TH:i'),
             'preview' => $offers->quotePreview(10000, 180, 18),
         ]);
     }
@@ -31,10 +33,11 @@ class PrivateOfferController extends Controller
     public function store(Request $request, User $user, PrivateOfferService $offers): RedirectResponse
     {
         $validated = $request->validate([
+            'name' => ['required', 'string', 'min:2', 'max:120'],
             'amount' => ['required', 'numeric', 'min:1'],
             'duration_days' => ['required', 'integer', 'min:1', 'max:3650'],
             'annual_profit_percent' => ['required', 'numeric', 'min:0.01', 'max:1000'],
-            'ttl_hours' => ['required', 'integer', 'min:1', 'max:8760'],
+            'expires_at' => ['required', 'date', 'after:now'],
         ]);
 
         try {
@@ -44,8 +47,9 @@ class PrivateOfferController extends Controller
                 (float) $validated['amount'],
                 (int) $validated['duration_days'],
                 (float) $validated['annual_profit_percent'],
+                Carbon::parse($validated['expires_at']),
                 null,
-                (int) $validated['ttl_hours'],
+                (string) $validated['name'],
             );
         } catch (RuntimeException $exception) {
             return redirect()

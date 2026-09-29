@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\Concerns\AdminListQuery;
 use App\Http\Controllers\Admin\Concerns\RedirectsWithAdminFlash;
 use App\Http\Controllers\Controller;
 use App\Models\Admin;
+use App\Models\PlanOffer;
 use App\Models\User;
 use App\Models\Wallet;
 use App\Services\AdminAuthorization;
@@ -98,6 +99,9 @@ class UserController extends Controller
             'referralVolume' => (float) $user->referralCommissionsEarned->sum('purchase_amount'),
             'referralEarnings' => (float) $user->referralCommissionsEarned->sum('commission_amount'),
             'pendingPrivateOffers' => $offers->pendingOffersForUser($user),
+            'privateOfferArchive' => $offers->offersHistoryForUser($user)
+                ->where('status', '!=', PlanOffer::STATUS_PENDING)
+                ->values(),
             'canManagePlans' => $admin instanceof Admin
                 && $authorization->allows($admin, AdminAbility::ManagePlans),
             'voximplantReady' => $voximplant->isReady(),

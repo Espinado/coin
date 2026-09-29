@@ -71,7 +71,10 @@ class PlanOffer extends Model
 
     public function formattedApr(): string
     {
-        return number_format((float) $this->annual_profit_percent, 1, '.', '').'%';
+        $value = (float) $this->annual_profit_percent;
+        $formatted = rtrim(rtrim(number_format($value, 2, '.', ''), '0'), '.');
+
+        return $formatted.'%';
     }
 
     public function statusLabel(): string
