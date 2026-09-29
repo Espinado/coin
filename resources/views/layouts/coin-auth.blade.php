@@ -15,8 +15,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="{{ asset('coin/responsive.css') }}?v={{ file_exists(public_path('coin/responsive.css')) ? filemtime(public_path('coin/responsive.css')) : 1 }}" />
     <style>
-      body { margin: 0; background: #04101c; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
-      .coin-auth { width: 100%; max-width: 1680px; min-height: 100vh; box-sizing: border-box; }
+      body { margin: 0; background: #061423; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+      .coin-auth { width: 100%; max-width: none; min-height: 100vh; box-sizing: border-box; }
       .coin-auth-brand { display: inline-flex; align-items: center; justify-content: center; max-width: min(320px, 86vw); }
       .coin-auth-brand__logo { max-width: 100%; max-height: 44px; height: auto; width: auto; object-fit: contain; }
       .coin-brand-logo { width: min(260px, 54vw); height: auto; max-height: 56px; display: block; object-fit: contain; }

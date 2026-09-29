@@ -4518,10 +4518,16 @@ html.coin-nav-open .coin-nav-mobile {
 
 .coin-auth {
   width: 100% !important;
-  max-width: 1680px;
+  max-width: none;
   min-height: 100vh !important;
   min-height: 100dvh !important;
   box-sizing: border-box;
+  margin: 0;
+  background: #061423;
+}
+
+body:has(.coin-auth) {
+  background: #061423;
 }
 
 .coin-auth-card {
