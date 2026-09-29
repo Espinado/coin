@@ -8,10 +8,12 @@ use App\Http\Controllers\Controller;
 use App\Models\Admin;
 use App\Models\User;
 use App\Models\Wallet;
+use App\Services\AdminAuthorization;
 use App\Services\PlatformBroadcastService;
 use App\Services\PrivateOfferService;
 use App\Services\UserNotificationService;
 use App\Services\Voximplant\VoximplantCallService;
+use App\Support\AdminAbility;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -60,8 +62,13 @@ class UserController extends Controller
         ]);
     }
 
-    public function show(Request $request, User $user, VoximplantCallService $voximplant, PrivateOfferService $offers): View
-    {
+    public function show(
+        Request $request,
+        User $user,
+        VoximplantCallService $voximplant,
+        PrivateOfferService $offers,
+        AdminAuthorization $authorization,
+    ): View {
         $activityTab = $request->string('activity')->toString();
         if (! in_array($activityTab, ['investments', 'deposits', 'withdrawals', 'transactions'], true)) {
             $activityTab = 'investments';
@@ -81,6 +88,9 @@ class UserController extends Controller
             'withdrawals' => fn ($query) => $query->latest()->limit(10),
         ]);
 
+        /** @var Admin|null $admin */
+        $admin = $request->user('admin');
+
         return view('admin.users.show', [
             'user' => $user,
             'activityTab' => $activityTab,
@@ -88,6 +98,8 @@ class UserController extends Controller
             'referralVolume' => (float) $user->referralCommissionsEarned->sum('purchase_amount'),
             'referralEarnings' => (float) $user->referralCommissionsEarned->sum('commission_amount'),
             'pendingPrivateOffers' => $offers->pendingOffersForUser($user),
+            'canManagePlans' => $admin instanceof Admin
+                && $authorization->allows($admin, AdminAbility::ManagePlans),
             'voximplantReady' => $voximplant->isReady(),
             'voximplantDestination' => $voximplant->normalizeDestination($user),
             'voximplantUsername' => $voximplant->sdkUsername(),
