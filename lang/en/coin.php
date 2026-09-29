@@ -1443,6 +1443,7 @@ return [
         'hero_active_power' => 'Active plans',
         'hero_accrued_today' => 'Accrued today',
         'cta_activate' => 'Get started',
+        'cta_sign_in' => 'Sign in',
         'cta_how' => 'How it works',
         'start' => 'Get started',
         'min_investment' => 'Min. amount',

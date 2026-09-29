@@ -1443,6 +1443,7 @@ return [
         'hero_active_power' => 'Активные планы',
         'hero_accrued_today' => 'Начислено сегодня',
         'cta_activate' => 'Начать',
+        'cta_sign_in' => 'Sign in',
         'cta_how' => 'Как это работает',
         'start' => 'Начать',
         'min_investment' => 'Мин. сумма',
