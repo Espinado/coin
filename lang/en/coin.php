@@ -314,6 +314,7 @@ return [
         'accruals' => 'Accruals',
         'accruals_sub' => 'Rewards accrued for the selected period',
         'active_power' => 'Active capacity',
+        'locked_in_investments' => 'Locked in investments',
         'active_plan' => 'Active plan',
         'active_plan_sub' => 'Contract :term · :infra',
         'no_active_plan' => 'No plan selected',

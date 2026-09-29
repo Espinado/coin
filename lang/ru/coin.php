@@ -314,6 +314,7 @@ return [
         'accruals' => 'Начисления',
         'accruals_sub' => 'Начисленные награды за выбранный период',
         'active_power' => 'Активная мощность',
+        'locked_in_investments' => 'Заморожено в инвестициях',
         'active_plan' => 'Активный тариф',
         'active_plan_sub' => 'Контракт :term · :infra',
         'no_active_plan' => 'Тариф не выбран',

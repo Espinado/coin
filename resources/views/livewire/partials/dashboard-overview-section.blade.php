@@ -6,11 +6,9 @@
       <div class="coin-dash-stat-card__hint">{{ $wallet?->currency ?? 'USDT' }}</div>
     </div>
     <div class="coin-dash-stat-card">
-      <div class="coin-dash-stat-card__label">{{ mb_strtoupper(__('coin.overview.active_power')) }}</div>
-      <div class="coin-dash-stat-card__value coin-dash-stat-card__value--lg">
-        {{ $this->totalAllocatedTflops }} <span class="coin-dash-stat-card__unit">TFLOPS</span>
-      </div>
-      <div class="coin-dash-stat-card__hint">{{ $this->activePowerSubtitle }}</div>
+      <div class="coin-dash-stat-card__label">{{ mb_strtoupper(__('coin.overview.locked_in_investments')) }}</div>
+      <div class="coin-dash-stat-card__value coin-dash-stat-card__value--lg">{{ $wallet?->formattedLocked() ?? \App\Support\MoneyFormat::zero() }}</div>
+      <div class="coin-dash-stat-card__hint">{{ __('coin.wallet.locked_principal_hint') }}</div>
     </div>
     <div class="coin-dash-stat-card">
       <div class="coin-dash-stat-card__label">{{ mb_strtoupper(__('coin.overview.active_plan')) }}</div>
