@@ -50,8 +50,11 @@ class WithdrawalUpdated implements ShouldBroadcastNow
                 'status_label' => $this->withdrawal->statusLabel(),
                 'amount' => $this->withdrawal->formattedAmount(),
                 'rejection_message' => $this->withdrawal->userRejectionMessage(),
+                'user_name' => $this->withdrawal->user?->name,
+                'user_email' => $this->withdrawal->user?->email,
             ],
             'pending_withdrawals_count' => Withdrawal::pendingCountForAdmin(),
+            'toast' => $this->toastMessage(),
             'wallet' => $wallet ? [
                 'balance' => $wallet->formattedBalance(),
                 'available' => $wallet->formattedAvailable(),
@@ -59,5 +62,16 @@ class WithdrawalUpdated implements ShouldBroadcastNow
                 'locked' => $wallet->formattedLocked(),
             ] : null,
         ];
+    }
+
+    private function toastMessage(): ?string
+    {
+        if ($this->withdrawal->status !== Withdrawal::STATUS_PENDING) {
+            return null;
+        }
+
+        $userName = $this->withdrawal->user?->name ?? __('coin.user');
+
+        return __('coin.admin.withdrawal_toast_new', ['user' => $userName]);
     }
 }

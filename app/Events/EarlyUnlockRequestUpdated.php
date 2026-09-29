@@ -53,6 +53,7 @@ class EarlyUnlockRequestUpdated implements ShouldBroadcastNow
                 'credit' => $this->request->formattedCredit(),
                 'fee' => $this->request->formattedFee(),
                 'user_name' => $this->request->user?->name,
+                'user_email' => $this->request->user?->email,
             ],
             'wallet' => $wallet ? [
                 'balance' => $wallet->formattedBalance(),
@@ -61,6 +62,7 @@ class EarlyUnlockRequestUpdated implements ShouldBroadcastNow
                 'locked' => $wallet->formattedLocked(),
             ] : null,
             'pending_early_unlocks_count' => EarlyUnlockRequest::pendingCountForAdmin(),
+            'toast' => $this->toastMessage(),
             'user_toast' => $this->userToastMessage(),
         ];
     }
@@ -72,6 +74,18 @@ class EarlyUnlockRequestUpdated implements ShouldBroadcastNow
                 'credit' => $this->request->formattedCredit(),
             ]),
             EarlyUnlockRequest::STATUS_REJECTED => __('coin.messages.early_unlock_rejected'),
+            default => null,
+        };
+    }
+
+    private function toastMessage(): ?string
+    {
+        $userName = $this->request->user?->name ?? __('coin.user');
+
+        return match ($this->request->status) {
+            EarlyUnlockRequest::STATUS_PENDING => __('coin.admin.early_unlock_toast_new', ['user' => $userName]),
+            EarlyUnlockRequest::STATUS_APPROVED => __('coin.admin.early_unlock_toast_approved', ['user' => $userName]),
+            EarlyUnlockRequest::STATUS_REJECTED => __('coin.admin.early_unlock_toast_rejected', ['user' => $userName]),
             default => null,
         };
     }

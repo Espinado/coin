@@ -93,8 +93,13 @@ function renderAdminWithdrawalsNavBadge(total) {
             } else {
                 badge.className = 'admin-sidebar-badge admin-sidebar-badge--red';
             }
-            const host = link.querySelector('.admin-sidebar-link__badges') ?? link;
-            host.appendChild(badge);
+            let host = link.querySelector('.admin-sidebar-link__badges');
+            if (! host && ! link.classList.contains('admin-section-tabs__tab')) {
+                host = document.createElement('span');
+                host.className = 'admin-sidebar-link__badges';
+                link.appendChild(host);
+            }
+            (host ?? link).appendChild(badge);
         }
 
         badge.textContent = String(total);
@@ -150,6 +155,89 @@ function updatePlanChangesNavBadge(total) {
     }
 
     renderAdminPlanChangesNavBadge(count);
+}
+
+const earlyUnlocksBadgeStyle = 'margin-left:6px;padding:2px 7px;border-radius:999px;background:rgba(255,180,84,0.18);color:#ffd39a;font-family:\'JetBrains Mono\',monospace;font-size:10px;';
+
+function readInitialAdminEarlyUnlocksNavCount() {
+    const badge = document.querySelector('[data-admin-early-unlocks-nav-badge]');
+
+    return badge ? Number(badge.textContent) : 0;
+}
+
+function renderAdminEarlyUnlocksNavBadge(total) {
+    if (! total || total <= 0) {
+        document.querySelectorAll('[data-admin-early-unlocks-nav-badge]').forEach((badge) => badge.remove());
+
+        return;
+    }
+
+    document.querySelectorAll('[data-admin-early-unlocks-nav]').forEach((link) => {
+        let badge = link.querySelector('[data-admin-early-unlocks-nav-badge]');
+
+        if (! badge) {
+            badge = document.createElement('span');
+            badge.dataset.adminEarlyUnlocksNavBadge = '';
+            if (link.classList.contains('admin-section-tabs__tab')) {
+                badge.className = 'admin-section-tabs__count admin-sidebar-badge admin-sidebar-badge--amber';
+            } else {
+                badge.className = 'admin-sidebar-badge admin-sidebar-badge--amber';
+            }
+            let host = link.querySelector('.admin-sidebar-link__badges');
+            if (! host && ! link.classList.contains('admin-section-tabs__tab')) {
+                host = document.createElement('span');
+                host.className = 'admin-sidebar-link__badges';
+                link.appendChild(host);
+            }
+            (host ?? link).appendChild(badge);
+        }
+
+        badge.textContent = String(total);
+    });
+}
+
+function updateEarlyUnlocksNavBadge(total) {
+    const count = Number(total);
+
+    if (! Number.isFinite(count)) {
+        return;
+    }
+
+    renderAdminEarlyUnlocksNavBadge(count);
+}
+
+function updateEarlyUnlockRow(payload) {
+    const requestId = payload.request?.id;
+
+    if (! requestId) {
+        return;
+    }
+
+    const row = document.querySelector(`tr[data-early-unlock-id="${requestId}"]`);
+
+    if (row) {
+        const statusCell = row.querySelector('[data-early-unlock-status-cell]');
+
+        if (statusCell && payload.request?.status_label) {
+            statusCell.textContent = payload.request.status_label;
+        }
+    }
+
+    const detail = document.querySelector(`[data-early-unlock-detail="${requestId}"]`);
+
+    if (! detail) {
+        return;
+    }
+
+    const statusEl = detail.querySelector('[data-early-unlock-status]');
+
+    if (statusEl && payload.request?.status_label) {
+        statusEl.textContent = payload.request.status_label;
+    }
+
+    if (payload.request?.status && payload.request.status !== 'pending') {
+        detail.querySelector('[data-early-unlock-actions]')?.remove();
+    }
 }
 
 function updatePlanChangeRow(payload) {
@@ -364,7 +452,31 @@ function bootAdminSupportRealtime() {
             }
 
             updateWithdrawalRow(payload);
+
+            if (payload?.toast) {
+                showIncomingMessageToast({ body: payload.toast }, payload.toast);
+            }
         });
+
+    echo.private('admin.early-unlocks')
+        .listen('.EarlyUnlockRequestUpdated', (payload) => {
+            reverbLog('info', 'admin channel: EarlyUnlockRequestUpdated', {
+                requestId: payload?.request?.id ?? null,
+                pendingCount: payload?.pending_early_unlocks_count ?? null,
+            });
+
+            if (payload.pending_early_unlocks_count !== undefined && payload.pending_early_unlocks_count !== null) {
+                updateEarlyUnlocksNavBadge(Number(payload.pending_early_unlocks_count));
+            }
+
+            updateEarlyUnlockRow(payload);
+
+            if (payload?.toast) {
+                showIncomingMessageToast({ body: payload.toast }, payload.toast);
+            }
+        });
+
+    reverbLog('info', 'admin early-unlocks subscribed');
 
     echo.private('support.admin')
         .listen('.SupportTicketMessageSent', (payload) => {
@@ -404,6 +516,7 @@ function bootAdminSupportNavBadge() {
     adminNavUnreadCount = readInitialAdminNavUnread();
     renderAdminNavBadge(adminNavUnreadCount);
     renderAdminWithdrawalsNavBadge(readInitialAdminWithdrawalsNavCount());
+    renderAdminEarlyUnlocksNavBadge(readInitialAdminEarlyUnlocksNavCount());
     renderAdminPlanChangesNavBadge(readInitialAdminPlanChangesNavCount());
 }
 

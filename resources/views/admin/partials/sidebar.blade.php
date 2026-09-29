@@ -61,7 +61,7 @@
                 <a href="{{ route('admin.users.index') }}" class="{{ $navClass($adminNavActive($routeName, 'admin.users')) }}">{{ __('coin.admin.users') }}</a>
             @endif
             @if($canAccessFinance ?? false)
-                <a href="{{ $financeNavUrl ?? route('admin.deposits.index') }}" class="{{ $navClass($financeActive) }}" data-admin-withdrawals-nav>
+                <a href="{{ $financeNavUrl ?? route('admin.deposits.index') }}" class="{{ $navClass($financeActive) }}" data-admin-withdrawals-nav data-admin-early-unlocks-nav>
                     <span>{{ __('coin.admin.finance') }}</span>
                     @if($financeBadges !== [])
                         <span class="admin-sidebar-link__badges">

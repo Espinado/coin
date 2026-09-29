@@ -9,12 +9,12 @@
         <div class="admin-card" style="margin-bottom:16px;border-color:{{ session('status_type') === 'error' ? 'rgba(255,143,143,0.35)' : 'rgba(255,180,84,0.35)' }};">{{ session('status') }}</div>
     @endif
 
-    <div class="admin-grid-split">
+    <div class="admin-grid-split" data-early-unlock-detail="{{ $request->id }}">
         <div>
             <div class="admin-card">
                 <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.12em;color:rgba(232,237,245,0.62);">{{ strtoupper(__('coin.admin.early_unlock_detail', ['id' => $request->id])) }}</div>
                 <h1 style="margin:10px 0 0;font-size:22px;font-weight:600;">{{ $request->reference }}</h1>
-                <p style="margin:8px 0 0;font-size:13px;color:rgba(232,237,245,0.72);">{{ $request->statusLabel() }} · {{ $request->created_at?->format('M j, Y H:i') }}</p>
+                <p style="margin:8px 0 0;font-size:13px;color:rgba(232,237,245,0.72);"><span data-early-unlock-status>{{ $request->statusLabel() }}</span> · {{ $request->created_at?->format('M j, Y H:i') }}</p>
                 <div style="margin-top:16px;font-size:13px;line-height:1.7;">
                     <div><strong>{{ __('coin.admin.contract') }}:</strong> {{ $request->contract?->code }}</div>
                     <div><strong>{{ __('coin.plan') }}:</strong> {{ $request->contract?->plan?->displayName() ?? '—' }}</div>
@@ -33,7 +33,7 @@
             </div>
 
             @if($request->isPending())
-            <div class="admin-card" style="margin-top:16px;">
+            <div class="admin-card" style="margin-top:16px;" data-early-unlock-actions>
                 <form method="POST" action="{{ route('admin.early-unlocks.approve', $request) }}" style="margin-bottom:12px;">
                     @csrf
                     <label style="display:block;font-size:12px;color:rgba(232,237,245,0.72);margin-bottom:6px;">{{ __('coin.admin.admin_note') }}</label>

@@ -68,7 +68,7 @@ class EarlyUnlockRequestService
 
             $currency = $contract->currency ?: $this->wallets->currencyFor($this->wallets->ensureWallet($user));
 
-            return EarlyUnlockRequest::query()->create([
+            $request = EarlyUnlockRequest::query()->create([
                 'user_id' => $user->id,
                 'contract_id' => $contract->id,
                 'reference' => $this->generateReference(),
@@ -80,6 +80,10 @@ class EarlyUnlockRequestService
                 'currency' => $currency,
                 'status' => EarlyUnlockRequest::STATUS_PENDING,
             ])->fresh(['user', 'contract.plan']);
+
+            $this->broadcastEarlyUnlockUpdated($request);
+
+            return $request;
         });
     }
 
@@ -185,12 +189,10 @@ class EarlyUnlockRequestService
 
             $request = $request->fresh(['user.wallet', 'contract.plan', 'processedByAdmin']);
 
-            DB::afterCommit(function () use ($request): void {
-                event(new EarlyUnlockRequestUpdated($request));
-
-                $user = $request->user;
+            $this->broadcastEarlyUnlockUpdated($request, function (EarlyUnlockRequest $fresh): void {
+                $user = $fresh->user;
                 if ($user instanceof User) {
-                    $this->notifications->notifyEarlyUnlockApproved($user, $request);
+                    $this->notifications->notifyEarlyUnlockApproved($user, $fresh);
                 }
             });
 
@@ -212,11 +214,30 @@ class EarlyUnlockRequestService
 
             $request = $request->fresh(['user', 'contract.plan', 'processedByAdmin']);
 
-            DB::afterCommit(function () use ($request): void {
-                event(new EarlyUnlockRequestUpdated($request));
-            });
+            $this->broadcastEarlyUnlockUpdated($request);
 
             return $request;
+        });
+    }
+
+    private function broadcastEarlyUnlockUpdated(EarlyUnlockRequest $request, ?callable $afterBroadcast = null): void
+    {
+        $requestId = $request->id;
+
+        DB::afterCommit(function () use ($requestId, $afterBroadcast): void {
+            $fresh = EarlyUnlockRequest::query()
+                ->with(['user.wallet', 'contract.plan', 'processedByAdmin'])
+                ->find($requestId);
+
+            if (! $fresh instanceof EarlyUnlockRequest) {
+                return;
+            }
+
+            event(new EarlyUnlockRequestUpdated($fresh));
+
+            if ($afterBroadcast !== null) {
+                $afterBroadcast($fresh);
+            }
         });
     }
 

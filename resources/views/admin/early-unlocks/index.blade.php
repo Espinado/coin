@@ -39,14 +39,14 @@
             </thead>
             <tbody>
                 @forelse($requests as $earlyUnlock)
-                    <tr style="border-bottom:1px solid rgba(255,255,255,0.06);">
+                    <tr data-early-unlock-id="{{ $earlyUnlock->id }}" style="border-bottom:1px solid rgba(255,255,255,0.06);">
                         <td style="padding:14px 18px;"><a href="{{ route('admin.early-unlocks.show', $earlyUnlock) }}">{{ $earlyUnlock->reference }}</a></td>
                         <td style="padding:14px 18px;">{{ $earlyUnlock->user->accountLabel() }}</td>
                         <td style="padding:14px 18px;">{{ $earlyUnlock->contract?->code }}</td>
                         <td style="padding:14px 18px;font-family:'JetBrains Mono',monospace;">{{ $earlyUnlock->formattedPrincipal() }}</td>
                         <td style="padding:14px 18px;font-family:'JetBrains Mono',monospace;">{{ $earlyUnlock->formattedFee() }}</td>
                         <td style="padding:14px 18px;font-family:'JetBrains Mono',monospace;">{{ $earlyUnlock->formattedCredit() }}</td>
-                        <td style="padding:14px 18px;">{{ $earlyUnlock->statusLabel() }}</td>
+                        <td data-early-unlock-status-cell style="padding:14px 18px;">{{ $earlyUnlock->statusLabel() }}</td>
                         <td style="padding:14px 18px;">{{ $earlyUnlock->created_at?->format('M j, Y H:i') }}</td>
                     </tr>
                 @empty
