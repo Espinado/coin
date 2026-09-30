@@ -6,8 +6,10 @@ use App\Mail\UserEventNotificationMail;
 use App\Models\Contract;
 use App\Models\EarlyUnlockRequest;
 use App\Models\PlanChangeRequest;
+use App\Models\SystemLog;
 use App\Models\User;
 use App\Models\Withdrawal;
+use App\Services\SystemLogService;
 use App\Support\UserLocale;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Mail;
@@ -66,7 +68,28 @@ class UserNotificationService
                 footer: $footer,
             ));
         } catch (\Throwable $exception) {
-            report($exception);
+            \Illuminate\Support\Facades\Log::error('Failed to send user notification email', [
+                'user_id' => $user->id,
+                'email' => $user->email,
+                'subject' => $subject,
+                'error' => $exception->getMessage(),
+            ]);
+
+            try {
+                app(SystemLogService::class)->error(
+                    SystemLog::SOURCE_MAIL,
+                    'Failed to send user notification email: '.$exception->getMessage(),
+                    [
+                        'user_id' => $user->id,
+                        'email' => $user->email,
+                        'subject' => $subject,
+                    ],
+                    'user-notification',
+                    $exception,
+                );
+            } catch (\Throwable) {
+                // Never break the caller if system logging itself fails.
+            }
         }
     }
 

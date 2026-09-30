@@ -5,6 +5,8 @@ use Illuminate\Auth\Middleware\RedirectIfAuthenticated;
 use Illuminate\Foundation\Application;
 use App\Services\AdminLoginTwoFactorService;
 use App\Services\LoginTwoFactorService;
+use App\Services\SystemLogService;
+use App\Models\SystemLog;
 use App\Support\SessionIdleTracker;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -79,6 +81,34 @@ return Application::configure(basePath: dirname(__DIR__))
         });
     })
     ->withExceptions(function (Exceptions $exceptions): void {
+        $exceptions->reportable(function (\Throwable $e): void {
+            if ($e instanceof TokenMismatchException) {
+                return;
+            }
+
+            if ($e instanceof HttpException && $e->getStatusCode() < 500) {
+                return;
+            }
+
+            try {
+                $source = app()->runningInConsole()
+                    ? SystemLog::SOURCE_CRON
+                    : SystemLog::SOURCE_HTTP;
+
+                app(SystemLogService::class)->recordException(
+                    $e,
+                    $source,
+                    [
+                        'url' => request()->fullUrl() ?: null,
+                        'command' => $_SERVER['argv'][1] ?? null,
+                    ],
+                    app()->runningInConsole() ? 'console' : 'http',
+                );
+            } catch (\Throwable) {
+                // Avoid recursive failure while reporting.
+            }
+        });
+
         $exceptions->render(function (\Throwable $e, Request $request) {
             if (! $request->isMethod('POST')) {
                 return null;

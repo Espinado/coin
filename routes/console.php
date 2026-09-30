@@ -1,6 +1,8 @@
 <?php
 
+use App\Models\SystemLog;
 use App\Services\PlatformSettingsService;
+use App\Services\SystemLogService;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Schema;
@@ -22,7 +24,19 @@ if (Schema::hasTable('platform_settings')) {
 Schedule::command('coin:accrue-daily-profits')
     ->dailyAt($profitAccrualTime)
     ->timezone($profitAccrualTimezone)
-    ->withoutOverlapping();
+    ->withoutOverlapping()
+    ->onFailure(function (): void {
+        try {
+            app(SystemLogService::class)->critical(
+                SystemLog::SOURCE_SCHEDULE,
+                'Scheduled daily profit accrual failed',
+                [],
+                'coin:accrue-daily-profits',
+            );
+        } catch (\Throwable) {
+            //
+        }
+    });
 
 if (config('coin.exchange_rates.coinmarketcap.enabled')) {
     Schedule::command('coin:refresh-btc-rate')

@@ -21,6 +21,7 @@ use App\Http\Controllers\Admin\SettingsController;
 use App\Http\Controllers\Admin\SupportTicketController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\PaymentLogController;
+use App\Http\Controllers\Admin\SystemLogController;
 use App\Http\Controllers\Admin\WithdrawalController;
 use App\Http\Controllers\Admin\VoximplantCallController;
 use App\Http\Controllers\SessionExpiredController;
@@ -95,6 +96,9 @@ Route::middleware(['admin.domain', 'reject.web.on.admin'])->group(function () {
 
             Route::get('payment-logs', [PaymentLogController::class, 'index'])->name('admin.payment-logs.index');
             Route::get('payment-logs/{paymentLog}', [PaymentLogController::class, 'show'])->name('admin.payment-logs.show');
+
+            Route::get('system-logs', [SystemLogController::class, 'index'])->name('admin.system-logs.index');
+            Route::get('system-logs/{systemLog}', [SystemLogController::class, 'show'])->name('admin.system-logs.show');
         });
 
         Route::middleware('admin.ability:manage_withdrawals')->group(function () {

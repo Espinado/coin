@@ -36,7 +36,7 @@
         $financeBadges[] = ['count' => $pendingEarlyUnlocksCount, 'class' => 'admin-sidebar-badge--amber', 'attrs' => 'data-admin-early-unlocks-nav-badge'];
     }
 
-    $logsActive = $adminNavActive($routeName, 'admin.payment-logs', 'admin.plan-changes');
+    $logsActive = $adminNavActive($routeName, 'admin.payment-logs', 'admin.plan-changes', 'admin.system-logs');
     $showLogsGroup = ($canAccessPaymentLogs ?? false) || ($canManagePlanChanges ?? false);
 @endphp
 
@@ -88,6 +88,7 @@
                     <div class="admin-sidebar-subnav">
                         @if($canAccessPaymentLogs ?? false)
                             <a href="{{ route('admin.payment-logs.index') }}" class="{{ $navClass($adminNavActive($routeName, 'admin.payment-logs')) }} admin-sidebar-link--sub">{{ __('coin.admin.logs_payments') }}</a>
+                            <a href="{{ route('admin.system-logs.index') }}" class="{{ $navClass($adminNavActive($routeName, 'admin.system-logs')) }} admin-sidebar-link--sub">{{ __('coin.admin.logs_system') }}</a>
                         @endif
                         @if($canManagePlanChanges ?? false)
                             <a href="{{ route('admin.plan-changes.index') }}" class="{{ $navClass($adminNavActive($routeName, 'admin.plan-changes')) }} admin-sidebar-link--sub" data-admin-plan-changes-nav>
