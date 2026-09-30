@@ -15,7 +15,7 @@
         return 'admin-sidebar-link'.($active ? ' admin-sidebar-link--active' : '');
     };
 
-    $queuesActive = $adminNavActive(
+    $inboxActive = $adminNavActive(
         $routeName,
         'admin.support',
         'admin.deposits',
@@ -23,31 +23,41 @@
         'admin.early-unlocks',
         'admin.plan-changes',
     );
-    $financeReportsActive = $adminNavActive($routeName, 'admin.commissions', 'admin.profit-accrual', 'admin.epochs');
-    $logsActive = $adminNavActive($routeName, 'admin.payment-logs', 'admin.system-logs');
-    $systemActive = $adminNavActive($routeName, 'admin.settings', 'admin.legal', 'admin.admins', 'admin.broadcasts');
+    $reportingActive = $adminNavActive($routeName, 'admin.commissions', 'admin.profit-accrual', 'admin.epochs');
+    $adminCenterActive = $adminNavActive(
+        $routeName,
+        'admin.payment-logs',
+        'admin.system-logs',
+        'admin.settings',
+        'admin.legal',
+        'admin.admins',
+        'admin.broadcasts',
+    );
 
-    $showQueues = ($canManageSupport ?? false)
+    $showInbox = ($canManageSupport ?? false)
         || ($canManageDeposits ?? false)
         || ($canManageWithdrawals ?? false)
         || ($canManagePlanChanges ?? false);
-    $showFinanceReports = ($canManageWithdrawals ?? false) || ($canManagePlans ?? false);
-    $showLogs = ($canAccessPaymentLogs ?? false);
-    $showSystem = ($canManageSettings ?? false) || ($canManageLegal ?? false) || ($canManageAdmins ?? false) || ($canManageBroadcasts ?? false);
+    $showReporting = ($canManageWithdrawals ?? false) || ($canManagePlans ?? false);
+    $showAdminCenter = ($canAccessPaymentLogs ?? false)
+        || ($canManageSettings ?? false)
+        || ($canManageLegal ?? false)
+        || ($canManageAdmins ?? false)
+        || ($canManageBroadcasts ?? false);
 
-    $queuesInboxCount = 0;
+    $inboxCount = 0;
     if ($canManageSupport ?? false) {
-        $queuesInboxCount += (int) ($unreadSupportCount ?? 0);
+        $inboxCount += (int) ($unreadSupportCount ?? 0);
     }
     if ($canManageDeposits ?? false) {
-        $queuesInboxCount += (int) ($pendingDepositsCount ?? 0);
+        $inboxCount += (int) ($pendingDepositsCount ?? 0);
     }
     if ($canManageWithdrawals ?? false) {
-        $queuesInboxCount += (int) ($pendingWithdrawalsCount ?? 0);
-        $queuesInboxCount += (int) ($pendingEarlyUnlocksCount ?? 0);
+        $inboxCount += (int) ($pendingWithdrawalsCount ?? 0);
+        $inboxCount += (int) ($pendingEarlyUnlocksCount ?? 0);
     }
     if ($canManagePlanChanges ?? false) {
-        $queuesInboxCount += (int) ($pendingPlanChangesCount ?? 0);
+        $inboxCount += (int) ($pendingPlanChangesCount ?? 0);
     }
 @endphp
 
@@ -67,20 +77,20 @@
         </div>
 
         <nav class="admin-sidebar-nav" id="admin-sidebar-nav" aria-label="{{ __('coin.admin.open_menu') }}">
-            <a href="{{ route('admin.dashboard') }}" class="{{ $navClass($routeName === 'admin.dashboard') }}">{{ __('coin.admin.overview') }}</a>
+            <a href="{{ route('admin.dashboard') }}" class="{{ $navClass($routeName === 'admin.dashboard') }}">{{ __('coin.admin.nav_home') }}</a>
 
-            @if($showQueues)
-                <div class="admin-sidebar-section {{ $queuesActive ? 'admin-sidebar-section--active' : '' }}">
+            @if($showInbox)
+                <div class="admin-sidebar-section {{ $inboxActive ? 'admin-sidebar-section--active' : '' }}">
                     <div class="admin-sidebar-section__label">
-                        <span>{{ __('coin.admin.nav_queues') }}</span>
-                        @if($queuesInboxCount > 0)
-                            <span class="admin-sidebar-badge admin-sidebar-badge--amber">{{ $queuesInboxCount }}</span>
+                        <span>{{ __('coin.admin.nav_inbox') }}</span>
+                        @if($inboxCount > 0)
+                            <span class="admin-sidebar-badge admin-sidebar-badge--amber">{{ $inboxCount }}</span>
                         @endif
                     </div>
                     <div class="admin-sidebar-section__links">
                         @if($canManageSupport ?? false)
                             <a href="{{ route('admin.support.index') }}" class="{{ $navClass($adminNavActive($routeName, 'admin.support')) }} admin-sidebar-link--sub" data-admin-support-nav>
-                                <span>{{ __('coin.admin.support') }}</span>
+                                <span>{{ __('coin.admin.nav_tickets') }}</span>
                                 @if(($unreadSupportCount ?? 0) > 0)
                                     <span class="admin-sidebar-badge admin-sidebar-badge--support admin-support-badge" data-admin-support-nav-badge>{{ $unreadSupportCount }}</span>
                                 @endif
@@ -122,16 +132,16 @@
 
             @if($canManageUsers ?? false)
                 <div class="admin-sidebar-section {{ $adminNavActive($routeName, 'admin.users') ? 'admin-sidebar-section--active' : '' }}">
-                    <div class="admin-sidebar-section__label">{{ __('coin.admin.nav_clients') }}</div>
+                    <div class="admin-sidebar-section__label">{{ __('coin.admin.nav_customers') }}</div>
                     <div class="admin-sidebar-section__links">
                         <a href="{{ route('admin.users.index') }}" class="{{ $navClass($adminNavActive($routeName, 'admin.users')) }} admin-sidebar-link--sub">{{ __('coin.admin.users') }}</a>
                     </div>
                 </div>
             @endif
 
-            @if($showFinanceReports)
-                <div class="admin-sidebar-section {{ $financeReportsActive ? 'admin-sidebar-section--active' : '' }}">
-                    <div class="admin-sidebar-section__label">{{ __('coin.admin.nav_finance') }}</div>
+            @if($showReporting)
+                <div class="admin-sidebar-section {{ $reportingActive ? 'admin-sidebar-section--active' : '' }}">
+                    <div class="admin-sidebar-section__label">{{ __('coin.admin.nav_reporting') }}</div>
                     <div class="admin-sidebar-section__links">
                         @if($canManageWithdrawals ?? false)
                             <a href="{{ route('admin.commissions.index') }}" class="{{ $navClass($adminNavActive($routeName, 'admin.commissions')) }} admin-sidebar-link--sub">{{ __('coin.admin.commissions') }}</a>
@@ -145,27 +155,21 @@
 
             @if($canManagePlans ?? false)
                 <div class="admin-sidebar-section {{ $adminNavActive($routeName, 'admin.plans') ? 'admin-sidebar-section--active' : '' }}">
-                    <div class="admin-sidebar-section__label">{{ __('coin.admin.nav_product') }}</div>
+                    <div class="admin-sidebar-section__label">{{ __('coin.admin.nav_products') }}</div>
                     <div class="admin-sidebar-section__links">
                         <a href="{{ route('admin.plans.index') }}" class="{{ $navClass($adminNavActive($routeName, 'admin.plans')) }} admin-sidebar-link--sub">{{ __('coin.admin.plans') }}</a>
                     </div>
                 </div>
             @endif
 
-            @if($showLogs)
-                <div class="admin-sidebar-section {{ $logsActive ? 'admin-sidebar-section--active' : '' }}">
-                    <div class="admin-sidebar-section__label">{{ __('coin.admin.logs_nav') }}</div>
+            @if($showAdminCenter)
+                <div class="admin-sidebar-section {{ $adminCenterActive ? 'admin-sidebar-section--active' : '' }}">
+                    <div class="admin-sidebar-section__label">{{ __('coin.admin.nav_admin') }}</div>
                     <div class="admin-sidebar-section__links">
-                        <a href="{{ route('admin.payment-logs.index') }}" class="{{ $navClass($adminNavActive($routeName, 'admin.payment-logs')) }} admin-sidebar-link--sub">{{ __('coin.admin.logs_payments') }}</a>
-                        <a href="{{ route('admin.system-logs.index') }}" class="{{ $navClass($adminNavActive($routeName, 'admin.system-logs')) }} admin-sidebar-link--sub">{{ __('coin.admin.logs_system') }}</a>
-                    </div>
-                </div>
-            @endif
-
-            @if($showSystem)
-                <div class="admin-sidebar-section {{ $systemActive ? 'admin-sidebar-section--active' : '' }}">
-                    <div class="admin-sidebar-section__label">{{ __('coin.admin.nav_system') }}</div>
-                    <div class="admin-sidebar-section__links">
+                        @if($canAccessPaymentLogs ?? false)
+                            <a href="{{ route('admin.payment-logs.index') }}" class="{{ $navClass($adminNavActive($routeName, 'admin.payment-logs')) }} admin-sidebar-link--sub">{{ __('coin.admin.logs_payments') }}</a>
+                            <a href="{{ route('admin.system-logs.index') }}" class="{{ $navClass($adminNavActive($routeName, 'admin.system-logs')) }} admin-sidebar-link--sub">{{ __('coin.admin.logs_system') }}</a>
+                        @endif
                         @if($canManageSettings ?? false)
                             <a href="{{ route('admin.settings.edit') }}" class="{{ $navClass($adminNavActive($routeName, 'admin.settings')) }} admin-sidebar-link--sub">{{ __('coin.admin.settings') }}</a>
                         @endif

@@ -28,10 +28,10 @@
 @if($tabs !== [])
 <div class="admin-card admin-section-tabs" style="margin-bottom:16px;">
     <div style="margin-bottom:14px;">
-        <h1 style="margin:0;font-size:24px;font-weight:600;">{{ __('coin.admin.nav_finance') }}</h1>
-        <p style="margin:8px 0 0;font-size:14px;color:rgba(232,237,245,0.72);">{{ __('coin.admin.finance_reports_sub') }}</p>
+        <h1 style="margin:0;font-size:24px;font-weight:600;">{{ __('coin.admin.nav_reporting') }}</h1>
+        <p style="margin:8px 0 0;font-size:14px;color:rgba(232,237,245,0.72);">{{ __('coin.admin.reporting_sub') }}</p>
     </div>
-    <nav class="admin-section-tabs__row" aria-label="{{ __('coin.admin.nav_finance') }}">
+    <nav class="admin-section-tabs__row" aria-label="{{ __('coin.admin.nav_reporting') }}">
         @foreach($tabs as $key => $tab)
             <a
                 href="{{ $tab['url'] }}"
