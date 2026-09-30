@@ -17,7 +17,16 @@
 
 @section('content')
     @if (session('status'))
-        <div class="admin-card" style="margin-bottom:16px;border-color:rgba(255,180,84,0.35);">{{ session('status') }}</div>
+        <div class="admin-card" style="margin-bottom:16px;border-color:{{ session('status_type') === 'error' ? 'rgba(255,143,143,0.55)' : 'rgba(255,180,84,0.35)' }};">{{ session('status') }}</div>
+    @endif
+    @if ($errors->any())
+        <div class="admin-card" style="margin-bottom:16px;border-color:rgba(255,143,143,0.55);">
+            <ul style="margin:0;padding-left:18px;font-size:13px;line-height:1.5;">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
     @endif
 
     <div class="admin-grid-split">
@@ -105,5 +114,14 @@
                 <div style="margin-top:18px;font-size:12.5px;color:rgba(232,237,245,0.72);">Assigned: {{ $ticket->assignedAdmin->name }}</div>
             @endif
         </div>
+
+        @if(($canManagePlans ?? false) && ! $ticket->isGuest() && $ticket->user)
+            @include('admin.partials.private-offer-composer', [
+                'user' => $ticket->user,
+                'ticketId' => $ticket->id,
+                'pendingOffers' => $pendingPrivateOffers ?? collect(),
+                'defaultExpiresAt' => $privateOfferDefaultExpiresAt ?? null,
+            ])
+        @endif
     </div>
 @endsection

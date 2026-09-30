@@ -5,8 +5,12 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Admin\Concerns\AdminListQuery;
 use App\Http\Controllers\Admin\Concerns\RedirectsWithAdminFlash;
 use App\Http\Controllers\Controller;
+use App\Models\Admin;
 use App\Models\SupportTicket;
+use App\Services\AdminAuthorization;
+use App\Services\PrivateOfferService;
 use App\Services\SupportTicketService;
+use App\Support\AdminAbility;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -66,8 +70,12 @@ class SupportTicketController extends Controller
         ]);
     }
 
-    public function show(SupportTicket $ticket): View
-    {
+    public function show(
+        Request $request,
+        SupportTicket $ticket,
+        PrivateOfferService $offers,
+        AdminAuthorization $authorization,
+    ): View {
         $ticket->load([
             'messages',
             'assignedAdmin',
@@ -82,9 +90,24 @@ class SupportTicketController extends Controller
 
         $ticket->markReadByAdmin();
 
+        /** @var Admin|null $admin */
+        $admin = $request->user('admin');
+        $canManagePlans = $admin instanceof Admin
+            && $authorization->allows($admin, AdminAbility::ManagePlans);
+
+        $pendingPrivateOffers = collect();
+        if ($canManagePlans && ! $ticket->isGuest() && $ticket->user) {
+            $pendingPrivateOffers = $offers->pendingOffersForUser($ticket->user);
+        }
+
         return view('admin.support.show', [
             'ticket' => $ticket,
             'statuses' => SupportTicket::statuses(),
+            'canManagePlans' => $canManagePlans,
+            'pendingPrivateOffers' => $pendingPrivateOffers,
+            'privateOfferDefaultExpiresAt' => now()
+                ->addHours(PrivateOfferService::DEFAULT_TTL_HOURS)
+                ->format('Y-m-d\TH:i'),
         ]);
     }
 

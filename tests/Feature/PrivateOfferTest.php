@@ -28,6 +28,7 @@ class PrivateOfferTest extends TestCase
 
         config([
             'coin.user_domain' => 'coin.test',
+            'coin.admin_domain' => 'admin.coin.test',
             'coin.deposits.auto_confirm_mock' => true,
         ]);
 
@@ -195,5 +196,66 @@ class PrivateOfferTest extends TestCase
 
         $this->expectException(\RuntimeException::class);
         app(PlanChangeRequestService::class)->createRequest($user->fresh(), $contract->fresh(), $offer->plan->fresh());
+    }
+
+    public function test_store_from_ticket_returns_to_ticket_with_composer(): void
+    {
+        $admin = Admin::query()->create([
+            'name' => 'Ticket Offer Admin',
+            'email' => 'ticket-offer-admin@test.lv',
+            'password' => 'secret',
+            'role' => \App\Support\AdminRole::Superadmin,
+        ]);
+        $user = User::factory()->create();
+        $ticket = SupportTicket::query()->create([
+            'user_id' => $user->id,
+            'reference' => 'SUP-OFFER01',
+            'subject' => 'VIP negotiation',
+            'category' => SupportTicket::CATEGORY_ENTERPRISE,
+            'status' => SupportTicket::STATUS_OPEN,
+            'last_reply_at' => now(),
+        ]);
+
+        $response = $this->actingAs($admin, 'admin')
+            ->from(route('admin.support.show', $ticket))
+            ->post('http://admin.coin.test/users/'.$user->id.'/private-offers', [
+                'name' => 'Ticket VIP Plan',
+                'amount' => 15_000,
+                'duration_days' => 200,
+                'annual_profit_percent' => 19.5,
+                'expires_at' => now()->addDays(2)->format('Y-m-d\TH:i'),
+                'ticket_id' => $ticket->id,
+            ]);
+
+        $response->assertRedirect(route('admin.support.show', $ticket).'#ticket-offer-composer');
+        $this->assertDatabaseHas('plan_offers', [
+            'user_id' => $user->id,
+            'status' => PlanOffer::STATUS_PENDING,
+        ]);
+    }
+
+    public function test_support_ticket_show_includes_offer_composer_for_registered_user(): void
+    {
+        $admin = Admin::query()->create([
+            'name' => 'Composer Admin',
+            'email' => 'composer-admin@test.lv',
+            'password' => 'secret',
+            'role' => \App\Support\AdminRole::Superadmin,
+        ]);
+        $user = User::factory()->create(['name' => 'Composer Client']);
+        $ticket = SupportTicket::query()->create([
+            'user_id' => $user->id,
+            'reference' => 'SUP-COMP01',
+            'subject' => 'Need personal plan',
+            'category' => SupportTicket::CATEGORY_ENTERPRISE,
+            'status' => SupportTicket::STATUS_OPEN,
+            'last_reply_at' => now(),
+        ]);
+
+        $this->actingAs($admin, 'admin')
+            ->get('http://admin.coin.test/support/'.$ticket->id)
+            ->assertOk()
+            ->assertSee('ticket-offer-composer', false)
+            ->assertSee(__('coin.admin.private_offer_composer_title'), false);
     }
 }
