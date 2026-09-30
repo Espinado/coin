@@ -293,6 +293,7 @@ return [
         'next_expiry' => 'Next expiry',
         'completed' => 'Completed investment',
         'archive_title' => 'Investment archive',
+        'archive_empty' => 'No completed investments yet.',
         'matured_summary' => 'Term completed · :amount profit accrued',
         'early_closed_summary' => 'Closed early · credited :credit · fee :fee',
         'renew' => 'Renew',

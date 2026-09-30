@@ -101,6 +101,8 @@ class Dashboard extends Component
 
     public string $referralTab = 'accruals';
 
+    public string $investmentsTab = 'active';
+
     public string $referralAccrualSearch = '';
 
     public string $referralAccrualSort = '';
@@ -331,6 +333,15 @@ class Dashboard extends Component
         }
 
         $this->referralTab = $tab;
+    }
+
+    public function setInvestmentsTab(string $tab): void
+    {
+        if (! in_array($tab, ['active', 'archive'], true)) {
+            return;
+        }
+
+        $this->investmentsTab = $tab;
     }
 
     public function updatedReferralAccrualPerPage(): void

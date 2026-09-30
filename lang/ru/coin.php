@@ -293,6 +293,7 @@ return [
         'next_expiry' => 'Следующее окончание',
         'completed' => 'Завершённая инвестиция',
         'archive_title' => 'Архив инвестиций',
+        'archive_empty' => 'Завершённых инвестиций пока нет.',
         'matured_summary' => 'Срок завершён · начислено :amount прибыли',
         'early_closed_summary' => 'Закрыто досрочно · зачислено :credit · комиссия :fee',
         'renew' => 'Продлить',

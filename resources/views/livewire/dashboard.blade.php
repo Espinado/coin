@@ -216,22 +216,41 @@
           </div>
         </div>
 
-        <div style="display: flex; flex-direction: column; gap: 14px;">
-          @foreach($activeContracts as $contract)
-            @include('livewire.partials.contract-active-card', [
-                'contract' => $contract,
-                'primaryContract' => $primaryContract,
-                'pendingPlanChange' => $pendingPlanChanges->get($contract->id),
-                'pendingEarlyUnlock' => $pendingEarlyUnlocks->get($contract->id),
-            ])
-          @endforeach
+        <div class="coin-dash-period-tabs coin-stats-toolbar__periods" role="tablist" aria-label="{{ __('coin.nav.my_investments') }}" style="align-self: start;">
+          <button type="button" role="tab" wire:click="setInvestmentsTab('active')" aria-selected="{{ $investmentsTab === 'active' ? 'true' : 'false' }}" class="coin-dash-period-tabs__btn {{ $investmentsTab === 'active' ? 'coin-dash-period-tabs__btn--active' : '' }}">
+            {{ __('coin.invest.active_investments') }}
+            <span style="opacity: 0.72;">· {{ $this->activeContractCount }}</span>
+          </button>
+          <button type="button" role="tab" wire:click="setInvestmentsTab('archive')" aria-selected="{{ $investmentsTab === 'archive' ? 'true' : 'false' }}" class="coin-dash-period-tabs__btn {{ $investmentsTab === 'archive' ? 'coin-dash-period-tabs__btn--active' : '' }}">
+            {{ __('coin.invest.archive_title') }}
+            <span style="opacity: 0.72;">· {{ $completedContracts->count() }}</span>
+          </button>
+        </div>
 
-          @if($completedContracts->isNotEmpty())
-          <div style="margin-top: 6px; font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.14em; color: rgba(214,238,248,0.66);">{{ mb_strtoupper(__('coin.invest.archive_title')) }}</div>
+        <div style="display: flex; flex-direction: column; gap: 14px;">
+          @if($investmentsTab === 'active')
+            @forelse($activeContracts as $contract)
+              @include('livewire.partials.contract-active-card', [
+                  'contract' => $contract,
+                  'primaryContract' => $primaryContract,
+                  'pendingPlanChange' => $pendingPlanChanges->get($contract->id),
+                  'pendingEarlyUnlock' => $pendingEarlyUnlocks->get($contract->id),
+              ])
+            @empty
+              <div style="padding: 28px 22px; border-radius: 16px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.035); text-align: center;">
+                <div style="font-size: 14px; color: rgba(214,238,248,0.78);">{{ __('coin.invest.no_active') }}</div>
+                <button type="button" wire:click="setSection(1)" style="margin-top: 16px; padding: 10px 18px; border-radius: 10px; border: 1px solid oklch(0.86 0.11 195 / 0.5); background: linear-gradient(140deg, oklch(0.86 0.12 192), oklch(0.66 0.13 205)); color: #04121f; font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer;">{{ __('coin.actions.new_investment') }}</button>
+              </div>
+            @endforelse
+          @else
+            @forelse($completedContracts as $contract)
+              @include('livewire.partials.contract-completed-card', ['contract' => $contract])
+            @empty
+              <div style="padding: 28px 22px; border-radius: 16px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.035); text-align: center; font-size: 14px; color: rgba(214,238,248,0.78);">
+                {{ __('coin.invest.archive_empty') }}
+              </div>
+            @endforelse
           @endif
-          @foreach($completedContracts as $contract)
-            @include('livewire.partials.contract-completed-card', ['contract' => $contract])
-          @endforeach
         </div>
       </section>
     @endif
