@@ -3,11 +3,9 @@
 @section('title', __('coin.admin.page_title', ['section' => __('coin.admin.early_unlocks')]))
 
 @section('content')
-    @include('admin.partials.finance-tabs', ['active' => 'early-unlocks'])
-
     <div class="admin-card">
         <div style="margin-bottom:16px;">
-            <h2 style="margin:0;font-size:18px;font-weight:600;">{{ __('coin.admin.early_unlocks') }}</h2>
+            <h1 style="margin:0;font-size:24px;font-weight:600;">{{ __('coin.admin.early_unlocks') }}</h1>
             <p style="margin:8px 0 0;font-size:14px;color:rgba(232,237,245,0.72);">{{ __('coin.admin.early_unlocks_sub') }}</p>
         </div>
         @include('admin.partials.list-toolbar', [

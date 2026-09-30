@@ -990,6 +990,7 @@ return [
         'nav_system' => 'System',
         'finance_ops' => 'Operations',
         'finance_reports' => 'Reports',
+        'finance_reports_sub' => 'Platform commission and daily profit accrual reports.',
         'system_logs' => 'System log',
         'system_logs_sub' => 'Application, cron, mail, and schedule errors recorded for operations review.',
         'system_log_detail' => 'System log #:id',

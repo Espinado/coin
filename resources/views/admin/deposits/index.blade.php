@@ -3,11 +3,9 @@
 @section('title', __('coin.admin.page_title', ['section' => __('coin.admin.top_ups')]))
 
 @section('content')
-    @include('admin.partials.finance-tabs', ['active' => 'deposits'])
-
     <div class="admin-card">
         <div style="margin-bottom:16px;">
-            <h2 style="margin:0;font-size:18px;font-weight:600;">{{ __('coin.admin.top_ups') }}</h2>
+            <h1 style="margin:0;font-size:24px;font-weight:600;">{{ __('coin.admin.top_ups') }}</h1>
             <p style="margin:8px 0 0;font-size:14px;color:rgba(232,237,245,0.72);">{{ __('coin.admin.top_ups_sub') }}</p>
         </div>
         @include('admin.partials.list-toolbar', [
