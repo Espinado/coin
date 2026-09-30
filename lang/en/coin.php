@@ -1085,6 +1085,7 @@ return [
         'private_offer_composer_title' => 'Offer composer',
         'private_offer_composer_sub' => 'Build and send a personal plan without leaving this ticket.',
         'private_offer_open_full' => 'Full form / archive',
+        'private_offer_slider_hint' => 'Type a value or drag the slider — both stay in sync.',
         'private_offer_create' => 'Create private offer',
         'private_offer_create_sub' => 'Build a personal plan for :user with live profit preview.',
         'private_offer_plan_name' => 'Plan name (client sees this)',

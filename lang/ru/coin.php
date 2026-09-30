@@ -1085,6 +1085,7 @@ return [
         'private_offer_composer_title' => 'Конструктор оферты',
         'private_offer_composer_sub' => 'Соберите и отправьте персональный план, не покидая тикет.',
         'private_offer_open_full' => 'Полная форма / архив',
+        'private_offer_slider_hint' => 'Введите значение или двигайте ползунок — оба связаны.',
         'private_offer_create' => 'Создать приватную оферту',
         'private_offer_create_sub' => 'Соберите персональный план для :user с live-превью прибыли.',
         'private_offer_plan_name' => 'Название плана (видит клиент)',
