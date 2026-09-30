@@ -15,29 +15,40 @@
         return 'admin-sidebar-link'.($active ? ' admin-sidebar-link--active' : '');
     };
 
-    $financeActive = $adminNavActive(
+    $queuesActive = $adminNavActive(
         $routeName,
+        'admin.support',
         'admin.deposits',
         'admin.withdrawals',
         'admin.early-unlocks',
-        'admin.commissions',
-        'admin.profit-accrual',
-        'admin.epochs',
+        'admin.plan-changes',
     );
+    $financeReportsActive = $adminNavActive($routeName, 'admin.commissions', 'admin.profit-accrual', 'admin.epochs');
+    $logsActive = $adminNavActive($routeName, 'admin.payment-logs', 'admin.system-logs');
+    $systemActive = $adminNavActive($routeName, 'admin.settings', 'admin.legal', 'admin.admins', 'admin.broadcasts');
 
-    $financeBadges = [];
-    if (($canManageDeposits ?? false) && ($pendingDepositsCount ?? 0) > 0) {
-        $financeBadges[] = ['count' => $pendingDepositsCount, 'class' => 'admin-sidebar-badge--amber'];
-    }
-    if (($canManageWithdrawals ?? false) && ($pendingWithdrawalsCount ?? 0) > 0) {
-        $financeBadges[] = ['count' => $pendingWithdrawalsCount, 'class' => 'admin-sidebar-badge--red', 'attrs' => 'data-admin-withdrawals-nav-badge'];
-    }
-    if (($canManageWithdrawals ?? false) && ($pendingEarlyUnlocksCount ?? 0) > 0) {
-        $financeBadges[] = ['count' => $pendingEarlyUnlocksCount, 'class' => 'admin-sidebar-badge--amber', 'attrs' => 'data-admin-early-unlocks-nav-badge'];
-    }
+    $showQueues = ($canManageSupport ?? false)
+        || ($canManageDeposits ?? false)
+        || ($canManageWithdrawals ?? false)
+        || ($canManagePlanChanges ?? false);
+    $showFinanceReports = ($canManageWithdrawals ?? false) || ($canManagePlans ?? false);
+    $showLogs = ($canAccessPaymentLogs ?? false);
+    $showSystem = ($canManageSettings ?? false) || ($canManageLegal ?? false) || ($canManageAdmins ?? false) || ($canManageBroadcasts ?? false);
 
-    $logsActive = $adminNavActive($routeName, 'admin.payment-logs', 'admin.plan-changes', 'admin.system-logs');
-    $showLogsGroup = ($canAccessPaymentLogs ?? false) || ($canManagePlanChanges ?? false);
+    $queuesInboxCount = 0;
+    if ($canManageSupport ?? false) {
+        $queuesInboxCount += (int) ($unreadSupportCount ?? 0);
+    }
+    if ($canManageDeposits ?? false) {
+        $queuesInboxCount += (int) ($pendingDepositsCount ?? 0);
+    }
+    if ($canManageWithdrawals ?? false) {
+        $queuesInboxCount += (int) ($pendingWithdrawalsCount ?? 0);
+        $queuesInboxCount += (int) ($pendingEarlyUnlocksCount ?? 0);
+    }
+    if ($canManagePlanChanges ?? false) {
+        $queuesInboxCount += (int) ($pendingPlanChangesCount ?? 0);
+    }
 @endphp
 
 <aside class="admin-sidebar" id="admin-sidebar">
@@ -57,38 +68,45 @@
 
         <nav class="admin-sidebar-nav" id="admin-sidebar-nav" aria-label="{{ __('coin.admin.open_menu') }}">
             <a href="{{ route('admin.dashboard') }}" class="{{ $navClass($routeName === 'admin.dashboard') }}">{{ __('coin.admin.overview') }}</a>
-            @if($canManageUsers ?? false)
-                <a href="{{ route('admin.users.index') }}" class="{{ $navClass($adminNavActive($routeName, 'admin.users')) }}">{{ __('coin.admin.users') }}</a>
-            @endif
-            @if($canAccessFinance ?? false)
-                <a href="{{ $financeNavUrl ?? route('admin.deposits.index') }}" class="{{ $navClass($financeActive) }}" data-admin-withdrawals-nav data-admin-early-unlocks-nav>
-                    <span>{{ __('coin.admin.finance') }}</span>
-                    @if($financeBadges !== [])
-                        <span class="admin-sidebar-link__badges">
-                            @foreach($financeBadges as $badge)
-                                <span class="admin-sidebar-badge {{ $badge['class'] }}" @if(! empty($badge['attrs'])) {!! $badge['attrs'] !!} @endif>{{ $badge['count'] }}</span>
-                            @endforeach
-                        </span>
-                    @endif
-                </a>
-            @endif
-            @if($showLogsGroup)
-                <div class="admin-sidebar-group" data-admin-sidebar-group="logs">
-                    <button
-                        type="button"
-                        class="admin-sidebar-link admin-sidebar-group__toggle {{ $logsActive ? 'admin-sidebar-link--active' : '' }}"
-                        aria-expanded="false"
-                        data-admin-sidebar-group-toggle
-                    >
-                        <span class="admin-sidebar-group__label">
-                            <span>{{ __('coin.admin.logs_nav') }}</span>
-                        </span>
-                        <span class="admin-sidebar-group__chevron" aria-hidden="true"></span>
-                    </button>
-                    <div class="admin-sidebar-subnav">
-                        @if($canAccessPaymentLogs ?? false)
-                            <a href="{{ route('admin.payment-logs.index') }}" class="{{ $navClass($adminNavActive($routeName, 'admin.payment-logs')) }} admin-sidebar-link--sub">{{ __('coin.admin.logs_payments') }}</a>
-                            <a href="{{ route('admin.system-logs.index') }}" class="{{ $navClass($adminNavActive($routeName, 'admin.system-logs')) }} admin-sidebar-link--sub">{{ __('coin.admin.logs_system') }}</a>
+
+            @if($showQueues)
+                <div class="admin-sidebar-section {{ $queuesActive ? 'admin-sidebar-section--active' : '' }}">
+                    <div class="admin-sidebar-section__label">
+                        <span>{{ __('coin.admin.nav_queues') }}</span>
+                        @if($queuesInboxCount > 0)
+                            <span class="admin-sidebar-badge admin-sidebar-badge--amber">{{ $queuesInboxCount }}</span>
+                        @endif
+                    </div>
+                    <div class="admin-sidebar-section__links">
+                        @if($canManageSupport ?? false)
+                            <a href="{{ route('admin.support.index') }}" class="{{ $navClass($adminNavActive($routeName, 'admin.support')) }} admin-sidebar-link--sub" data-admin-support-nav>
+                                <span>{{ __('coin.admin.support') }}</span>
+                                @if(($unreadSupportCount ?? 0) > 0)
+                                    <span class="admin-sidebar-badge admin-sidebar-badge--support admin-support-badge" data-admin-support-nav-badge>{{ $unreadSupportCount }}</span>
+                                @endif
+                            </a>
+                        @endif
+                        @if($canManageDeposits ?? false)
+                            <a href="{{ route('admin.deposits.index') }}" class="{{ $navClass($adminNavActive($routeName, 'admin.deposits')) }} admin-sidebar-link--sub">
+                                <span>{{ __('coin.admin.top_ups') }}</span>
+                                @if(($pendingDepositsCount ?? 0) > 0)
+                                    <span class="admin-sidebar-badge admin-sidebar-badge--amber">{{ $pendingDepositsCount }}</span>
+                                @endif
+                            </a>
+                        @endif
+                        @if($canManageWithdrawals ?? false)
+                            <a href="{{ route('admin.withdrawals.index') }}" class="{{ $navClass($adminNavActive($routeName, 'admin.withdrawals')) }} admin-sidebar-link--sub" data-admin-withdrawals-nav>
+                                <span>{{ __('coin.admin.payouts') }}</span>
+                                @if(($pendingWithdrawalsCount ?? 0) > 0)
+                                    <span class="admin-sidebar-badge admin-sidebar-badge--red" data-admin-withdrawals-nav-badge>{{ $pendingWithdrawalsCount }}</span>
+                                @endif
+                            </a>
+                            <a href="{{ route('admin.early-unlocks.index') }}" class="{{ $navClass($adminNavActive($routeName, 'admin.early-unlocks')) }} admin-sidebar-link--sub" data-admin-early-unlocks-nav>
+                                <span>{{ __('coin.admin.early_unlocks') }}</span>
+                                @if(($pendingEarlyUnlocksCount ?? 0) > 0)
+                                    <span class="admin-sidebar-badge admin-sidebar-badge--amber" data-admin-early-unlocks-nav-badge>{{ $pendingEarlyUnlocksCount }}</span>
+                                @endif
+                            </a>
                         @endif
                         @if($canManagePlanChanges ?? false)
                             <a href="{{ route('admin.plan-changes.index') }}" class="{{ $navClass($adminNavActive($routeName, 'admin.plan-changes')) }} admin-sidebar-link--sub" data-admin-plan-changes-nav>
@@ -101,28 +119,67 @@
                     </div>
                 </div>
             @endif
+
+            @if($canManageUsers ?? false)
+                <div class="admin-sidebar-section {{ $adminNavActive($routeName, 'admin.users') ? 'admin-sidebar-section--active' : '' }}">
+                    <div class="admin-sidebar-section__label">{{ __('coin.admin.nav_clients') }}</div>
+                    <div class="admin-sidebar-section__links">
+                        <a href="{{ route('admin.users.index') }}" class="{{ $navClass($adminNavActive($routeName, 'admin.users')) }} admin-sidebar-link--sub">{{ __('coin.admin.users') }}</a>
+                    </div>
+                </div>
+            @endif
+
+            @if($showFinanceReports)
+                <div class="admin-sidebar-section {{ $financeReportsActive ? 'admin-sidebar-section--active' : '' }}">
+                    <div class="admin-sidebar-section__label">{{ __('coin.admin.nav_finance') }}</div>
+                    <div class="admin-sidebar-section__links">
+                        @if($canManageWithdrawals ?? false)
+                            <a href="{{ route('admin.commissions.index') }}" class="{{ $navClass($adminNavActive($routeName, 'admin.commissions')) }} admin-sidebar-link--sub">{{ __('coin.admin.commissions') }}</a>
+                        @endif
+                        @if($canManagePlans ?? false)
+                            <a href="{{ route('admin.profit-accrual.index') }}" class="{{ $navClass($adminNavActive($routeName, 'admin.profit-accrual') || $adminNavActive($routeName, 'admin.epochs')) }} admin-sidebar-link--sub">{{ __('coin.admin.profit_accrual') }}</a>
+                        @endif
+                    </div>
+                </div>
+            @endif
+
             @if($canManagePlans ?? false)
-                <a href="{{ route('admin.plans.index') }}" class="{{ $navClass($adminNavActive($routeName, 'admin.plans')) }}">{{ __('coin.admin.plans') }}</a>
+                <div class="admin-sidebar-section {{ $adminNavActive($routeName, 'admin.plans') ? 'admin-sidebar-section--active' : '' }}">
+                    <div class="admin-sidebar-section__label">{{ __('coin.admin.nav_product') }}</div>
+                    <div class="admin-sidebar-section__links">
+                        <a href="{{ route('admin.plans.index') }}" class="{{ $navClass($adminNavActive($routeName, 'admin.plans')) }} admin-sidebar-link--sub">{{ __('coin.admin.plans') }}</a>
+                    </div>
+                </div>
             @endif
-            @if($canManageAdmins ?? false)
-                <a href="{{ route('admin.admins.index') }}" class="{{ $navClass($adminNavActive($routeName, 'admin.admins')) }}">{{ __('coin.admin.admins.title') }}</a>
+
+            @if($showLogs)
+                <div class="admin-sidebar-section {{ $logsActive ? 'admin-sidebar-section--active' : '' }}">
+                    <div class="admin-sidebar-section__label">{{ __('coin.admin.logs_nav') }}</div>
+                    <div class="admin-sidebar-section__links">
+                        <a href="{{ route('admin.payment-logs.index') }}" class="{{ $navClass($adminNavActive($routeName, 'admin.payment-logs')) }} admin-sidebar-link--sub">{{ __('coin.admin.logs_payments') }}</a>
+                        <a href="{{ route('admin.system-logs.index') }}" class="{{ $navClass($adminNavActive($routeName, 'admin.system-logs')) }} admin-sidebar-link--sub">{{ __('coin.admin.logs_system') }}</a>
+                    </div>
+                </div>
             @endif
-            @if($canManageSettings ?? false)
-                <a href="{{ route('admin.settings.edit') }}" class="{{ $navClass($adminNavActive($routeName, 'admin.settings')) }}">{{ __('coin.admin.settings') }}</a>
-            @endif
-            @if($canManageLegal ?? false)
-                <a href="{{ route('admin.legal.index') }}" class="{{ $navClass($adminNavActive($routeName, 'admin.legal')) }}">{{ __('coin.admin.legal.title') }}</a>
-            @endif
-            @if($canManageBroadcasts ?? false)
-                <a href="{{ route('admin.broadcasts.index') }}" class="{{ $navClass($adminNavActive($routeName, 'admin.broadcasts')) }}">{{ __('coin.admin.broadcasts.title') }}</a>
-            @endif
-            @if($canManageSupport ?? false)
-                <a href="{{ route('admin.support.index') }}" class="{{ $navClass($adminNavActive($routeName, 'admin.support')) }}" data-admin-support-nav>
-                    <span>{{ __('coin.admin.support') }}</span>
-                    @if(($unreadSupportCount ?? 0) > 0)
-                        <span class="admin-sidebar-badge admin-sidebar-badge--support admin-support-badge" data-admin-support-nav-badge>{{ $unreadSupportCount }}</span>
-                    @endif
-                </a>
+
+            @if($showSystem)
+                <div class="admin-sidebar-section {{ $systemActive ? 'admin-sidebar-section--active' : '' }}">
+                    <div class="admin-sidebar-section__label">{{ __('coin.admin.nav_system') }}</div>
+                    <div class="admin-sidebar-section__links">
+                        @if($canManageSettings ?? false)
+                            <a href="{{ route('admin.settings.edit') }}" class="{{ $navClass($adminNavActive($routeName, 'admin.settings')) }} admin-sidebar-link--sub">{{ __('coin.admin.settings') }}</a>
+                        @endif
+                        @if($canManageLegal ?? false)
+                            <a href="{{ route('admin.legal.index') }}" class="{{ $navClass($adminNavActive($routeName, 'admin.legal')) }} admin-sidebar-link--sub">{{ __('coin.admin.legal.title') }}</a>
+                        @endif
+                        @if($canManageAdmins ?? false)
+                            <a href="{{ route('admin.admins.index') }}" class="{{ $navClass($adminNavActive($routeName, 'admin.admins')) }} admin-sidebar-link--sub">{{ __('coin.admin.admins.title') }}</a>
+                        @endif
+                        @if($canManageBroadcasts ?? false)
+                            <a href="{{ route('admin.broadcasts.index') }}" class="{{ $navClass($adminNavActive($routeName, 'admin.broadcasts')) }} admin-sidebar-link--sub">{{ __('coin.admin.broadcasts.title') }}</a>
+                        @endif
+                    </div>
+                </div>
             @endif
         </nav>
     </div>
