@@ -1566,10 +1566,39 @@ return [
     ],
 
     'seo' => [
-        'meta_description' => ':brand — investment-plan platform. Top up USDT or BTC, buy a plan with daily APR accruals, and withdraw to your wallet. Investing involves risk.',
+        'meta_description' => ':brand — AI infrastructure investment plans. Top up USDT or BTC, buy a plan with daily APR accruals, and withdraw to your wallet. Investing involves risk.',
         'legal_meta_description' => ':title — official :brand legal information.',
         'auth_meta_description' => 'Sign in or create a :brand account. This page is not indexed.',
         'dashboard_meta_description' => ':brand user dashboard. This area requires authentication and is not indexed.',
+    ],
+
+    'seo_hubs' => [
+        'nav_label' => 'Related pages',
+        'nav_home' => 'Home',
+        'invest' => [
+            'title' => 'AI infrastructure investment',
+            'kicker' => 'INVESTMENT',
+            'heading' => 'Invest in AI infrastructure with :brand',
+            'meta_description' => ':brand offers AI infrastructure investment through transparent plans: USDT/BTC top-up, stated APR and term, daily accruals, wallet withdrawals. Investing involves risk.',
+            'lead' => ':brand lets you allocate capital into investment plans linked to AI infrastructure economics — with clear plan parameters and a transparent dashboard.',
+            'what_title' => 'What this investment is',
+            'what_body' => 'You buy a fixed-term investment plan. Each plan states a minimum amount, APR, and term. Profit accrues daily to your available balance. At maturity, principal returns to available balance and can be withdrawn to your own wallet.',
+            'how_title' => 'How it works',
+            'how_1' => 'Create an account and verify your email.',
+            'how_2' => 'Top up with USDT or BTC (BTC converts to USDT at the platform rate where configured).',
+            'how_3' => 'Choose a plan and open a contract.',
+            'how_4' => 'Track daily accruals in the dashboard.',
+            'how_5' => 'Withdraw available funds to your external wallet when ready.',
+            'model_title' => 'Business model in plain terms',
+            'model_body' => ':brand is built around investment-plan revenue and AI infrastructure economics — not around selling on-demand GPU hours or operating a public compute marketplace.',
+            'not_title' => 'What this is not',
+            'not_body' => ':brand is not a crypto exchange, not a bank, and not a GPU cloud provider for renting servers by the hour. Returns are not guaranteed.',
+            'risks_title' => 'Risks',
+            'risks_body' => 'Investing involves risk. Past performance does not guarantee future results. Read the',
+            'cta_start' => 'Start investing',
+            'cta_plans' => 'View plans',
+            'disclaimer' => 'Plan APR figures and landing calculators are illustrative. Live parameters are shown in the authenticated dashboard.',
+        ],
     ],
 
     'about' => [
@@ -1596,13 +1625,15 @@ return [
     ],
 
     'landing' => [
-        'meta_title_suffix' => 'Investment platform',
+        'meta_title_suffix' => 'AI infrastructure investment',
+        'footer_tagline' => 'AI infrastructure investment plans with daily APR accruals.',
         'scroll_top' => 'Back to top',
 
         'nav_product' => 'Product',
         'nav_how' => 'How it works',
         'nav_plans' => 'Plans',
         'nav_infra' => 'Platform',
+        'nav_invest' => 'Invest',
         'nav_about' => 'About',
         'nav_dashboard' => 'Dashboard',
         'nav_faq' => 'FAQ',

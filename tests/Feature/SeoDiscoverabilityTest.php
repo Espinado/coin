@@ -75,12 +75,24 @@ class SeoDiscoverabilityTest extends TestCase
             ->assertDontSee('AI COMPUTE PLATFORM', false);
     }
 
+    public function test_invest_hub_is_public_and_separate_from_gpu_marketplace_claims(): void
+    {
+        $this->get('http://coin.test/invest')
+            ->assertOk()
+            ->assertSee('AI infrastructure investment', false)
+            ->assertSee('name="robots" content="noindex, nofollow"', false)
+            ->assertSee('rel="canonical"', false)
+            ->assertSee('"@type":"WebPage"', false)
+            ->assertSee('not a GPU cloud provider', false)
+            ->assertDontSee('rent GPU servers', false);
+    }
+
     public function test_about_page_is_public_and_describes_platform(): void
     {
         $this->get('http://coin.test/legal/about')
             ->assertOk()
             ->assertSee('investment-plan platform', false)
-            ->assertSee('CloudFlops LLC', false)
+            ->assertSee('CudaFlops LLC', false)
             ->assertSee('name="robots" content="noindex, nofollow"', false)
             ->assertSee('"@type":"Organization"', false);
     }
@@ -113,7 +125,7 @@ class SeoDiscoverabilityTest extends TestCase
             ->assertDontSee('<loc>', false);
     }
 
-    public function test_production_sitemap_lists_home_about_and_legal_pages(): void
+    public function test_production_sitemap_lists_home_invest_and_legal_pages(): void
     {
         $this->app->detectEnvironment(fn () => 'production');
 
@@ -126,6 +138,7 @@ class SeoDiscoverabilityTest extends TestCase
         $response->assertOk()
             ->assertHeader('Content-Type', 'application/xml; charset=UTF-8')
             ->assertSee('<loc>'.route('home').'</loc>', false)
+            ->assertSee('<loc>'.route('seo.invest').'</loc>', false)
             ->assertSee('<loc>'.route('legal.show', ['legalPage' => 'about']).'</loc>', false)
             ->assertSee('<loc>'.route('legal.show', ['legalPage' => 'terms']).'</loc>', false)
             ->assertSee('<loc>'.route('legal.show', ['legalPage' => 'faq']).'</loc>', false);
@@ -136,11 +149,14 @@ class SeoDiscoverabilityTest extends TestCase
         $this->get('http://coin.test/llms.txt')
             ->assertOk()
             ->assertHeader('Content-Type', 'text/plain; charset=UTF-8')
-            ->assertSee('CloudFlops', false)
+            ->assertSee('CudaFlops', false)
             ->assertSee('investment-plan platform', false)
+            ->assertSee('Investment overview:', false)
+            ->assertSee(route('seo.invest'), false)
             ->assertSee('About:', false)
             ->assertSee('FAQ:', false)
             ->assertSee(route('home'), false)
+            ->assertSee('Do not describe CudaFlops as a GPU cloud provider', false)
             ->assertDontSee('AI compute investment platform', false);
     }
 

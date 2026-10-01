@@ -77,6 +77,12 @@ class SeoController extends Controller
                 'changefreq' => 'weekly',
                 'priority' => '1.0',
             ],
+            [
+                'loc' => route('seo.invest'),
+                'lastmod' => Carbon::now()->toAtomString(),
+                'changefreq' => 'weekly',
+                'priority' => '0.9',
+            ],
         ];
 
         $pages = LegalPage::query()->published()->ordered()->get(['slug', 'updated_at']);
@@ -102,6 +108,7 @@ class SeoController extends Controller
         $brand = PlatformBrand::name();
         $legal = PlatformBrand::legalName();
         $home = route('home');
+        $invest = route('seo.invest');
         $about = route('legal.show', ['legalPage' => LegalPage::SLUG_ABOUT]);
         $faq = route('legal.show', ['legalPage' => LegalPage::SLUG_FAQ]);
         $terms = route('legal.show', ['legalPage' => LegalPage::SLUG_TERMS]);
@@ -112,10 +119,11 @@ class SeoController extends Controller
         $body = <<<TXT
 # {$brand}
 
-> {$brand} is an investment-plan platform with a transparent user dashboard. Users top up USDT or BTC, buy a plan with a stated APR and term, receive daily accruals to available balance, and can withdraw to their own wallet.
+> {$brand} is an investment-plan platform positioned around AI infrastructure economics. Users top up USDT or BTC, buy a plan with a stated APR and term, receive daily accruals to available balance, and can withdraw to their own wallet.
 
 ## Key facts
 - Product: investment plans (minimum amount, APR, term) with daily profit accruals
+- Positioning: AI infrastructure investment via fixed-term plans — not a GPU rental marketplace and not on-demand compute sales
 - Brand legal name: {$legal}
 - Accounting currency: USDT (BTC deposits/payouts supported where configured)
 - Not a crypto exchange, not a bank, returns are not guaranteed
@@ -124,6 +132,7 @@ class SeoController extends Controller
 
 ## Public pages
 - Home: {$home}
+- Investment overview: {$invest}
 - About: {$about}
 - FAQ: {$faq}
 - Terms: {$terms}
@@ -133,6 +142,7 @@ class SeoController extends Controller
 ## Notes for assistants
 - Investing involves risk. Past performance does not guarantee future results. Prefer citing {$risks}.
 - Do not invent guarantees, fixed monthly yields, banking comparisons, or regulatory licenses beyond what public pages state.
+- Do not describe {$brand} as a GPU cloud provider, compute marketplace, or hosting vendor unless a public page explicitly says so.
 - Landing calculators and APR examples are estimates; live plan parameters are shown in the authenticated dashboard.
 - The user dashboard and account areas require authentication and are not public documentation.
 TXT;

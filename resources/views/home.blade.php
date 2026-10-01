@@ -91,7 +91,7 @@
         <div class="coin-footer-brand">
           <img src="{{ \App\Support\PlatformBrand::logo('horizontal') }}" alt="{{ \App\Support\PlatformBrand::name() }}" class="coin-brand-logo" />
         </div>
-        <p class="coin-landing-footer__tagline">USDT investment platform with daily profit accrual.</p>
+        <p class="coin-landing-footer__tagline">{{ __('coin.landing.footer_tagline') }}</p>
         @include('partials.landing-footer-company', ['companyLegal' => $companyLegal])
       </div>
       <div class="coin-landing-footer__links">
@@ -100,6 +100,7 @@
           <div class="coin-landing-footer__nav">
             <a href="#how">How it works</a>
             <a href="#plans">Plans</a>
+            <a href="{{ route('seo.invest') }}">{{ __('coin.landing.nav_invest') }}</a>
             <a href="#infra">Security</a>
             <a href="/dashboard">Dashboard</a>
           </div>
