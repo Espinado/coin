@@ -9,13 +9,17 @@ function reverbConfig() {
 
     const scheme = runtime.scheme ?? import.meta.env.VITE_REVERB_SCHEME ?? 'http';
     const port = Number(runtime.port ?? import.meta.env.VITE_REVERB_PORT ?? (scheme === 'https' ? 443 : 8080));
+    const broadcaster = runtime.broadcaster
+        ?? (import.meta.env.VITE_BROADCAST_DRIVER || 'reverb');
 
     return {
-        key: runtime.key ?? import.meta.env.VITE_REVERB_APP_KEY,
+        broadcaster,
+        key: runtime.key ?? import.meta.env.VITE_REVERB_APP_KEY ?? import.meta.env.VITE_PUSHER_APP_KEY,
+        cluster: runtime.cluster ?? import.meta.env.VITE_PUSHER_APP_CLUSTER ?? null,
         wsHost: runtime.host ?? import.meta.env.VITE_REVERB_HOST,
         wsPort: port,
         wssPort: port,
-        forceTLS: scheme === 'https',
+        forceTLS: scheme === 'https' || broadcaster === 'pusher',
         debug: Boolean(runtime.debug),
         guestAuthEndpoint: runtime.guestAuthEndpoint ?? null,
     };
@@ -76,7 +80,7 @@ export function initEcho() {
     const config = reverbConfig();
 
     if (! config.key) {
-        reverbLog('error', 'Echo not initialized: missing Reverb app key');
+        reverbLog('error', 'Echo not initialized: missing broadcast app key');
 
         return null;
     }
@@ -89,16 +93,24 @@ export function initEcho() {
 
     const authEndpoint = config.guestAuthEndpoint ?? `${window.location.origin}/broadcasting/auth`;
 
-    const echoOptions = {
-        broadcaster: 'reverb',
-        key: config.key,
-        wsHost: config.wsHost,
-        wsPort: config.wsPort,
-        wssPort: config.wssPort,
-        forceTLS: config.forceTLS,
-        enabledTransports: ['ws', 'wss'],
-        disableStats: true,
-    };
+    const echoOptions = config.broadcaster === 'pusher'
+        ? {
+            broadcaster: 'pusher',
+            key: config.key,
+            cluster: config.cluster ?? 'mt1',
+            forceTLS: true,
+            disableStats: true,
+        }
+        : {
+            broadcaster: 'reverb',
+            key: config.key,
+            wsHost: config.wsHost,
+            wsPort: config.wsPort,
+            wssPort: config.wssPort,
+            forceTLS: config.forceTLS,
+            enabledTransports: ['ws', 'wss'],
+            disableStats: true,
+        };
 
     if (config.guestAuthEndpoint) {
         echoOptions.authorizer = buildGuestAuthorizer(authEndpoint);

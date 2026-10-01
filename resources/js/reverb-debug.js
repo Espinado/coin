@@ -136,6 +136,8 @@ export function logEchoConfig(label = 'echo') {
     const runtime = window.coinReverb ?? {};
 
     reverbLog('info', `${label}: runtime config`, {
+        broadcaster: runtime.broadcaster ?? 'reverb',
+        cluster: runtime.cluster ?? null,
         host: runtime.host,
         port: runtime.port,
         scheme: runtime.scheme,
