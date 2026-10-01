@@ -2,11 +2,11 @@
 
 namespace App\Models;
 
+use App\Notifications\ResetPasswordNotification;
 use App\Services\EmailVerificationCodeService;
 use App\Support\MoneyFormat;
 use App\Support\UserLocale;
 use Database\Factories\UserFactory;
-use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -84,7 +84,7 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function sendPasswordResetNotification(#[\SensitiveParameter] $token): void
     {
-        $this->notify((new ResetPassword($token))->locale(UserLocale::LOCALE));
+        $this->notify((new ResetPasswordNotification($token))->locale(UserLocale::LOCALE));
     }
 
     public function wantsNotification(string $type): bool

@@ -1,0 +1,43 @@
+<?php
+
+namespace App\Mail;
+
+use App\Mail\Concerns\UsesEnglishLocale;
+use App\Models\User;
+use Illuminate\Bus\Queueable;
+use Illuminate\Mail\Mailable;
+use Illuminate\Mail\Mailables\Content;
+use Illuminate\Mail\Mailables\Envelope;
+use Illuminate\Queue\SerializesModels;
+
+class PasswordResetMail extends Mailable
+{
+    use Queueable, SerializesModels, UsesEnglishLocale;
+
+    public function __construct(
+        public User $user,
+        public string $resetUrl,
+        public int $expireMinutes,
+    ) {
+        $this->forceEnglishLocale();
+    }
+
+    public function envelope(): Envelope
+    {
+        return new Envelope(
+            subject: __('coin.auth.reset_mail_subject'),
+        );
+    }
+
+    public function content(): Content
+    {
+        return new Content(
+            view: 'emails.password-reset',
+            with: [
+                'userName' => $this->user->name,
+                'resetUrl' => $this->resetUrl,
+                'expireMinutes' => $this->expireMinutes,
+            ],
+        );
+    }
+}
