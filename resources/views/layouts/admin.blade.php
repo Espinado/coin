@@ -176,6 +176,26 @@
 
                     setOpen(false);
 
+                    (function focusActiveSidebarLink() {
+                        const nav = document.getElementById('admin-sidebar-nav');
+                        if (! nav) {
+                            return;
+                        }
+
+                        const active = nav.querySelector('.admin-sidebar-link--active');
+                        if (! active) {
+                            return;
+                        }
+
+                        const reveal = function () {
+                            active.scrollIntoView({ block: 'center', inline: 'nearest', behavior: 'auto' });
+                        };
+
+                        requestAnimationFrame(function () {
+                            requestAnimationFrame(reveal);
+                        });
+                    })();
+
                     document.addEventListener('keydown', function (event) {
                         if (event.key === 'Escape') {
                             setOpen(false);
