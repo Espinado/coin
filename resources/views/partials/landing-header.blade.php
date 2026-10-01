@@ -3,7 +3,7 @@
 <header class="coin-header coin-landing-header" data-screen-label="Header">
   <div class="coin-landing-header__inner">
     <a href="{{ auth()->check() ? route('dashboard') : route('home') }}" class="coin-header-brand">
-      <img src="{{ \App\Support\PlatformBrand::logo('horizontal') }}" alt="CloudFlops" class="coin-brand-logo coin-landing-header__logo" />
+      <img src="{{ \App\Support\PlatformBrand::logo('horizontal') }}" alt="{{ \App\Support\PlatformBrand::name() }}" class="coin-brand-logo coin-landing-header__logo" />
     </a>
 
     <nav class="coin-nav coin-nav-desktop" aria-label="{{ __('coin.nav.main') }}">
@@ -27,7 +27,7 @@
 
 <nav class="coin-nav coin-nav-mobile coin-landing-drawer" aria-label="{{ __('coin.nav.main') }}">
   <div class="coin-landing-drawer__head">
-    <img src="{{ \App\Support\PlatformBrand::logo('horizontal') }}" alt="CloudFlops" class="coin-landing-drawer__logo" />
+    <img src="{{ \App\Support\PlatformBrand::logo('horizontal') }}" alt="{{ \App\Support\PlatformBrand::name() }}" class="coin-landing-drawer__logo" />
     <button type="button" class="coin-nav-mobile-close" aria-label="{{ __('coin.landing.aria_close_menu') }}">&times;</button>
   </div>
   <a href="#product" class="coin-landing-drawer__link">{{ __('coin.landing.nav_product') }}</a>

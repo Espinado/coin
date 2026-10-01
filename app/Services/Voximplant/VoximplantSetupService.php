@@ -105,7 +105,7 @@ class VoximplantSetupService
         $sdkPassword = (string) config('voximplant.sdk_password');
 
         if ($sdkPassword === '') {
-            $sdkPassword = 'CloudFlops1!';
+            $sdkPassword = 'CudaFlops1!';
         }
 
         $users = $this->client->call('GetUsers', [
@@ -119,7 +119,7 @@ class VoximplantSetupService
             $this->client->call('AddUser', [
                 'application_id' => $applicationId,
                 'user_name' => $sdkUser,
-                'user_display_name' => 'CloudFlops Admin Operator',
+                'user_display_name' => 'CudaFlops Admin Operator',
                 'user_password' => $sdkPassword,
                 'user_active' => true,
                 'parent_accounting' => true,

@@ -6,7 +6,7 @@ final class PlatformBrand
 {
     public static function name(): string
     {
-        return (string) config('coin.brand.name', config('app.name', 'CloudFlops'));
+        return (string) config('coin.brand.name', config('app.name', 'CudaFlops'));
     }
 
     public static function adminName(): string

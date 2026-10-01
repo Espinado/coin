@@ -1,15 +1,15 @@
 TERMS OF USE — CLOUDFLOPS
 
 Published: 28 March 2026
-Platform operator: CloudFlops LLC (“Company”, “we”, “us”)
-Platform: the CloudFlops website and user dashboard (“Platform”)
+Platform operator: CudaFlops LLC (“Company”, “we”, “us”)
+Platform: the CudaFlops website and user dashboard (“Platform”)
 
 1. Acceptance
 1.1. By registering, accepting Terms / Privacy / Risks, and using the Platform, you confirm that you are at least 18 years old, have legal capacity, and agree to these Terms, the Privacy Policy, and the Risk Disclosure.
 1.2. If you do not agree, do not register or use the Platform.
 
 2. Nature of the service
-2.1. CloudFlops is an online platform where users select a plan related to allocated AI compute capacity, top up a balance in cryptocurrency, and track accruals in a personal dashboard.
+2.1. CudaFlops is an online platform where users select a plan related to allocated AI compute capacity, top up a balance in cryptocurrency, and track accruals in a personal dashboard.
 2.2. The Platform is not a bank, credit institution, or stock exchange, and does not provide classic deposit-insurance coverage. Cryptocurrency operations carry network and market risks.
 2.3. Website materials are informational. Yield projections, APR figures, and calculator examples are illustrative and do not guarantee results.
 
@@ -49,7 +49,7 @@ Platform design, content, logos, and software belong to the Company or its licen
 We may update these Terms, fees, and features. Material changes will be reflected on the Platform where practicable. Continued use after publication means acceptance, unless law requires otherwise.
 
 11. Governing law and disputes
-Unless mandatory rules provide otherwise, these Terms are governed by the laws applicable to CloudFlops LLC’s place of incorporation. Parties should first attempt to resolve disputes amicably; otherwise disputes are submitted to the competent courts for that place of incorporation, subject to mandatory consumer-protection rules.
+Unless mandatory rules provide otherwise, these Terms are governed by the laws applicable to CudaFlops LLC’s place of incorporation. Parties should first attempt to resolve disputes amicably; otherwise disputes are submitted to the competent courts for that place of incorporation, subject to mandatory consumer-protection rules.
 
 12. Contact
 For questions about these Terms, use the contact email shown on the Platform / in support.

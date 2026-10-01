@@ -89,7 +89,7 @@
     <div class="coin-landing-footer__grid">
       <div class="coin-landing-footer__brand">
         <div class="coin-footer-brand">
-          <img src="{{ \App\Support\PlatformBrand::logo('horizontal') }}" alt="CloudFlops" class="coin-brand-logo" />
+          <img src="{{ \App\Support\PlatformBrand::logo('horizontal') }}" alt="{{ \App\Support\PlatformBrand::name() }}" class="coin-brand-logo" />
         </div>
         <p class="coin-landing-footer__tagline">USDT investment platform with daily profit accrual.</p>
         @include('partials.landing-footer-company', ['companyLegal' => $companyLegal])
@@ -136,7 +136,7 @@
           $footerReg = trim($companyLegal['company_registration_number'] ?? '');
       @endphp
       <span>
-          © {{ date('Y') }} {{ $footerCompany !== '' ? $footerCompany : 'CloudFlops' }}.
+          © {{ date('Y') }} {{ $footerCompany !== '' ? $footerCompany : \App\Support\PlatformBrand::name() }}.
           @if($footerReg !== '')
               {{ __('coin.footer.registration_number') }} {{ $footerReg }}.
           @endif

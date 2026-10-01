@@ -1,15 +1,15 @@
 RISK DISCLOSURE — CLOUDFLOPS
 
 Published: 28 March 2026
-Operator: CloudFlops LLC
-Product: CloudFlops platform (plans related to AI compute, accounted in crypto assets)
+Operator: CudaFlops LLC
+Product: CudaFlops platform (plans related to AI compute, accounted in crypto assets)
 
 WARNING: Participation involves the risk of partial or total loss of funds. Do not use money you cannot afford to lose. Past or illustrative performance does not guarantee future results.
 
 1. Product and expectation risk
 1.1. The Platform offers plans with calculated yield parameters (including APR) and a term. Calculators and marketing materials are estimates. Actual accruals depend on Platform rules, service status, and other factors.
 1.2. The Company does not guarantee profit, capital preservation, uninterrupted accruals, or unrestricted withdrawals at any time.
-1.3. CloudFlops is not a bank deposit, deposit insurance product, or government guarantee.
+1.3. CudaFlops is not a bank deposit, deposit insurance product, or government guarantee.
 
 2. Crypto-asset and network risk
 2.1. BTC, USDT, and other assets are volatile; stablecoins may also lose parity or face issuer/infrastructure risk.

@@ -14,7 +14,7 @@ class AdminSeeder extends Seeder
         Admin::query()->updateOrCreate(
             ['email' => 'admin@coin.local'],
             [
-                'name' => 'CloudFlops Admin',
+                'name' => 'CudaFlops Admin',
                 'password' => Hash::make('admin1234'),
                 'role' => AdminRole::Superadmin,
             ]

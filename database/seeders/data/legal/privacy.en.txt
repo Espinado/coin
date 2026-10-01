@@ -1,8 +1,8 @@
 PRIVACY POLICY — CLOUDFLOPS
 
 Published: 28 March 2026
-Data controller / operator: CloudFlops LLC (“Company”, “we”, “us”)
-Service: the CloudFlops platform (“Platform”)
+Data controller / operator: CudaFlops LLC (“Company”, “we”, “us”)
+Service: the CudaFlops platform (“Platform”)
 
 1. Overview
 1.1. This Policy explains what personal data we process, why, and what rights you have.
@@ -53,4 +53,4 @@ We may update this Policy. The current version is published on the Platform. For
 
 11. Contact
 For privacy questions: the contact email shown on the Platform / in support.
-Legal entity: CloudFlops LLC (company details appear in the footer/company section when configured in settings).
+Legal entity: CudaFlops LLC (company details appear in the footer/company section when configured in settings).

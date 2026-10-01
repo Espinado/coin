@@ -13,8 +13,8 @@ class LegalFaq
 
         return [
             [
-                'question' => 'What is CloudFlops?',
-                'answer' => "CloudFlops is an investment-plan platform at {$host}. You top up USDT (or BTC converted to USDT), buy a plan with a stated APR and term, receive daily profit to your available balance, and can withdraw to your own wallet. Investing involves risk — see the Risk Disclosure.",
+                'question' => 'What is CudaFlops?',
+                'answer' => "CudaFlops is an investment-plan platform at {$host}. You top up USDT (or BTC converted to USDT), buy a plan with a stated APR and term, receive daily profit to your available balance, and can withdraw to your own wallet. Investing involves risk — see the Risk Disclosure.",
             ],
             [
                 'question' => 'How do investment plans work?',
@@ -41,8 +41,8 @@ class LegalFaq
                 'answer' => 'Share your referral link. When someone you invited buys a plan, you may receive a Level-1 commission (default percentage is configured by the platform, commonly 20% of the purchase). On an approved plan upgrade, commission may apply to the top-up difference only. Level-2 is not used.',
             ],
             [
-                'question' => 'Is CloudFlops an exchange or a bank?',
-                'answer' => 'No. CloudFlops is not a crypto exchange and not a bank. It offers investment plans through a user dashboard under its Terms and Risk Disclosure.',
+                'question' => 'Is CudaFlops an exchange or a bank?',
+                'answer' => 'No. CudaFlops is not a crypto exchange and not a bank. It offers investment plans through a user dashboard under its Terms and Risk Disclosure.',
             ],
             [
                 'question' => 'Are returns guaranteed?',
@@ -66,7 +66,7 @@ class LegalFaq
 
         $host = is_string($fromApp) && $fromApp !== '' ? $fromApp : $fromUser;
 
-        return $host !== '' ? $host : 'CloudFlops';
+        return $host !== '' ? $host : 'CudaFlops';
     }
 
     /**

@@ -11,7 +11,7 @@ class VoximplantSetupCommand extends Command
 {
     protected $signature = 'voximplant:setup {--show-env : Print .env lines after provisioning}';
 
-    protected $description = 'Provision CloudFlops Voximplant application, scenario, rule, and SDK user';
+    protected $description = 'Provision CudaFlops Voximplant application, scenario, rule, and SDK user';
 
     public function handle(VoximplantSetupService $setup, VoximplantApiClient $client): int
     {

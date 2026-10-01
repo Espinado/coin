@@ -17,7 +17,7 @@ class ReverbDiagnoseCommand extends Command
 
     public function handle(): int
     {
-        $this->components->info('CloudFlops Reverb diagnostics');
+        $this->components->info('CudaFlops Reverb diagnostics');
 
         $default = config('broadcasting.default');
         $reverb = config('broadcasting.connections.reverb');

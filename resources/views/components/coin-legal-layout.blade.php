@@ -48,7 +48,7 @@
 <div class="coin-legal-shell">
     <div class="coin-legal-top">
         <a href="{{ auth()->check() ? route('dashboard') : route('home') }}" class="coin-legal-brand">
-            <img src="{{ \App\Support\PlatformBrand::logo('horizontal') }}" alt="CloudFlops" class="coin-brand-logo" />
+            <img src="{{ \App\Support\PlatformBrand::logo('horizontal') }}" alt="{{ \App\Support\PlatformBrand::name() }}" class="coin-brand-logo" />
         </a>
         <a href="{{ auth()->check() ? route('dashboard') : route('home') }}" class="coin-legal-back">{{ __('coin.legal.back_home') }}</a>
     </div>
