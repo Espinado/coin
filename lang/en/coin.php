@@ -1386,7 +1386,7 @@ return [
         ],
         'legal' => [
             'title' => 'Legal',
-            'subtitle' => 'Terms, Privacy, Risks, and FAQ for landing',
+            'subtitle' => 'About, Invest, Terms, Privacy, Risks, and FAQ for the public site',
             'section' => 'Section',
             'title_field' => 'Page title',
             'body_field' => 'Content',
@@ -1398,6 +1398,7 @@ return [
             'preview' => 'On site',
             'publish' => 'Publish on landing',
             'edit_hint' => 'Text appears on a separate page linked from the landing footer.',
+            'invest_edit_hint' => 'Content appears on /invest — the public Investment hub for SEO and AI indexing.',
             'empty' => 'Legal sections not created yet. Run migration or seeder.',
             'faq_edit_hint' => 'Questions and answers appear in the FAQ block on the landing and on /legal/faq.',
             'faq_item' => 'Question',
@@ -1745,6 +1746,7 @@ return [
         'open_full_faq' => 'Open full FAQ',
         'slugs' => [
             'about' => 'About',
+            'invest' => 'Invest',
             'terms' => 'Terms',
             'privacy' => 'Privacy',
             'risks' => 'Risks',

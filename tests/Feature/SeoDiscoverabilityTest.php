@@ -87,6 +87,13 @@ class SeoDiscoverabilityTest extends TestCase
             ->assertDontSee('rent GPU servers', false);
     }
 
+    public function test_unpublished_invest_hub_is_not_found(): void
+    {
+        LegalPage::query()->where('slug', LegalPage::SLUG_INVEST)->update(['is_published' => false]);
+
+        $this->get('http://coin.test/invest')->assertNotFound();
+    }
+
     public function test_about_page_is_public_and_describes_platform(): void
     {
         $this->get('http://coin.test/legal/about')

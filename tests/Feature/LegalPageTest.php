@@ -40,7 +40,7 @@ class LegalPageTest extends TestCase
         $this->get('http://coin.test/legal/terms')
             ->assertOk()
             ->assertSee($page->title, false)
-            ->assertSee('CloudFlops', false);
+            ->assertSee('CudaFlops', false);
     }
 
     public function test_guest_cannot_view_unpublished_legal_page(): void
@@ -136,12 +136,36 @@ class LegalPageTest extends TestCase
             ->assertSee('Updated about body for CloudFlops.', false);
     }
 
-    public function test_admin_legal_index_lists_about(): void
+    public function test_admin_can_update_invest_page_and_it_appears_on_public_hub(): void
+    {
+        $page = LegalPage::query()->where('slug', LegalPage::SLUG_INVEST)->firstOrFail();
+
+        $this->actingAs($this->admin, 'admin')
+            ->patch('http://admin.coin.test/legal/'.$page->slug, [
+                'title' => 'Invest hub updated',
+                'body' => "Custom invest body.\n\nEdited from Legal CRUD.",
+                'is_published' => '1',
+            ])
+            ->assertRedirect(route('admin.legal.index', absolute: false));
+
+        $page->refresh();
+        $this->assertSame('Invest hub updated', $page->title);
+        $this->assertSame(route('seo.invest'), $page->publicUrl());
+
+        $this->get('http://coin.test/invest')
+            ->assertOk()
+            ->assertSee('Invest hub updated', false)
+            ->assertSee('Custom invest body.', false);
+    }
+
+    public function test_admin_legal_index_lists_about_and_invest(): void
     {
         $this->actingAs($this->admin, 'admin')
             ->get('http://admin.coin.test/legal')
             ->assertOk()
             ->assertSee(__('coin.legal.slugs.about'), false)
-            ->assertSee('About CloudFlops', false);
+            ->assertSee(__('coin.legal.slugs.invest'), false)
+            ->assertSee('About CudaFlops', false)
+            ->assertSee('AI infrastructure investment', false);
     }
 }

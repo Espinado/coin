@@ -28,6 +28,7 @@ Route::domain(config('coin.user_domain'))
         Route::get('/legal/{legalPage:slug}', [LegalPageController::class, 'show'])
             ->where('legalPage', 'about|terms|privacy|risks|faq')
             ->name('legal.show');
+        Route::redirect('/legal/invest', '/invest');
 
         Route::get('/r/{code}', ReferralInviteController::class)->name('referral.invite');
 

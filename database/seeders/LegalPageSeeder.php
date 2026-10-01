@@ -19,6 +19,12 @@ class LegalPageSeeder extends Seeder
                 'sort_order' => 50,
             ],
             [
+                'slug' => LegalPage::SLUG_INVEST,
+                'title' => 'AI infrastructure investment',
+                'body' => $this->legalBody('invest.en.txt'),
+                'sort_order' => 5,
+            ],
+            [
                 'slug' => LegalPage::SLUG_TERMS,
                 'title' => 'Terms of Use',
                 'body' => $this->legalBody('terms.en.txt'),

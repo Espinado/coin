@@ -35,7 +35,7 @@
                         <td style="padding:14px 18px;text-align:right;white-space:nowrap;">
                             <a href="{{ route('admin.legal.edit', $page) }}" class="admin-btn">{{ __('coin.admin.legal.edit') }}</a>
                             @if($page->is_published)
-                                <a href="{{ route('legal.show', $page) }}" class="admin-btn" target="_blank" rel="noopener">{{ __('coin.admin.legal.preview') }}</a>
+                                <a href="{{ $page->publicUrl() }}" class="admin-btn" target="_blank" rel="noopener">{{ __('coin.admin.legal.preview') }}</a>
                             @endif
                         </td>
                     </tr>

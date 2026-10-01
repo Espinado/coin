@@ -1,0 +1,24 @@
+AI INFRASTRUCTURE INVESTMENT
+
+CudaFlops lets you allocate capital into investment plans linked to AI infrastructure economics — with clear plan parameters and a transparent dashboard.
+
+What this investment is
+You buy a fixed-term investment plan. Each plan states a minimum amount, APR, and term. Profit accrues daily to your available balance. At maturity, principal returns to available balance and can be withdrawn to your own wallet.
+
+How it works
+1. Create an account and verify your email.
+2. Top up with USDT or BTC (BTC converts to USDT at the platform rate where configured).
+3. Choose a plan and open a contract.
+4. Track daily accruals in the dashboard.
+5. Withdraw available funds to your external wallet when ready.
+
+Business model in plain terms
+CudaFlops is built around investment-plan revenue and AI infrastructure economics — not around selling on-demand GPU hours or operating a public compute marketplace.
+
+What this is not
+CudaFlops is not a crypto exchange, not a bank, and not a GPU cloud provider for renting servers by the hour. Returns are not guaranteed.
+
+Risks
+Investing involves risk. Past performance does not guarantee future results. Please read the Risk Disclosure (/legal/risks) before participating.
+
+Plan APR figures and landing calculators are illustrative. Live parameters are shown in the authenticated dashboard.

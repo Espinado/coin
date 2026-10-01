@@ -5,7 +5,15 @@
 @section('content')
     <div class="admin-card">
         <h1 style="margin:0;font-size:24px;font-weight:600;">{{ $page->slugLabel() }}</h1>
-        <p style="margin:8px 0 0;font-size:14px;color:rgba(232,237,245,0.72);">{{ $page->isFaq() ? __('coin.admin.legal.faq_edit_hint') : __('coin.admin.legal.edit_hint') }}</p>
+        <p style="margin:8px 0 0;font-size:14px;color:rgba(232,237,245,0.72);">
+            @if($page->isFaq())
+                {{ __('coin.admin.legal.faq_edit_hint') }}
+            @elseif($page->isInvest())
+                {{ __('coin.admin.legal.invest_edit_hint') }}
+            @else
+                {{ __('coin.admin.legal.edit_hint') }}
+            @endif
+        </p>
     </div>
 
     <div class="admin-card" style="margin-top:16px;">
@@ -37,7 +45,7 @@
                 <button type="submit" class="admin-btn admin-btn-primary">{{ __('coin.save') }}</button>
                 <a href="{{ route('admin.legal.index') }}" class="admin-btn">{{ __('coin.cancel') }}</a>
                 @if($page->is_published)
-                    <a href="{{ route('legal.show', $page) }}" class="admin-btn" target="_blank" rel="noopener">{{ __('coin.admin.legal.preview') }}</a>
+                    <a href="{{ $page->publicUrl() }}" class="admin-btn" target="_blank" rel="noopener">{{ __('coin.admin.legal.preview') }}</a>
                 @endif
             </div>
         </form>

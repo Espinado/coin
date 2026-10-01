@@ -35,16 +35,17 @@ final class SeoSchema
     /**
      * @return list<array<string, mixed>>
      */
-    public static function investHub(): array
+    public static function investHub(?LegalPage $page = null): array
     {
         $brand = PlatformBrand::name();
+        $title = $page?->title ?: __('coin.seo_hubs.invest.title');
 
         return [
             self::organization(),
             [
                 '@context' => 'https://schema.org',
                 '@type' => 'WebPage',
-                'name' => __('coin.seo_hubs.invest.title'),
+                'name' => $title,
                 'url' => route('seo.invest'),
                 'description' => __('coin.seo_hubs.invest.meta_description', ['brand' => $brand]),
                 'isPartOf' => [

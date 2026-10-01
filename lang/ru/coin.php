@@ -1386,7 +1386,7 @@ return [
         ],
         'legal' => [
             'title' => 'Legal',
-            'subtitle' => 'Terms, Privacy, Risks и FAQ для лендинга',
+            'subtitle' => 'About, Invest, Terms, Privacy, Risks и FAQ для публичного сайта',
             'section' => 'Раздел',
             'title_field' => 'Заголовок страницы',
             'body_field' => 'Содержимое',
@@ -1398,6 +1398,7 @@ return [
             'preview' => 'На сайте',
             'publish' => 'Опубликовать на лендинге',
             'edit_hint' => 'Текст отображается на отдельной странице по ссылке из футера лендинга.',
+            'invest_edit_hint' => 'Контент отображается на /invest — публичный Investment-хаб для SEO и ИИ-индексации.',
             'empty' => 'Разделы Legal ещё не созданы. Запустите миграцию или сидер.',
             'faq_edit_hint' => 'Вопросы и ответы отображаются в блоке FAQ на лендинге и на странице /legal/faq.',
             'faq_item' => 'Вопрос',
@@ -1745,6 +1746,7 @@ return [
         'open_full_faq' => 'Открыть полный FAQ',
         'slugs' => [
             'about' => 'О нас',
+            'invest' => 'Инвестиции',
             'terms' => 'Terms',
             'privacy' => 'Privacy',
             'risks' => 'Risks',

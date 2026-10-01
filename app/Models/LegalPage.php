@@ -18,6 +18,8 @@ class LegalPage extends Model
 
     public const SLUG_ABOUT = 'about';
 
+    public const SLUG_INVEST = 'invest';
+
     protected $fillable = [
         'slug',
         'title',
@@ -46,6 +48,23 @@ class LegalPage extends Model
     {
         return [
             self::SLUG_ABOUT,
+            self::SLUG_INVEST,
+            self::SLUG_TERMS,
+            self::SLUG_PRIVACY,
+            self::SLUG_RISKS,
+            self::SLUG_FAQ,
+        ];
+    }
+
+    /**
+     * Slugs served under /legal/{slug} (invest uses /invest).
+     *
+     * @return list<string>
+     */
+    public static function legalRouteSlugs(): array
+    {
+        return [
+            self::SLUG_ABOUT,
             self::SLUG_TERMS,
             self::SLUG_PRIVACY,
             self::SLUG_RISKS,
@@ -59,6 +78,15 @@ class LegalPage extends Model
         $label = __($key);
 
         return $label === $key ? $this->slug : $label;
+    }
+
+    public function publicUrl(): string
+    {
+        if ($this->isInvest()) {
+            return route('seo.invest');
+        }
+
+        return route('legal.show', $this);
     }
 
     public function scopePublished(Builder $query): Builder
@@ -79,6 +107,11 @@ class LegalPage extends Model
     public function isAbout(): bool
     {
         return $this->slug === self::SLUG_ABOUT;
+    }
+
+    public function isInvest(): bool
+    {
+        return $this->slug === self::SLUG_INVEST;
     }
 
     /**
