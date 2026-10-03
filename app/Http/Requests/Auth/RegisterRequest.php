@@ -4,6 +4,8 @@ namespace App\Http\Requests\Auth;
 
 use App\Models\User;
 use App\Rules\ContactPhone;
+use App\Rules\NotDisposableEmail;
+use App\Services\TurnstileVerifier;
 use App\Support\PhoneCountries;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
@@ -24,6 +26,10 @@ class RegisterRequest extends FormRequest
 
         if ($this->has('email')) {
             $merged['email'] = Str::lower(trim($this->string('email')->toString()));
+        }
+
+        if ($this->has('website')) {
+            $merged['website'] = trim($this->string('website')->toString());
         }
 
         if ($this->has('phone_country')) {
@@ -69,6 +75,7 @@ class RegisterRequest extends FormRequest
                 'string',
                 'email',
                 'max:255',
+                new NotDisposableEmail,
                 function (string $attribute, mixed $value, \Closure $fail): void {
                     $email = Str::lower(trim((string) $value));
 
@@ -95,6 +102,24 @@ class RegisterRequest extends FormRequest
             'accept_terms' => ['required', 'accepted'],
             'accept_privacy' => ['required', 'accepted'],
             'accept_risks' => ['required', 'accepted'],
+            // Honeypot: real users never fill this; bots often do.
+            'website' => ['nullable', 'string', 'max:0'],
+            'cf-turnstile-response' => [
+                Rule::requiredIf(fn () => app(TurnstileVerifier::class)->enabled()),
+                'nullable',
+                'string',
+                function (string $attribute, mixed $value, \Closure $fail): void {
+                    $turnstile = app(TurnstileVerifier::class);
+
+                    if (! $turnstile->enabled()) {
+                        return;
+                    }
+
+                    if (! $turnstile->verify(is_string($value) ? $value : null, $this->ip())) {
+                        $fail(__('coin.auth.captcha_failed'));
+                    }
+                },
+            ],
         ];
     }
 
@@ -122,6 +147,8 @@ class RegisterRequest extends FormRequest
             'accept_privacy.accepted' => __('coin.auth.accept_privacy_required'),
             'accept_risks.required' => __('coin.auth.accept_risks_required'),
             'accept_risks.accepted' => __('coin.auth.accept_risks_required'),
+            'website.max' => __('coin.auth.bot_rejected'),
+            'cf-turnstile-response.required' => __('coin.auth.captcha_required'),
         ];
     }
 

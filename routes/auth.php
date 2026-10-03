@@ -22,7 +22,7 @@ Route::middleware(['guest', 'auth.page.no-cache'])->group(function () {
         ->name('register');
 
     Route::post('register', [RegisteredUserController::class, 'store'])
-        ->middleware('throttle:5,1');
+        ->middleware('throttle:3,10');
 
     Route::get('login', [AuthenticatedSessionController::class, 'create'])
         ->name('login');

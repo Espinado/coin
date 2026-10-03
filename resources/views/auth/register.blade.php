@@ -10,6 +10,12 @@
             <form method="POST" action="{{ route('register') }}" data-no-page-spinner novalidate>
                 @csrf
 
+                {{-- Honeypot for bots; keep empty. --}}
+                <div aria-hidden="true" style="position: absolute; left: -10000px; top: auto; width: 1px; height: 1px; overflow: hidden;">
+                    <label for="website">Website</label>
+                    <input id="website" type="text" name="website" value="" tabindex="-1" autocomplete="off" />
+                </div>
+
                 <div style="margin-top: 26px;">
                     <label for="name" style="display: block; font-size: 12.5px; color: rgba(230,244,250,0.78);">{{ __('coin.auth.name') }}</label>
                     <input id="name" type="text" name="name" value="{{ old('name') }}" autocomplete="name" placeholder="{{ __('coin.auth.name_placeholder') }}" aria-invalid="{{ $errors->has('name') ? 'true' : 'false' }}" style="width: 100%; box-sizing: border-box; margin-top: 9px; padding: 14px 16px; border-radius: 12px; border: 1px solid {{ $errors->has('name') ? 'oklch(0.72 0.22 25)' : 'rgba(150,235,250,0.18)' }}; background: rgba(4,16,28,0.7); color: #f0fbff; font-family: inherit; font-size: 16px;" />
@@ -87,6 +93,13 @@
                     </div>
                 </div>
 
+                @if(config('coin.turnstile.enabled') && filled(config('coin.turnstile.site_key')))
+                    <div style="margin-top: 20px;">
+                        <div class="cf-turnstile" data-sitekey="{{ config('coin.turnstile.site_key') }}" data-theme="dark"></div>
+                        @error('cf-turnstile-response')<div class="coin-auth-error" role="alert">{{ $message }}</div>@enderror
+                    </div>
+                @endif
+
                 <button type="submit" style="width: 100%; margin-top: 24px; padding: 15px; border-radius: 12px; border: 1px solid oklch(0.86 0.11 195 / 0.5); background: linear-gradient(140deg, oklch(0.86 0.12 192), oklch(0.66 0.13 205)); color: #04121f; font-family: inherit; font-size: 15px; font-weight: 600; cursor: pointer; box-shadow: 0 20px 46px -22px oklch(0.8 0.13 195 / 0.85);">{{ __('coin.auth.register') }}</button>
 
                 <div style="margin-top: 24px; padding-top: 20px; border-top: 1px solid rgba(150,235,250,0.1); text-align: center; font-size: 13px; color: rgba(230,244,250,0.72);">
@@ -100,4 +113,7 @@
             ])
         </div>
     </div>
+    @if(config('coin.turnstile.enabled') && filled(config('coin.turnstile.site_key')))
+        <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+    @endif
 </x-coin-auth-layout>

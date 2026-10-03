@@ -142,4 +142,28 @@ class RegistrationTest extends TestCase
             ->assertSee(__('coin.auth.accept_privacy_required'), false)
             ->assertSee(__('coin.auth.accept_risks_required'), false);
     }
+
+    public function test_registration_rejects_disposable_email_domains(): void
+    {
+        $response = $this->from('/register')->post('/register', $this->validRegistrationPayload([
+            'email' => 'bot@mx-mailsrv.com',
+        ]));
+
+        $response->assertRedirect('/register')
+            ->assertSessionHasErrors([
+                'email' => __('coin.auth.email_disposable'),
+            ]);
+        $this->assertGuest();
+    }
+
+    public function test_registration_rejects_honeypot_fill(): void
+    {
+        $response = $this->from('/register')->post('/register', $this->validRegistrationPayload([
+            'website' => 'https://spam.example',
+        ]));
+
+        $response->assertRedirect('/register')
+            ->assertSessionHasErrors('website');
+        $this->assertGuest();
+    }
 }

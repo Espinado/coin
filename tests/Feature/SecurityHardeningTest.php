@@ -514,7 +514,7 @@ class SecurityHardeningTest extends TestCase
     {
         RateLimiter::clear('127.0.0.1');
 
-        for ($i = 0; $i < 5; $i++) {
+        for ($i = 0; $i < 3; $i++) {
             $this->post('http://coin.test/register', $this->validRegistrationPayload([
                 'name' => 'User '.$i,
                 'email' => "user{$i}@coin.test",
