@@ -147,17 +147,38 @@ class WithdrawalTwoFactorService
 
     private function cacheKey(Request $request): string
     {
+        $this->ensureRequestSession($request);
+
         return self::CACHE_PREFIX.$request->session()->getId();
     }
 
     private function throttleKey(Request $request, User $user): string
     {
+        $this->ensureRequestSession($request);
+
         return 'withdrawal-two-factor|'.$user->id.'|'.$request->session()->getId();
     }
 
     private function resendThrottleKey(Request $request, User $user): string
     {
+        $this->ensureRequestSession($request);
+
         return 'withdrawal-two-factor-resend|'.$user->id.'|'.$request->session()->getId();
+    }
+
+    private function ensureRequestSession(Request $request): void
+    {
+        if ($request->hasSession()) {
+            return;
+        }
+
+        $store = app('session')->driver();
+
+        if (! $store->isStarted()) {
+            $store->start();
+        }
+
+        $request->setLaravelSession($store);
     }
 
     private function ensureResendIsNotRateLimited(Request $request, User $user): void

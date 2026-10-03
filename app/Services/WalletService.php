@@ -23,7 +23,7 @@ class WalletService
             return $wallet;
         }
 
-        return Wallet::query()->create([
+        $wallet = Wallet::query()->create([
             'user_id' => $user->id,
             'currency' => (string) config('coin.wallet.base_currency', 'USDT'),
             'balance' => 0,
@@ -32,6 +32,10 @@ class WalletService
             'locked_balance' => 0,
             'min_withdrawal_label' => number_format($this->settings->minWithdrawal(), 2, '.', ''),
         ]);
+
+        $user->setRelation('wallet', $wallet);
+
+        return $wallet;
     }
 
     public function currencyFor(Wallet $wallet): string

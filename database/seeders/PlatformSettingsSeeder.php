@@ -22,6 +22,8 @@ class PlatformSettingsSeeder extends Seeder
             'kyc_required_for_withdrawal' => '0',
             'maintenance_mode' => '0',
             'btc_per_usdt' => '2',
+            'usdt_per_btc' => '80000',
+            'btc_rate_source' => 'manual',
             'early_unlock_fee_percent' => '30',
             'early_unlock_fee_min' => '50.00',
         ]);

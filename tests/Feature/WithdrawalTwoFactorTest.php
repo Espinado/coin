@@ -148,7 +148,7 @@ class WithdrawalTwoFactorTest extends TestCase
             'password' => $password,
         ]);
 
-        $user->wallet->update([
+        app(\App\Services\WalletService::class)->ensureWallet($user)->update([
             'available' => 500,
             'balance' => 500,
             'payout_address' => PayoutAddressTest::VALID_TRON_ADDRESS,

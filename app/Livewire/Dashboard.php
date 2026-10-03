@@ -26,6 +26,7 @@ use App\Rules\ContactPhone;
 use App\Rules\TronPayoutAddress;
 use App\Services\Payment\PaymentSimulatorService;
 use App\Services\PayoutAddressService;
+use App\Services\PayoutAddressTwoFactorService;
 use App\Services\PlanChangeRequestService;
 use App\Services\EarlyUnlockRequestService;
 use App\Services\PlanPurchaseService;
@@ -195,11 +196,16 @@ class Dashboard extends Component
 
     public string $walletModalMode = 'save';
 
+    /** form|verify */
+    public string $walletModalStep = 'form';
+
     public string $payoutAddressInput = '';
 
     public string $payoutAddressConfirm = '';
 
     public string $payoutAddressPassword = '';
+
+    public string $payoutAddressVerificationCode = '';
 
     public string $payoutPassword = '';
 
@@ -2047,93 +2053,181 @@ class Dashboard extends Component
 
     public function openWalletModal(string $currency = 'USDT'): void
     {
+        app(PayoutAddressTwoFactorService::class)->clearChallenge(request());
         $this->resetActionFeedback();
         $this->walletModalCurrency = strtoupper(trim($currency));
         $this->walletModalMode = 'save';
+        $this->walletModalStep = 'form';
         $this->payoutAddressInput = $this->walletModalCurrency === 'BTC'
             ? (string) ($this->wallet?->btc_payout_address ?? '')
             : (string) ($this->wallet?->payout_address ?? '');
         $this->payoutAddressConfirm = '';
         $this->payoutAddressPassword = '';
-        $this->resetErrorBag('payoutAddressInput', 'payoutAddressConfirm', 'payoutAddressPassword');
+        $this->payoutAddressVerificationCode = '';
+        $this->resetErrorBag('payoutAddressInput', 'payoutAddressConfirm', 'payoutAddressPassword', 'payoutAddressVerificationCode');
         $this->walletModalOpen = true;
     }
 
     public function openDisconnectWalletModal(string $currency = 'USDT'): void
     {
+        app(PayoutAddressTwoFactorService::class)->clearChallenge(request());
         $this->resetActionFeedback();
         $this->walletModalCurrency = strtoupper(trim($currency));
         $this->walletModalMode = 'disconnect';
+        $this->walletModalStep = 'form';
         $this->payoutAddressInput = '';
         $this->payoutAddressConfirm = '';
         $this->payoutAddressPassword = '';
-        $this->resetErrorBag('payoutAddressInput', 'payoutAddressConfirm', 'payoutAddressPassword');
+        $this->payoutAddressVerificationCode = '';
+        $this->resetErrorBag('payoutAddressInput', 'payoutAddressConfirm', 'payoutAddressPassword', 'payoutAddressVerificationCode');
         $this->walletModalOpen = true;
     }
 
     public function closeWalletModal(): void
     {
+        app(PayoutAddressTwoFactorService::class)->clearChallenge(request());
         $this->walletModalOpen = false;
         $this->walletModalMode = 'save';
+        $this->walletModalStep = 'form';
         $this->walletModalCurrency = 'USDT';
         $this->payoutAddressInput = '';
         $this->payoutAddressConfirm = '';
         $this->payoutAddressPassword = '';
-        $this->resetErrorBag('payoutAddressInput', 'payoutAddressConfirm', 'payoutAddressPassword');
+        $this->payoutAddressVerificationCode = '';
+        $this->resetErrorBag('payoutAddressInput', 'payoutAddressConfirm', 'payoutAddressPassword', 'payoutAddressVerificationCode');
     }
 
-    public function savePayoutAddress(PayoutAddressService $payoutAddresses): void
+    public function savePayoutAddress(PayoutAddressTwoFactorService $verification): void
     {
+        $this->beginPayoutAddressVerification($verification, PayoutAddressTwoFactorService::ACTION_SAVE);
+    }
+
+    public function disconnectPayoutAddress(PayoutAddressTwoFactorService $verification): void
+    {
+        $this->beginPayoutAddressVerification($verification, PayoutAddressTwoFactorService::ACTION_DISCONNECT);
+    }
+
+    public function beginPayoutAddressVerification(
+        PayoutAddressTwoFactorService $verification,
+        ?string $action = null,
+    ): void {
+        if (! $this->walletModalOpen || $this->walletModalStep !== 'form') {
+            return;
+        }
+
         $this->resetActionFeedback();
+        $action ??= $this->walletModalMode === 'disconnect'
+            ? PayoutAddressTwoFactorService::ACTION_DISCONNECT
+            : PayoutAddressTwoFactorService::ACTION_SAVE;
 
-        $addressRule = $this->walletModalCurrency === 'BTC'
-            ? new BitcoinPayoutAddress
-            : new TronPayoutAddress;
+        if ($action === PayoutAddressTwoFactorService::ACTION_DISCONNECT) {
+            $this->validate([
+                'payoutAddressPassword' => ['required', 'string'],
+            ], [], [
+                'payoutAddressPassword' => __('coin.profile.sessions_password'),
+            ]);
+        } else {
+            $addressRule = $this->walletModalCurrency === 'BTC'
+                ? new BitcoinPayoutAddress
+                : new TronPayoutAddress;
 
-        $this->validate([
-            'payoutAddressInput' => ['required', 'string', $addressRule],
-            'payoutAddressConfirm' => ['required', 'same:payoutAddressInput'],
-            'payoutAddressPassword' => ['required', 'string'],
-        ], [], [
-            'payoutAddressInput' => __('coin.wallet.payout_address'),
-            'payoutAddressConfirm' => __('coin.profile.payout_address_confirm'),
-            'payoutAddressPassword' => __('coin.profile.sessions_password'),
-        ]);
+            $this->validate([
+                'payoutAddressInput' => ['required', 'string', $addressRule],
+                'payoutAddressConfirm' => ['required', 'same:payoutAddressInput'],
+                'payoutAddressPassword' => ['required', 'string'],
+            ], [], [
+                'payoutAddressInput' => __('coin.wallet.payout_address'),
+                'payoutAddressConfirm' => __('coin.profile.payout_address_confirm'),
+                'payoutAddressPassword' => __('coin.profile.sessions_password'),
+            ]);
+        }
 
         $this->assertCurrentUserPassword($this->payoutAddressPassword, 'payoutAddressPassword');
 
         $currency = $this->walletModalCurrency;
-        $payoutAddresses->saveForUser($this->user, $this->payoutAddressInput, $currency);
+        $previous = $currency === 'BTC'
+            ? ($this->wallet?->btc_payout_address)
+            : ($this->wallet?->payout_address);
+
+        $verification->beginChallenge(
+            $this->user,
+            $action,
+            $currency,
+            $action === PayoutAddressTwoFactorService::ACTION_SAVE ? $this->payoutAddressInput : null,
+            $previous,
+            request(),
+        );
+
+        $this->walletModalMode = $action === PayoutAddressTwoFactorService::ACTION_DISCONNECT
+            ? 'disconnect'
+            : 'save';
+        $this->payoutAddressPassword = '';
+        $this->payoutAddressVerificationCode = '';
+        $this->walletModalStep = 'verify';
+    }
+
+    public function resendPayoutAddressVerificationCode(PayoutAddressTwoFactorService $verification): void
+    {
+        if (! $this->walletModalOpen || $this->walletModalStep !== 'verify') {
+            return;
+        }
+
+        $verification->sendCode($this->user, request());
+        $this->setActionFeedback(__('coin.auth.two_factor_resent'), 'success');
+    }
+
+    public function backToPayoutAddressForm(PayoutAddressTwoFactorService $verification): void
+    {
+        if (! $this->walletModalOpen || $this->walletModalStep !== 'verify') {
+            return;
+        }
+
+        $verification->clearChallenge(request());
+        $this->payoutAddressVerificationCode = '';
+        $this->walletModalStep = 'form';
+        $this->resetErrorBag('payoutAddressVerificationCode');
+    }
+
+    public function confirmPayoutAddressChange(
+        PayoutAddressTwoFactorService $verification,
+        PayoutAddressService $payoutAddresses,
+    ): void {
+        if (! $this->walletModalOpen || $this->walletModalStep !== 'verify') {
+            return;
+        }
+
+        $this->resetActionFeedback();
+
+        $this->validate([
+            'payoutAddressVerificationCode' => ['required', 'string', 'size:6'],
+        ], [], [
+            'payoutAddressVerificationCode' => __('coin.auth.two_factor_code'),
+        ]);
+
+        $intent = $verification->verify($this->payoutAddressVerificationCode, $this->user, request());
+        $currency = $intent['currency'];
+
+        if ($intent['action'] === PayoutAddressTwoFactorService::ACTION_DISCONNECT) {
+            $payoutAddresses->clearForUser($this->user, $currency);
+            $this->closeWalletModal();
+            $this->reloadPortfolioData();
+            $this->setActionFeedback(
+                $currency === 'BTC'
+                    ? __('coin.messages.btc_payout_address_removed')
+                    : __('coin.messages.payout_address_removed'),
+                'success',
+            );
+
+            return;
+        }
+
+        $payoutAddresses->saveForUser($this->user, $intent['address'], $currency);
         $this->closeWalletModal();
         $this->reloadPortfolioData();
         $this->setActionFeedback(
             $currency === 'BTC'
                 ? __('coin.messages.btc_payout_address_saved')
                 : __('coin.messages.payout_address_saved'),
-            'success',
-        );
-    }
-
-    public function disconnectPayoutAddress(PayoutAddressService $payoutAddresses): void
-    {
-        $this->resetActionFeedback();
-
-        $this->validate([
-            'payoutAddressPassword' => ['required', 'string'],
-        ], [], [
-            'payoutAddressPassword' => __('coin.profile.sessions_password'),
-        ]);
-
-        $this->assertCurrentUserPassword($this->payoutAddressPassword, 'payoutAddressPassword');
-
-        $currency = $this->walletModalCurrency;
-        $payoutAddresses->clearForUser($this->user, $currency);
-        $this->closeWalletModal();
-        $this->reloadPortfolioData();
-        $this->setActionFeedback(
-            $currency === 'BTC'
-                ? __('coin.messages.btc_payout_address_removed')
-                : __('coin.messages.payout_address_removed'),
             'success',
         );
     }

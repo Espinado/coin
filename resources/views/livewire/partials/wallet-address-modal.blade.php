@@ -1,14 +1,22 @@
 @if($walletModalOpen)
 @php
   $isBtc = $walletModalCurrency === 'BTC';
-  $modalHint = $walletModalMode === 'disconnect'
-    ? __('coin.profile.disconnect_wallet_hint')
-    : ($isBtc
-      ? __('coin.profile.btc_payout_address_hint', ['network' => $this->payoutNetworkLabel])
-      : __('coin.profile.payout_address_hint', ['network' => $this->payoutNetworkLabel]));
+  $isVerify = $walletModalStep === 'verify';
+  $modalHint = $isVerify
+    ? __('coin.profile.payout_address_verify_sub', ['email' => $user->email])
+    : ($walletModalMode === 'disconnect'
+      ? __('coin.profile.disconnect_wallet_hint')
+      : ($isBtc
+        ? __('coin.profile.btc_payout_address_hint', ['network' => $this->payoutNetworkLabel])
+        : __('coin.profile.payout_address_hint', ['network' => $this->payoutNetworkLabel])));
   $placeholder = $isBtc
     ? __('coin.profile.btc_payout_address_placeholder')
     : __('coin.profile.payout_address_placeholder');
+  $modalTitle = $isVerify
+    ? __('coin.profile.payout_address_verify_title')
+    : ($walletModalMode === 'disconnect'
+      ? __('coin.profile.disconnect_wallet_title')
+      : __('coin.profile.payout_address_modal_title'));
 @endphp
 <div
   class="coin-payment-overlay"
@@ -24,7 +32,7 @@
       <div style="min-width: 0;">
         <div style="font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: 0.14em; color: rgba(214,238,248,0.62);">{{ mb_strtoupper(__('coin.profile.connected_wallet')) }} · {{ $walletModalCurrency }}</div>
         <div style="margin-top: 8px; font-size: 20px; font-weight: 600; letter-spacing: -0.02em; color: #f0fbff;">
-          {{ $walletModalMode === 'disconnect' ? __('coin.profile.disconnect_wallet_title') : __('coin.profile.payout_address_modal_title') }}
+          {{ $modalTitle }}
         </div>
         <div style="margin-top: 6px; font-size: 12.5px; color: rgba(214,238,248,0.72);">
           {{ $modalHint }}
@@ -34,40 +42,66 @@
     </div>
 
     <div style="padding: 22px; display: flex; flex-direction: column; gap: 14px;">
-      @if($walletModalMode === 'save')
-        <div>
-          <label style="display: block; font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.12em; color: rgba(214,238,248,0.65);">{{ mb_strtoupper(__('coin.wallet.payout_address')) }} · {{ $this->payoutNetworkLabel }}</label>
-          <input type="text" wire:model="payoutAddressInput" autocomplete="off" spellcheck="false" placeholder="{{ $placeholder }}" style="width: 100%; box-sizing: border-box; margin-top: 8px; padding: 12px 14px; border-radius: 10px; border: 1px solid rgba(150,235,250,0.18); background: rgba(4,16,28,0.7); color: #f0fbff; font-family: 'JetBrains Mono', monospace; font-size: 16px;" />
-          @error('payoutAddressInput')<p style="margin-top: 8px; font-size: 12px; color: #ff8f8f;">{{ $message }}</p>@enderror
-        </div>
+      @if($isVerify)
+        @if($walletModalMode === 'save' && filled($payoutAddressInput))
+          <div style="padding: 12px 14px; border-radius: 10px; border: 1px solid rgba(150,235,250,0.12); background: rgba(150,235,250,0.04);">
+            <div style="font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.12em; color: rgba(214,238,248,0.62);">{{ mb_strtoupper(__('coin.profile.payout_address_verify_mail_new')) }}</div>
+            <div style="margin-top: 8px; font-family: 'JetBrains Mono', monospace; font-size: 12px; word-break: break-all; color: #eafcff;">{{ $payoutAddressInput }}</div>
+          </div>
+        @endif
 
         <div>
-          <label style="display: block; font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.12em; color: rgba(214,238,248,0.65);">{{ mb_strtoupper(__('coin.profile.payout_address_confirm')) }}</label>
-          <input type="text" wire:model="payoutAddressConfirm" autocomplete="off" spellcheck="false" placeholder="{{ $placeholder }}" style="width: 100%; box-sizing: border-box; margin-top: 8px; padding: 12px 14px; border-radius: 10px; border: 1px solid rgba(150,235,250,0.18); background: rgba(4,16,28,0.7); color: #f0fbff; font-family: 'JetBrains Mono', monospace; font-size: 16px;" />
-          @error('payoutAddressConfirm')<p style="margin-top: 8px; font-size: 12px; color: #ff8f8f;">{{ $message }}</p>@enderror
+          <label style="display: block; font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.12em; color: rgba(214,238,248,0.65);">{{ mb_strtoupper(__('coin.auth.two_factor_code')) }}</label>
+          <input type="text" wire:model="payoutAddressVerificationCode" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="000000" style="width: 100%; box-sizing: border-box; margin-top: 8px; padding: 12px 14px; border-radius: 10px; border: 1px solid rgba(150,235,250,0.18); background: rgba(4,16,28,0.7); color: #f0fbff; font-family: 'JetBrains Mono', monospace; font-size: 18px; letter-spacing: 0.2em; text-align: center;" />
+          @error('payoutAddressVerificationCode')<p style="margin-top: 8px; font-size: 12px; color: #ff8f8f;">{{ $message }}</p>@enderror
+        </div>
+
+        <div style="display: flex; gap: 10px; margin-top: 4px;">
+          <button type="button" wire:click="backToPayoutAddressForm" style="flex: 1; padding: 12px; border-radius: 10px; border: 1px solid rgba(150,235,250,0.18); background: transparent; color: rgba(214,238,248,0.82); font-family: inherit; font-size: 13px; cursor: pointer;">{{ __('coin.profile.payout_address_verify_back') }}</button>
+          <button type="button" wire:click="confirmPayoutAddressChange" wire:loading.attr="disabled" wire:target="confirmPayoutAddressChange" style="flex: 1; padding: 12px; border-radius: 10px; border: 1px solid oklch(0.86 0.11 195 / 0.5); background: linear-gradient(140deg, oklch(0.86 0.12 192), oklch(0.66 0.13 205)); color: #04121f; font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer;">
+            <span wire:loading.remove wire:target="confirmPayoutAddressChange">{{ __('coin.profile.payout_address_verify_confirm') }}</span>
+            <span wire:loading wire:target="confirmPayoutAddressChange">{{ __('coin.profile.saving_password') }}</span>
+          </button>
+        </div>
+        <button type="button" wire:click="resendPayoutAddressVerificationCode" wire:loading.attr="disabled" wire:target="resendPayoutAddressVerificationCode" style="align-self: flex-start; border: 0; background: transparent; color: oklch(0.82 0.1 195); font-family: inherit; font-size: 12px; cursor: pointer; padding: 0;">
+          {{ __('coin.auth.two_factor_resend') }}
+        </button>
+      @else
+        @if($walletModalMode === 'save')
+          <div>
+            <label style="display: block; font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.12em; color: rgba(214,238,248,0.65);">{{ mb_strtoupper(__('coin.wallet.payout_address')) }} · {{ $this->payoutNetworkLabel }}</label>
+            <input type="text" wire:model="payoutAddressInput" autocomplete="off" spellcheck="false" placeholder="{{ $placeholder }}" style="width: 100%; box-sizing: border-box; margin-top: 8px; padding: 12px 14px; border-radius: 10px; border: 1px solid rgba(150,235,250,0.18); background: rgba(4,16,28,0.7); color: #f0fbff; font-family: 'JetBrains Mono', monospace; font-size: 16px;" />
+            @error('payoutAddressInput')<p style="margin-top: 8px; font-size: 12px; color: #ff8f8f;">{{ $message }}</p>@enderror
+          </div>
+
+          <div>
+            <label style="display: block; font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.12em; color: rgba(214,238,248,0.65);">{{ mb_strtoupper(__('coin.profile.payout_address_confirm')) }}</label>
+            <input type="text" wire:model="payoutAddressConfirm" autocomplete="off" spellcheck="false" placeholder="{{ $placeholder }}" style="width: 100%; box-sizing: border-box; margin-top: 8px; padding: 12px 14px; border-radius: 10px; border: 1px solid rgba(150,235,250,0.18); background: rgba(4,16,28,0.7); color: #f0fbff; font-family: 'JetBrains Mono', monospace; font-size: 16px;" />
+            @error('payoutAddressConfirm')<p style="margin-top: 8px; font-size: 12px; color: #ff8f8f;">{{ $message }}</p>@enderror
+          </div>
+        @endif
+
+        <div>
+          <label style="display: block; font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.12em; color: rgba(214,238,248,0.65);">{{ mb_strtoupper(__('coin.profile.sessions_password')) }}</label>
+          <input type="password" wire:model="payoutAddressPassword" autocomplete="current-password" placeholder="{{ __('coin.profile.sessions_password_placeholder') }}" style="width: 100%; box-sizing: border-box; margin-top: 8px; padding: 12px 14px; border-radius: 10px; border: 1px solid rgba(150,235,250,0.18); background: rgba(4,16,28,0.7); color: #f0fbff; font-size: 16px;" />
+          @error('payoutAddressPassword')<p style="margin-top: 8px; font-size: 12px; color: #ff8f8f;">{{ $message }}</p>@enderror
+        </div>
+
+        <div style="display: flex; gap: 10px; margin-top: 4px;">
+          <button type="button" wire:click="closeWalletModal" style="flex: 1; padding: 12px; border-radius: 10px; border: 1px solid rgba(150,235,250,0.18); background: transparent; color: rgba(214,238,248,0.82); font-family: inherit; font-size: 13px; cursor: pointer;">{{ __('coin.cancel') }}</button>
+          @if($walletModalMode === 'disconnect')
+            <button type="button" wire:click="disconnectPayoutAddress" wire:loading.attr="disabled" wire:target="disconnectPayoutAddress" style="flex: 1; padding: 12px; border-radius: 10px; border: 1px solid rgba(255,120,120,0.35); background: rgba(255,120,120,0.12); color: #ffd0d0; font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer;">
+              <span wire:loading.remove wire:target="disconnectPayoutAddress">{{ __('coin.profile.payout_address_continue') }}</span>
+              <span wire:loading wire:target="disconnectPayoutAddress">{{ __('coin.profile.saving_password') }}</span>
+            </button>
+          @else
+            <button type="button" wire:click="savePayoutAddress" wire:loading.attr="disabled" wire:target="savePayoutAddress" style="flex: 1; padding: 12px; border-radius: 10px; border: 1px solid oklch(0.86 0.11 195 / 0.5); background: linear-gradient(140deg, oklch(0.86 0.12 192), oklch(0.66 0.13 205)); color: #04121f; font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer;">
+              <span wire:loading.remove wire:target="savePayoutAddress">{{ __('coin.profile.payout_address_continue') }}</span>
+              <span wire:loading wire:target="savePayoutAddress">{{ __('coin.profile.saving_password') }}</span>
+            </button>
+          @endif
         </div>
       @endif
-
-      <div>
-        <label style="display: block; font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.12em; color: rgba(214,238,248,0.65);">{{ mb_strtoupper(__('coin.profile.sessions_password')) }}</label>
-        <input type="password" wire:model="payoutAddressPassword" autocomplete="current-password" placeholder="{{ __('coin.profile.sessions_password_placeholder') }}" style="width: 100%; box-sizing: border-box; margin-top: 8px; padding: 12px 14px; border-radius: 10px; border: 1px solid rgba(150,235,250,0.18); background: rgba(4,16,28,0.7); color: #f0fbff; font-size: 16px;" />
-        @error('payoutAddressPassword')<p style="margin-top: 8px; font-size: 12px; color: #ff8f8f;">{{ $message }}</p>@enderror
-      </div>
-
-      <div style="display: flex; gap: 10px; margin-top: 4px;">
-        <button type="button" wire:click="closeWalletModal" style="flex: 1; padding: 12px; border-radius: 10px; border: 1px solid rgba(150,235,250,0.18); background: transparent; color: rgba(214,238,248,0.82); font-family: inherit; font-size: 13px; cursor: pointer;">{{ __('coin.cancel') }}</button>
-        @if($walletModalMode === 'disconnect')
-          <button type="button" wire:click="disconnectPayoutAddress" wire:loading.attr="disabled" wire:target="disconnectPayoutAddress" style="flex: 1; padding: 12px; border-radius: 10px; border: 1px solid rgba(255,120,120,0.35); background: rgba(255,120,120,0.12); color: #ffd0d0; font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer;">
-            <span wire:loading.remove wire:target="disconnectPayoutAddress">{{ __('coin.profile.disconnect') }}</span>
-            <span wire:loading wire:target="disconnectPayoutAddress">{{ __('coin.profile.saving_password') }}</span>
-          </button>
-        @else
-          <button type="button" wire:click="savePayoutAddress" wire:loading.attr="disabled" wire:target="savePayoutAddress" style="flex: 1; padding: 12px; border-radius: 10px; border: 1px solid oklch(0.86 0.11 195 / 0.5); background: linear-gradient(140deg, oklch(0.86 0.12 192), oklch(0.66 0.13 205)); color: #04121f; font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer;">
-            <span wire:loading.remove wire:target="savePayoutAddress">{{ __('coin.profile.save_wallet') }}</span>
-            <span wire:loading wire:target="savePayoutAddress">{{ __('coin.profile.saving_password') }}</span>
-          </button>
-        @endif
-      </div>
     </div>
   </div>
 </div>
