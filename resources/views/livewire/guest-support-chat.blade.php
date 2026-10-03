@@ -1,3 +1,9 @@
+@php
+    $selectedTicket = $this->selectedTicket;
+    $turnstileOn = (bool) $this->turnstileEnabled;
+    $showCaptchaGate = $isOpen && ! $selectedTicket && $turnstileOn && ! $turnstileCleared;
+    $showStartForm = $isOpen && ! $selectedTicket && (! $turnstileOn || $turnstileCleared);
+@endphp
 <div id="guest-support-root" data-new-message-toast="{{ __('coin.support.new_message') }}" @if($isOpen && $ticketId) wire:poll.3s="pollMessages" @endif style="position:fixed;inset:0;z-index:9999;pointer-events:none;">
     @if(! $isOpen)
     <button type="button" wire:click="openChat" data-open-guest-support class="coin-guest-support-fab">
@@ -20,16 +26,15 @@
             </div>
 
             <div style="flex:1;overflow-y:auto;padding:18px 20px;display:flex;flex-direction:column;gap:14px;">
-                @if($this->selectedTicket)
-                    @php($ticket = $this->selectedTicket)
+                @if($selectedTicket)
                     <div style="padding:14px 16px;border-radius:12px;border:1px solid rgba(150,235,250,0.12);background:rgba(150,235,250,0.035);">
-                        <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:rgba(214,238,248,0.66);">{{ $ticket->reference }}</div>
-                        <div style="margin-top:8px;font-size:16px;font-weight:600;">{{ $ticket->subject }}</div>
-                        <div style="margin-top:6px;font-size:12px;color:rgba(214,238,248,0.72);">{{ $ticket->categoryLabel() }} · {{ $guestEmail }}</div>
+                        <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:rgba(214,238,248,0.66);">{{ $selectedTicket->reference }}</div>
+                        <div style="margin-top:8px;font-size:16px;font-weight:600;">{{ $selectedTicket->subject }}</div>
+                        <div style="margin-top:6px;font-size:12px;color:rgba(214,238,248,0.72);">{{ $selectedTicket->categoryLabel() }} · {{ $guestEmail }}</div>
                     </div>
 
                     <div id="guest-support-thread" wire:ignore.self style="display:flex;flex-direction:column;gap:12px;max-height:320px;overflow-y:auto;padding-right:4px;">
-                        @foreach($ticket->messages as $message)
+                        @foreach($selectedTicket->messages as $message)
                             <div wire:key="guest-support-message-{{ $message->id }}" data-message-id="{{ $message->id }}" style="padding:14px 16px;border-radius:14px;border:1px solid rgba(150,235,250,0.12);background:{{ $message->isFromAdmin() ? 'oklch(0.6 0.13 200 / 0.12)' : 'rgba(150,235,250,0.03)' }};">
                                 <div style="display:flex;justify-content:space-between;gap:12px;font-size:12px;color:rgba(214,238,248,0.66);">
                                     <span>{{ $message->authorLabel() }}</span>
@@ -40,8 +45,8 @@
                         @endforeach
                     </div>
 
-                    @if($ticket->status !== \App\Models\SupportTicket::STATUS_CLOSED)
-                        <form wire:submit.prevent="sendReply" wire:key="guest-support-reply-{{ $ticket->id }}-{{ $replyFormKey }}" style="display:flex;flex-direction:column;gap:10px;">
+                    @if($selectedTicket->status !== \App\Models\SupportTicket::STATUS_CLOSED)
+                        <form wire:submit.prevent="sendReply" wire:key="guest-support-reply-{{ $selectedTicket->id }}-{{ $replyFormKey }}" style="display:flex;flex-direction:column;gap:10px;">
                             <textarea wire:model="replyBody" rows="3" maxlength="5000" placeholder="Type a message..."
                                 style="width:100%;box-sizing:border-box;padding:12px 14px;border-radius:10px;border:1px solid rgba(150,235,250,0.16);background:rgba(4,16,28,0.6);color:#eafcff;font-size:16px;resize:vertical;"></textarea>
                             @error('replyBody')<div style="font-size:12px;color:oklch(0.78 0.16 25);">{{ $message }}</div>@enderror
@@ -50,7 +55,9 @@
                     @else
                         <div style="padding:14px;border-radius:12px;border:1px dashed rgba(150,235,250,0.18);font-size:13px;color:rgba(214,238,248,0.72);">This chat is closed.</div>
                     @endif
-                @elseif($this->turnstileEnabled && ! $turnstileCleared)
+                @endif
+
+                @if($showCaptchaGate)
                     <div style="font-size:15px;font-weight:600;">{{ __('coin.support.captcha_gate_title') }}</div>
                     <p style="margin:0;font-size:13px;line-height:1.55;color:rgba(214,238,248,0.72);">{{ __('coin.support.captcha_gate_hint') }}</p>
 
@@ -92,8 +99,10 @@
                          data-widget-key="{{ $turnstileWidgetKey }}"
                          style="min-height:70px;display:flex;align-items:center;justify-content:center;"></div>
                     @error('turnstileToken')<div style="font-size:12px;color:oklch(0.78 0.16 25);">{{ $message }}</div>@enderror
-                @else
-                    @if($this->turnstileEnabled && $turnstileCleared)
+                @endif
+
+                @if($showStartForm)
+                    @if($turnstileOn && $turnstileCleared)
                         <div style="padding:12px 14px;border-radius:12px;border:1px solid oklch(0.7 0.14 160 / 0.45);background:oklch(0.6 0.14 160 / 0.12);color:oklch(0.82 0.14 160);font-size:13px;line-height:1.5;">
                             {{ __('coin.support.captcha_status_passed') }}
                         </div>

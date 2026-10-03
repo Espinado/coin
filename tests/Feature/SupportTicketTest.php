@@ -296,10 +296,16 @@ class SupportTicketTest extends TestCase
             ->call('openChat')
             ->assertSet('turnstileCleared', false)
             ->assertSet('turnstileStatus', 'checking')
+            ->assertSee(__('coin.support.captcha_gate_title'), false)
+            ->assertSee('guest-turnstile-widget', false)
+            ->assertDontSee('Start a live chat', false)
             ->call('markTurnstilePassed', 'client-token')
             ->assertSet('turnstileCleared', true)
             ->assertSet('turnstileStatus', 'passed')
-            ->assertSet('turnstileToken', 'client-token');
+            ->assertSet('turnstileToken', 'client-token')
+            ->assertSee('Start a live chat', false)
+            ->assertSee(__('coin.support.captcha_status_passed'), false)
+            ->assertDontSee('guest-turnstile-widget', false);
     }
 
     public function test_guest_livewire_create_ticket_rejects_disposable_email(): void
