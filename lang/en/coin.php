@@ -810,6 +810,7 @@ return [
         'invalid_response' => 'Payment gateway returned an invalid response. Try again later.',
         'give_invalid_response' => 'Could not obtain payment address. Try again later or contact support.',
         'unsupported_currency' => 'Selected currency is not supported by the payment gateway.',
+        'ip_restricted' => 'Payment gateway blocked this server IP. Add the production IP to the CCAPI API key whitelist (Security).',
     ],
 
     'bank_gateway' => [

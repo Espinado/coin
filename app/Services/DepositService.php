@@ -69,6 +69,19 @@ class DepositService
             $intent = $gateway->createDepositIntent($deposit);
             $this->applyDepositIntent($deposit, $intent);
         } catch (\Throwable $exception) {
+            Log::error('deposit.gateway.create_failed', [
+                'deposit_id' => $deposit->id,
+                'user_id' => $user->id,
+                'currency' => $deposit->currency,
+                'amount' => (string) $deposit->amount,
+                'gateway_error' => $exception->getMessage(),
+                'gateway_value' => $exception instanceof \App\Services\Payment\PaymentGatewayException
+                    ? $exception->gatewayValue
+                    : ($exception->getPrevious() instanceof \App\Services\Payment\PaymentGatewayException
+                        ? $exception->getPrevious()->gatewayValue
+                        : null),
+            ]);
+
             try {
                 $this->reject(
                     $deposit->fresh(),

@@ -18,6 +18,8 @@ final class CcapiUserMessage
         'ccapi_invalid_response' => 'coin.ccapi_errors.invalid_response',
         'ccapi_give_invalid_response' => 'coin.ccapi_errors.give_invalid_response',
         'ccapi_unsupported_currency' => 'coin.ccapi_errors.unsupported_currency',
+        'ip_restricted' => 'coin.ccapi_errors.ip_restricted',
+        'allowed_ip_required' => 'coin.ccapi_errors.ip_restricted',
     ];
 
     public static function fromThrowable(Throwable $exception): string
