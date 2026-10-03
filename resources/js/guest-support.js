@@ -105,10 +105,15 @@ function setGuestTurnstileToken(token) {
     }
 }
 
-function renderGuestTurnstile(forceReset = false) {
+function renderGuestTurnstile(forceReset = false, attempt = 0) {
     const el = document.getElementById('guest-turnstile-widget');
 
+    // Panel opens via Livewire morph — widget may not be in the DOM yet.
     if (! el || ! el.dataset.sitekey) {
+        if (attempt < 20) {
+            window.setTimeout(() => renderGuestTurnstile(forceReset, attempt + 1), 50);
+        }
+
         return;
     }
 
@@ -117,7 +122,7 @@ function renderGuestTurnstile(forceReset = false) {
             guestTurnstileLoading = true;
             window.setTimeout(() => {
                 guestTurnstileLoading = false;
-                renderGuestTurnstile(forceReset);
+                renderGuestTurnstile(forceReset, attempt);
             }, 250);
         }
 

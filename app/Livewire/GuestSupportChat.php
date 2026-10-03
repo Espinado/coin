@@ -4,6 +4,7 @@ namespace App\Livewire;
 
 use App\Models\SupportTicket;
 use App\Models\SupportTicketMessage;
+use App\Rules\NotDisposableEmail;
 use App\Services\SupportGuestSession;
 use App\Services\SupportTicketService;
 use App\Services\TurnstileVerifier;
@@ -59,6 +60,8 @@ class GuestSupportChat extends Component
             $this->markTicketRead($this->selectedTicket);
             $this->bootGuestRealtime();
         } else {
+            // Ensure Turnstile mounts after the open morph paints the widget container.
+            $this->js('window.setTimeout(function () { window.renderGuestTurnstile && window.renderGuestTurnstile(true); }, 80)');
             $this->dispatch('guest-turnstile-reset');
         }
     }
@@ -105,11 +108,13 @@ class GuestSupportChat extends Component
         $this->newBody = trim($this->newBody);
 
         $validated = $this->validate([
-            'guestEmail' => ['required', 'email', 'max:255'],
+            'guestEmail' => ['required', 'email', 'max:255', new NotDisposableEmail],
             'newSubject' => ['required', 'string', 'min:3', 'max:120'],
             'newCategory' => ['required', 'in:'.implode(',', array_keys(SupportTicket::categories()))],
             'newBody' => ['required', 'string', 'min:10', 'max:5000'],
-        ], [], [
+        ], [
+            'guestEmail.email' => __('coin.auth.email_invalid'),
+        ], [
             'guestEmail' => 'email',
             'newSubject' => 'subject',
             'newCategory' => 'category',

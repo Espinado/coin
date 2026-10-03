@@ -257,6 +257,23 @@ class SupportTicketTest extends TestCase
         $this->assertDatabaseCount('support_tickets', 0);
     }
 
+    public function test_guest_livewire_create_ticket_rejects_disposable_email(): void
+    {
+        config([
+            'coin.turnstile.enabled' => false,
+        ]);
+
+        \Livewire\Livewire::test(\App\Livewire\GuestSupportChat::class)
+            ->set('guestEmail', 'spam@mx-mailsrv.com')
+            ->set('newSubject', 'Need help please')
+            ->set('newCategory', SupportTicket::CATEGORY_OTHER)
+            ->set('newBody', 'This is a long enough message for support.')
+            ->call('createTicket')
+            ->assertHasErrors(['guestEmail']);
+
+        $this->assertDatabaseCount('support_tickets', 0);
+    }
+
     public function test_guest_livewire_create_ticket_succeeds_with_valid_turnstile(): void
     {
         config([
