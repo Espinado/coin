@@ -16,7 +16,21 @@ echo "==> composer install"
 composer install --no-dev --optimize-autoloader --no-interaction
 
 echo "==> npm build"
-export PATH="${NODE_BIN_PATH:-/home2/argussl/node-local/node/bin}:${PATH}"
+if [[ -z "${NODE_BIN_PATH:-}" ]]; then
+  for candidate in \
+    /home2/argussl/node-local/node/bin \
+    /opt/alt/alt-nodejs22/root/usr/bin \
+    /opt/alt/alt-nodejs20/root/usr/bin \
+    /opt/alt/alt-nodejs18/root/usr/bin
+  do
+    if [[ -x "${candidate}/npm" ]]; then
+      NODE_BIN_PATH="${candidate}"
+      break
+    fi
+  done
+fi
+export PATH="${NODE_BIN_PATH:-}:${PATH}"
+command -v npm >/dev/null
 npm ci
 npm run build
 
