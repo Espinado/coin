@@ -148,7 +148,8 @@ class SeoDiscoverabilityTest extends TestCase
             ->assertSee('<loc>'.route('seo.invest').'</loc>', false)
             ->assertSee('<loc>'.route('legal.show', ['legalPage' => 'about']).'</loc>', false)
             ->assertSee('<loc>'.route('legal.show', ['legalPage' => 'terms']).'</loc>', false)
-            ->assertSee('<loc>'.route('legal.show', ['legalPage' => 'faq']).'</loc>', false);
+            ->assertSee('<loc>'.route('legal.show', ['legalPage' => 'faq']).'</loc>', false)
+            ->assertDontSee('/legal/invest', false);
     }
 
     public function test_llms_txt_exposes_platform_facts(): void

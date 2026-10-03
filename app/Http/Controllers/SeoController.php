@@ -88,8 +88,13 @@ class SeoController extends Controller
         $pages = LegalPage::query()->published()->ordered()->get(['slug', 'updated_at']);
 
         foreach ($pages as $page) {
+            // /invest is listed above; /legal/invest only redirects and must not appear twice.
+            if ($page->isInvest()) {
+                continue;
+            }
+
             $urls[] = [
-                'loc' => route('legal.show', $page),
+                'loc' => $page->publicUrl(),
                 'lastmod' => optional($page->updated_at)->toAtomString() ?? Carbon::now()->toAtomString(),
                 'changefreq' => 'monthly',
                 'priority' => $page->slug === LegalPage::SLUG_ABOUT ? '0.8' : '0.7',
