@@ -246,15 +246,60 @@ class SupportTicketTest extends TestCase
         ]);
 
         \Livewire\Livewire::test(\App\Livewire\GuestSupportChat::class)
+            ->call('openChat')
+            ->assertSet('turnstileCleared', false)
+            ->assertSet('turnstileStatus', 'checking')
             ->set('guestEmail', 'guest@example.com')
             ->set('newSubject', 'Need help please')
             ->set('newCategory', SupportTicket::CATEGORY_OTHER)
             ->set('newBody', 'This is a long enough message for support.')
             ->set('turnstileToken', 'fake-token')
+            ->set('turnstileCleared', true)
             ->call('createTicket')
-            ->assertHasErrors(['turnstileToken']);
+            ->assertHasErrors(['turnstileToken'])
+            ->assertSet('turnstileCleared', false)
+            ->assertSet('turnstileStatus', 'failed');
 
         $this->assertDatabaseCount('support_tickets', 0);
+    }
+
+    public function test_guest_livewire_blocks_create_until_turnstile_gate_cleared(): void
+    {
+        config([
+            'coin.turnstile.enabled' => true,
+            'coin.turnstile.site_key' => 'test-site',
+            'coin.turnstile.secret_key' => 'test-secret',
+        ]);
+
+        \Livewire\Livewire::test(\App\Livewire\GuestSupportChat::class)
+            ->call('openChat')
+            ->set('guestEmail', 'guest@example.com')
+            ->set('newSubject', 'Need help please')
+            ->set('newCategory', SupportTicket::CATEGORY_OTHER)
+            ->set('newBody', 'This is a long enough message for support.')
+            ->call('createTicket')
+            ->assertHasErrors(['turnstileToken'])
+            ->assertSet('turnstileCleared', false);
+
+        $this->assertDatabaseCount('support_tickets', 0);
+    }
+
+    public function test_guest_livewire_turnstile_gate_unlocks_form(): void
+    {
+        config([
+            'coin.turnstile.enabled' => true,
+            'coin.turnstile.site_key' => 'test-site',
+            'coin.turnstile.secret_key' => 'test-secret',
+        ]);
+
+        \Livewire\Livewire::test(\App\Livewire\GuestSupportChat::class)
+            ->call('openChat')
+            ->assertSet('turnstileCleared', false)
+            ->assertSet('turnstileStatus', 'checking')
+            ->call('markTurnstilePassed', 'client-token')
+            ->assertSet('turnstileCleared', true)
+            ->assertSet('turnstileStatus', 'passed')
+            ->assertSet('turnstileToken', 'client-token');
     }
 
     public function test_guest_livewire_create_ticket_rejects_disposable_email(): void
@@ -287,11 +332,12 @@ class SupportTicketTest extends TestCase
         ]);
 
         \Livewire\Livewire::test(\App\Livewire\GuestSupportChat::class)
+            ->call('markTurnstilePassed', 'valid-token')
+            ->assertSet('turnstileCleared', true)
             ->set('guestEmail', 'guest@example.com')
             ->set('newSubject', 'Need help please')
             ->set('newCategory', SupportTicket::CATEGORY_OTHER)
             ->set('newBody', 'This is a long enough message for support.')
-            ->set('turnstileToken', 'valid-token')
             ->call('createTicket')
             ->assertHasNoErrors()
             ->assertSet('ticketId', fn ($id) => is_int($id) && $id > 0);

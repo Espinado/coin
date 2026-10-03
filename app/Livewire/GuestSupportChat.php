@@ -17,6 +17,7 @@ use Livewire\Component;
 class GuestSupportChat extends Component
 {
     use ThrottlesSupportActions;
+
     public bool $isOpen = false;
 
     public ?int $ticketId = null;
@@ -32,6 +33,11 @@ class GuestSupportChat extends Component
     public string $turnstileToken = '';
 
     public int $turnstileWidgetKey = 0;
+
+    /** pending|checking|passed|failed|expired */
+    public string $turnstileStatus = 'pending';
+
+    public bool $turnstileCleared = false;
 
     public string $replyBody = '';
 
@@ -49,6 +55,11 @@ class GuestSupportChat extends Component
             $this->lastSeenMessageId = (int) ($ticket->messages->max('id') ?? 0);
             $this->markTicketRead($ticket);
         }
+
+        if (! $this->turnstileEnabled) {
+            $this->turnstileCleared = true;
+            $this->turnstileStatus = 'passed';
+        }
     }
 
     #[On('open-guest-support')]
@@ -59,16 +70,73 @@ class GuestSupportChat extends Component
         if ($this->ticketId) {
             $this->markTicketRead($this->selectedTicket);
             $this->bootGuestRealtime();
-        } else {
-            // Ensure Turnstile mounts after the open morph paints the widget container.
-            $this->js('window.setTimeout(function () { window.renderGuestTurnstile && window.renderGuestTurnstile(true); }, 80)');
-            $this->dispatch('guest-turnstile-reset');
+
+            return;
         }
+
+        if (! $this->turnstileEnabled) {
+            $this->turnstileCleared = true;
+            $this->turnstileStatus = 'passed';
+
+            return;
+        }
+
+        $this->turnstileCleared = false;
+        $this->turnstileStatus = 'checking';
+        $this->resetTurnstileWidget(dispatchReset: true);
+        $this->js('window.setTimeout(function () { window.renderGuestTurnstile && window.renderGuestTurnstile(true); }, 80)');
     }
 
     public function closeChat(): void
     {
         $this->isOpen = false;
+
+        if (! $this->ticketId && $this->turnstileEnabled) {
+            $this->turnstileCleared = false;
+            $this->turnstileStatus = 'pending';
+            $this->turnstileToken = '';
+        }
+    }
+
+    public function markTurnstileChecking(): void
+    {
+        if ($this->turnstileCleared) {
+            return;
+        }
+
+        $this->turnstileStatus = 'checking';
+    }
+
+    public function markTurnstilePassed(string $token): void
+    {
+        $token = trim($token);
+
+        if ($token === '') {
+            $this->markTurnstileFailed();
+
+            return;
+        }
+
+        $this->turnstileToken = $token;
+        $this->turnstileStatus = 'passed';
+        $this->turnstileCleared = true;
+        $this->resetErrorBag('turnstileToken');
+    }
+
+    public function markTurnstileFailed(): void
+    {
+        $this->turnstileToken = '';
+        $this->turnstileCleared = false;
+        $this->turnstileStatus = 'failed';
+        $this->resetTurnstileWidget(dispatchReset: true);
+    }
+
+    public function markTurnstileExpired(): void
+    {
+        $this->turnstileToken = '';
+        $this->turnstileCleared = false;
+        $this->turnstileStatus = 'expired';
+        $this->resetTurnstileWidget(dispatchReset: true);
     }
 
     public function pollMessages(): void
@@ -103,6 +171,12 @@ class GuestSupportChat extends Component
     {
         $this->throttleSupportAction('guest-create-ticket');
 
+        if ($turnstile->enabled() && ! $this->turnstileCleared) {
+            throw ValidationException::withMessages([
+                'turnstileToken' => __('coin.support.captcha_required'),
+            ]);
+        }
+
         $this->guestEmail = strtolower(trim($this->guestEmail));
         $this->newSubject = trim($this->newSubject);
         $this->newBody = trim($this->newBody);
@@ -123,7 +197,9 @@ class GuestSupportChat extends Component
 
         if ($turnstile->enabled()) {
             if (trim($this->turnstileToken) === '') {
-                $this->resetTurnstileWidget();
+                $this->turnstileCleared = false;
+                $this->turnstileStatus = 'pending';
+                $this->resetTurnstileWidget(dispatchReset: true);
 
                 throw ValidationException::withMessages([
                     'turnstileToken' => __('coin.support.captcha_required'),
@@ -131,7 +207,9 @@ class GuestSupportChat extends Component
             }
 
             if (! $turnstile->verify($this->turnstileToken, request()->ip())) {
-                $this->resetTurnstileWidget();
+                $this->turnstileCleared = false;
+                $this->turnstileStatus = 'failed';
+                $this->resetTurnstileWidget(dispatchReset: true);
 
                 throw ValidationException::withMessages([
                     'turnstileToken' => __('coin.support.captcha_failed'),
@@ -151,7 +229,7 @@ class GuestSupportChat extends Component
         $this->newSubject = '';
         $this->newBody = '';
         $this->newCategory = SupportTicket::CATEGORY_OTHER;
-        $this->resetTurnstileWidget();
+        $this->turnstileToken = '';
         $this->markTicketRead($ticket);
         $this->bootGuestRealtime($ticket);
         $this->dispatch('support-thread-scroll');
@@ -224,11 +302,14 @@ class GuestSupportChat extends Component
         return view('livewire.guest-support-chat');
     }
 
-    private function resetTurnstileWidget(): void
+    private function resetTurnstileWidget(bool $dispatchReset = true): void
     {
         $this->turnstileToken = '';
         $this->turnstileWidgetKey++;
-        $this->dispatch('guest-turnstile-reset');
+
+        if ($dispatchReset) {
+            $this->dispatch('guest-turnstile-reset');
+        }
     }
 
     private function bootGuestRealtime(?SupportTicket $ticket = null): void

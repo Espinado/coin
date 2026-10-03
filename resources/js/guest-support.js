@@ -97,12 +97,14 @@ function guestSupportLivewireComponent() {
     return Livewire.find(wireId);
 }
 
-function setGuestTurnstileToken(token) {
+function callGuestSupport(method, ...args) {
     const component = guestSupportLivewireComponent();
 
-    if (component) {
-        component.set('turnstileToken', token || '');
+    if (! component) {
+        return;
     }
+
+    component.call(method, ...args);
 }
 
 function renderGuestTurnstile(forceReset = false, attempt = 0) {
@@ -140,7 +142,6 @@ function renderGuestTurnstile(forceReset = false, attempt = 0) {
     if (guestTurnstileWidgetId !== null) {
         try {
             window.turnstile.reset(guestTurnstileWidgetId);
-            setGuestTurnstileToken('');
 
             return;
         } catch (_) {
@@ -153,9 +154,10 @@ function renderGuestTurnstile(forceReset = false, attempt = 0) {
         sitekey: el.dataset.sitekey,
         theme: 'dark',
         appearance: 'always',
-        callback: (token) => setGuestTurnstileToken(token),
-        'expired-callback': () => setGuestTurnstileToken(''),
-        'error-callback': () => setGuestTurnstileToken(''),
+        callback: (token) => callGuestSupport('markTurnstilePassed', token),
+        'expired-callback': () => callGuestSupport('markTurnstileExpired'),
+        'error-callback': () => callGuestSupport('markTurnstileFailed'),
+        'before-interactive-callback': () => callGuestSupport('markTurnstileChecking'),
     });
 }
 

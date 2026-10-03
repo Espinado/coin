@@ -50,7 +50,55 @@
                     @else
                         <div style="padding:14px;border-radius:12px;border:1px dashed rgba(150,235,250,0.18);font-size:13px;color:rgba(214,238,248,0.72);">This chat is closed.</div>
                     @endif
+                @elseif($this->turnstileEnabled && ! $turnstileCleared)
+                    <div style="font-size:15px;font-weight:600;">{{ __('coin.support.captcha_gate_title') }}</div>
+                    <p style="margin:0;font-size:13px;line-height:1.55;color:rgba(214,238,248,0.72);">{{ __('coin.support.captcha_gate_hint') }}</p>
+
+                    @php
+                        $statusCopy = match ($turnstileStatus) {
+                            'checking' => __('coin.support.captcha_status_checking'),
+                            'passed' => __('coin.support.captcha_status_passed'),
+                            'failed' => __('coin.support.captcha_status_failed'),
+                            'expired' => __('coin.support.captcha_status_expired'),
+                            default => __('coin.support.captcha_status_pending'),
+                        };
+                        $statusColor = match ($turnstileStatus) {
+                            'passed' => 'oklch(0.82 0.14 160)',
+                            'failed', 'expired' => 'oklch(0.78 0.16 25)',
+                            'checking' => 'oklch(0.86 0.11 195)',
+                            default => 'rgba(214,238,248,0.78)',
+                        };
+                        $statusBorder = match ($turnstileStatus) {
+                            'passed' => 'oklch(0.7 0.14 160 / 0.45)',
+                            'failed', 'expired' => 'oklch(0.7 0.16 25 / 0.45)',
+                            'checking' => 'oklch(0.8 0.11 195 / 0.4)',
+                            default => 'rgba(150,235,250,0.18)',
+                        };
+                        $statusBg = match ($turnstileStatus) {
+                            'passed' => 'oklch(0.6 0.14 160 / 0.12)',
+                            'failed', 'expired' => 'oklch(0.55 0.16 25 / 0.12)',
+                            'checking' => 'oklch(0.55 0.1 195 / 0.12)',
+                            default => 'rgba(150,235,250,0.04)',
+                        };
+                    @endphp
+
+                    <div style="padding:14px 16px;border-radius:12px;border:1px solid {{ $statusBorder }};background:{{ $statusBg }};color:{{ $statusColor }};font-size:13px;line-height:1.5;">
+                        {{ $statusCopy }}
+                    </div>
+
+                    <div wire:ignore wire:key="guest-turnstile-{{ $turnstileWidgetKey }}" class="coin-guest-turnstile"
+                         id="guest-turnstile-widget"
+                         data-sitekey="{{ $this->turnstileSiteKey }}"
+                         data-widget-key="{{ $turnstileWidgetKey }}"
+                         style="min-height:70px;display:flex;align-items:center;justify-content:center;"></div>
+                    @error('turnstileToken')<div style="font-size:12px;color:oklch(0.78 0.16 25);">{{ $message }}</div>@enderror
                 @else
+                    @if($this->turnstileEnabled && $turnstileCleared)
+                        <div style="padding:12px 14px;border-radius:12px;border:1px solid oklch(0.7 0.14 160 / 0.45);background:oklch(0.6 0.14 160 / 0.12);color:oklch(0.82 0.14 160);font-size:13px;line-height:1.5;">
+                            {{ __('coin.support.captcha_status_passed') }}
+                        </div>
+                    @endif
+
                     <div style="font-size:15px;font-weight:600;">Start a live chat</div>
                     <p style="margin:0;font-size:13px;line-height:1.55;color:rgba(214,238,248,0.72);">Enter your email so we can reply. An operator will join this conversation in real time.</p>
                     <form wire:submit.prevent="createTicket" style="display:flex;flex-direction:column;gap:12px;">
@@ -80,13 +128,6 @@
                                 style="width:100%;box-sizing:border-box;margin-top:8px;padding:12px 14px;border-radius:10px;border:1px solid rgba(150,235,250,0.16);background:rgba(4,16,28,0.6);color:#eafcff;font-size:16px;resize:vertical;"></textarea>
                             @error('newBody')<div style="margin-top:8px;font-size:12px;color:oklch(0.78 0.16 25);">{{ $message }}</div>@enderror
                         </div>
-                        @if($this->turnstileEnabled)
-                            <div wire:ignore wire:key="guest-turnstile-{{ $turnstileWidgetKey }}" class="coin-guest-turnstile"
-                                 id="guest-turnstile-widget"
-                                 data-sitekey="{{ $this->turnstileSiteKey }}"
-                                 data-widget-key="{{ $turnstileWidgetKey }}"></div>
-                            @error('turnstileToken')<div style="font-size:12px;color:oklch(0.78 0.16 25);">{{ $message }}</div>@enderror
-                        @endif
                         <button type="submit" style="padding:11px 18px;border-radius:10px;border:1px solid oklch(0.86 0.11 195 / 0.5);background:linear-gradient(140deg, oklch(0.86 0.12 192), oklch(0.66 0.13 205));color:#04121f;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;">{{ __('coin.support.start_chat') }}</button>
                     </form>
                 @endif
