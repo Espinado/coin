@@ -10,6 +10,7 @@ use App\Http\Controllers\ReverbDebugLogController;
 use App\Http\Controllers\SeoController;
 use App\Http\Controllers\SeoHubController;
 use App\Http\Controllers\SupportAttachmentController;
+use App\Http\Controllers\UserAvatarController;
 use App\Livewire\Dashboard;
 use App\Livewire\ProfitHistory;
 use Illuminate\Support\Facades\Broadcast;
@@ -57,6 +58,8 @@ Route::domain(config('coin.user_domain'))
             Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
             Route::get('/support/attachments/{attachment}', [SupportAttachmentController::class, 'show'])
                 ->name('support.attachments.show');
+            Route::get('/avatar', [UserAvatarController::class, 'show'])
+                ->name('avatar.show');
         });
 
         require __DIR__.'/auth.php';

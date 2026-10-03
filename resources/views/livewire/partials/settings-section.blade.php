@@ -15,11 +15,34 @@
     {{-- Профиль и контакты --}}
     <div style="{{ $card }}">
       <h2 style="{{ $cardTitle }}">{{ __('coin.profile.title') }}</h2>
-      <div style="display: flex; align-items: center; gap: 16px; margin-top: 20px; padding-bottom: 18px; border-bottom: 1px solid rgba(150,235,250,0.08);">
-        <div style="width: 52px; height: 52px; border-radius: 50%; background: linear-gradient(145deg, oklch(0.7 0.13 198), oklch(0.5 0.15 285)); display: grid; place-items: center; font-family: 'JetBrains Mono', monospace; font-size: 17px; color: #04121f; flex-shrink: 0;">{{ $user->avatarInitial() }}</div>
-        <div style="min-width: 0;">
+      <div style="display: flex; align-items: flex-start; gap: 16px; margin-top: 20px; padding-bottom: 18px; border-bottom: 1px solid rgba(150,235,250,0.08); flex-wrap: wrap;">
+        <div style="width: 72px; height: 72px; border-radius: 50%; background: linear-gradient(145deg, oklch(0.7 0.13 198), oklch(0.5 0.15 285)); display: grid; place-items: center; font-family: 'JetBrains Mono', monospace; font-size: 22px; color: #04121f; flex-shrink: 0; overflow: hidden;">
+          @if($this->profileAvatar)
+            <img src="{{ $this->profileAvatar->temporaryUrl() }}" alt="" style="width:100%;height:100%;object-fit:cover;display:block;">
+          @elseif($user->hasAvatar())
+            <img src="{{ $user->avatarUrl() }}" alt="" style="width:100%;height:100%;object-fit:cover;display:block;">
+          @else
+            {{ $user->avatarInitial() }}
+          @endif
+        </div>
+        <div style="min-width: 0; flex: 1;">
           <div style="font-size: 15px; font-weight: 500;">{{ $user->accountLabel() }}</div>
           <div style="margin-top: 4px; font-size: 12.5px; color: rgba(214,238,248,0.72); word-break: break-all;">{{ $user->email }}</div>
+          <div style="margin-top: 12px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center;">
+            <label style="{{ $btnPrimary }}; padding: 8px 14px; font-size: 12.5px; display: inline-flex; cursor: pointer;">
+              <input type="file" wire:model="profileAvatar" accept=".jpg,.jpeg,.png,image/jpeg,image/png" style="position:absolute;width:1px;height:1px;opacity:0;overflow:hidden;">
+              {{ __('coin.profile.avatar_choose') }}
+            </label>
+            @if($this->profileAvatar)
+              <button type="button" wire:click="saveAvatar" style="{{ $btnPrimary }}; padding: 8px 14px; font-size: 12.5px;">{{ __('coin.profile.avatar_save') }}</button>
+            @endif
+            @if($user->hasAvatar())
+              <button type="button" wire:click="removeAvatar" style="padding: 8px 14px; border-radius: 10px; border: 1px solid rgba(255,143,143,0.45); background: transparent; color: #ff8f8f; font-family: inherit; font-size: 12.5px; font-weight: 600; cursor: pointer;">{{ __('coin.profile.avatar_remove') }}</button>
+            @endif
+          </div>
+          <div style="margin-top: 8px; {{ $hint }}">{{ __('coin.profile.avatar_hint') }}</div>
+          <div wire:loading wire:target="profileAvatar" style="margin-top: 6px; {{ $hint }}">{{ __('coin.profile.avatar_uploading') }}</div>
+          @error('profileAvatar')<p style="margin-top: 6px; {{ $error }}">{{ $message }}</p>@enderror
         </div>
       </div>
       <div style="{{ $cardBody }}">

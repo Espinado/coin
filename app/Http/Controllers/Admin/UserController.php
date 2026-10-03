@@ -12,6 +12,7 @@ use App\Models\User;
 use App\Models\Wallet;
 use App\Services\AdminAuthorization;
 use App\Services\KycDocumentService;
+use App\Services\UserAvatarService;
 use App\Services\PlatformBroadcastService;
 use App\Services\PrivateOfferService;
 use App\Services\UserNotificationService;
@@ -156,6 +157,11 @@ class UserController extends Controller
         }
 
         return $this->adminSuccess('coin.admin.flash.kyc_photos_saved', 'admin.users.show', $user);
+    }
+
+    public function showAvatar(User $user, UserAvatarService $avatars): StreamedResponse
+    {
+        return $avatars->stream($user);
     }
 
     public function showKycDocument(User $user, KycDocument $kycDocument, KycDocumentService $kycDocuments): StreamedResponse

@@ -10,8 +10,19 @@
     <div class="admin-grid-split">
         <div class="admin-stack">
             <div class="admin-card">
-                <h1 style="margin:0;font-size:24px;font-weight:600;">{{ $user->name }}</h1>
-                <p style="margin:8px 0 0;font-size:14px;color:rgba(232,237,245,0.72);word-break:break-word;">{{ $user->email }} · {{ $user->accountLabel() }}</p>
+                <div style="display:flex;align-items:center;gap:16px;">
+                    <div style="width:64px;height:64px;border-radius:50%;background:linear-gradient(145deg,#5ec8d8,#6a5bd4);display:grid;place-items:center;font-family:'JetBrains Mono',monospace;font-size:22px;color:#04121f;flex-shrink:0;overflow:hidden;">
+                        @if($user->hasAvatar())
+                            <img src="{{ $user->avatarUrl('admin.users.avatar') }}" alt="" style="width:100%;height:100%;object-fit:cover;display:block;">
+                        @else
+                            {{ $user->avatarInitial() }}
+                        @endif
+                    </div>
+                    <div style="min-width:0;">
+                        <h1 style="margin:0;font-size:24px;font-weight:600;">{{ $user->name }}</h1>
+                        <p style="margin:8px 0 0;font-size:14px;color:rgba(232,237,245,0.72);word-break:break-word;">{{ $user->email }} · {{ $user->accountLabel() }}</p>
+                    </div>
+                </div>
                 <div class="admin-meta-grid" style="margin-top:14px;font-size:13px;">
                     <div><span style="color:rgba(232,237,245,0.62);">{{ __('coin.admin.registered') }}</span><div style="margin-top:4px;">{{ $user->created_at?->format('M j, Y H:i') ?? '—' }}</div></div>
                     <div><span style="color:rgba(232,237,245,0.62);">{{ __('coin.admin.last_login') }}</span><div style="margin-top:4px;">{{ $user->last_login_at?->format('M j, Y H:i') ?? '—' }}</div></div>

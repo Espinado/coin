@@ -1,9 +1,20 @@
 <div class="admin-card admin-user-context">
     <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.12em;color:rgba(232,237,245,0.62);">{{ mb_strtoupper(__('coin.user_context.title')) }}</div>
-    <div style="margin-top:12px;font-size:15px;font-weight:600;">
-        <a href="{{ route('admin.users.show', $user) }}">{{ $user->accountLabel() }}</a>
+    <div style="margin-top:12px;display:flex;align-items:center;gap:12px;">
+        <div style="width:44px;height:44px;border-radius:50%;background:linear-gradient(145deg,#5ec8d8,#6a5bd4);display:grid;place-items:center;font-family:'JetBrains Mono',monospace;font-size:15px;color:#04121f;flex-shrink:0;overflow:hidden;">
+            @if($user->hasAvatar())
+                <img src="{{ $user->avatarUrl('admin.users.avatar') }}" alt="" style="width:100%;height:100%;object-fit:cover;display:block;">
+            @else
+                {{ $user->avatarInitial() }}
+            @endif
+        </div>
+        <div style="min-width:0;">
+            <div style="font-size:15px;font-weight:600;">
+                <a href="{{ route('admin.users.show', $user) }}">{{ $user->accountLabel() }}</a>
+            </div>
+            <div class="admin-user-context__email">{{ $user->email }}</div>
+        </div>
     </div>
-    <div class="admin-user-context__email">{{ $user->email }}</div>
     <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;">
         <span style="font-size:11px;padding:4px 8px;border-radius:6px;background:rgba(255,255,255,0.05);">KYC: {{ $user->kycLabel() }}</span>
         @if($user->is_blocked)

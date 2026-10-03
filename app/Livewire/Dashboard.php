@@ -50,6 +50,7 @@ use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
 use Illuminate\Validation\ValidationException;
 use App\Services\SupportMessageAttachmentService;
+use App\Services\UserAvatarService;
 use App\Support\Concerns\ThrottlesSupportActions;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\On;
@@ -266,6 +267,9 @@ class Dashboard extends Component
     public string $profileTelegram = '';
 
     public string $profileCountry = '';
+
+    /** @var \Livewire\Features\SupportFileUploads\TemporaryUploadedFile|null */
+    public $profileAvatar = null;
 
     public int $walletPerPage = 10;
 
@@ -2354,6 +2358,41 @@ class Dashboard extends Component
 
         $this->reloadPortfolioData();
         $this->actionMessage = __('coin.messages.profile_saved');
+    }
+
+    public function saveAvatar(UserAvatarService $avatars): void
+    {
+        $this->resetActionFeedback();
+
+        $this->validate([
+            'profileAvatar' => ['required', 'image', 'mimes:jpg,jpeg,png', 'max:2048'],
+        ], [], [
+            'profileAvatar' => __('coin.profile.avatar'),
+        ]);
+
+        try {
+            $this->user = $avatars->store($this->user, $this->profileAvatar);
+        } catch (\RuntimeException $exception) {
+            $this->addError('profileAvatar', $exception->getMessage());
+
+            return;
+        }
+
+        $this->profileAvatar = null;
+        auth()->setUser($this->user);
+        $this->reloadPortfolioData();
+        $this->actionMessage = __('coin.messages.avatar_updated');
+    }
+
+    public function removeAvatar(UserAvatarService $avatars): void
+    {
+        $this->resetActionFeedback();
+
+        $this->user = $avatars->delete($this->user);
+        $this->profileAvatar = null;
+        auth()->setUser($this->user);
+        $this->reloadPortfolioData();
+        $this->actionMessage = __('coin.messages.avatar_removed');
     }
 
     public function openInvestmentPaymentModal(): void

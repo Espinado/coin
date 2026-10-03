@@ -81,6 +81,8 @@ Route::middleware(['admin.domain', 'reject.web.on.admin'])->group(function () {
             Route::get('users', [UserController::class, 'index'])->name('admin.users.index');
             Route::get('users/{user}', [UserController::class, 'show'])->name('admin.users.show');
             Route::patch('users/{user}', [UserController::class, 'update'])->name('admin.users.update');
+            Route::get('users/{user}/avatar', [UserController::class, 'showAvatar'])
+                ->name('admin.users.avatar');
             Route::post('users/{user}/kyc-documents', [UserController::class, 'storeKycDocuments'])
                 ->name('admin.users.kyc-documents.store');
             Route::get('users/{user}/kyc-documents/{kycDocument}', [UserController::class, 'showKycDocument'])

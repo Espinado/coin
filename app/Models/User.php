@@ -38,6 +38,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'phone',
         'telegram',
         'country_code',
+        'avatar_path',
         'last_login_at',
         'password',
         'account_slug',
@@ -237,6 +238,11 @@ class User extends Authenticatable implements MustVerifyEmail
         ]);
     }
 
+    public function hasAvatar(): bool
+    {
+        return filled($this->avatar_path);
+    }
+
     public function avatarInitial(): string
     {
         if (filled($this->name)) {
@@ -248,6 +254,21 @@ class User extends Authenticatable implements MustVerifyEmail
         }
 
         return 'C';
+    }
+
+    public function avatarUrl(string $routeName = 'avatar.show'): ?string
+    {
+        if (! $this->hasAvatar()) {
+            return null;
+        }
+
+        $version = $this->updated_at?->getTimestamp() ?? time();
+
+        if ($routeName === 'avatar.show') {
+            return route('avatar.show', ['v' => $version]);
+        }
+
+        return route($routeName, ['user' => $this, 'v' => $version]);
     }
 
     public function formattedDailyReward(): string

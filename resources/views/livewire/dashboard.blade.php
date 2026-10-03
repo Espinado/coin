@@ -75,7 +75,13 @@
         </div>
         <div class="coin-hide-mobile coin-dash-meta__pill coin-dash-meta__pill--epoch">{{ $this->epochHeaderLabel }}</div>
         <div class="coin-dash-meta__user">
-          <span class="coin-dash-meta__avatar">{{ $user->avatarInitial() }}</span>
+          <span class="coin-dash-meta__avatar">
+            @if($user->hasAvatar())
+              <img src="{{ $user->avatarUrl() }}" alt="" class="coin-dash-meta__avatar-img">
+            @else
+              {{ $user->avatarInitial() }}
+            @endif
+          </span>
           <span class="coin-hide-mobile coin-dash-meta__name">{{ $user->accountLabel() }}</span>
         </div>
       </div>
