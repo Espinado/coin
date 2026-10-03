@@ -7,6 +7,8 @@ use App\Models\PaymentWebhookLog;
 use App\Models\User;
 use App\Models\Withdrawal;
 use App\Services\Payment\CcapiIpnVerifier;
+use App\Services\WalletService;
+use App\Support\PaymentStatusReason;
 use Database\Seeders\PlatformSettingsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -26,6 +28,7 @@ class PaymentWebhookTest extends TestCase
             'coin.payments.driver' => 'ccapi',
             'coin.payments.ccapi.api_key' => $this->apiKey,
             'coin.payments.ccapi.min_confirmations' => 1,
+            'coin.payments.ccapi.webhook_ips' => ['127.0.0.1', '::1'],
             'coin.deposits.auto_confirm_mock' => false,
         ]);
 
@@ -323,6 +326,7 @@ class PaymentWebhookTest extends TestCase
     public function test_ccapi_webhook_rejects_underpaid_deposit(): void
     {
         $user = User::factory()->create();
+        app(WalletService::class)->ensureWallet($user);
         $deposit = Deposit::query()->create([
             'user_id' => $user->id,
             'amount' => 100,
@@ -354,6 +358,7 @@ class PaymentWebhookTest extends TestCase
     public function test_ccapi_webhook_rejects_overpaid_deposit(): void
     {
         $user = User::factory()->create();
+        app(WalletService::class)->ensureWallet($user);
         $deposit = Deposit::query()->create([
             'user_id' => $user->id,
             'amount' => 100,
@@ -411,6 +416,7 @@ class PaymentWebhookTest extends TestCase
     public function test_ccapi_webhook_rejects_expired_deposit(): void
     {
         $user = User::factory()->create();
+        app(WalletService::class)->ensureWallet($user);
         $deposit = Deposit::query()->create([
             'user_id' => $user->id,
             'amount' => 100,
@@ -431,7 +437,8 @@ class PaymentWebhookTest extends TestCase
         $deposit->refresh();
         $user->refresh();
 
-        $this->assertSame(Deposit::STATUS_PENDING, $deposit->status);
+        $this->assertSame(Deposit::STATUS_REJECTED, $deposit->status);
+        $this->assertSame(PaymentStatusReason::DEPOSIT_EXPIRED, $deposit->status_reason);
         $this->assertSame('0.00', number_format((float) $user->wallet->available, 2, '.', ''));
 
         $log = PaymentWebhookLog::query()->where('deposit_id', $deposit->id)->first();
@@ -442,6 +449,7 @@ class PaymentWebhookTest extends TestCase
     public function test_ccapi_webhook_rejects_gateway_reference_mismatch(): void
     {
         $user = User::factory()->create();
+        app(WalletService::class)->ensureWallet($user);
         $deposit = Deposit::query()->create([
             'user_id' => $user->id,
             'amount' => 100,
@@ -498,6 +506,7 @@ class PaymentWebhookTest extends TestCase
     public function test_ccapi_webhook_rejects_wrong_payment_address(): void
     {
         $user = User::factory()->create();
+        app(WalletService::class)->ensureWallet($user);
         $deposit = Deposit::query()->create([
             'user_id' => $user->id,
             'amount' => 100,
@@ -512,13 +521,15 @@ class PaymentWebhookTest extends TestCase
 
         $payload = $this->signedDepositPayload($deposit, 'wrong-addr-tx', 1);
         $payload['to'] = 'TWrongAddress999';
+        $payload['sign'] = app(CcapiIpnVerifier::class)->sign($payload, $this->apiKey);
 
         $this->postJson('http://coin.test/webhooks/ccapi', $payload)->assertOk();
 
         $deposit->refresh();
         $user->refresh();
 
-        $this->assertSame(Deposit::STATUS_PENDING, $deposit->status);
+        $this->assertSame(Deposit::STATUS_REJECTED, $deposit->status);
+        $this->assertSame(PaymentStatusReason::DEPOSIT_ADDRESS_MISMATCH, $deposit->status_reason);
         $this->assertSame('0.00', number_format((float) $user->wallet->available, 2, '.', ''));
 
         $log = PaymentWebhookLog::query()->where('deposit_id', $deposit->id)->first();
@@ -557,15 +568,25 @@ class PaymentWebhookTest extends TestCase
     public function test_outgoing_ipn_marks_processing_withdrawal_as_paid(): void
     {
         $user = User::factory()->create();
+        app(WalletService::class)->ensureWallet($user)->update([
+            'available' => 0,
+            'balance' => 100,
+            'pending' => 0,
+        ]);
+        $user->refresh();
+
         $withdrawal = Withdrawal::query()->create([
             'user_id' => $user->id,
             'reference' => 'WD-TEST1234',
             'amount' => 25,
+            'base_amount' => 25,
+            'platform_fee' => 0,
             'currency' => 'USDT',
             'withdrawal_type' => 'available_balance',
             'payout_address' => 'TRecipient123',
             'network_label' => 'TRC-20',
             'gateway_request_id' => '999',
+            'sent_at' => now(),
             'status' => Withdrawal::STATUS_PROCESSING,
         ]);
 
@@ -599,15 +620,25 @@ class PaymentWebhookTest extends TestCase
     public function test_outgoing_ipn_rejects_wrong_payout_amount(): void
     {
         $user = User::factory()->create();
+        app(WalletService::class)->ensureWallet($user)->update([
+            'available' => 0,
+            'balance' => 100,
+            'pending' => 0,
+        ]);
+        $user->refresh();
+
         $withdrawal = Withdrawal::query()->create([
             'user_id' => $user->id,
             'reference' => 'WD-WRONGAMT1',
             'amount' => 25,
+            'base_amount' => 25,
+            'platform_fee' => 0,
             'currency' => 'USDT',
             'withdrawal_type' => 'available_balance',
             'payout_address' => 'TRecipient123',
             'network_label' => 'TRC-20',
             'gateway_request_id' => '999',
+            'sent_at' => now(),
             'status' => Withdrawal::STATUS_PROCESSING,
         ]);
 
@@ -633,25 +664,42 @@ class PaymentWebhookTest extends TestCase
         $this->postJson('http://coin.test/webhooks/ccapi', $payload)->assertOk();
 
         $withdrawal->refresh();
+        $user->wallet->refresh();
 
-        $this->assertSame(Withdrawal::STATUS_REJECTED, $withdrawal->status);
-        $this->assertSame('withdrawal_ipn_mismatch', $withdrawal->status_reason);
+        $this->assertSame(Withdrawal::STATUS_PROCESSING, $withdrawal->status);
+        $this->assertSame(PaymentStatusReason::WITHDRAWAL_IPN_MISMATCH, $withdrawal->status_reason);
+        $this->assertStringContainsString('no auto-refund', (string) $withdrawal->admin_note);
+        $this->assertSame(100.0, (float) $user->wallet->balance);
+        $this->assertSame(0.0, (float) $user->wallet->available);
     }
 
-    public function test_outgoing_ipn_rejects_wrong_payout_address(): void
+    public function test_outgoing_ipn_holds_wrong_payout_address_without_refund(): void
     {
         $user = User::factory()->create();
+        app(WalletService::class)->ensureWallet($user)->update([
+            'available' => 0,
+            'balance' => 100,
+            'pending' => 0,
+        ]);
+        $user->refresh();
+
         $withdrawal = Withdrawal::query()->create([
             'user_id' => $user->id,
             'reference' => 'WD-WRONGADDR',
             'amount' => 25,
+            'base_amount' => 25,
+            'platform_fee' => 0,
             'currency' => 'USDT',
             'withdrawal_type' => 'available_balance',
             'payout_address' => 'TRecipient123',
             'network_label' => 'TRC-20',
             'gateway_request_id' => '999',
+            'sent_at' => now(),
             'status' => Withdrawal::STATUS_PROCESSING,
         ]);
+
+        $balanceBefore = (float) $user->wallet->balance;
+        $availableBefore = (float) $user->wallet->available;
 
         $payload = [
             'cryptocurrencyapi.net' => 3,
@@ -675,9 +723,13 @@ class PaymentWebhookTest extends TestCase
         $this->postJson('http://coin.test/webhooks/ccapi', $payload)->assertOk();
 
         $withdrawal->refresh();
+        $user->wallet->refresh();
 
-        $this->assertSame(Withdrawal::STATUS_REJECTED, $withdrawal->status);
-        $this->assertSame('withdrawal_ipn_mismatch', $withdrawal->status_reason);
+        $this->assertSame(Withdrawal::STATUS_PROCESSING, $withdrawal->status);
+        $this->assertSame(PaymentStatusReason::WITHDRAWAL_IPN_MISMATCH, $withdrawal->status_reason);
+        $this->assertStringContainsString('no auto-refund', (string) $withdrawal->admin_note);
+        $this->assertSame($balanceBefore, (float) $user->wallet->balance);
+        $this->assertSame($availableBefore, (float) $user->wallet->available);
     }
 
     /** @return array<string, mixed> */

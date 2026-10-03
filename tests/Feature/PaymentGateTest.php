@@ -51,7 +51,7 @@ class PaymentGateTest extends TestCase
 
     public function test_withdrawal_works_in_mock_driver_mode(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->kycApproved()->create();
         $wallet = app(\App\Services\WalletService::class)->ensureWallet($user);
         $wallet->update([
             'available' => 500,

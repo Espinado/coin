@@ -637,6 +637,29 @@ class PaymentStatusLogService
         );
     }
 
+    public function withdrawalMismatchHeld(
+        Withdrawal $withdrawal,
+        string $source = PaymentStatusLog::SOURCE_APP,
+        ?string $detail = null,
+    ): PaymentStatusLog {
+        return $this->logWithdrawalStatusChange(
+            $withdrawal,
+            $source,
+            'mismatch_hold',
+            Withdrawal::STATUS_PROCESSING,
+            Withdrawal::STATUS_PROCESSING,
+            'failed',
+            __('coin.payment_log.title_withdrawal_mismatch_held'),
+            $detail ?: __('coin.payment_log.message_withdrawal_mismatch_held'),
+            gatewayState: $withdrawal->gateway_state,
+            payload: [
+                'gateway_request_id' => $withdrawal->gateway_request_id,
+                'status_reason' => $withdrawal->status_reason,
+                'auto_refund' => false,
+            ],
+        );
+    }
+
     public function withdrawalAdminStatusChange(
         Withdrawal $withdrawal,
         ?string $previousStatus,

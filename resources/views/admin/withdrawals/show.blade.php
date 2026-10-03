@@ -44,6 +44,9 @@
                     @endif
                 @elseif($withdrawal->status === \App\Models\Withdrawal::STATUS_PROCESSING)
                     <p style="margin:0;font-size:13px;line-height:1.65;color:rgba(232,237,245,0.72);">{{ __('coin.admin.withdrawal_processing_hint') }}</p>
+                    @if($withdrawal->status_reason === \App\Support\PaymentStatusReason::WITHDRAWAL_IPN_MISMATCH)
+                        <p style="margin:12px 0 0;font-size:13px;line-height:1.65;color:#ffb4b4;">{{ __('coin.admin.withdrawal_mismatch_hold_hint') }}</p>
+                    @endif
                     @if($pollLogs->isNotEmpty())
                         <div style="margin-top:18px;padding-top:18px;border-top:1px solid rgba(255,255,255,0.08);">
                             <h3 style="margin:0 0 10px;font-size:14px;font-weight:600;">{{ __('coin.admin.gateway_poll_log') }}</h3>

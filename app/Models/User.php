@@ -28,6 +28,10 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public const KYC_REJECTED = 'rejected';
 
+    protected $attributes = [
+        'kyc_status' => self::KYC_NONE,
+    ];
+
     protected $fillable = [
         'name',
         'email',
@@ -150,6 +154,11 @@ class User extends Authenticatable implements MustVerifyEmail
     public function wallet(): HasOne
     {
         return $this->hasOne(Wallet::class);
+    }
+
+    public function kycDocuments(): HasMany
+    {
+        return $this->hasMany(KycDocument::class)->latest();
     }
 
     public function contracts(): HasMany

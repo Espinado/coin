@@ -112,11 +112,16 @@ class CcapiSyncCommand extends Command
             $params['token'] = strtoupper((string) $deposit->currency);
         }
 
-        $forwardTo = trim((string) config('coin.payments.ccapi.forward_to', ''));
+        $currency = strtoupper((string) $deposit->currency);
+        $forwardTo = $currency === 'BTC'
+            ? trim((string) config('coin.payments.ccapi.forward_btc', ''))
+            : trim((string) config('coin.payments.ccapi.forward_to', ''));
+        $forwardFrom = $currency === 'BTC'
+            ? trim((string) config('coin.payments.ccapi.forward_btc_from', ''))
+            : trim((string) config('coin.payments.ccapi.forward_from', ''));
 
         if ($forwardTo !== '') {
             $params['to'] = $forwardTo;
-            $forwardFrom = trim((string) config('coin.payments.ccapi.forward_from', ''));
             $params['from'] = $forwardFrom !== '' ? $forwardFrom : $forwardTo;
         }
 

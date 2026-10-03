@@ -61,7 +61,7 @@ class PayoutAddressTest extends TestCase
 
     public function test_usdt_withdrawal_rejects_bitcoin_address(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->kycApproved()->create();
         app(WalletService::class)->ensureWallet($user)->update([
             'available' => 200,
             'balance' => 200,
@@ -78,7 +78,7 @@ class PayoutAddressTest extends TestCase
 
     public function test_btc_withdrawal_rejects_tron_address(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->kycApproved()->create();
         app(WalletService::class)->ensureWallet($user)->update([
             'available' => 200,
             'balance' => 200,
@@ -95,7 +95,7 @@ class PayoutAddressTest extends TestCase
 
     public function test_usdt_withdrawal_succeeds_with_valid_tron_address(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->kycApproved()->create();
         app(WalletService::class)->ensureWallet($user)->update([
             'available' => 200,
             'balance' => 200,
@@ -114,7 +114,7 @@ class PayoutAddressTest extends TestCase
 
     public function test_btc_withdrawal_succeeds_with_valid_bitcoin_address(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->kycApproved()->create();
         app(WalletService::class)->ensureWallet($user)->update([
             'available' => 200,
             'balance' => 200,

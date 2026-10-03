@@ -2,6 +2,7 @@
 
 namespace Tests;
 
+use App\Models\User;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 
 abstract class TestCase extends BaseTestCase
@@ -23,5 +24,12 @@ abstract class TestCase extends BaseTestCase
             'accept_privacy' => '1',
             'accept_risks' => '1',
         ], $overrides);
+    }
+
+    protected function approveKyc(User $user): User
+    {
+        $user->forceFill(['kyc_status' => User::KYC_APPROVED])->save();
+
+        return $user->fresh();
     }
 }

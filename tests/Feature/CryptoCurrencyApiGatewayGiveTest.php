@@ -68,11 +68,13 @@ class CryptoCurrencyApiGatewayGiveTest extends TestCase
         });
     }
 
-    public function test_btc_deposit_uses_btc_give_endpoint(): void
+    public function test_btc_deposit_uses_btc_give_endpoint_with_btc_forward(): void
     {
         config([
             'coin.exchange_rates.coinmarketcap.enabled' => true,
             'coin.exchange_rates.coinmarketcap.api_key' => 'test-cmc-key',
+            'coin.payments.ccapi.forward_btc' => '18hno6LVJie8pfPzHsMqB18Rhrh5rsDqW7',
+            'coin.payments.ccapi.forward_to' => 'TLcvabZXL8sfwux16zqwgdiMzhBgKGNDCy',
         ]);
 
         Http::fake([
@@ -102,7 +104,14 @@ class CryptoCurrencyApiGatewayGiveTest extends TestCase
         $this->assertSame('bc1qqhza20mal9tdar863pzrlpjgfx6kdhyfssccpf', $intent->paymentAddress);
 
         Http::assertSent(function ($request) {
-            return str_contains($request->url(), '/api/btc/.give');
+            if (! str_contains($request->url(), '/api/btc/.give')) {
+                return false;
+            }
+
+            parse_str((string) parse_url($request->url(), PHP_URL_QUERY), $query);
+
+            return ($query['to'] ?? null) === '18hno6LVJie8pfPzHsMqB18Rhrh5rsDqW7'
+                && ($query['from'] ?? null) === '18hno6LVJie8pfPzHsMqB18Rhrh5rsDqW7';
         });
     }
 

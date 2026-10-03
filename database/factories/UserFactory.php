@@ -51,4 +51,11 @@ class UserFactory extends Factory
             'email_two_factor_enabled' => true,
         ]);
     }
+
+    public function kycApproved(): static
+    {
+        return $this->afterCreating(function (User $user): void {
+            $user->forceFill(['kyc_status' => User::KYC_APPROVED])->save();
+        });
+    }
 }

@@ -124,7 +124,7 @@ class SecurityHardeningTest extends TestCase
     public function test_rejected_withdrawal_cannot_be_marked_paid(): void
     {
         $admin = Admin::query()->firstOrFail();
-        $user = User::factory()->create();
+        $user = User::factory()->kycApproved()->create();
 
         config(['coin.deposits.auto_confirm_mock' => true]);
         app()->detectEnvironment(fn () => 'testing');
@@ -311,14 +311,15 @@ class SecurityHardeningTest extends TestCase
 
     public function test_second_withdrawal_rejected_when_balance_already_reserved(): void
     {
-        $user = User::factory()->create();
-        $user->wallet->update([
+        $user = User::factory()->kycApproved()->create();
+        app(\App\Services\WalletService::class)->ensureWallet($user)->update([
             'available' => 150,
             'balance' => 150,
             'pending' => 0,
             'payout_address' => PayoutAddressTest::VALID_TRON_ADDRESS,
             'network_label' => 'TRC-20',
         ]);
+        $user->refresh();
 
         app(WithdrawalService::class)->createForUser($user, 100);
 

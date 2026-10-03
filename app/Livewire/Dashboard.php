@@ -49,16 +49,19 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
 use Illuminate\Validation\ValidationException;
+use App\Services\SupportMessageAttachmentService;
 use App\Support\Concerns\ThrottlesSupportActions;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\On;
 use Livewire\Attributes\Url;
 use Livewire\Component;
+use Livewire\WithFileUploads;
 use Livewire\WithPagination;
 
 class Dashboard extends Component
 {
     use ThrottlesSupportActions;
+    use WithFileUploads;
     use WithPagination;
 
     #[Url(as: 'section', history: true, keep: false)]
@@ -162,7 +165,13 @@ class Dashboard extends Component
 
     public string $newBody = '';
 
+    /** @var list<\Livewire\Features\SupportFileUploads\TemporaryUploadedFile> */
+    public $newAttachments = [];
+
     public string $replyBody = '';
+
+    /** @var list<\Livewire\Features\SupportFileUploads\TemporaryUploadedFile> */
+    public $replyAttachments = [];
 
     public int $replyFormKey = 0;
 
@@ -2617,6 +2626,7 @@ class Dashboard extends Component
         $this->newSubject = '';
         $this->newCategory = SupportTicket::CATEGORY_OTHER;
         $this->newBody = '';
+        $this->newAttachments = [];
         $this->resetValidation();
     }
 
@@ -2627,6 +2637,7 @@ class Dashboard extends Component
         $this->selectedTicketId = $ticketId;
         $this->showCreateTicket = false;
         $this->replyBody = '';
+        $this->replyAttachments = [];
         $this->markTicketRead($ticketId);
         $this->syncSupportUnreadBadge();
     }
@@ -2641,18 +2652,38 @@ class Dashboard extends Component
         $validated = $this->validate([
             'newSubject' => ['required', 'string', 'min:3', 'max:120'],
             'newCategory' => ['required', 'in:'.implode(',', array_keys(SupportTicket::categories()))],
-            'newBody' => ['required', 'string', 'min:10', 'max:5000'],
+            'newBody' => ['nullable', 'string', 'max:5000'],
+            'newAttachments' => ['nullable', 'array', 'max:'.SupportMessageAttachmentService::MAX_FILES_PER_MESSAGE],
+            'newAttachments.*' => ['image', 'mimes:jpg,jpeg', 'max:5120'],
         ], [], [
             'newSubject' => 'subject',
             'newCategory' => 'category',
             'newBody' => 'message',
+            'newAttachments' => __('coin.support.attachments'),
+            'newAttachments.*' => __('coin.support.attachment'),
         ]);
+
+        $files = is_array($this->newAttachments) ? array_values($this->newAttachments) : [];
+        $body = trim((string) ($validated['newBody'] ?? ''));
+
+        if ($body === '' && $files === []) {
+            $this->addError('newBody', __('coin.support.message_or_attachment_required'));
+
+            return;
+        }
+
+        if ($body !== '' && strlen($body) < 10 && $files === []) {
+            $this->addError('newBody', __('validation.min.string', ['attribute' => 'message', 'min' => 10]));
+
+            return;
+        }
 
         $ticket = $support->createForUser(
             $this->user,
             $validated['newSubject'],
             $validated['newCategory'],
-            $validated['newBody'],
+            $body,
+            $files,
         );
 
         $this->reloadTickets();
@@ -2661,6 +2692,7 @@ class Dashboard extends Component
         $this->newSubject = '';
         $this->newCategory = SupportTicket::CATEGORY_OTHER;
         $this->newBody = '';
+        $this->newAttachments = [];
         $this->createFormKey++;
         $this->markTicketRead($ticket->id);
         $this->syncSupportUnreadBadge();
@@ -2879,15 +2911,35 @@ class Dashboard extends Component
 
         $this->replyBody = trim($this->replyBody);
 
-        $validated = $this->validate([
-            'replyBody' => ['required', 'string', 'min:2', 'max:5000'],
+        $this->validate([
+            'replyBody' => ['nullable', 'string', 'max:5000'],
+            'replyAttachments' => ['nullable', 'array', 'max:'.SupportMessageAttachmentService::MAX_FILES_PER_MESSAGE],
+            'replyAttachments.*' => ['image', 'mimes:jpg,jpeg', 'max:5120'],
         ], [], [
             'replyBody' => 'message',
+            'replyAttachments' => __('coin.support.attachments'),
+            'replyAttachments.*' => __('coin.support.attachment'),
         ]);
 
-        $message = $support->addUserMessage($ticket, $this->user, $validated['replyBody']);
+        $files = is_array($this->replyAttachments) ? array_values($this->replyAttachments) : [];
+        $body = $this->replyBody;
+
+        if ($body === '' && $files === []) {
+            $this->addError('replyBody', __('coin.support.message_or_attachment_required'));
+
+            return;
+        }
+
+        if ($body !== '' && strlen($body) < 2 && $files === []) {
+            $this->addError('replyBody', __('validation.min.string', ['attribute' => 'message', 'min' => 2]));
+
+            return;
+        }
+
+        $message = $support->addUserMessage($ticket, $this->user, $body, $files);
 
         $this->replyBody = '';
+        $this->replyAttachments = [];
         $this->replyFormKey++;
         $this->reloadTickets();
         $this->selectedTicketId = $ticket->id;
@@ -3391,7 +3443,7 @@ class Dashboard extends Component
     private function reloadTickets(): void
     {
         $this->tickets = $this->user->supportTickets()
-            ->with('messages')
+            ->with('messages.attachments')
             ->orderByDesc('updated_at')
             ->get();
     }
@@ -3399,6 +3451,9 @@ class Dashboard extends Component
     /** @return array<string, mixed> */
     private function formatMessageForBroadcast(SupportTicketMessage $message): array
     {
+        $message->loadMissing('attachments');
+        $attachmentService = app(SupportMessageAttachmentService::class);
+
         return [
             'id' => $message->id,
             'ticket_id' => $message->support_ticket_id,
@@ -3407,6 +3462,10 @@ class Dashboard extends Component
             'body' => $message->body,
             'created_at' => $message->created_at?->format('M j, Y H:i'),
             'is_from_admin' => $message->isFromAdmin(),
+            'attachments' => $message->attachments
+                ->map(fn ($attachment) => $attachmentService->toBroadcastArray($attachment))
+                ->values()
+                ->all(),
         ];
     }
 

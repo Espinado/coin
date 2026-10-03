@@ -58,6 +58,10 @@ class WithdrawalService
 
     public function assertCanCreate(User $user, float $amount, string $currency): array
     {
+        if (! $user->isKycApproved()) {
+            throw new RuntimeException(__('coin.wallet.kyc_required'));
+        }
+
         $wallet = $user->wallet ?? throw new RuntimeException('User has no wallet.');
         $quote = $this->quote($amount, $currency);
 
@@ -83,8 +87,8 @@ class WithdrawalService
             throw new RuntimeException('Account is blocked.');
         }
 
-        if ($this->settings->getBool('kyc_required_for_withdrawal') && $user->kyc_status !== User::KYC_APPROVED) {
-            throw new RuntimeException('KYC approval is required before requesting a payout.');
+        if (! $user->isKycApproved()) {
+            throw new RuntimeException(__('coin.wallet.kyc_required'));
         }
 
         if ($amount <= 0) {
@@ -332,6 +336,22 @@ class WithdrawalService
                 throw new RuntimeException('Only processing withdrawals can be marked failed from gateway.');
             }
 
+            $resolvedReason = $statusReason ?? PaymentStatusReason::WITHDRAWAL_GATEWAY_FAILED;
+
+            // After .send, an IPN/poll mismatch must not auto-refund — funds may already be on-chain.
+            if (
+                $resolvedReason === PaymentStatusReason::WITHDRAWAL_IPN_MISMATCH
+                && $this->wasDispatchedToGateway($withdrawal)
+            ) {
+                return $this->holdDispatchedMismatchForReview(
+                    $withdrawal,
+                    $gatewayState,
+                    $reason,
+                    $resolvedReason,
+                    $logSource,
+                );
+            }
+
             $wallet = $this->lockWallet(
                 $withdrawal->user->wallet ?? throw new RuntimeException('User has no wallet.'),
             );
@@ -339,7 +359,7 @@ class WithdrawalService
 
             $updates = [
                 'status' => Withdrawal::STATUS_REJECTED,
-                'status_reason' => $statusReason ?? PaymentStatusReason::WITHDRAWAL_GATEWAY_FAILED,
+                'status_reason' => $resolvedReason,
                 'gateway_state' => $gatewayState ?? $withdrawal->gateway_state,
                 'processed_at' => now(),
             ];
@@ -358,6 +378,45 @@ class WithdrawalService
 
             return $withdrawal;
         });
+    }
+
+    /**
+     * Keep a dispatched payout in processing when IPN/poll details mismatch.
+     * Caller must already hold a row lock inside a transaction.
+     */
+    private function holdDispatchedMismatchForReview(
+        Withdrawal $withdrawal,
+        ?string $gatewayState,
+        ?string $reason,
+        string $statusReason,
+        string $logSource,
+    ): Withdrawal {
+        $noteLine = trim('IPN/poll mismatch held for review (no auto-refund): '.($reason ?: $statusReason));
+
+        $updates = [
+            'status_reason' => $statusReason,
+            'gateway_state' => $gatewayState ?? $withdrawal->gateway_state,
+            'admin_note' => trim(($withdrawal->admin_note ? $withdrawal->admin_note."\n" : '').$noteLine),
+            'gateway_poll_summary' => trim(implode(' · ', array_filter([
+                $withdrawal->gateway_poll_summary,
+                'mismatch_hold='.$statusReason,
+            ]))),
+        ];
+
+        $withdrawal->update($updates);
+
+        $withdrawal = $withdrawal->fresh(['user.wallet', 'processedByAdmin']);
+
+        WithdrawalUpdated::dispatch($withdrawal);
+
+        app(PaymentStatusLogService::class)->withdrawalMismatchHeld($withdrawal, $logSource, $noteLine);
+
+        return $withdrawal;
+    }
+
+    private function wasDispatchedToGateway(Withdrawal $withdrawal): bool
+    {
+        return filled($withdrawal->gateway_request_id) || $withdrawal->sent_at !== null;
     }
 
     public function findPaidWithdrawalWithTxid(?string $txid, int $exceptWithdrawalId): ?Withdrawal

@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\User;
 use App\Models\Withdrawal;
 use App\Services\PlatformSettingsService;
+use App\Services\WalletService;
 use App\Services\WithdrawalService;
 use App\Support\PlatformTerms;
 use Database\Seeders\PlatformSettingsSeeder;
@@ -26,13 +27,14 @@ class WithdrawalPlatformFeeTest extends TestCase
 
     public function test_withdrawal_reserves_payout_plus_platform_fee(): void
     {
-        $user = User::factory()->create();
-        $user->wallet->update([
+        $user = User::factory()->kycApproved()->create();
+        app(WalletService::class)->ensureWallet($user)->update([
             'available' => 200,
             'balance' => 200,
             'payout_address' => PayoutAddressTest::VALID_TRON_ADDRESS,
             'network_label' => 'TRC-20',
         ]);
+        $user->refresh();
 
         $withdrawal = app(WithdrawalService::class)->createForUser($user, 100, 'USDT');
 
@@ -46,13 +48,14 @@ class WithdrawalPlatformFeeTest extends TestCase
 
     public function test_withdrawal_rejected_when_available_covers_payout_but_not_fee(): void
     {
-        $user = User::factory()->create();
-        $user->wallet->update([
+        $user = User::factory()->kycApproved()->create();
+        app(WalletService::class)->ensureWallet($user)->update([
             'available' => 100.5,
             'balance' => 100.5,
             'payout_address' => PayoutAddressTest::VALID_TRON_ADDRESS,
             'network_label' => 'TRC-20',
         ]);
+        $user->refresh();
 
         $this->expectException(\RuntimeException::class);
         $this->expectExceptionMessage(__('coin.wallet.insufficient_funds'));
@@ -62,14 +65,15 @@ class WithdrawalPlatformFeeTest extends TestCase
 
     public function test_mark_paid_records_payout_and_platform_fee_transactions(): void
     {
-        $user = User::factory()->create();
-        $user->wallet->update([
+        $user = User::factory()->kycApproved()->create();
+        app(WalletService::class)->ensureWallet($user)->update([
             'available' => 0,
             'balance' => 101,
             'pending' => 101,
             'payout_address' => PayoutAddressTest::VALID_TRON_ADDRESS,
             'network_label' => 'TRC-20',
         ]);
+        $user->refresh();
 
         $withdrawal = Withdrawal::query()->create([
             'user_id' => $user->id,

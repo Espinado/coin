@@ -10,6 +10,7 @@ use App\Models\SupportTicketMessage;
 use App\Models\User;
 use Illuminate\Broadcasting\BroadcastException;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
@@ -17,6 +18,10 @@ use Throwable;
 
 class SupportTicketService
 {
+    public function __construct(
+        private readonly SupportMessageAttachmentService $attachments,
+    ) {}
+
     public function createForGuest(string $email, string $subject, string $category, string $body): SupportTicket
     {
         return DB::transaction(function () use ($email, $subject, $category, $body) {
@@ -35,7 +40,7 @@ class SupportTicketService
 
             SupportGuestSession::put($ticket);
 
-            return $ticket->load('messages');
+            return $ticket->load(['messages.attachments']);
         });
     }
 
@@ -50,9 +55,17 @@ class SupportTicketService
         return $this->addMessage($ticket, SupportTicketMessage::AUTHOR_GUEST, 0, $body);
     }
 
-    public function createForUser(User $user, string $subject, string $category, string $body): SupportTicket
-    {
-        return DB::transaction(function () use ($user, $subject, $category, $body) {
+    /**
+     * @param  list<UploadedFile>  $files
+     */
+    public function createForUser(
+        User $user,
+        string $subject,
+        string $category,
+        string $body,
+        array $files = [],
+    ): SupportTicket {
+        return DB::transaction(function () use ($user, $subject, $category, $body, $files) {
             $ticket = SupportTicket::query()->create([
                 'user_id' => $user->id,
                 'reference' => $this->nextReference(),
@@ -62,21 +75,28 @@ class SupportTicketService
                 'last_reply_at' => now(),
             ]);
 
-            $this->addMessage($ticket, SupportTicketMessage::AUTHOR_USER, $user->id, $body);
+            $this->addMessage($ticket, SupportTicketMessage::AUTHOR_USER, $user->id, $body, $files);
 
-            return $ticket->load('messages');
+            return $ticket->load(['messages.attachments']);
         });
     }
 
-    public function addUserMessage(SupportTicket $ticket, User $user, string $body): SupportTicketMessage
-    {
+    /**
+     * @param  list<UploadedFile>  $files
+     */
+    public function addUserMessage(
+        SupportTicket $ticket,
+        User $user,
+        string $body,
+        array $files = [],
+    ): SupportTicketMessage {
         $this->assertTicketOwner($ticket, $user);
 
         if ($ticket->status === SupportTicket::STATUS_CLOSED) {
             $ticket->update(['status' => SupportTicket::STATUS_OPEN]);
         }
 
-        return $this->addMessage($ticket, SupportTicketMessage::AUTHOR_USER, $user->id, $body);
+        return $this->addMessage($ticket, SupportTicketMessage::AUTHOR_USER, $user->id, $body, $files);
     }
 
     public function addAdminMessage(SupportTicket $ticket, Admin $admin, string $body, ?string $status = null): SupportTicketMessage
@@ -103,17 +123,31 @@ class SupportTicketService
         return $ticket;
     }
 
-    private function addMessage(SupportTicket $ticket, string $authorType, int $authorId, string $body): SupportTicketMessage
-    {
+    /**
+     * @param  list<UploadedFile>  $files
+     */
+    private function addMessage(
+        SupportTicket $ticket,
+        string $authorType,
+        int $authorId,
+        string $body,
+        array $files = [],
+    ): SupportTicketMessage {
         $message = $ticket->messages()->create([
             'author_type' => $authorType,
             'author_id' => $authorId,
-            'body' => $body,
+            'body' => $body !== '' ? $body : __('coin.support.attachment_message_body'),
         ]);
+
+        if ($files !== []) {
+            $this->attachments->storeJpgsForMessage($message, $files);
+        }
 
         $ticket->update(['last_reply_at' => $message->created_at]);
 
-        $this->broadcastSupportEvent(new SupportTicketMessageSent($message->fresh()));
+        $message = $message->fresh(['attachments', 'ticket.user']);
+
+        $this->broadcastSupportEvent(new SupportTicketMessageSent($message));
 
         return $message;
     }

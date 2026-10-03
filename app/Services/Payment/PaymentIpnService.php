@@ -594,13 +594,21 @@ class PaymentIpnService
             'txid' => $event->txid,
         ]);
 
-        $this->withdrawals->markFailedFromGateway(
+        $withdrawal = $this->withdrawals->markFailedFromGateway(
             $withdrawal,
             null,
             'IPN mismatch: '.$reason,
             PaymentStatusReason::WITHDRAWAL_IPN_MISMATCH,
             PaymentStatusLog::SOURCE_IPN,
         );
+
+        if ($withdrawal->status === Withdrawal::STATUS_PROCESSING) {
+            return $this->finish(
+                $log,
+                PaymentWebhookLog::RESULT_PROCESSED,
+                'Withdrawal held for review (no auto-refund): '.$reason,
+            );
+        }
 
         return $this->finish($log, PaymentWebhookLog::RESULT_PROCESSED, 'Withdrawal rejected: '.$reason);
     }

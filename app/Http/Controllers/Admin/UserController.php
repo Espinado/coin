@@ -6,10 +6,12 @@ use App\Http\Controllers\Admin\Concerns\AdminListQuery;
 use App\Http\Controllers\Admin\Concerns\RedirectsWithAdminFlash;
 use App\Http\Controllers\Controller;
 use App\Models\Admin;
+use App\Models\KycDocument;
 use App\Models\PlanOffer;
 use App\Models\User;
 use App\Models\Wallet;
 use App\Services\AdminAuthorization;
+use App\Services\KycDocumentService;
 use App\Services\PlatformBroadcastService;
 use App\Services\PrivateOfferService;
 use App\Services\UserNotificationService;
@@ -18,6 +20,8 @@ use App\Support\AdminAbility;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
+use RuntimeException;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class UserController extends Controller
 {
@@ -87,6 +91,7 @@ class UserController extends Controller
             'deposits' => fn ($query) => $query->latest()->limit(10),
             'supportTickets',
             'withdrawals' => fn ($query) => $query->latest()->limit(10),
+            'kycDocuments',
         ]);
 
         /** @var Admin|null $admin */
@@ -125,7 +130,58 @@ class UserController extends Controller
 
         $user->forceFill($validated)->save();
 
-        return $this->adminSuccess('coin.admin.flash.user_updated', 'admin.users.index');
+        return $this->adminSuccess('coin.admin.flash.user_updated', 'admin.users.show', $user);
+    }
+
+    public function storeKycDocuments(
+        Request $request,
+        User $user,
+        KycDocumentService $kycDocuments,
+    ): RedirectResponse {
+        $validated = $request->validate([
+            'kyc_photos' => ['required', 'array', 'min:1', 'max:'.KycDocumentService::MAX_FILES_PER_USER],
+            'kyc_photos.*' => ['required', 'file', 'mimes:jpg,jpeg', 'max:5120'],
+        ], [], [
+            'kyc_photos' => __('coin.admin.kyc_photos'),
+            'kyc_photos.*' => __('coin.admin.kyc_photo'),
+        ]);
+
+        /** @var Admin $admin */
+        $admin = $request->user('admin');
+
+        try {
+            $kycDocuments->storeJpgs($user, $validated['kyc_photos'], $admin);
+        } catch (RuntimeException $exception) {
+            return back()->withErrors(['kyc_photos' => $exception->getMessage()]);
+        }
+
+        return $this->adminSuccess('coin.admin.flash.kyc_photos_saved', 'admin.users.show', $user);
+    }
+
+    public function showKycDocument(User $user, KycDocument $kycDocument, KycDocumentService $kycDocuments): StreamedResponse
+    {
+        abort_unless($kycDocument->user_id === $user->id, 404);
+
+        return $kycDocuments->stream($kycDocument);
+    }
+
+    public function destroyKycDocument(
+        User $user,
+        KycDocument $kycDocument,
+        KycDocumentService $kycDocuments,
+    ): RedirectResponse {
+        abort_unless($kycDocument->user_id === $user->id, 404);
+
+        $kycDocuments->delete($kycDocument);
+
+        return $this->adminSuccess('coin.admin.flash.kyc_photo_deleted', 'admin.users.show', $user);
+    }
+
+    public function approveKyc(User $user, KycDocumentService $kycDocuments): RedirectResponse
+    {
+        $kycDocuments->approve($user);
+
+        return $this->adminSuccess('coin.admin.flash.kyc_approved', 'admin.users.show', $user);
     }
 
     public function sendNotification(

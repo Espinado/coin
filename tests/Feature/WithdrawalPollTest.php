@@ -6,6 +6,7 @@ use App\Models\PaymentWebhookLog;
 use App\Models\User;
 use App\Models\Withdrawal;
 use App\Services\Payment\WithdrawalPollService;
+use App\Services\WalletService;
 use Database\Seeders\PlatformSettingsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
@@ -31,10 +32,19 @@ class WithdrawalPollTest extends TestCase
     public function test_poll_marks_confirmed_processing_withdrawal_as_paid(): void
     {
         $user = User::factory()->create();
+        app(WalletService::class)->ensureWallet($user)->update([
+            'available' => 0,
+            'balance' => 100,
+            'pending' => 0,
+        ]);
+        $user->refresh();
+
         $withdrawal = Withdrawal::query()->create([
             'user_id' => $user->id,
             'reference' => 'WD-POLL0001',
             'amount' => 25,
+            'base_amount' => 25,
+            'platform_fee' => 0,
             'currency' => 'USDT',
             'withdrawal_type' => 'available_balance',
             'payout_address' => 'TRecipient123',
@@ -109,8 +119,9 @@ class WithdrawalPollTest extends TestCase
 
         $withdrawal->refresh();
 
-        $this->assertSame(Withdrawal::STATUS_REJECTED, $withdrawal->status);
+        $this->assertSame(Withdrawal::STATUS_PROCESSING, $withdrawal->status);
         $this->assertSame('withdrawal_ipn_mismatch', $withdrawal->status_reason);
+        $this->assertStringContainsString('no auto-refund', (string) $withdrawal->admin_note);
 
         $this->assertSame(1, PaymentWebhookLog::query()
             ->where('withdrawal_id', $withdrawal->id)
@@ -151,11 +162,12 @@ class WithdrawalPollTest extends TestCase
     public function test_poll_failed_gateway_status_restores_user_funds(): void
     {
         $user = User::factory()->create();
-        $user->wallet->update([
+        app(WalletService::class)->ensureWallet($user)->update([
             'available' => 450,
             'balance' => 450,
             'pending' => 0,
         ]);
+        $user->refresh();
 
         $withdrawal = Withdrawal::query()->create([
             'user_id' => $user->id,
@@ -219,11 +231,12 @@ class WithdrawalPollTest extends TestCase
     public function test_poll_rejects_mock_gateway_reference_on_live_ccapi(): void
     {
         $user = User::factory()->create();
-        $user->wallet->update([
+        app(WalletService::class)->ensureWallet($user)->update([
             'available' => 500,
             'balance' => 1500,
             'pending' => 0,
         ]);
+        $user->refresh();
 
         $withdrawal = Withdrawal::query()->create([
             'user_id' => $user->id,
@@ -259,11 +272,12 @@ class WithdrawalPollTest extends TestCase
         ]);
 
         $user = User::factory()->create();
-        $user->wallet->update([
+        app(WalletService::class)->ensureWallet($user)->update([
             'available' => 500,
             'balance' => 1500,
             'pending' => 0,
         ]);
+        $user->refresh();
 
         $withdrawal = Withdrawal::query()->create([
             'user_id' => $user->id,

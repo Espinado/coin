@@ -72,6 +72,14 @@
             <textarea wire:model.live.debounce.250ms="newBody" rows="6" maxlength="5000" placeholder="{{ __('coin.support.message_placeholder') }}" class="coin-support-input coin-support-textarea"></textarea>
             @error('newBody')<div class="coin-support-error">{{ $message }}</div>@enderror
           </div>
+          <div class="coin-support-field">
+            <div class="coin-support-label">{{ mb_strtoupper(__('coin.support.attachments')) }}</div>
+            <input type="file" wire:model="newAttachments" accept=".jpg,.jpeg,image/jpeg" multiple class="coin-support-input">
+            <div class="coin-support-panel-hint" style="margin-top:6px;">{{ __('coin.support.attachments_jpg_hint') }}</div>
+            <div wire:loading wire:target="newAttachments" class="coin-support-panel-hint">{{ __('coin.support.attachments_uploading') }}</div>
+            @error('newAttachments')<div class="coin-support-error">{{ $message }}</div>@enderror
+            @error('newAttachments.*')<div class="coin-support-error">{{ $message }}</div>@enderror
+          </div>
           <div class="coin-support-form-actions">
             <button type="submit" class="coin-support-btn coin-support-btn--primary">{{ __('coin.support.start_chat') }}</button>
             <button type="button" wire:click="cancelCreateTicket" class="coin-support-btn coin-support-btn--secondary">{{ __('coin.cancel') }}</button>
@@ -96,7 +104,20 @@
                 <span>{{ $message->authorLabel() }}</span>
                 <span>{{ $message->created_at?->format('M j, Y H:i') }}</span>
               </div>
-              <div class="coin-support-message__body">{{ $message->body }}</div>
+              @if(filled($message->body) && $message->body !== __('coin.support.attachment_message_body'))
+                <div class="coin-support-message__body">{{ $message->body }}</div>
+              @elseif($message->attachments->isEmpty())
+                <div class="coin-support-message__body">{{ $message->body }}</div>
+              @endif
+              @if($message->attachments->isNotEmpty())
+                <div class="coin-support-attachments" style="margin-top:10px;display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:8px;">
+                  @foreach($message->attachments as $attachment)
+                    <a href="{{ route('support.attachments.show', $attachment) }}" target="_blank" rel="noopener" style="display:block;aspect-ratio:1;border-radius:10px;overflow:hidden;border:1px solid rgba(150,235,250,0.18);background:rgba(4,16,28,0.7);">
+                      <img src="{{ route('support.attachments.show', $attachment) }}" alt="{{ $attachment->original_name }}" style="width:100%;height:100%;object-fit:cover;display:block;">
+                    </a>
+                  @endforeach
+                </div>
+              @endif
             </div>
           @endforeach
         </div>
@@ -106,6 +127,14 @@
             <form wire:submit.prevent="sendTicketReply" wire:key="support-reply-form-{{ $ticket->id }}-{{ $replyFormKey }}" class="coin-support-form">
               <textarea wire:model="replyBody" rows="3" maxlength="5000" placeholder="{{ __('coin.support.reply_placeholder') }}" class="coin-support-input coin-support-textarea"></textarea>
               @error('replyBody')<div class="coin-support-error">{{ $message }}</div>@enderror
+              <div class="coin-support-field" style="margin-top:10px;">
+                <div class="coin-support-label">{{ mb_strtoupper(__('coin.support.attachments')) }}</div>
+                <input type="file" wire:model="replyAttachments" accept=".jpg,.jpeg,image/jpeg" multiple class="coin-support-input">
+                <div class="coin-support-panel-hint" style="margin-top:6px;">{{ __('coin.support.attachments_jpg_hint') }}</div>
+                <div wire:loading wire:target="replyAttachments" class="coin-support-panel-hint">{{ __('coin.support.attachments_uploading') }}</div>
+                @error('replyAttachments')<div class="coin-support-error">{{ $message }}</div>@enderror
+                @error('replyAttachments.*')<div class="coin-support-error">{{ $message }}</div>@enderror
+              </div>
               <button type="submit" class="coin-support-btn coin-support-btn--primary coin-support-btn--self-start">{{ __('coin.support.send_message') }}</button>
             </form>
           </div>

@@ -7,6 +7,10 @@
         window.supportChatConfig = {
             ticketId: {{ $ticket->id }},
             replyUrl: @json(route('admin.support.reply', $ticket)),
+            canSaveToKyc: @json(! $ticket->isGuest() && $ticket->user),
+            saveToKycLabel: @json(__('coin.admin.support_save_to_kyc')),
+            savedToKycLabel: @json(__('coin.admin.support_saved_to_kyc')),
+            csrfToken: @json(csrf_token()),
         };
     </script>
 @endpush
@@ -58,7 +62,35 @@
                             <span>{{ $message->isFromAdmin() ? 'Support team' : $ticket->contactLabel() }}</span>
                             <span>{{ $message->created_at?->format('M j, Y H:i') }}</span>
                         </div>
-                        <div style="margin-top:10px;font-size:14px;line-height:1.6;white-space:pre-wrap;">{{ $message->body }}</div>
+                        @if(filled($message->body) && $message->body !== __('coin.support.attachment_message_body'))
+                            <div style="margin-top:10px;font-size:14px;line-height:1.6;white-space:pre-wrap;">{{ $message->body }}</div>
+                        @elseif($message->attachments->isEmpty())
+                            <div style="margin-top:10px;font-size:14px;line-height:1.6;white-space:pre-wrap;">{{ $message->body }}</div>
+                        @endif
+                        @if($message->attachments->isNotEmpty())
+                            <div style="margin-top:12px;display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;">
+                                @foreach($message->attachments as $attachment)
+                                    <div data-attachment-id="{{ $attachment->id }}" style="border:1px solid rgba(255,255,255,0.10);border-radius:12px;overflow:hidden;background:rgba(255,255,255,0.02);">
+                                        <a href="{{ route('admin.support.attachments.show', $attachment) }}" target="_blank" rel="noopener" style="display:block;aspect-ratio:1;background:#05070c;">
+                                            <img src="{{ route('admin.support.attachments.show', $attachment) }}" alt="{{ $attachment->original_name }}" style="width:100%;height:100%;object-fit:cover;display:block;">
+                                        </a>
+                                        <div style="padding:8px 10px;display:flex;flex-direction:column;gap:8px;">
+                                            <span style="font-size:11px;color:rgba(232,237,245,0.62);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="{{ $attachment->original_name }}">{{ $attachment->original_name ?: 'JPG' }}</span>
+                                            @if(! $ticket->isGuest() && $ticket->user)
+                                                @if($attachment->isSavedToKyc())
+                                                    <a href="{{ route('admin.users.show', $ticket->user) }}" class="admin-btn" style="padding:6px 8px;font-size:11px;text-align:center;">{{ __('coin.admin.support_saved_to_kyc') }}</a>
+                                                @else
+                                                    <form method="POST" action="{{ route('admin.support.attachments.save-kyc', $attachment) }}">
+                                                        @csrf
+                                                        <button type="submit" class="admin-btn admin-btn-primary" style="width:100%;padding:6px 8px;font-size:11px;">{{ __('coin.admin.support_save_to_kyc') }}</button>
+                                                    </form>
+                                                @endif
+                                            @endif
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+                        @endif
                     </div>
                 @endforeach
             </div>
@@ -87,7 +119,13 @@
 
         <div class="admin-card">
             <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.12em;color:rgba(232,237,245,0.62);">{{ $ticket->isGuest() ? 'GUEST CONTEXT' : 'USER CONTEXT' }}</div>
-            <div style="margin-top:12px;font-size:15px;font-weight:600;">{{ $ticket->contactLabel() }}</div>
+            <div style="margin-top:12px;font-size:15px;font-weight:600;">
+                @if(! $ticket->isGuest() && $ticket->user)
+                    <a href="{{ route('admin.users.show', $ticket->user) }}" style="color:inherit;text-decoration:underline;text-underline-offset:3px;">{{ $ticket->contactLabel() }}</a>
+                @else
+                    {{ $ticket->contactLabel() }}
+                @endif
+            </div>
             <div style="margin-top:6px;font-size:13px;color:rgba(232,237,245,0.72);">{{ $ticket->contactEmail() }}</div>
             @if($ticket->isGuest())
                 <div style="margin-top:18px;padding:12px 14px;border-radius:10px;background:rgba(255,180,84,0.08);font-size:13px;line-height:1.55;color:rgba(232,237,245,0.78);">
@@ -95,6 +133,7 @@
                 </div>
             @else
                 <div style="margin-top:18px;display:flex;flex-direction:column;gap:10px;font-size:13px;">
+                    <div style="display:flex;justify-content:space-between;gap:12px;"><span style="color:rgba(232,237,245,0.62);">{{ __('coin.admin.kyc') }}</span><span style="display:inline-flex;padding:2px 8px;border-radius:999px;font-size:11px;{{ $ticket->user->kycBadgeStyle() }}">{{ $ticket->user->kycLabel() }}</span></div>
                     <div style="display:flex;justify-content:space-between;gap:12px;"><span style="color:rgba(232,237,245,0.62);">Balance</span><span style="font-family:'JetBrains Mono',monospace;">{{ $ticket->user->wallet?->formattedBalance() ?? '—' }}</span></div>
                     <div style="display:flex;justify-content:space-between;gap:12px;"><span style="color:rgba(232,237,245,0.62);">{{ __('coin.available') }}</span><span style="font-family:'JetBrains Mono',monospace;">{{ $ticket->user->wallet?->formattedAvailable() ?? '—' }}</span></div>
                     <div style="display:flex;justify-content:space-between;gap:12px;"><span style="color:rgba(232,237,245,0.62);">Active TFLOPS</span><span style="font-family:'JetBrains Mono',monospace;">{{ number_format($ticket->user->active_tflops) }}</span></div>

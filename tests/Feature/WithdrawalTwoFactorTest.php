@@ -144,7 +144,7 @@ class WithdrawalTwoFactorTest extends TestCase
 
     private function userReadyForWithdrawal(string $password = 'password'): User
     {
-        $user = User::factory()->create([
+        $user = User::factory()->kycApproved()->create([
             'password' => $password,
         ]);
 

@@ -126,6 +126,68 @@
             @endif
 
             <div class="admin-card" style="margin-top:16px;">
+                <div style="display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:16px;">
+                    <div>
+                        <h2 style="margin:0;font-size:16px;font-weight:600;">{{ __('coin.admin.kyc_documents') }}</h2>
+                        <p style="margin:8px 0 0;font-size:13px;color:rgba(232,237,245,0.72);">{{ __('coin.admin.kyc_documents_hint') }}</p>
+                    </div>
+                    <div style="display:flex;flex-wrap:wrap;align-items:center;gap:10px;">
+                        <span style="display:inline-flex;align-items:center;padding:6px 10px;border-radius:999px;font-size:12px;{{ $user->kycBadgeStyle() }}">{{ $user->kycLabel() }}</span>
+                        @if (! $user->isKycApproved())
+                            <form method="POST" action="{{ route('admin.users.kyc.approve', $user) }}">
+                                @csrf
+                                <button type="submit" class="admin-btn admin-btn-primary">{{ __('coin.admin.kyc_approve') }}</button>
+                            </form>
+                        @endif
+                    </div>
+                </div>
+
+                @if ($user->kycDocuments->isNotEmpty())
+                    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;margin-bottom:16px;">
+                        @foreach ($user->kycDocuments as $document)
+                            <div style="border:1px solid rgba(255,255,255,0.10);border-radius:12px;overflow:hidden;background:rgba(255,255,255,0.02);">
+                                <a href="{{ route('admin.users.kyc-documents.show', [$user, $document]) }}" target="_blank" rel="noopener" style="display:block;aspect-ratio:1;background:#05070c;">
+                                    <img src="{{ route('admin.users.kyc-documents.show', [$user, $document]) }}" alt="{{ $document->original_name }}" style="width:100%;height:100%;object-fit:cover;display:block;">
+                                </a>
+                                <div style="padding:8px 10px;display:flex;justify-content:space-between;gap:8px;align-items:center;">
+                                    <span style="font-size:11px;color:rgba(232,237,245,0.62);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="{{ $document->original_name }}">{{ $document->original_name ?: 'JPG' }}</span>
+                                    <form method="POST" action="{{ route('admin.users.kyc-documents.destroy', [$user, $document]) }}" onsubmit="return confirm(@js(__('coin.admin.kyc_photo_delete_confirm')));">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="admin-btn" style="padding:4px 8px;font-size:11px;border-color:rgba(255,143,143,0.45);color:#ff8f8f;">{{ __('coin.delete') }}</button>
+                                    </form>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                @else
+                    <p style="margin:0 0 16px;font-size:13px;color:rgba(232,237,245,0.55);">{{ __('coin.admin.kyc_photos_empty') }}</p>
+                @endif
+
+                <form method="POST" action="{{ route('admin.users.kyc-documents.store', $user) }}" enctype="multipart/form-data" style="display:grid;gap:12px;">
+                    @csrf
+                    <div>
+                        <label style="display:block;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.12em;color:rgba(232,237,245,0.65);">{{ strtoupper(__('coin.admin.kyc_photos')) }}</label>
+                        <input
+                            id="kyc-photos-input"
+                            type="file"
+                            name="kyc_photos[]"
+                            accept=".jpg,.jpeg,image/jpeg"
+                            multiple
+                            style="width:100%;box-sizing:border-box;margin-top:8px;padding:10px 12px;border-radius:10px;border:1px solid rgba(255,255,255,0.12);background:#070a10;color:#e8edf5;"
+                        >
+                        <p style="margin:8px 0 0;font-size:12px;color:rgba(232,237,245,0.55);">{{ __('coin.admin.kyc_photos_jpg_hint') }}</p>
+                        @error('kyc_photos')<p style="margin:8px 0 0;font-size:12px;color:#ff8f8f;">{{ $message }}</p>@enderror
+                        @error('kyc_photos.*')<p style="margin:8px 0 0;font-size:12px;color:#ff8f8f;">{{ $message }}</p>@enderror
+                    </div>
+                    <div id="kyc-photos-preview" style="display:none;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px;"></div>
+                    <div>
+                        <button type="submit" class="admin-btn admin-btn-primary">{{ __('coin.admin.kyc_photos_save') }}</button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="admin-card" style="margin-top:16px;">
                 <h2 style="margin:0 0 16px;font-size:16px;font-weight:600;">{{ __('coin.admin.account_controls') }}</h2>
                 <form method="POST" action="{{ route('admin.users.update', $user) }}" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
                     @csrf
@@ -184,6 +246,41 @@
         </div>
     </div>
 @endsection
+
+@push('scripts')
+    <script>
+        (() => {
+            const input = document.getElementById('kyc-photos-input');
+            const preview = document.getElementById('kyc-photos-preview');
+            if (!input || !preview) return;
+
+            input.addEventListener('change', () => {
+                preview.innerHTML = '';
+                const files = Array.from(input.files || []);
+                if (files.length === 0) {
+                    preview.style.display = 'none';
+                    return;
+                }
+
+                preview.style.display = 'grid';
+                files.forEach((file) => {
+                    if (!file.type.match(/^image\/jpeg$/i) && !/\.jpe?g$/i.test(file.name)) {
+                        return;
+                    }
+                    const url = URL.createObjectURL(file);
+                    const wrap = document.createElement('div');
+                    wrap.style.cssText = 'border:1px solid rgba(255,255,255,0.10);border-radius:10px;overflow:hidden;aspect-ratio:1;background:#05070c;';
+                    const img = document.createElement('img');
+                    img.src = url;
+                    img.alt = file.name;
+                    img.style.cssText = 'width:100%;height:100%;object-fit:cover;display:block;';
+                    wrap.appendChild(img);
+                    preview.appendChild(wrap);
+                });
+            });
+        })();
+    </script>
+@endpush
 
 @if ($voximplantReady && $voximplantDestination)
     @include('admin.partials.vox-call-modal')

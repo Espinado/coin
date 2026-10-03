@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class SupportTicketMessage extends Model
 {
@@ -29,6 +30,11 @@ class SupportTicketMessage extends Model
     public function ticket(): BelongsTo
     {
         return $this->belongsTo(SupportTicket::class, 'support_ticket_id');
+    }
+
+    public function attachments(): HasMany
+    {
+        return $this->hasMany(SupportMessageAttachment::class, 'support_ticket_message_id');
     }
 
     public function isFromAdmin(): bool

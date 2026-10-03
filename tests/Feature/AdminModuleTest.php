@@ -99,7 +99,7 @@ class AdminModuleTest extends TestCase
         $wallet->refresh();
         $this->assertSame(Withdrawal::STATUS_PAID, $withdrawal->status);
         $this->assertNotEmpty($withdrawal->gateway_request_id);
-        $this->assertSame($balanceBeforeApproval - 50, (float) $wallet->balance);
+        $this->assertSame($balanceBeforeApproval - $withdrawal->totalReservedUsdt(), (float) $wallet->balance);
         $this->assertSame(0.0, (float) $wallet->pending);
 
         Event::assertDispatched(WithdrawalUpdated::class, function (WithdrawalUpdated $event) use ($withdrawal): bool {
@@ -183,13 +183,14 @@ class AdminModuleTest extends TestCase
             '*' => Http::response(['result' => '12345'], 200),
         ]);
 
-        $user = User::factory()->create();
-        $user->wallet->update([
+        $user = User::factory()->kycApproved()->create();
+        app(\App\Services\WalletService::class)->ensureWallet($user)->update([
             'available' => 500,
             'balance' => 500,
             'payout_address' => PayoutAddressTest::VALID_TRON_ADDRESS,
             'network_label' => 'TRC-20',
         ]);
+        $user->refresh();
 
         $withdrawal = app(\App\Services\WithdrawalService::class)->createForUser($user, 50);
         $admin = Admin::query()->firstOrFail();

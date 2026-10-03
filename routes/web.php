@@ -9,6 +9,7 @@ use App\Http\Controllers\ReferralInviteController;
 use App\Http\Controllers\ReverbDebugLogController;
 use App\Http\Controllers\SeoController;
 use App\Http\Controllers\SeoHubController;
+use App\Http\Controllers\SupportAttachmentController;
 use App\Livewire\Dashboard;
 use App\Livewire\ProfitHistory;
 use Illuminate\Support\Facades\Broadcast;
@@ -54,6 +55,8 @@ Route::domain(config('coin.user_domain'))
             Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
             Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
             Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+            Route::get('/support/attachments/{attachment}', [SupportAttachmentController::class, 'show'])
+                ->name('support.attachments.show');
         });
 
         require __DIR__.'/auth.php';

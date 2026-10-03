@@ -20,7 +20,7 @@ class PlatformSettingsService
         'withdrawal_processing_hours' => '24',
         'referral_level1_percent' => '20',
         'referral_level2_percent' => '0',
-        'kyc_required_for_withdrawal' => '0',
+        'kyc_required_for_withdrawal' => '1',
         'maintenance_mode' => '0',
         'btc_per_usdt' => '2',
         'usdt_per_btc' => '',

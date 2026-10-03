@@ -81,6 +81,14 @@ Route::middleware(['admin.domain', 'reject.web.on.admin'])->group(function () {
             Route::get('users', [UserController::class, 'index'])->name('admin.users.index');
             Route::get('users/{user}', [UserController::class, 'show'])->name('admin.users.show');
             Route::patch('users/{user}', [UserController::class, 'update'])->name('admin.users.update');
+            Route::post('users/{user}/kyc-documents', [UserController::class, 'storeKycDocuments'])
+                ->name('admin.users.kyc-documents.store');
+            Route::get('users/{user}/kyc-documents/{kycDocument}', [UserController::class, 'showKycDocument'])
+                ->name('admin.users.kyc-documents.show');
+            Route::delete('users/{user}/kyc-documents/{kycDocument}', [UserController::class, 'destroyKycDocument'])
+                ->name('admin.users.kyc-documents.destroy');
+            Route::post('users/{user}/kyc/approve', [UserController::class, 'approveKyc'])
+                ->name('admin.users.kyc.approve');
             Route::post('users/{user}/notifications', [UserController::class, 'sendNotification'])
                 ->name('admin.users.notifications.store');
             Route::post('users/{user}/call', [VoximplantCallController::class, 'store'])
@@ -200,6 +208,10 @@ Route::middleware(['admin.domain', 'reject.web.on.admin'])->group(function () {
                 ->name('admin.support.reply');
             Route::patch('support/{ticket}/status', [SupportTicketController::class, 'updateStatus'])
                 ->name('admin.support.status');
+            Route::get('support/attachments/{attachment}', [SupportTicketController::class, 'showAttachment'])
+                ->name('admin.support.attachments.show');
+            Route::post('support/attachments/{attachment}/save-kyc', [SupportTicketController::class, 'saveAttachmentToKyc'])
+                ->name('admin.support.attachments.save-kyc');
         });
 
         Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])

@@ -2,8 +2,10 @@
 
 namespace App\Events;
 
+use App\Models\SupportMessageAttachment;
 use App\Models\SupportTicket;
 use App\Models\SupportTicketMessage;
+use App\Services\SupportMessageAttachmentService;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
 use Illuminate\Foundation\Events\Dispatchable;
@@ -16,7 +18,7 @@ class SupportTicketMessageSent implements ShouldBroadcastNow
     public function __construct(
         public SupportTicketMessage $message,
     ) {
-        $this->message->loadMissing('ticket.user');
+        $this->message->loadMissing(['ticket.user', 'attachments']);
     }
 
     /** @return array<int, \Illuminate\Broadcasting\PrivateChannel> */
@@ -36,6 +38,8 @@ class SupportTicketMessageSent implements ShouldBroadcastNow
         $ticket = $this->message->ticket;
         $ticket->loadMissing('messages');
 
+        $attachmentService = app(SupportMessageAttachmentService::class);
+
         return [
             'message' => [
                 'id' => $this->message->id,
@@ -45,6 +49,10 @@ class SupportTicketMessageSent implements ShouldBroadcastNow
                 'body' => $this->message->body,
                 'created_at' => $this->message->created_at?->format('M j, Y H:i'),
                 'is_from_admin' => $this->message->isFromAdmin(),
+                'attachments' => $this->message->attachments
+                    ->map(fn (SupportMessageAttachment $attachment) => $attachmentService->toBroadcastArray($attachment))
+                    ->values()
+                    ->all(),
             ],
             'ticket' => [
                 'id' => $ticket->id,

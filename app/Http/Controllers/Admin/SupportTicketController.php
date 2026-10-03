@@ -6,15 +6,19 @@ use App\Http\Controllers\Admin\Concerns\AdminListQuery;
 use App\Http\Controllers\Admin\Concerns\RedirectsWithAdminFlash;
 use App\Http\Controllers\Controller;
 use App\Models\Admin;
+use App\Models\SupportMessageAttachment;
 use App\Models\SupportTicket;
 use App\Services\AdminAuthorization;
 use App\Services\PrivateOfferService;
+use App\Services\SupportMessageAttachmentService;
 use App\Services\SupportTicketService;
 use App\Support\AdminAbility;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
+use RuntimeException;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class SupportTicketController extends Controller
 {
@@ -77,7 +81,7 @@ class SupportTicketController extends Controller
         AdminAuthorization $authorization,
     ): View {
         $ticket->load([
-            'messages',
+            'messages.attachments',
             'assignedAdmin',
         ]);
 
@@ -129,6 +133,9 @@ class SupportTicketController extends Controller
         $ticket->markReadByAdmin();
 
         if ($request->wantsJson()) {
+            $message->loadMissing('attachments');
+            $attachmentService = app(SupportMessageAttachmentService::class);
+
             return response()->json([
                 'message' => [
                     'id' => $message->id,
@@ -138,6 +145,10 @@ class SupportTicketController extends Controller
                     'body' => $message->body,
                     'created_at' => $message->created_at?->format('M j, Y H:i'),
                     'is_from_admin' => $message->isFromAdmin(),
+                    'attachments' => $message->attachments
+                        ->map(fn (SupportMessageAttachment $attachment) => $attachmentService->toBroadcastArray($attachment))
+                        ->values()
+                        ->all(),
                 ],
                 'ticket' => [
                     'id' => $ticket->id,
@@ -149,7 +160,52 @@ class SupportTicketController extends Controller
             ]);
         }
 
-        return $this->adminSuccess('coin.admin.flash.reply_sent', 'admin.support.index');
+        return $this->adminSuccess('coin.admin.flash.reply_sent', 'admin.support.show', $ticket);
+    }
+
+    public function showAttachment(
+        SupportMessageAttachment $attachment,
+        SupportMessageAttachmentService $attachments,
+    ): StreamedResponse {
+        $attachment->loadMissing('message.ticket');
+
+        return $attachments->stream($attachment);
+    }
+
+    public function saveAttachmentToKyc(
+        Request $request,
+        SupportMessageAttachment $attachment,
+        SupportMessageAttachmentService $attachments,
+    ): RedirectResponse|JsonResponse {
+        /** @var Admin $admin */
+        $admin = $request->user('admin');
+
+        try {
+            $document = $attachments->saveToKyc($attachment, $admin);
+        } catch (RuntimeException $exception) {
+            if ($request->wantsJson()) {
+                return response()->json(['message' => $exception->getMessage()], 422);
+            }
+
+            return back()->with('status', $exception->getMessage())->with('status_type', 'error');
+        }
+
+        $attachment->refresh()->loadMissing('message.ticket.user');
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'message' => __('coin.admin.flash.support_attachment_saved_to_kyc'),
+                'attachment' => $attachments->toBroadcastArray($attachment),
+                'kyc_document_id' => $document->id,
+                'user_url' => route('admin.users.show', $attachment->message->ticket->user),
+            ]);
+        }
+
+        return $this->adminSuccess(
+            'coin.admin.flash.support_attachment_saved_to_kyc',
+            'admin.support.show',
+            $attachment->message->ticket,
+        );
     }
 
     public function updateStatus(Request $request, SupportTicket $ticket, SupportTicketService $support): RedirectResponse
