@@ -262,7 +262,8 @@ class User extends Authenticatable implements MustVerifyEmail
             return null;
         }
 
-        $version = $this->updated_at?->getTimestamp() ?? time();
+        // Bust browser cache when the stored file path changes after a replace.
+        $version = basename((string) $this->avatar_path);
 
         if ($routeName === 'avatar.show') {
             return route('avatar.show', ['v' => $version]);

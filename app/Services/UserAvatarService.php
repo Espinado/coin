@@ -15,6 +15,8 @@ class UserAvatarService
 
     public const MAX_FILE_BYTES = 2_097_152; // 2 MB
 
+    public const SIZE_PX = 256;
+
     /** @var list<string> */
     public const ALLOWED_EXTENSIONS = ['jpg', 'jpeg', 'png'];
 
@@ -25,24 +27,31 @@ class UserAvatarService
     {
         $this->assertImage($file);
 
-        return DB::transaction(function () use ($user, $file) {
+        if (! extension_loaded('gd')) {
+            throw new RuntimeException(__('coin.profile.avatar_store_failed'));
+        }
+
+        $jpeg = $this->makeSquareJpeg($file);
+
+        return DB::transaction(function () use ($user, $jpeg) {
             $disk = Storage::disk(self::DISK);
             $directory = 'avatars/'.$user->id;
-            $extension = strtolower((string) $file->getClientOriginalExtension());
-            $extension = $extension === 'jpeg' ? 'jpg' : $extension;
-            $path = $directory.'/avatar.'.$extension;
-
-            if (filled($user->avatar_path) && $user->avatar_path !== $path) {
-                $disk->delete($user->avatar_path);
-            }
+            $path = $directory.'/avatar-'.str_replace('.', '', uniqid('', true)).'.jpg';
 
             $disk->makeDirectory($directory);
 
-            if (! $disk->putFileAs($directory, $file, 'avatar.'.$extension)) {
+            foreach ($disk->files($directory) as $existing) {
+                $disk->delete($existing);
+            }
+
+            if (! $disk->put($path, $jpeg)) {
                 throw new RuntimeException(__('coin.profile.avatar_store_failed'));
             }
 
-            $user->forceFill(['avatar_path' => $path])->save();
+            $user->forceFill([
+                'avatar_path' => $path,
+                'updated_at' => now(),
+            ])->save();
 
             return $user->fresh();
         });
@@ -51,11 +60,21 @@ class UserAvatarService
     public function delete(User $user): User
     {
         return DB::transaction(function () use ($user) {
-            if (filled($user->avatar_path)) {
-                Storage::disk(self::DISK)->delete($user->avatar_path);
+            $disk = Storage::disk(self::DISK);
+            $directory = 'avatars/'.$user->id;
+
+            if ($disk->exists($directory)) {
+                foreach ($disk->files($directory) as $existing) {
+                    $disk->delete($existing);
+                }
+            } elseif (filled($user->avatar_path)) {
+                $disk->delete($user->avatar_path);
             }
 
-            $user->forceFill(['avatar_path' => null])->save();
+            $user->forceFill([
+                'avatar_path' => null,
+                'updated_at' => now(),
+            ])->save();
 
             return $user->fresh();
         });
@@ -72,14 +91,71 @@ class UserAvatarService
             abort(404);
         }
 
-        $extension = strtolower(pathinfo($path, PATHINFO_EXTENSION));
-        $contentType = $extension === 'png' ? 'image/png' : 'image/jpeg';
-
-        return $disk->response($path, 'avatar.'.$extension, [
-            'Content-Type' => $contentType,
-            'Content-Disposition' => 'inline; filename="avatar.'.$extension.'"',
-            'Cache-Control' => 'private, max-age=3600',
+        return $disk->response($path, 'avatar.jpg', [
+            'Content-Type' => 'image/jpeg',
+            'Content-Disposition' => 'inline; filename="avatar.jpg"',
+            'Cache-Control' => 'private, no-cache, must-revalidate',
         ]);
+    }
+
+    private function makeSquareJpeg(UploadedFile $file): string
+    {
+        $binary = file_get_contents($file->getRealPath() ?: '');
+
+        if ($binary === false || $binary === '') {
+            throw new RuntimeException(__('coin.profile.avatar_store_failed'));
+        }
+
+        $source = @imagecreatefromstring($binary);
+
+        if ($source === false) {
+            throw new RuntimeException(__('coin.profile.avatar_format'));
+        }
+
+        $width = imagesx($source);
+        $height = imagesy($source);
+
+        if ($width < 1 || $height < 1) {
+            imagedestroy($source);
+            throw new RuntimeException(__('coin.profile.avatar_format'));
+        }
+
+        $side = min($width, $height);
+        $srcX = (int) floor(($width - $side) / 2);
+        $srcY = (int) floor(($height - $side) / 2);
+
+        $canvas = imagecreatetruecolor(self::SIZE_PX, self::SIZE_PX);
+
+        if ($canvas === false) {
+            imagedestroy($source);
+            throw new RuntimeException(__('coin.profile.avatar_store_failed'));
+        }
+
+        imagecopyresampled(
+            $canvas,
+            $source,
+            0,
+            0,
+            $srcX,
+            $srcY,
+            self::SIZE_PX,
+            self::SIZE_PX,
+            $side,
+            $side,
+        );
+
+        ob_start();
+        imagejpeg($canvas, null, 85);
+        $jpeg = ob_get_clean();
+
+        imagedestroy($source);
+        imagedestroy($canvas);
+
+        if (! is_string($jpeg) || $jpeg === '') {
+            throw new RuntimeException(__('coin.profile.avatar_store_failed'));
+        }
+
+        return $jpeg;
     }
 
     private function assertImage(UploadedFile $file): void

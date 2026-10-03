@@ -557,7 +557,7 @@ return [
         'avatar_choose' => 'Выбрать фото',
         'avatar_save' => 'Сохранить аватар',
         'avatar_remove' => 'Удалить',
-        'avatar_hint' => 'JPG или PNG, до 2 МБ.',
+        'avatar_hint' => 'JPG или PNG, до 2 МБ. Автоматически обрезается в квадратную иконку.',
         'avatar_uploading' => 'Загрузка…',
         'avatar_format' => 'Аватар должен быть в формате JPG или PNG.',
         'avatar_too_large' => 'Аватар должен быть не больше 2 МБ.',

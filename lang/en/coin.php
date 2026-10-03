@@ -557,7 +557,7 @@ return [
         'avatar_choose' => 'Choose photo',
         'avatar_save' => 'Save avatar',
         'avatar_remove' => 'Remove',
-        'avatar_hint' => 'JPG or PNG, up to 2 MB.',
+        'avatar_hint' => 'JPG or PNG, up to 2 MB. Cropped to a square icon automatically.',
         'avatar_uploading' => 'Uploading…',
         'avatar_format' => 'Avatar must be a JPG or PNG image.',
         'avatar_too_large' => 'Avatar must be 2 MB or smaller.',

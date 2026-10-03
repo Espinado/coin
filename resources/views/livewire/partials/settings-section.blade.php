@@ -16,7 +16,7 @@
     <div style="{{ $card }}">
       <h2 style="{{ $cardTitle }}">{{ __('coin.profile.title') }}</h2>
       <div style="display: flex; align-items: flex-start; gap: 16px; margin-top: 20px; padding-bottom: 18px; border-bottom: 1px solid rgba(150,235,250,0.08); flex-wrap: wrap;">
-        <div style="width: 72px; height: 72px; border-radius: 50%; background: linear-gradient(145deg, oklch(0.7 0.13 198), oklch(0.5 0.15 285)); display: grid; place-items: center; font-family: 'JetBrains Mono', monospace; font-size: 22px; color: #04121f; flex-shrink: 0; overflow: hidden;">
+        <div wire:key="settings-avatar-{{ $user->avatar_path ?: 'none' }}-{{ $this->profileAvatar ? 'pending' : 'saved' }}" style="width: 72px; height: 72px; border-radius: 50%; background: linear-gradient(145deg, oklch(0.7 0.13 198), oklch(0.5 0.15 285)); display: grid; place-items: center; font-family: 'JetBrains Mono', monospace; font-size: 22px; color: #04121f; flex-shrink: 0; overflow: hidden;">
           @if($this->profileAvatar)
             <img src="{{ $this->profileAvatar->temporaryUrl() }}" alt="" style="width:100%;height:100%;object-fit:cover;display:block;">
           @elseif($user->hasAvatar())

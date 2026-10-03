@@ -75,7 +75,7 @@
         </div>
         <div class="coin-hide-mobile coin-dash-meta__pill coin-dash-meta__pill--epoch">{{ $this->epochHeaderLabel }}</div>
         <div class="coin-dash-meta__user">
-          <span class="coin-dash-meta__avatar">
+          <span class="coin-dash-meta__avatar" wire:key="header-avatar-{{ $user->avatar_path ?: 'none' }}">
             @if($user->hasAvatar())
               <img src="{{ $user->avatarUrl() }}" alt="" class="coin-dash-meta__avatar-img">
             @else

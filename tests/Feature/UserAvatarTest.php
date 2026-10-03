@@ -112,4 +112,39 @@ class UserAvatarTest extends TestCase
 
         $this->assertFalse($user->fresh()->hasAvatar());
     }
+
+    public function test_replacing_avatar_resizes_and_busts_cache_url(): void
+    {
+        $user = User::factory()->create();
+
+        Livewire::actingAs($user)
+            ->test(Dashboard::class)
+            ->set('profileAvatar', UploadedFile::fake()->image('wide.jpg', 640, 240))
+            ->call('saveAvatar')
+            ->assertHasNoErrors();
+
+        $first = $user->fresh();
+        $firstPath = $first->avatar_path;
+        $firstUrl = $first->avatarUrl();
+
+        Livewire::actingAs($first)
+            ->test(Dashboard::class)
+            ->set('profileAvatar', UploadedFile::fake()->image('tall.png', 200, 500))
+            ->call('saveAvatar')
+            ->assertHasNoErrors();
+
+        $second = $user->fresh();
+
+        $this->assertNotSame($firstPath, $second->avatar_path);
+        $this->assertNotSame($firstUrl, $second->avatarUrl());
+        Storage::disk('local')->assertMissing($firstPath);
+        Storage::disk('local')->assertExists($second->avatar_path);
+
+        $binary = Storage::disk('local')->get($second->avatar_path);
+        $image = imagecreatefromstring($binary);
+        $this->assertNotFalse($image);
+        $this->assertSame(256, imagesx($image));
+        $this->assertSame(256, imagesy($image));
+        imagedestroy($image);
+    }
 }
