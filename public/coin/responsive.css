@@ -1984,11 +1984,21 @@ html.coin-nav-open .coin-nav-mobile {
 .coin-nav-item__badge {
   position: relative;
   font-family: 'JetBrains Mono', monospace;
-  font-size: 10px;
-  padding: 2px 7px;
-  border-radius: 6px;
-  background: rgba(150, 235, 250, 0.1);
-  color: rgba(214, 238, 248, 0.8);
+  font-size: 13px;
+  font-weight: 700;
+  min-width: 24px;
+  text-align: center;
+  padding: 4px 9px;
+  border-radius: 8px;
+  background: rgba(150, 235, 250, 0.18);
+  color: #eafcff;
+  border: 1px solid rgba(150, 235, 250, 0.28);
+}
+
+.coin-nav-item--active .coin-nav-item__badge {
+  background: oklch(0.86 0.12 192 / 0.22);
+  color: #f4feff;
+  border-color: oklch(0.86 0.12 192 / 0.45);
 }
 
 .coin-nav-dot {
