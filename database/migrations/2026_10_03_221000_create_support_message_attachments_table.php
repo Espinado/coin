@@ -18,7 +18,7 @@ return new class extends Migration
             $table->foreignId('kyc_document_id')->nullable()->constrained('kyc_documents')->nullOnDelete();
             $table->timestamps();
 
-            $table->index(['support_ticket_message_id', 'created_at']);
+            $table->index(['support_ticket_message_id', 'created_at'], 'sma_message_created_idx');
         });
     }
 
