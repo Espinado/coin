@@ -1,7 +1,9 @@
 @php
     use App\Support\PhoneCountries;
 
-    $selectedIso = old('country_code', PhoneCountries::DEFAULT_ISO);
+    $inputName = $inputName ?? 'country_code';
+    $wireModel = $wireModel ?? null;
+    $selectedIso = old($inputName, $selectedIso ?? PhoneCountries::DEFAULT_ISO);
     $selected = PhoneCountries::find($selectedIso) ?? PhoneCountries::find(PhoneCountries::DEFAULT_ISO);
     $countryBorder = $countryBorder ?? 'rgba(150,235,250,0.18)';
 @endphp
@@ -11,7 +13,13 @@
     data-phone-country
     style="--coin-phone-border: {{ $countryBorder }};"
 >
-    <input type="hidden" name="country_code" value="{{ $selected['iso'] }}" data-phone-country-input>
+    <input
+        type="hidden"
+        name="{{ $inputName }}"
+        value="{{ $selected['iso'] }}"
+        data-phone-country-input
+        @if($wireModel) wire:model="{{ $wireModel }}" @endif
+    >
     <button
         type="button"
         class="coin-phone-country__trigger"

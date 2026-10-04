@@ -20,6 +20,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
     <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="{{ asset('coin/responsive.css') }}?v={{ file_exists(public_path('coin/responsive.css')) ? filemtime(public_path('coin/responsive.css')) : 1 }}" />
+    <link rel="stylesheet" href="{{ asset('coin/phone-country.css') }}?v={{ file_exists(public_path('coin/phone-country.css')) ? filemtime(public_path('coin/phone-country.css')) : 1 }}" />
     <style>
       body { margin: 0; background: #061423; color: #e6f4fa; font-family: 'Sora', 'Helvetica Neue', Helvetica, sans-serif; -webkit-font-smoothing: antialiased; }
       @media (min-width: 1025px) and (min-height: 501px) {
@@ -91,5 +92,6 @@
     @livewireScripts
     <script src="{{ asset('coin/page-navigate.js') }}?v={{ file_exists(public_path('coin/page-navigate.js')) ? filemtime(public_path('coin/page-navigate.js')) : 1 }}" defer></script>
     <script src="{{ asset('coin/mobile.js') }}?v={{ file_exists(public_path('coin/mobile.js')) ? filemtime(public_path('coin/mobile.js')) : 1 }}" defer></script>
+    <script src="{{ asset('coin/phone-country.js') }}?v={{ file_exists(public_path('coin/phone-country.js')) ? filemtime(public_path('coin/phone-country.js')) : 1 }}" defer></script>
 </body>
 </html>

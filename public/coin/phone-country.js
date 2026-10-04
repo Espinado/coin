@@ -90,6 +90,8 @@
         }
 
         input.value = option.getAttribute('data-iso') || '';
+        input.dispatchEvent(new Event('input', { bubbles: true }));
+        input.dispatchEvent(new Event('change', { bubbles: true }));
 
         if (flag) {
             flag.src = option.getAttribute('data-flag') || flag.src;

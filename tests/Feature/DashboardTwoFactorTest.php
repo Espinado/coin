@@ -71,11 +71,15 @@ class DashboardTwoFactorTest extends TestCase
         Livewire::actingAs($user)
             ->test(Dashboard::class)
             ->set('profileName', 'New Display Name')
-            ->set('profilePhone', '+37126161034')
+            ->set('profilePhoneCountry', 'LV')
+            ->set('profilePhoneNational', '26161034')
+            ->set('profileCountry', 'LV')
             ->call('saveProfile')
             ->assertHasNoErrors()
             ->assertSet('profileName', 'New Display Name');
 
         $this->assertSame('New Display Name', $user->fresh()->name);
+        $this->assertSame('+37126161034', $user->fresh()->phone);
+        $this->assertSame('LV', $user->fresh()->country_code);
     }
 }

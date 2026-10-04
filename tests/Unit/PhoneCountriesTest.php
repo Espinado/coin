@@ -39,4 +39,20 @@ class PhoneCountriesTest extends TestCase
         $this->assertFalse(PhoneCountries::nationalIncludesCountryCode('LV', '26161034'));
         $this->assertFalse(PhoneCountries::nationalIncludesCountryCode('RU', '9001234567'));
     }
+
+    public function test_split_extracts_iso_and_national(): void
+    {
+        $this->assertSame(
+            ['iso' => 'LV', 'national' => '26161034'],
+            PhoneCountries::split('+37126161034'),
+        );
+        $this->assertSame(
+            ['iso' => 'RU', 'national' => '9001234567'],
+            PhoneCountries::split('+79001234567', 'RU'),
+        );
+        $this->assertSame(
+            ['iso' => 'LV', 'national' => ''],
+            PhoneCountries::split(null, 'LV'),
+        );
+    }
 }

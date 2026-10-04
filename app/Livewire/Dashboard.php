@@ -40,6 +40,7 @@ use App\Services\WithdrawalTwoFactorService;
 use App\Support\BitcoinAddressValidator;
 use App\Support\CcapiUserMessage;
 use App\Support\CryptoAmountFormat;
+use App\Support\PhoneCountries;
 use App\Support\TronAddressValidator;
 use Carbon\Carbon;
 use Illuminate\Contracts\View\View;
@@ -262,7 +263,9 @@ class Dashboard extends Component
 
     public string $profileName = '';
 
-    public string $profilePhone = '';
+    public string $profilePhoneCountry = '';
+
+    public string $profilePhoneNational = '';
 
     public string $profileTelegram = '';
 
@@ -439,9 +442,11 @@ class Dashboard extends Component
         $this->primaryPlan = $payload['primaryPlan'];
         $this->profileEmail = (string) $this->user->email;
         $this->profileName = (string) $this->user->name;
-        $this->profilePhone = (string) ($this->user->phone ?? '');
+        $this->fillProfilePhoneFields();
         $this->profileTelegram = (string) ($this->user->telegram ?? '');
-        $this->profileCountry = (string) ($this->user->country_code ?? '');
+        $this->profileCountry = PhoneCountries::isValidIso($this->user->country_code)
+            ? strtoupper((string) $this->user->country_code)
+            : $this->profilePhoneCountry;
         $this->depositCurrency = (string) (config('coin.deposits.currencies')[0] ?? 'USDT');
         $this->withdrawCurrency = (string) (config('coin.withdrawals.currencies')[0] ?? 'USDT');
         $this->selectedPlanId = $this->primaryPlan?->id
@@ -2337,23 +2342,71 @@ class Dashboard extends Component
     {
         $this->resetActionFeedback();
 
+        $rawNational = $this->profilePhoneNational;
+        $this->profilePhoneCountry = strtoupper(trim($this->profilePhoneCountry));
+        $this->profileCountry = strtoupper(trim($this->profileCountry));
+        $this->profilePhoneNational = preg_replace('/\D+/', '', $this->profilePhoneNational) ?? '';
+
+        $phoneNationalIncludesDial = PhoneCountries::nationalIncludesCountryCode(
+            $this->profilePhoneCountry,
+            $rawNational,
+        );
+
         $validated = $this->validate([
             'profileName' => ['required', 'string', 'min:2', 'max:255'],
-            'profilePhone' => ['required', 'string', 'max:32', new ContactPhone],
+            'profilePhoneCountry' => ['required', 'string', Rule::in(PhoneCountries::isos())],
+            'profilePhoneNational' => [
+                'required',
+                'string',
+                'min:4',
+                'max:15',
+                function (string $attribute, mixed $value, \Closure $fail) use ($phoneNationalIncludesDial): void {
+                    if ($phoneNationalIncludesDial) {
+                        $fail(__('coin.auth.phone_national_no_country_code'));
+                    }
+                },
+            ],
             'profileTelegram' => ['nullable', 'string', 'max:64'],
-            'profileCountry' => ['nullable', 'string', 'size:2'],
-        ], [], [
+            'profileCountry' => ['required', 'string', 'size:2', Rule::in(PhoneCountries::isos())],
+        ], [
+            'profilePhoneCountry.required' => __('coin.auth.phone_country_required'),
+            'profilePhoneCountry.in' => __('coin.auth.phone_country_required'),
+            'profilePhoneNational.required' => __('coin.auth.phone_national_required'),
+            'profileCountry.required' => __('coin.auth.country_required'),
+            'profileCountry.in' => __('coin.auth.country_required'),
+        ], [
             'profileName' => __('coin.profile.display_name'),
-            'profilePhone' => __('coin.profile.phone'),
+            'profilePhoneCountry' => __('coin.auth.phone_country'),
+            'profilePhoneNational' => __('coin.auth.phone_national'),
             'profileTelegram' => 'telegram',
-            'profileCountry' => 'country',
+            'profileCountry' => __('coin.profile.country'),
         ]);
+
+        $composedPhone = PhoneCountries::compose(
+            $validated['profilePhoneCountry'],
+            $validated['profilePhoneNational'],
+        );
+
+        $phoneErrors = validator(
+            ['profilePhone' => $composedPhone],
+            ['profilePhone' => ['required', 'string', 'max:32', new ContactPhone]],
+            [],
+            ['profilePhone' => __('coin.profile.phone')],
+        )->errors();
+
+        if ($phoneErrors->isNotEmpty()) {
+            foreach ($phoneErrors->get('profilePhone') as $message) {
+                $this->addError('profilePhoneNational', $message);
+            }
+
+            return;
+        }
 
         $this->user->update([
             'name' => trim($validated['profileName']),
-            'phone' => ContactPhone::normalize($validated['profilePhone']),
+            'phone' => ContactPhone::normalize($composedPhone),
             'telegram' => $validated['profileTelegram'] ?: null,
-            'country_code' => $validated['profileCountry'] ? strtoupper($validated['profileCountry']) : null,
+            'country_code' => $validated['profileCountry'],
         ]);
 
         $this->reloadPortfolioData();
@@ -3123,9 +3176,18 @@ class Dashboard extends Component
         $this->primaryPlan = $payload['primaryPlan'];
         $this->profileEmail = (string) $this->user->email;
         $this->profileName = (string) $this->user->name;
-        $this->profilePhone = (string) ($this->user->phone ?? '');
+        $this->fillProfilePhoneFields();
         $this->profileTelegram = (string) ($this->user->telegram ?? '');
-        $this->profileCountry = (string) ($this->user->country_code ?? '');
+        $this->profileCountry = PhoneCountries::isValidIso($this->user->country_code)
+            ? strtoupper((string) $this->user->country_code)
+            : $this->profilePhoneCountry;
+    }
+
+    private function fillProfilePhoneFields(): void
+    {
+        $split = PhoneCountries::split($this->user->phone, $this->user->country_code);
+        $this->profilePhoneCountry = $split['iso'];
+        $this->profilePhoneNational = $split['national'];
     }
 
     private function profitTotalForPeriod(int $period): float

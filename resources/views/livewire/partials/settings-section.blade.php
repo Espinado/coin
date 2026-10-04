@@ -52,17 +52,44 @@
         </div>
         <div>
           <div style="{{ $fieldLabel }}">{{ mb_strtoupper(__('coin.profile.phone')) }}</div>
-          <input type="tel" wire:model="profilePhone" required inputmode="tel" autocomplete="tel" placeholder="{{ __('coin.auth.phone_placeholder') }}" style="{{ $input }}; margin-top: 8px;" />
+          @php
+            $phoneHasError = $errors->has('profilePhoneCountry') || $errors->has('profilePhoneNational') || $errors->has('profilePhone');
+            $phoneBorder = $phoneHasError ? 'oklch(0.72 0.22 25)' : 'rgba(150,235,250,0.14)';
+          @endphp
+          <div class="coin-auth-phone" style="display: flex; gap: 10px; margin-top: 8px; align-items: stretch;">
+            <div wire:key="settings-phone-country-{{ $profilePhoneCountry }}">
+              @include('partials.coin-phone-country', [
+                  'phoneBorder' => $phoneBorder,
+                  'selectedIso' => $profilePhoneCountry,
+                  'inputName' => 'profile_phone_country',
+                  'wireModel' => 'profilePhoneCountry',
+              ])
+            </div>
+            <input type="tel" wire:model="profilePhoneNational" required inputmode="tel" autocomplete="tel-national" placeholder="{{ __('coin.auth.phone_national_placeholder') }}" aria-invalid="{{ $phoneHasError ? 'true' : 'false' }}" style="flex: 1 1 0; min-width: 0; box-sizing: border-box; padding: 12px 14px; border-radius: 10px; border: 1px solid {{ $phoneBorder }}; background: rgba(4,16,28,0.5); font-size: 16px; color: #f0fbff;" />
+          </div>
         </div>
         <div>
           <div style="{{ $fieldLabel }}">{{ mb_strtoupper(__('coin.profile.telegram')) }}</div>
           <input type="text" wire:model="profileTelegram" style="{{ $input }}; margin-top: 8px;" />
         </div>
         <div>
-          <div style="{{ $fieldLabel }}">{{ mb_strtoupper(__('coin.profile.country_iso')) }}</div>
-          <input type="text" wire:model="profileCountry" maxlength="2" style="{{ $input }}; margin-top: 8px;" />
+          <div style="{{ $fieldLabel }}">{{ mb_strtoupper(__('coin.profile.country')) }}</div>
+          @php
+            $countryHasError = $errors->has('profileCountry');
+            $countryBorder = $countryHasError ? 'oklch(0.72 0.22 25)' : 'rgba(150,235,250,0.14)';
+          @endphp
+          <div style="margin-top: 8px;" wire:key="settings-country-{{ $profileCountry }}">
+            @include('partials.coin-country-select', [
+                'countryBorder' => $countryBorder,
+                'selectedIso' => $profileCountry !== '' ? $profileCountry : \App\Support\PhoneCountries::DEFAULT_ISO,
+                'inputName' => 'profile_country',
+                'wireModel' => 'profileCountry',
+            ])
+          </div>
         </div>
         @error('profileName')<p style="{{ $error }}">{{ $message }}</p>@enderror
+        @error('profilePhoneCountry')<p style="{{ $error }}">{{ $message }}</p>@enderror
+        @error('profilePhoneNational')<p style="{{ $error }}">{{ $message }}</p>@enderror
         @error('profilePhone')<p style="{{ $error }}">{{ $message }}</p>@enderror
         @error('profileTelegram')<p style="{{ $error }}">{{ $message }}</p>@enderror
         @error('profileCountry')<p style="{{ $error }}">{{ $message }}</p>@enderror

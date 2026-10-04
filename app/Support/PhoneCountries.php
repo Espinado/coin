@@ -157,6 +157,54 @@ final class PhoneCountries
     }
 
     /**
+     * Split an E.164 / stored phone into ISO + national digits.
+     *
+     * @return array{iso: string, national: string}
+     */
+    public static function split(?string $phone, ?string $preferIso = null): array
+    {
+        $digits = preg_replace('/\D+/', '', (string) $phone) ?? '';
+
+        if ($digits === '') {
+            $iso = self::isValidIso($preferIso) ? strtoupper((string) $preferIso) : self::DEFAULT_ISO;
+
+            return ['iso' => $iso, 'national' => ''];
+        }
+
+        $preferIso = self::isValidIso($preferIso) ? strtoupper((string) $preferIso) : null;
+        if ($preferIso !== null) {
+            $preferDialDigits = preg_replace('/\D+/', '', (string) self::dialFor($preferIso)) ?? '';
+            if ($preferDialDigits !== '' && str_starts_with($digits, $preferDialDigits)) {
+                return [
+                    'iso' => $preferIso,
+                    'national' => substr($digits, strlen($preferDialDigits)),
+                ];
+            }
+        }
+
+        $countries = self::all();
+        usort(
+            $countries,
+            static fn (array $a, array $b): int => strlen(preg_replace('/\D+/', '', $b['dial']) ?? '')
+                <=> strlen(preg_replace('/\D+/', '', $a['dial']) ?? '')
+        );
+
+        foreach ($countries as $country) {
+            $dialDigits = preg_replace('/\D+/', '', $country['dial']) ?? '';
+            if ($dialDigits !== '' && str_starts_with($digits, $dialDigits)) {
+                return [
+                    'iso' => $country['iso'],
+                    'national' => substr($digits, strlen($dialDigits)),
+                ];
+            }
+        }
+
+        $iso = $preferIso ?? self::DEFAULT_ISO;
+
+        return ['iso' => $iso, 'national' => $digits];
+    }
+
+    /**
      * True when the national field already includes the selected country calling code
      * (or a leading + / 00 international prefix).
      */
