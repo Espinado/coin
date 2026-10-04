@@ -117,6 +117,7 @@ class RegistrationTest extends TestCase
             ->assertSee('name="phone_national"', false)
             ->assertSee('name="country_code"', false)
             ->assertSee('data-phone-country', false)
+            ->assertSee('data-phone-country-search', false)
             ->assertSee('flagcdn.com/w40/lv.png', false)
             ->assertSee('+371', false)
             ->assertSee('Latvia', false)

@@ -35,6 +35,18 @@
     </button>
 
     <div class="coin-phone-country__menu" data-phone-country-menu hidden role="listbox" aria-label="{{ __('coin.auth.phone_country') }}">
+        <div class="coin-phone-country__search-wrap">
+            <input
+                type="search"
+                class="coin-phone-country__search"
+                data-phone-country-search
+                placeholder="{{ __('coin.auth.country_search_placeholder') }}"
+                autocomplete="off"
+                spellcheck="false"
+                aria-label="{{ __('coin.auth.country_search_placeholder') }}"
+            >
+        </div>
+        <div class="coin-phone-country__empty" data-phone-country-empty hidden>{{ __('coin.auth.country_search_empty') }}</div>
         @foreach(PhoneCountries::all() as $country)
             <button
                 type="button"

@@ -43,14 +43,28 @@
         border-left: 5px solid transparent; border-right: 5px solid transparent; border-top: 6px solid rgba(230,244,250,0.7);
       }
       .coin-phone-country__menu {
-        position: absolute; z-index: 40; top: calc(100% + 6px); left: 0; width: min(320px, 82vw); max-height: 260px; overflow: auto;
+        position: absolute; z-index: 40; top: calc(100% + 6px); left: 0; width: min(320px, 82vw); max-height: 280px; overflow: auto;
         border-radius: 12px; border: 1px solid rgba(150,235,250,0.18); background: #0b1c2c;
         box-shadow: 0 24px 48px -24px rgba(0,0,0,0.85); padding: 6px;
+      }
+      .coin-phone-country__search-wrap {
+        position: sticky; top: 0; z-index: 1; margin: -6px -6px 6px; padding: 6px;
+        background: #0b1c2c; border-bottom: 1px solid rgba(150,235,250,0.12);
+      }
+      .coin-phone-country__search {
+        width: 100%; box-sizing: border-box; padding: 10px 12px; border-radius: 8px;
+        border: 1px solid rgba(150,235,250,0.18); background: rgba(4,16,28,0.85); color: #f0fbff;
+        font-family: inherit; font-size: 14px;
+      }
+      .coin-phone-country__search::placeholder { color: rgba(230,244,250,0.42); }
+      .coin-phone-country__empty {
+        padding: 12px 10px; color: rgba(230,244,250,0.55); font-size: 13px; text-align: center;
       }
       .coin-phone-country__option {
         display: flex; align-items: center; gap: 10px; width: 100%; padding: 10px 10px; border: 0; border-radius: 8px;
         background: transparent; color: #e6f4fa; font-family: inherit; font-size: 13.5px; text-align: left; cursor: pointer;
       }
+      .coin-phone-country__option[hidden] { display: none !important; }
       .coin-phone-country__option:hover,
       .coin-phone-country__option.is-selected { background: rgba(150,235,250,0.1); }
       .coin-phone-country__name { flex: 1; min-width: 0; }

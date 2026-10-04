@@ -1609,6 +1609,8 @@ return [
         'phone_national' => 'Номер телефона',
         'country' => 'Страна',
         'country_required' => 'Выберите страну.',
+        'country_search_placeholder' => 'Поиск страны…',
+        'country_search_empty' => 'Страны не найдены',
         'phone_country_required' => 'Выберите код страны.',
         'phone_national_required' => 'Укажите номер телефона.',
         'phone_national_invalid' => 'Укажите корректный номер телефона.',

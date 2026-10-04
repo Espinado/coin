@@ -1609,6 +1609,8 @@ return [
         'phone_national' => 'Phone number',
         'country' => 'Country',
         'country_required' => 'Please select a country.',
+        'country_search_placeholder' => 'Search country…',
+        'country_search_empty' => 'No countries found',
         'phone_country_required' => 'Please select a country code.',
         'phone_national_required' => 'Please enter your phone number.',
         'phone_national_invalid' => 'Please enter a valid phone number.',

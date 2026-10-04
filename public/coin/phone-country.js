@@ -2,6 +2,7 @@
     function closePicker(root) {
         var menu = root.querySelector('[data-phone-country-menu]');
         var trigger = root.querySelector('[data-phone-country-trigger]');
+        var search = root.querySelector('[data-phone-country-search]');
 
         if (! menu || ! trigger) {
             return;
@@ -10,6 +11,38 @@
         menu.hidden = true;
         root.classList.remove('is-open');
         trigger.setAttribute('aria-expanded', 'false');
+
+        if (search) {
+            search.value = '';
+            filterOptions(root, '');
+        }
+    }
+
+    function filterOptions(root, query) {
+        var needle = String(query || '').trim().toLowerCase();
+        var options = root.querySelectorAll('[data-phone-country-option]');
+        var empty = root.querySelector('[data-phone-country-empty]');
+        var visibleCount = 0;
+
+        options.forEach(function (option) {
+            var name = (option.getAttribute('data-name') || '').toLowerCase();
+            var dial = (option.getAttribute('data-dial') || '').toLowerCase();
+            var iso = (option.getAttribute('data-iso') || '').toLowerCase();
+            var match = ! needle
+                || name.indexOf(needle) === 0
+                || name.indexOf(needle) !== -1
+                || dial.replace('+', '').indexOf(needle.replace('+', '')) === 0
+                || iso.indexOf(needle) === 0;
+
+            option.hidden = ! match;
+            if (match) {
+                visibleCount += 1;
+            }
+        });
+
+        if (empty) {
+            empty.hidden = visibleCount > 0;
+        }
     }
 
     function openPicker(root) {
@@ -21,6 +54,7 @@
 
         var menu = root.querySelector('[data-phone-country-menu]');
         var trigger = root.querySelector('[data-phone-country-trigger]');
+        var search = root.querySelector('[data-phone-country-search]');
 
         if (! menu || ! trigger) {
             return;
@@ -30,7 +64,16 @@
         root.classList.add('is-open');
         trigger.setAttribute('aria-expanded', 'true');
 
-        var selected = menu.querySelector('.is-selected');
+        if (search) {
+            search.value = '';
+            filterOptions(root, '');
+            window.setTimeout(function () {
+                search.focus();
+                search.select();
+            }, 0);
+        }
+
+        var selected = menu.querySelector('.is-selected:not([hidden])');
         if (selected && typeof selected.scrollIntoView === 'function') {
             selected.scrollIntoView({ block: 'nearest' });
         }
@@ -69,10 +112,19 @@
         closePicker(root);
     }
 
+    function firstVisibleOption(root) {
+        return root.querySelector('[data-phone-country-option]:not([hidden])');
+    }
+
     document.addEventListener('click', function (event) {
         var trigger = event.target.closest('[data-phone-country-trigger]');
         var option = event.target.closest('[data-phone-country-option]');
+        var search = event.target.closest('[data-phone-country-search]');
         var root = event.target.closest('[data-phone-country]');
+
+        if (search) {
+            return;
+        }
 
         if (trigger && root) {
             event.preventDefault();
@@ -93,11 +145,47 @@
         document.querySelectorAll('[data-phone-country].is-open').forEach(closePicker);
     });
 
-    document.addEventListener('keydown', function (event) {
-        if (event.key !== 'Escape') {
+    document.addEventListener('input', function (event) {
+        var search = event.target.closest('[data-phone-country-search]');
+        if (! search) {
             return;
         }
 
-        document.querySelectorAll('[data-phone-country].is-open').forEach(closePicker);
+        var root = search.closest('[data-phone-country]');
+        if (! root) {
+            return;
+        }
+
+        filterOptions(root, search.value);
+    });
+
+    document.addEventListener('keydown', function (event) {
+        var openRoot = document.querySelector('[data-phone-country].is-open');
+        if (! openRoot) {
+            return;
+        }
+
+        if (event.key === 'Escape') {
+            event.preventDefault();
+            closePicker(openRoot);
+            var trigger = openRoot.querySelector('[data-phone-country-trigger]');
+            if (trigger) {
+                trigger.focus();
+            }
+            return;
+        }
+
+        if (event.key === 'Enter') {
+            var searchFocused = event.target.closest('[data-phone-country-search]');
+            if (! searchFocused) {
+                return;
+            }
+
+            event.preventDefault();
+            var first = firstVisibleOption(openRoot);
+            if (first) {
+                selectOption(openRoot, first);
+            }
+        }
     });
 })();
