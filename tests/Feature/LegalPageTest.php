@@ -85,14 +85,21 @@ class LegalPageTest extends TestCase
             'company_email' => 'legal@cloudflops.example',
         ]);
 
-        $this->get('http://coin.test/')
+        $html = $this->get('http://coin.test/')
             ->assertOk()
             ->assertSee('CloudFlops LLC', false)
             ->assertSee('40103123456', false)
             ->assertSee('LV-12345', false)
             ->assertSee('Rīga, Brīvības iela 1', false)
             ->assertSee('+371 20000000', false)
-            ->assertSee('legal@cloudflops.example', false);
+            ->assertSee('mailto:legal@cloudflops.example', false)
+            ->assertSee('E-mail', false)
+            ->getContent();
+
+        $this->assertDoesNotMatchRegularExpression(
+            '/mailto:legal@cloudflops\.example[^>]*>\s*legal@cloudflops\.example\s*</i',
+            $html,
+        );
     }
 
     public function test_landing_renders_published_faq_items(): void

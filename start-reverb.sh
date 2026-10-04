@@ -3,6 +3,27 @@ set -euo pipefail
 
 cd "$(dirname "$0")"
 
+broadcast_driver() {
+  if [[ -f .env ]]; then
+    local value
+    value="$(grep -E '^BROADCAST_CONNECTION=' .env | tail -n1 | cut -d= -f2- | tr -d '\r' | tr -d '"' | tr -d "'")"
+    echo "${value:-null}"
+  else
+    echo "null"
+  fi
+}
+
+log_watchdog() {
+    echo "[$(date -u +"%Y-%m-%dT%H:%M:%SZ")] [watchdog] $*"
+}
+
+BROADCAST="$(broadcast_driver)"
+if [[ "${BROADCAST}" != "reverb" ]]; then
+    log_watchdog "SKIP driver=${BROADCAST} (Reverb not required)"
+    pkill -f "artisan reverb:start" 2>/dev/null || true
+    exit 0
+fi
+
 if [[ -z "${PHP_BIN:-}" ]]; then
     for candidate in /usr/local/bin/php /opt/alt/php84/usr/bin/php /opt/cpanel/ea-php84/root/usr/bin/php php; do
         if [[ -x "${candidate}" ]] && "${candidate}" -v 2>&1 | grep -qi '(cli)'; then
@@ -16,10 +37,6 @@ if [[ -z "${PHP_BIN:-}" ]] || ! "${PHP_BIN}" -v 2>&1 | grep -qi '(cli)'; then
     echo "[$(date -u +"%Y-%m-%dT%H:%M:%SZ")] [watchdog] ERROR: PHP CLI not found" >&2
     exit 1
 fi
-
-log_watchdog() {
-    echo "[$(date -u +"%Y-%m-%dT%H:%M:%SZ")] [watchdog] $*"
-}
 
 is_port_open() {
     (echo > /dev/tcp/127.0.0.1/8080) >/dev/null 2>&1

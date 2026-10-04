@@ -48,7 +48,7 @@
         </div>
         <div>
             <label style="{{ $labelStyle }}" for="ticket-offer-expires">{{ strtoupper(__('coin.admin.private_offer_expires_at')) }}</label>
-            <input type="datetime-local" name="expires_at" id="ticket-offer-expires" value="{{ old('expires_at', $defaultExpiresAt) }}" required style="{{ $inputStyle }}">
+            <x-datetime-local-24h name="expires_at" id="ticket-offer-expires" :value="old('expires_at', $defaultExpiresAt)" :required="true" />
         </div>
 
         <div style="padding:12px;border-radius:10px;border:1px solid rgba(255,180,84,0.2);background:rgba(255,180,84,0.05);display:grid;gap:8px;font-size:12.5px;">

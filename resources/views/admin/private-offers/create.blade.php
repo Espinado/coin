@@ -51,8 +51,7 @@
                     </div>
                     <div>
                         <label style="display:block;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.12em;color:rgba(232,237,245,0.65);">{{ strtoupper(__('coin.admin.private_offer_expires_at')) }}</label>
-                        <input type="datetime-local" name="expires_at" id="offer-expires" value="{{ old('expires_at', $defaultExpiresAt) }}" required
-                               style="width:100%;margin-top:8px;padding:10px 12px;border-radius:10px;border:1px solid rgba(255,255,255,0.12);background:#070a10;color:#e8edf5;">
+                        <x-datetime-local-24h name="expires_at" id="offer-expires" :value="old('expires_at', $defaultExpiresAt)" :required="true" />
                         <p style="margin:8px 0 0;font-size:12px;color:rgba(232,237,245,0.55);">{{ __('coin.admin.private_offer_expires_hint') }}</p>
                     </div>
                     <div>
@@ -168,7 +167,7 @@
   };
 
   const fmt = (n) => Number(n).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ' + currency;
-  const fmtDate = (d) => d.toLocaleString(undefined, { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+  const fmtDate = (d) => d.toLocaleString(undefined, { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false });
 
   const render = () => {
     const a = Math.max(0, Number(amount.value || 0));

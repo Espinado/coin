@@ -1299,6 +1299,9 @@ return [
         'save_settings' => 'Save settings',
         'save_changes' => 'Save changes',
         'enabled' => 'Enabled',
+        'time_date' => 'Date',
+        'time_hour' => 'Hour (24h)',
+        'time_minute' => 'Minute',
         'run_accrual_now' => 'Run accrual now',
         'run_accrual_confirm' => 'Run daily profit accrual for all active investments?',
         'top_up_detail' => 'Top-up :reference',
@@ -1879,6 +1882,7 @@ return [
         'address' => 'Address',
         'legal_address' => 'Legal address',
         'physical_address' => 'Office',
+        'email' => 'E-mail',
     ],
 
     'legal' => [

@@ -119,14 +119,27 @@
 
         <div class="admin-card">
             <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.12em;color:rgba(232,237,245,0.62);">{{ $ticket->isGuest() ? 'GUEST CONTEXT' : 'USER CONTEXT' }}</div>
-            <div style="margin-top:12px;font-size:15px;font-weight:600;">
-                @if(! $ticket->isGuest() && $ticket->user)
-                    <a href="{{ route('admin.users.show', $ticket->user) }}" style="color:inherit;text-decoration:underline;text-underline-offset:3px;">{{ $ticket->contactLabel() }}</a>
-                @else
-                    {{ $ticket->contactLabel() }}
-                @endif
+            <div style="margin-top:12px;display:flex;align-items:center;gap:12px;">
+                <div style="width:44px;height:44px;border-radius:50%;background:linear-gradient(145deg,#5ec8d8,#6a5bd4);display:grid;place-items:center;font-family:'JetBrains Mono',monospace;font-size:15px;color:#04121f;flex-shrink:0;overflow:hidden;">
+                    @if(! $ticket->isGuest() && $ticket->user?->hasAvatar())
+                        <img src="{{ $ticket->user->avatarUrl('admin.users.avatar') }}" alt="" style="width:100%;height:100%;object-fit:cover;display:block;">
+                    @elseif(! $ticket->isGuest() && $ticket->user)
+                        {{ $ticket->user->avatarInitial() }}
+                    @else
+                        {{ mb_strtoupper(mb_substr($ticket->contactLabel(), 0, 1)) }}
+                    @endif
+                </div>
+                <div style="min-width:0;">
+                    <div style="font-size:15px;font-weight:600;">
+                        @if(! $ticket->isGuest() && $ticket->user)
+                            <a href="{{ route('admin.users.show', $ticket->user) }}" style="color:inherit;text-decoration:underline;text-underline-offset:3px;">{{ $ticket->contactLabel() }}</a>
+                        @else
+                            {{ $ticket->contactLabel() }}
+                        @endif
+                    </div>
+                    <div style="margin-top:6px;font-size:13px;color:rgba(232,237,245,0.72);word-break:break-all;">{{ $ticket->contactEmail() }}</div>
+                </div>
             </div>
-            <div style="margin-top:6px;font-size:13px;color:rgba(232,237,245,0.72);">{{ $ticket->contactEmail() }}</div>
             @if($ticket->isGuest())
                 <div style="margin-top:18px;padding:12px 14px;border-radius:10px;background:rgba(255,180,84,0.08);font-size:13px;line-height:1.55;color:rgba(232,237,245,0.78);">
                     Guest live chat from the public site. No dashboard account linked yet.

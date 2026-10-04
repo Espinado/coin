@@ -212,5 +212,6 @@
             </script>
         @endunless
     @endauth
+    <script src="{{ asset('admin/time-24h.js') }}?v={{ file_exists(public_path('admin/time-24h.js')) ? filemtime(public_path('admin/time-24h.js')) : 1 }}"></script>
 </body>
 </html>

@@ -25,15 +25,13 @@
             <div style="margin-top: 6px;">{{ __('coin.footer.license_number') }}: {{ $licenseNumber }}</div>
         @endif
 
-        @if($legalAddress !== '' && $physicalAddress !== '' && $legalAddress === $physicalAddress)
+        @if($legalAddress !== '' && $physicalAddress !== '' && $legalAddress !== $physicalAddress)
+            <div style="margin-top: 10px;">{{ __('coin.footer.legal_address') }}:<br>{!! nl2br(e($legalAddress)) !!}</div>
+            <div style="margin-top: 10px;">{{ __('coin.footer.physical_address') }}:<br>{!! nl2br(e($physicalAddress)) !!}</div>
+        @elseif($legalAddress !== '')
             <div style="margin-top: 10px;">{{ __('coin.footer.address') }}:<br>{!! nl2br(e($legalAddress)) !!}</div>
-        @else
-            @if($legalAddress !== '')
-                <div style="margin-top: 10px;">{{ __('coin.footer.legal_address') }}:<br>{!! nl2br(e($legalAddress)) !!}</div>
-            @endif
-            @if($physicalAddress !== '')
-                <div style="margin-top: 10px;">{{ __('coin.footer.physical_address') }}:<br>{!! nl2br(e($physicalAddress)) !!}</div>
-            @endif
+        @elseif($physicalAddress !== '')
+            <div style="margin-top: 10px;">{{ __('coin.footer.address') }}:<br>{!! nl2br(e($physicalAddress)) !!}</div>
         @endif
     </address>
 @endif

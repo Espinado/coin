@@ -6,5 +6,5 @@
     <a href="tel:{{ preg_replace('/[^\d+]/', '', $contactPhone) }}">{{ $contactPhone }}</a>
 @endif
 @if($contactEmail !== '')
-    <a href="mailto:{{ $contactEmail }}">{{ $contactEmail }}</a>
+    <a href="mailto:{{ $contactEmail }}">{{ __('coin.footer.email') }}</a>
 @endif

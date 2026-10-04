@@ -8,6 +8,16 @@ chmod +x deploy-prod.sh start-reverb.sh setup-reverb-cron.sh setup-scheduler-cro
 BRANCH="${DEPLOY_BRANCH:-main}"
 REMOTE="${DEPLOY_REMOTE:-origin}"
 
+broadcast_driver() {
+  if [[ -f .env ]]; then
+    local value
+    value="$(grep -E '^BROADCAST_CONNECTION=' .env | tail -n1 | cut -d= -f2- | tr -d '\r' | tr -d '"' | tr -d "'")"
+    echo "${value:-null}"
+  else
+    echo "null"
+  fi
+}
+
 echo "==> git pull (${REMOTE}/${BRANCH})"
 git fetch "${REMOTE}" "${BRANCH}"
 git reset --hard "${REMOTE}/${BRANCH}"
@@ -45,21 +55,34 @@ php artisan view:cache
 php -r "if (function_exists('opcache_reset')) { opcache_reset(); echo 'OPCACHE_RESET_OK'; } else { echo 'OPCACHE_N/A'; }"
 echo
 
-echo "==> reverb"
-if [ -x ./start-reverb.sh ]; then
-  ./start-reverb.sh
-else
-  bash ./start-reverb.sh
-fi
+BROADCAST="$(broadcast_driver)"
+echo "==> broadcast driver: ${BROADCAST}"
 
-echo "==> reverb diagnose"
-php artisan coin:reverb-diagnose || true
+if [[ "${BROADCAST}" == "reverb" ]]; then
+  echo "==> reverb"
+  if [ -x ./start-reverb.sh ]; then
+    ./start-reverb.sh
+  else
+    bash ./start-reverb.sh
+  fi
 
-echo "==> reverb cron"
-if [ -x ./setup-reverb-cron.sh ]; then
-  ./setup-reverb-cron.sh
+  echo "==> reverb diagnose"
+  php artisan coin:reverb-diagnose || true
+
+  echo "==> reverb cron"
+  if [ -x ./setup-reverb-cron.sh ]; then
+    ./setup-reverb-cron.sh
+  else
+    bash ./setup-reverb-cron.sh
+  fi
 else
-  bash ./setup-reverb-cron.sh
+  echo "==> skipping reverb (not needed for ${BROADCAST})"
+  pkill -f "artisan reverb:start" 2>/dev/null || true
+  if [ -x ./setup-reverb-cron.sh ]; then
+    ./setup-reverb-cron.sh
+  else
+    bash ./setup-reverb-cron.sh
+  fi
 fi
 
 echo "==> scheduler cron"

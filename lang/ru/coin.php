@@ -1299,6 +1299,9 @@ return [
         'save_settings' => 'Сохранить настройки',
         'save_changes' => 'Сохранить изменения',
         'enabled' => 'Включено',
+        'time_date' => 'Дата',
+        'time_hour' => 'Час (24ч)',
+        'time_minute' => 'Минута',
         'run_accrual_now' => 'Запустить начисление сейчас',
         'run_accrual_confirm' => 'Запустить ежедневное начисление прибыли по всем активным инвестициям?',
         'top_up_detail' => 'Пополнение :reference',
@@ -1879,6 +1882,7 @@ return [
         'address' => 'Address',
         'legal_address' => 'Legal address',
         'physical_address' => 'Office',
+        'email' => 'E-mail',
     ],
 
     'legal' => [
