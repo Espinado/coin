@@ -2,6 +2,8 @@
 
 namespace App\Support;
 
+use App\Services\PlatformSettingsService;
+
 final class PlatformBrand
 {
     public static function name(): string
@@ -14,9 +16,40 @@ final class PlatformBrand
         return (string) config('coin.brand.admin_name', self::name().' Admin');
     }
 
+    /**
+     * Legal entity name: admin Legal information → company_name, else config fallback.
+     */
     public static function legalName(): string
     {
+        try {
+            $fromSettings = trim(app(PlatformSettingsService::class)->get('company_name'));
+        } catch (\Throwable) {
+            $fromSettings = '';
+        }
+
+        if ($fromSettings !== '') {
+            return $fromSettings;
+        }
+
         return (string) config('coin.brand.legal_name', self::name().' LLC');
+    }
+
+    /**
+     * Public contact email: admin Legal information → company_email, else config fallback.
+     */
+    public static function contactEmail(): string
+    {
+        try {
+            $fromSettings = trim(app(PlatformSettingsService::class)->get('company_email'));
+        } catch (\Throwable) {
+            $fromSettings = '';
+        }
+
+        if ($fromSettings !== '') {
+            return $fromSettings;
+        }
+
+        return trim((string) config('coin.contact_email', ''));
     }
 
     public static function logo(string $variant = 'horizontal'): string

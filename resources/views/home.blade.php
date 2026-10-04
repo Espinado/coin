@@ -136,6 +136,7 @@
           @endif
       </span>
       @include('partials.coin-legal-links', ['class' => 'coin-landing-footer__legal'])
+      <a href="{{ route('seo.llms') }}" class="coin-landing-footer__llms">{{ __('coin.footer.llms') }}</a>
       <span class="coin-landing-footer__status">NETWORK ONLINE</span>
     </div>
   </footer>

@@ -3,7 +3,6 @@
 namespace App\Support;
 
 use App\Models\LegalPage;
-use App\Services\PlatformSettingsService;
 
 final class SeoSchema
 {
@@ -65,13 +64,14 @@ final class SeoSchema
         $name = PlatformBrand::name();
         $url = route('home');
         $logo = PlatformBrand::logoUrl('mark');
-        $email = self::contactEmail();
+        $email = PlatformBrand::contactEmail();
+        $legalName = PlatformBrand::legalName();
 
         $org = [
             '@context' => 'https://schema.org',
             '@type' => 'Organization',
             'name' => $name,
-            'legalName' => PlatformBrand::legalName(),
+            'legalName' => $legalName,
             'url' => $url,
             'logo' => $logo,
             'description' => __('coin.seo.meta_description', ['brand' => $name]),
@@ -125,14 +125,4 @@ final class SeoSchema
         ];
     }
 
-    private static function contactEmail(): string
-    {
-        try {
-            $fromSettings = trim(app(PlatformSettingsService::class)->get('company_email'));
-        } catch (\Throwable) {
-            $fromSettings = '';
-        }
-
-        return $fromSettings !== '' ? $fromSettings : trim((string) config('coin.contact_email', ''));
-    }
 }

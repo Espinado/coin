@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\LegalPage;
+use App\Services\PlatformSettingsService;
 use Database\Seeders\LegalPageSeeder;
 use Database\Seeders\PlatformSettingsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -55,7 +56,12 @@ class SeoDiscoverabilityTest extends TestCase
             ->assertSee('Disallow: /register', false)
             ->assertSee('Sitemap:', false)
             ->assertSee('# AI:', false)
-            ->assertSee('/llms.txt', false);
+            ->assertSee('/llms.txt', false)
+            ->assertSee('# AI full:', false)
+            ->assertSee('/llms-full.txt', false)
+            ->assertSee('User-agent: GPTBot', false)
+            ->assertSee('User-agent: PerplexityBot', false)
+            ->assertSee('Allow: /llms.txt', false);
 
         $this->assertStringNotContainsString("Disallow: /\n", $response->getContent());
     }
@@ -97,12 +103,19 @@ class SeoDiscoverabilityTest extends TestCase
 
     public function test_about_page_is_public_and_describes_platform(): void
     {
+        app(PlatformSettingsService::class)->setLegalMany([
+            'company_name' => 'Cloud Computing (HongKong) Group Co., Limited',
+        ]);
+
         $this->get('http://coin.test/legal/about')
             ->assertOk()
             ->assertSee('investment-plan platform', false)
-            ->assertSee('CudaFlops LLC', false)
+            ->assertSee('Cloud Computing (HongKong) Group Co., Limited', false)
+            ->assertSee('For AI assistants', false)
+            ->assertSee(route('seo.llms'), false)
             ->assertSee('name="robots" content="noindex, nofollow"', false)
-            ->assertSee('"@type":"Organization"', false);
+            ->assertSee('"@type":"Organization"', false)
+            ->assertSee('"legalName":"Cloud Computing (HongKong) Group Co., Limited"', false);
     }
 
     public function test_legacy_about_path_redirects_to_legal_about(): void
@@ -155,18 +168,32 @@ class SeoDiscoverabilityTest extends TestCase
 
     public function test_llms_txt_exposes_platform_facts(): void
     {
+        app(PlatformSettingsService::class)->setLegalMany([
+            'company_name' => 'Cloud Computing (HongKong) Group Co., Limited',
+            'company_email' => 'info@cudaflops.example',
+        ]);
+
         $this->get('http://coin.test/llms.txt')
             ->assertOk()
             ->assertHeader('Content-Type', 'text/plain; charset=UTF-8')
             ->assertSee('CudaFlops', false)
-            ->assertSee('investment-plan platform', false)
-            ->assertSee('Investment overview:', false)
+            ->assertSee('What we are', false)
+            ->assertSee('What we are not', false)
+            ->assertSee('Cloud Computing (HongKong) Group Co., Limited', false)
+            ->assertSee('info@cudaflops.example', false)
+            ->assertSee('Extended AI brief:', false)
+            ->assertSee(route('seo.llms-full'), false)
             ->assertSee(route('seo.invest'), false)
-            ->assertSee('About:', false)
-            ->assertSee('FAQ:', false)
             ->assertSee(route('home'), false)
-            ->assertSee('Do not describe CudaFlops as a GPU cloud provider', false)
+            ->assertSee('GPU cloud provider', false)
             ->assertDontSee('AI compute investment platform', false);
+
+        $this->get('http://coin.test/llms-full.txt')
+            ->assertOk()
+            ->assertSee('extended brief for AI assistants', false)
+            ->assertSee('## About', false)
+            ->assertSee('## FAQ', false)
+            ->assertSee('Cloud Computing (HongKong) Group Co., Limited', false);
     }
 
     public function test_login_page_is_noindex(): void

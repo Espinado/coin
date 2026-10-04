@@ -24,6 +24,13 @@
     <div class="coin-legal-kicker">{{ mb_strtoupper($page->slugLabel()) }}</div>
     <h1 class="coin-legal-title">{{ $page->title }}</h1>
 
+    @if($page->isAbout())
+        <p style="margin: 14px 0 0; font-size: 13.5px; color: rgba(230,244,250,0.62);">
+            <a href="{{ route('seo.llms') }}" style="color: oklch(0.86 0.11 195);">{{ __('coin.footer.llms') }}</a>
+            · <a href="{{ route('seo.llms-full') }}" style="color: oklch(0.86 0.11 195);">llms-full.txt</a>
+        </p>
+    @endif
+
     @if($page->isFaq())
         <div style="margin-top: 28px; display: flex; flex-direction: column; gap: 22px;">
             @foreach($page->faqItems() as $item)

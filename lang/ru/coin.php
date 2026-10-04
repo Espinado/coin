@@ -1883,6 +1883,7 @@ return [
         'legal_address' => 'Legal address',
         'physical_address' => 'Office',
         'email' => 'E-mail',
+        'llms' => 'For AI assistants',
     ],
 
     'legal' => [
