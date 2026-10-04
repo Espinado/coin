@@ -3,13 +3,26 @@
 namespace App\Http\Controllers;
 
 use App\Models\LegalPage;
+use App\Services\Seo\IndexNowService;
 use App\Support\PlatformBrand;
+use App\Support\PublicSeoUrls;
 use App\Support\SeoVisibility;
 use Illuminate\Http\Response;
-use Illuminate\Support\Carbon;
 
 class SeoController extends Controller
 {
+    public function indexNowKey(string $key, IndexNowService $indexNow): Response
+    {
+        if (! $indexNow->isConfigured() || ! hash_equals($indexNow->key(), $key)) {
+            abort(404);
+        }
+
+        return response($indexNow->key()."\n", 200, [
+            'Content-Type' => 'text/plain; charset=UTF-8',
+            'Cache-Control' => 'public, max-age=3600',
+        ]);
+    }
+
     public function robots(): Response
     {
         $lines = [
@@ -70,38 +83,7 @@ class SeoController extends Controller
             ]);
         }
 
-        $urls = [
-            [
-                'loc' => route('home'),
-                'lastmod' => Carbon::now()->toAtomString(),
-                'changefreq' => 'weekly',
-                'priority' => '1.0',
-            ],
-            [
-                'loc' => route('seo.invest'),
-                'lastmod' => Carbon::now()->toAtomString(),
-                'changefreq' => 'weekly',
-                'priority' => '0.9',
-            ],
-        ];
-
-        $pages = LegalPage::query()->published()->ordered()->get(['slug', 'updated_at']);
-
-        foreach ($pages as $page) {
-            // /invest is listed above; /legal/invest only redirects and must not appear twice.
-            if ($page->isInvest()) {
-                continue;
-            }
-
-            $urls[] = [
-                'loc' => $page->publicUrl(),
-                'lastmod' => optional($page->updated_at)->toAtomString() ?? Carbon::now()->toAtomString(),
-                'changefreq' => 'monthly',
-                'priority' => $page->slug === LegalPage::SLUG_ABOUT ? '0.8' : '0.7',
-            ];
-        }
-
-        $xml = view('seo.sitemap', ['urls' => $urls])->render();
+        $xml = view('seo.sitemap', ['urls' => PublicSeoUrls::sitemapEntries()])->render();
 
         return response($xml, 200, [
             'Content-Type' => 'application/xml; charset=UTF-8',

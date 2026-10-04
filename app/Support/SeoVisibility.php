@@ -7,7 +7,7 @@ final class SeoVisibility
     /**
      * Public marketing pages may be indexed only in production on an allowlisted host.
      */
-    public static function shouldIndexPublicPages(): bool
+    public static function shouldIndexPublicPages(?string $host = null): bool
     {
         if (! app()->environment('production')) {
             return false;
@@ -19,10 +19,18 @@ final class SeoVisibility
             return false;
         }
 
-        $host = strtolower((string) request()->getHost());
+        $resolved = strtolower(trim((string) ($host ?? request()->getHost())));
+
+        if ($resolved === '') {
+            $resolved = strtolower((string) parse_url((string) config('app.url'), PHP_URL_HOST));
+        }
+
+        if ($resolved === '') {
+            return false;
+        }
 
         foreach ($hosts as $allowed) {
-            if ($host === strtolower((string) $allowed)) {
+            if ($resolved === strtolower((string) $allowed)) {
                 return true;
             }
         }

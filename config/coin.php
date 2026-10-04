@@ -34,6 +34,9 @@ return [
             explode(',', (string) env('COIN_SEO_INDEXABLE_HOSTS', '')),
         ))),
         'og_image' => env('COIN_SEO_OG_IMAGE', 'cloudflops/og-default.png'),
+        // IndexNow key for Bing/Yandex (host as /{key}.txt). Empty = disabled.
+        'indexnow_key' => env('COIN_SEO_INDEXNOW_KEY', ''),
+        'indexnow_endpoint' => env('COIN_SEO_INDEXNOW_ENDPOINT', 'https://api.indexnow.org/indexnow'),
     ],
 
     // Comma-separated proxy IPs (or *). Empty = do not trust X-Forwarded-For.

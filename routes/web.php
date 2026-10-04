@@ -25,6 +25,9 @@ Route::domain(config('coin.user_domain'))
         Route::get('/robots.txt', [SeoController::class, 'robots'])->name('seo.robots');
         Route::get('/sitemap.xml', [SeoController::class, 'sitemap'])->name('seo.sitemap');
         Route::get('/llms.txt', [SeoController::class, 'llms'])->name('seo.llms');
+        Route::get('/{key}.txt', [SeoController::class, 'indexNowKey'])
+            ->where('key', '[A-Za-z0-9-]{8,128}')
+            ->name('seo.indexnow-key');
         Route::get('/invest', [SeoHubController::class, 'invest'])->name('seo.invest');
 
         Route::get('/legal/{legalPage:slug}', [LegalPageController::class, 'show'])

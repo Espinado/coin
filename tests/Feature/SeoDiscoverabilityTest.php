@@ -6,6 +6,7 @@ use App\Models\LegalPage;
 use Database\Seeders\LegalPageSeeder;
 use Database\Seeders\PlatformSettingsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
 
 class SeoDiscoverabilityTest extends TestCase
@@ -173,5 +174,51 @@ class SeoDiscoverabilityTest extends TestCase
         $this->get('http://coin.test/login')
             ->assertOk()
             ->assertSee('name="robots" content="noindex, nofollow"', false);
+    }
+
+    public function test_indexnow_key_file_is_served_when_configured(): void
+    {
+        config([
+            'coin.seo.indexnow_key' => 'cudaflops-indexnow-key1',
+        ]);
+
+        $this->get('http://coin.test/cudaflops-indexnow-key1.txt')
+            ->assertOk()
+            ->assertHeader('Content-Type', 'text/plain; charset=UTF-8')
+            ->assertSee('cudaflops-indexnow-key1', false);
+
+        $this->get('http://coin.test/wrong-indexnow-key12.txt')->assertNotFound();
+    }
+
+    public function test_indexnow_command_submits_public_urls_in_production(): void
+    {
+        $this->app->detectEnvironment(fn () => 'production');
+
+        config([
+            'app.url' => 'https://coin.test',
+            'coin.seo.indexable_hosts' => ['coin.test'],
+            'coin.seo.indexnow_key' => 'cudaflops-indexnow-key1',
+            'coin.seo.indexnow_endpoint' => 'https://api.indexnow.org/indexnow',
+        ]);
+
+        Http::fake([
+            'api.indexnow.org/*' => Http::response('', 200),
+        ]);
+
+        $this->artisan('coin:indexnow')
+            ->expectsOutputToContain('IndexNow OK')
+            ->assertSuccessful();
+
+        Http::assertSent(function ($request) {
+            $data = $request->data();
+            $urls = $data['urlList'] ?? [];
+
+            return $request->url() === 'https://api.indexnow.org/indexnow'
+                && ($data['host'] ?? null) === 'coin.test'
+                && ($data['key'] ?? null) === 'cudaflops-indexnow-key1'
+                && ($data['keyLocation'] ?? null) === 'https://coin.test/cudaflops-indexnow-key1.txt'
+                && is_array($urls)
+                && collect($urls)->contains(fn (string $url) => str_contains($url, 'coin.test') && ! str_contains($url, '/legal/'));
+        });
     }
 }
