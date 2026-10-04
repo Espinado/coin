@@ -17,6 +17,7 @@ use App\Http\Controllers\Admin\ProfitAccrualController;
 use App\Http\Controllers\Admin\PlanChangeRequestController;
 use App\Http\Controllers\Admin\PlanController;
 use App\Http\Controllers\Admin\PrivateOfferController;
+use App\Http\Controllers\Admin\MailboxController;
 use App\Http\Controllers\Admin\SettingsController;
 use App\Http\Controllers\Admin\SupportTicketController;
 use App\Http\Controllers\Admin\UserController;
@@ -168,6 +169,17 @@ Route::middleware(['admin.domain', 'reject.web.on.admin'])->group(function () {
                 ->name('admin.settings.refresh-btc-rate');
             Route::patch('settings/legal', [SettingsController::class, 'updateLegal'])
                 ->name('admin.settings.legal.update');
+
+            Route::get('settings/mailboxes', [MailboxController::class, 'index'])
+                ->name('admin.settings.mailboxes.index');
+            Route::post('settings/mailboxes', [MailboxController::class, 'store'])
+                ->name('admin.settings.mailboxes.store');
+            Route::get('settings/mailboxes/{localPart}', [MailboxController::class, 'show'])
+                ->where('localPart', '[A-Za-z0-9._+-]+')
+                ->name('admin.settings.mailboxes.show');
+            Route::patch('settings/mailboxes/{localPart}/password', [MailboxController::class, 'updatePassword'])
+                ->where('localPart', '[A-Za-z0-9._+-]+')
+                ->name('admin.settings.mailboxes.password');
         });
 
         Route::middleware('admin.ability:manage_admins')->group(function () {

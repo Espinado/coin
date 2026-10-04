@@ -55,6 +55,26 @@ return [
 
     'contact_email' => env('COIN_CONTACT_EMAIL', ''),
 
+    /*
+    |--------------------------------------------------------------------------
+    | cPanel mailboxes (admin Settings → Mailboxes)
+    |--------------------------------------------------------------------------
+    |
+    | driver=uapi uses the local cPanel `uapi` binary on the hosting account.
+    | driver=array is for tests (DB-only). driver=null disables management.
+    |
+    */
+    'mailboxes' => [
+        'driver' => env('COIN_MAILBOXES_DRIVER', 'null'),
+        'domain' => env('COIN_MAILBOXES_DOMAIN', 'cudaflops.com'),
+        'mail_host' => env('COIN_MAIL_HOST', env('MAIL_HOST', 'mail.cudaflops.com')),
+        'imap_port' => (int) env('COIN_MAIL_IMAP_PORT', 993),
+        'smtp_port' => (int) env('COIN_MAIL_SMTP_PORT', 465),
+        'encryption' => env('COIN_MAIL_ENCRYPTION', 'ssl'),
+        'webmail_url' => env('COIN_WEBMAIL_URL', 'https://business198.web-hosting.com:2096'),
+        'uapi_binary' => env('COIN_MAILBOXES_UAPI_BINARY', 'uapi'),
+    ],
+
     'wallet' => [
         'base_currency' => env('COIN_WALLET_BASE_CURRENCY', 'USDT'),
         'payout_network' => env('COIN_WALLET_PAYOUT_NETWORK', 'TRC-20'),

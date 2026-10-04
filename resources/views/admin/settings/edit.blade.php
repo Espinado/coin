@@ -3,12 +3,14 @@
 @section('title', __('coin.admin.page_title', ['section' => __('coin.admin.settings')]))
 
 @section('content')
+    @include('admin.partials.settings-tabs', ['active' => 'platform'])
+
     @if (session('status'))
-        <div class="admin-card" style="margin-bottom:16px;border-color:rgba(255,180,84,0.35);">{{ session('status') }}</div>
+        <div class="admin-card" style="margin-bottom:16px;border-color:{{ session('status_type') === 'error' ? 'rgba(255,143,143,0.35)' : 'rgba(255,180,84,0.35)' }};">{{ session('status') }}</div>
     @endif
 
     <div class="admin-card">
-        <h1 style="margin:0;font-size:24px;font-weight:600;">{{ __('coin.admin.platform_settings') }}</h1>
+        <h2 style="margin:0;font-size:20px;font-weight:600;">{{ __('coin.admin.platform_settings') }}</h2>
         <p style="margin:8px 0 0;font-size:14px;color:rgba(232,237,245,0.72);">{{ __('coin.admin.settings_sub') }}</p>
     </div>
 
