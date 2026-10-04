@@ -238,8 +238,8 @@ html.coin-nav-open .coin-nav-overlay {
 
 .coin-landing-footer__grid {
   display: grid;
-  grid-template-columns: minmax(0, 1.6fr) minmax(0, 4fr);
-  gap: 40px;
+  grid-template-columns: minmax(0, 1.45fr) minmax(0, 3fr);
+  gap: 48px;
   align-items: start;
 }
 
@@ -267,8 +267,8 @@ html.coin-nav-open .coin-nav-overlay {
 
 .coin-landing-footer__links {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 32px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 40px;
 }
 
 .coin-landing-footer__heading {
@@ -3704,8 +3704,8 @@ html.coin-nav-open .coin-nav-mobile {
   }
 
   .coin-landing-footer__links {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 28px 24px;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 28px 20px;
   }
 
   .coin-dashboard [style*="grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr)"],
@@ -4207,8 +4207,8 @@ html.coin-nav-open .coin-nav-mobile {
   }
 
   .coin-landing-footer__links {
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-    gap: 28px 20px !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 24px 16px !important;
   }
 
   .coin-landing-footer__heading {

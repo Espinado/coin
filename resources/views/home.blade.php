@@ -116,14 +116,7 @@
         <div class="coin-landing-footer__col">
           <div class="coin-landing-footer__heading">SUPPORT</div>
           <div class="coin-landing-footer__nav">
-            <a href="{{ route('legal.show', ['legalPage' => 'faq']) }}" target="_blank" rel="noopener noreferrer">{{ __('coin.legal.slugs.faq') }}</a>
-            <a href="{{ route('legal.show', ['legalPage' => 'risks']) }}" target="_blank" rel="noopener noreferrer">{{ __('coin.legal.slugs.risks') }}</a>
-@include('partials.landing-footer-contact', ['companyLegal' => $companyLegal])
-          </div>
-        </div>
-        <div class="coin-landing-footer__col">
-          <div class="coin-landing-footer__heading">SOCIAL</div>
-          <div class="coin-landing-footer__nav">
+            @include('partials.landing-footer-contact', ['companyLegal' => $companyLegal])
             <a href="#">Telegram</a>
             <a href="#">X</a>
             <a href="#">LinkedIn</a>
