@@ -18,6 +18,7 @@ abstract class TestCase extends BaseTestCase
             'email' => 'test@example.com',
             'phone_country' => 'RU',
             'phone_national' => '9001234567',
+            'country_code' => 'RU',
             'password' => 'password',
             'password_confirmation' => 'password',
             'accept_terms' => '1',

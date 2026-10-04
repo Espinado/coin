@@ -1607,6 +1607,8 @@ return [
         'phone_required' => 'Укажите телефон.',
         'phone_country' => 'Код страны',
         'phone_national' => 'Номер телефона',
+        'country' => 'Страна',
+        'country_required' => 'Выберите страну.',
         'phone_country_required' => 'Выберите код страны.',
         'phone_national_required' => 'Укажите номер телефона.',
         'phone_national_invalid' => 'Укажите корректный номер телефона.',

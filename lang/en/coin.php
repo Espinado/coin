@@ -1607,6 +1607,8 @@ return [
         'phone_required' => 'Please enter your phone number.',
         'phone_country' => 'Country code',
         'phone_national' => 'Phone number',
+        'country' => 'Country',
+        'country_required' => 'Please select a country.',
         'phone_country_required' => 'Please select a country code.',
         'phone_national_required' => 'Please enter your phone number.',
         'phone_national_invalid' => 'Please enter a valid phone number.',

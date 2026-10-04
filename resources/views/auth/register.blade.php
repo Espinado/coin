@@ -44,11 +44,20 @@
                 </div>
 
                 <div style="margin-top: 18px;">
-                    <label for="password" style="display: block; font-size: 12.5px; color: rgba(230,244,250,0.78);">{{ __('coin.auth.password') }}</label>
-                    <div style="position: relative; margin-top: 9px;">
-                        <input id="password" type="password" name="password" autocomplete="new-password" class="js-password-input" placeholder="{{ __('coin.auth.password_new_placeholder') }}" aria-invalid="{{ $errors->has('password') ? 'true' : 'false' }}" style="width: 100%; box-sizing: border-box; padding: 14px 92px 14px 16px; border-radius: 12px; border: 1px solid {{ $errors->has('password') ? 'oklch(0.72 0.22 25)' : 'rgba(150,235,250,0.18)' }}; background: rgba(4,16,28,0.7); color: #f0fbff; font-family: inherit; font-size: 16px;" />
-                        <button type="button" data-password-toggle data-show-label="{{ __('coin.auth.show') }}" data-hide-label="{{ __('coin.auth.hide') }}" style="position: absolute; top: 50%; right: 10px; transform: translateY(-50%); padding: 7px 12px; border-radius: 8px; border: 1px solid rgba(150,235,250,0.18); background: rgba(150,235,250,0.07); color: rgba(230,244,250,0.85); font-family: inherit; font-size: 12px; cursor: pointer;">{{ __('coin.auth.show') }}</button>
+                    <label style="display: block; font-size: 12.5px; color: rgba(230,244,250,0.78);">{{ __('coin.auth.country') }}</label>
+                    @php
+                        $countryHasError = $errors->has('country_code');
+                        $countryBorder = $countryHasError ? 'oklch(0.72 0.22 25)' : 'rgba(150,235,250,0.18)';
+                    @endphp
+                    <div style="margin-top: 9px;">
+                        @include('partials.coin-country-select', ['countryBorder' => $countryBorder])
                     </div>
+                    @error('country_code')<div class="coin-auth-error" role="alert">{{ $message }}</div>@enderror
+                </div>
+
+                <div style="margin-top: 18px;">
+                    <label for="password" style="display: block; font-size: 12.5px; color: rgba(230,244,250,0.78);">{{ __('coin.auth.password') }}</label>
+                    <input id="password" type="password" name="password" autocomplete="new-password" class="js-password-input" placeholder="{{ __('coin.auth.password_new_placeholder') }}" aria-invalid="{{ $errors->has('password') ? 'true' : 'false' }}" style="width: 100%; box-sizing: border-box; margin-top: 9px; padding: 14px 16px; border-radius: 12px; border: 1px solid {{ $errors->has('password') ? 'oklch(0.72 0.22 25)' : 'rgba(150,235,250,0.18)' }}; background: rgba(4,16,28,0.7); color: #f0fbff; font-family: inherit; font-size: 16px;" />
                     @error('password')<div class="coin-auth-error" role="alert">{{ $message }}</div>@enderror
                 </div>
 
@@ -102,8 +111,9 @@
 
                 <button type="submit" style="width: 100%; margin-top: 24px; padding: 15px; border-radius: 12px; border: 1px solid oklch(0.86 0.11 195 / 0.5); background: linear-gradient(140deg, oklch(0.86 0.12 192), oklch(0.66 0.13 205)); color: #04121f; font-family: inherit; font-size: 15px; font-weight: 600; cursor: pointer; box-shadow: 0 20px 46px -22px oklch(0.8 0.13 195 / 0.85);">{{ __('coin.auth.register') }}</button>
 
-                <div style="margin-top: 24px; padding-top: 20px; border-top: 1px solid rgba(150,235,250,0.1); text-align: center; font-size: 13px; color: rgba(230,244,250,0.72);">
-                    {{ __('coin.auth.have_account') }} <a href="{{ route('login') }}">{{ __('coin.auth.login') }}</a>
+                <div style="margin-top: 24px; padding-top: 20px; border-top: 1px solid rgba(150,235,250,0.1); text-align: center; font-size: 13.5px; color: rgba(230,244,250,0.78);">
+                    {{ __('coin.auth.have_account') }}
+                    <a href="{{ route('login') }}" style="color: oklch(0.86 0.12 192); font-weight: 600; text-decoration: none;">{{ __('coin.auth.sign_in') }}</a>
                 </div>
             </form>
 

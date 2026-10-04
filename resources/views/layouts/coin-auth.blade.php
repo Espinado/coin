@@ -35,8 +35,11 @@
       }
       .coin-phone-country__flag { width: 22px; height: 16px; object-fit: cover; border-radius: 2px; flex-shrink: 0; box-shadow: 0 0 0 1px rgba(255,255,255,0.12); }
       .coin-phone-country__dial { font-variant-numeric: tabular-nums; white-space: nowrap; }
+      .coin-phone-country__name-label { flex: 1; min-width: 0; text-align: left; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      .coin-country-select { display: block; width: 100%; min-width: 0; }
+      .coin-country-select .coin-phone-country__menu { width: 100%; }
       .coin-phone-country__chevron {
-        margin-left: auto; width: 0; height: 0;
+        margin-left: auto; width: 0; height: 0; flex-shrink: 0;
         border-left: 5px solid transparent; border-right: 5px solid transparent; border-top: 6px solid rgba(230,244,250,0.7);
       }
       .coin-phone-country__menu {

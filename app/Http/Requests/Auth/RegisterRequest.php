@@ -36,6 +36,10 @@ class RegisterRequest extends FormRequest
             $merged['phone_country'] = strtoupper(trim($this->string('phone_country')->toString()));
         }
 
+        if ($this->has('country_code')) {
+            $merged['country_code'] = strtoupper(trim($this->string('country_code')->toString()));
+        }
+
         $phoneCountry = $merged['phone_country'] ?? $this->input('phone_country');
         $rawNational = $this->has('phone_national')
             ? trim($this->string('phone_national')->toString())
@@ -85,6 +89,7 @@ class RegisterRequest extends FormRequest
                 },
             ],
             'phone_country' => ['required', 'string', Rule::in(PhoneCountries::isos())],
+            'country_code' => ['required', 'string', 'size:2', Rule::in(PhoneCountries::isos())],
             'phone_national' => [
                 'required',
                 'string',
@@ -135,6 +140,9 @@ class RegisterRequest extends FormRequest
             'phone.required' => __('coin.auth.phone_required'),
             'phone_country.required' => __('coin.auth.phone_country_required'),
             'phone_country.in' => __('coin.auth.phone_country_required'),
+            'country_code.required' => __('coin.auth.country_required'),
+            'country_code.in' => __('coin.auth.country_required'),
+            'country_code.size' => __('coin.auth.country_required'),
             'phone_national.required' => __('coin.auth.phone_national_required'),
             'phone_national.min' => __('coin.auth.phone_national_invalid'),
             'phone_national.max' => __('coin.auth.phone_national_invalid'),
@@ -159,6 +167,7 @@ class RegisterRequest extends FormRequest
     {
         return [
             'phone_country' => __('coin.auth.phone_country'),
+            'country_code' => __('coin.auth.country'),
             'phone_national' => __('coin.auth.phone_national'),
             'accept_terms' => __('coin.auth.accept_terms_attribute'),
             'accept_privacy' => __('coin.auth.accept_privacy_attribute'),

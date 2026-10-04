@@ -40,6 +40,7 @@
         var input = root.querySelector('[data-phone-country-input]');
         var flag = root.querySelector('[data-phone-country-flag]');
         var dial = root.querySelector('[data-phone-country-dial]');
+        var name = root.querySelector('[data-phone-country-name]');
 
         if (! input || ! option) {
             return;
@@ -53,6 +54,10 @@
 
         if (dial) {
             dial.textContent = option.getAttribute('data-dial') || '';
+        }
+
+        if (name) {
+            name.textContent = option.getAttribute('data-name') || '';
         }
 
         root.querySelectorAll('[data-phone-country-option]').forEach(function (item) {

@@ -30,6 +30,7 @@ class RegisteredUserController extends Controller
             'name' => $validated['name'],
             'email' => $validated['email'],
             'phone' => $validated['phone'],
+            'country_code' => $validated['country_code'],
             'password' => Hash::make($validated['password']),
             'email_two_factor_enabled' => true,
         ]);

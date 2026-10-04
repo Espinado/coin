@@ -32,6 +32,7 @@ class RegistrationTest extends TestCase
         $this->assertDatabaseHas('users', [
             'email' => 'test@example.com',
             'phone' => '+79001234567',
+            'country_code' => 'RU',
             'email_two_factor_enabled' => true,
         ]);
     }
@@ -114,10 +115,25 @@ class RegistrationTest extends TestCase
             ->assertOk()
             ->assertSee('name="phone_country"', false)
             ->assertSee('name="phone_national"', false)
+            ->assertSee('name="country_code"', false)
             ->assertSee('data-phone-country', false)
             ->assertSee('flagcdn.com/w40/lv.png', false)
             ->assertSee('+371', false)
-            ->assertSee('Latvia', false);
+            ->assertSee('Latvia', false)
+            ->assertSee(__('coin.auth.have_account'), false)
+            ->assertSee(route('login'), false)
+            ->assertDontSee('data-password-toggle', false);
+    }
+
+    public function test_registration_requires_country(): void
+    {
+        $response = $this->from('/register')->post('/register', $this->validRegistrationPayload([
+            'country_code' => null,
+        ]));
+
+        $response->assertRedirect('/register')
+            ->assertSessionHasErrors('country_code');
+        $this->assertGuest();
     }
 
     public function test_registration_requires_legal_acceptances(): void
