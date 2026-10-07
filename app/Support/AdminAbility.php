@@ -23,4 +23,6 @@ final class AdminAbility
     public const ManageBroadcasts = 'manage_broadcasts';
 
     public const ManageSupport = 'manage_support';
+
+    public const ManageVisits = 'manage_visits';
 }

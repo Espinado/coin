@@ -34,6 +34,7 @@ class AdminNavComposer
         $canManageLegal = $admin !== null && $this->authorization->allows($admin, AdminAbility::ManageLegal);
         $canManageBroadcasts = $admin !== null && $this->authorization->allows($admin, AdminAbility::ManageBroadcasts);
         $canManageSupport = $admin !== null && $this->authorization->allows($admin, AdminAbility::ManageSupport);
+        $canManageVisits = $admin !== null && $this->authorization->allows($admin, AdminAbility::ManageVisits);
 
         $view->with([
             'unreadSupportCount' => $canManageSupport ? SupportTicket::totalUnreadForAdmin() : 0,
@@ -59,6 +60,7 @@ class AdminNavComposer
             'canManageLegal' => $canManageLegal,
             'canManageBroadcasts' => $canManageBroadcasts,
             'canManageSupport' => $canManageSupport,
+            'canManageVisits' => $canManageVisits,
             'canAccessFinance' => $canManageDeposits || $canManageWithdrawals || $canManagePlans,
             'canAccessPaymentLogs' => $canManageDeposits,
             'financeNavUrl' => $canManageDeposits

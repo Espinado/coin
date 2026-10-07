@@ -23,7 +23,7 @@
         'admin.early-unlocks',
         'admin.plan-changes',
     );
-    $reportingActive = $adminNavActive($routeName, 'admin.commissions', 'admin.profit-accrual', 'admin.epochs');
+    $reportingActive = $adminNavActive($routeName, 'admin.commissions', 'admin.profit-accrual', 'admin.epochs', 'admin.visits');
     $adminCenterActive = $adminNavActive(
         $routeName,
         'admin.payment-logs',
@@ -38,7 +38,7 @@
         || ($canManageDeposits ?? false)
         || ($canManageWithdrawals ?? false)
         || ($canManagePlanChanges ?? false);
-    $showReporting = ($canManageWithdrawals ?? false) || ($canManagePlans ?? false);
+    $showReporting = ($canManageWithdrawals ?? false) || ($canManagePlans ?? false) || ($canManageVisits ?? false);
     $showAdminCenter = ($canAccessPaymentLogs ?? false)
         || ($canManageSettings ?? false)
         || ($canManageLegal ?? false)
@@ -148,6 +148,9 @@
                         @endif
                         @if($canManagePlans ?? false)
                             <a href="{{ route('admin.profit-accrual.index') }}" class="{{ $navClass($adminNavActive($routeName, 'admin.profit-accrual') || $adminNavActive($routeName, 'admin.epochs')) }} admin-sidebar-link--sub">{{ __('coin.admin.profit_accrual') }}</a>
+                        @endif
+                        @if($canManageVisits ?? false)
+                            <a href="{{ route('admin.visits.index') }}" class="{{ $navClass($adminNavActive($routeName, 'admin.visits')) }} admin-sidebar-link--sub">{{ __('coin.admin.visits') }}</a>
                         @endif
                     </div>
                 </div>

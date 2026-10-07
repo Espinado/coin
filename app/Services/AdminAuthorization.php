@@ -18,6 +18,7 @@ class AdminAuthorization
             AdminAbility::ManagePlanChanges,
             AdminAbility::ManagePlans,
             AdminAbility::ManageSupport,
+            AdminAbility::ManageVisits,
         ],
         AdminRole::Viewer->value => [],
     ];

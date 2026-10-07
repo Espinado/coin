@@ -62,6 +62,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'auth.page.no-cache' => \App\Http\Middleware\PreventAuthPageCache::class,
             'platform.maintenance' => \App\Http\Middleware\EnsurePlatformNotInMaintenance::class,
             'ccapi.webhook.source' => \App\Http\Middleware\EnsureCcapiWebhookSource::class,
+            'record.site.visit' => \App\Http\Middleware\RecordSiteVisit::class,
         ]);
 
         Authenticate::redirectUsing(function (Request $request) {

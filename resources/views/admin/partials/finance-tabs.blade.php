@@ -1,6 +1,6 @@
 @php
     $active = $active ?? 'commissions';
-    if (! in_array($active, ['commissions', 'profit-accrual'], true)) {
+    if (! in_array($active, ['commissions', 'profit-accrual', 'visits'], true)) {
         $active = 'commissions';
     }
 
@@ -17,6 +17,13 @@
         $tabs['profit-accrual'] = [
             'label' => __('coin.admin.profit_accrual'),
             'url' => route('admin.profit-accrual.index'),
+        ];
+    }
+
+    if ($canManageVisits ?? false) {
+        $tabs['visits'] = [
+            'label' => __('coin.admin.visits'),
+            'url' => route('admin.visits.index'),
         ];
     }
 

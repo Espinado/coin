@@ -17,7 +17,7 @@ use Illuminate\Support\Facades\Broadcast;
 use Illuminate\Support\Facades\Route;
 
 Route::domain(config('coin.user_domain'))
-    ->middleware(['user.domain', 'platform.maintenance'])
+    ->middleware(['user.domain', 'platform.maintenance', 'record.site.visit'])
     ->group(function () {
         Route::get('/', HomeController::class)->name('home');
         Route::redirect('/about', '/legal/about')->name('about');
