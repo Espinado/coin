@@ -10,6 +10,7 @@ class AdminInvitation extends Model
     protected $fillable = [
         'email',
         'name',
+        'role',
         'admin_id',
         'token_hash',
         'invited_by_admin_id',

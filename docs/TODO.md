@@ -6,14 +6,14 @@
 
 - [x] **Payout 2FA** — уже сделано: вывод требует пароль + email-код (`WithdrawalTwoFactorService`), независимо от флага login-2FA.
 - [x] **H8 — Login/register 2FA** — login всегда через email-код; регистрация через email verification; toggle в профиле убран (только badge «Обязательно»).
-- [ ] **H9 — Guest Turnstile** — на staging `TURNSTILE_ENABLED=false`, ключи пустые → спам guest tickets. Включить + `TURNSTILE_SITE_KEY` / `TURNSTILE_SECRET_KEY` на staging/prod.
-- [ ] **H10 — KYC на вывод** — `kyc_required_for_withdrawal=false` на staging. Включить до широкого запуска; проверить upload/approve flow в admin/users.
-- [ ] **H12 — Staging SEO** — `public/robots.txt` Allow all; meta noindex только на maintenance. До PUBLIC_ORIGIN: noindex / Disallow.
-- [ ] **H13 — Invite role** — invite всегда создаёт Operator; нет выбора Viewer. Добавить роль в invite UX; сверить DB default Superadmin vs invite Operator.
+- [x] **H9 — Guest Turnstile** — `TURNSTILE_ENABLED=true` + keys на staging/prod (виджет Cloudflare: добавить hostname `coin.arguss.lv`, если ещё нет).
+- [x] **H10 — KYC на вывод** — `kyc_required_for_withdrawal=1` на staging и prod.
+- [x] **H12 — Staging SEO** — `SeoVisibility` + пустой allowlist → staging `Disallow: /` и meta `noindex`; prod только `cudaflops.com`.
+- [x] **H13 — Invite role** — в invite UX выбор Operator / Viewer; Superadmin через invite недоступен.
 
 ## Compliance / безопасность
 
-- [ ] **Включить обязательный KYC для вывода** — см. H10 выше (`kyc_required_for_withdrawal = 0`, с 2026-09-24). Перед продакшен-запуском для широкой аудитории: включить в админке «Настройки платформы» или `PlatformSettingsSeeder`, убедиться что есть процесс верификации (upload flow или ручной approve в admin/users).
+- [x] **Включить обязательный KYC для вывода** — см. H10 (`kyc_required_for_withdrawal = 1`). Upload/approve — admin/users + chat KYC photos.
 
 ## Платежи / UX
 

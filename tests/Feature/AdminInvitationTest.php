@@ -6,6 +6,7 @@ use App\Mail\AdminInvitationMail;
 use App\Mail\AdminLoginVerificationMail;
 use App\Models\Admin;
 use App\Models\AdminInvitation;
+use App\Support\AdminRole;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
@@ -51,6 +52,7 @@ class AdminInvitationTest extends TestCase
             ->post('http://admin.coin.test/admins/invite', [
                 'email' => 'newadmin@coin.test',
                 'name' => 'New Admin',
+                'role' => 'operator',
             ]);
 
         $response->assertRedirect('http://admin.coin.test/admins');
@@ -58,12 +60,55 @@ class AdminInvitationTest extends TestCase
         $this->assertDatabaseHas('admin_invitations', [
             'email' => 'newadmin@coin.test',
             'name' => 'New Admin',
+            'role' => 'operator',
             'accepted_at' => null,
         ]);
 
         Mail::assertSent(AdminInvitationMail::class, function (AdminInvitationMail $mail) {
             return $mail->hasTo('newadmin@coin.test');
         });
+    }
+
+    public function test_admin_can_invite_viewer_role(): void
+    {
+        Mail::fake();
+
+        $admin = Admin::query()->create([
+            'name' => 'Owner',
+            'email' => 'owner-viewer@coin.test',
+            'password' => Hash::make('secret1234'),
+            'role' => AdminRole::Superadmin,
+        ]);
+
+        $this->actingAs($admin, 'admin')
+            ->post('http://admin.coin.test/admins/invite', [
+                'email' => 'viewer@coin.test',
+                'name' => 'Read Only',
+                'role' => 'viewer',
+            ])
+            ->assertRedirect('http://admin.coin.test/admins');
+
+        $this->assertDatabaseHas('admin_invitations', [
+            'email' => 'viewer@coin.test',
+            'role' => 'viewer',
+        ]);
+    }
+
+    public function test_invite_rejects_superadmin_role(): void
+    {
+        $admin = Admin::query()->create([
+            'name' => 'Owner',
+            'email' => 'owner-role@coin.test',
+            'password' => Hash::make('secret1234'),
+            'role' => AdminRole::Superadmin,
+        ]);
+
+        $this->actingAs($admin, 'admin')
+            ->post('http://admin.coin.test/admins/invite', [
+                'email' => 'hack@coin.test',
+                'role' => 'superadmin',
+            ])
+            ->assertSessionHasErrors(['role']);
     }
 
     public function test_invited_admin_can_accept_invitation_and_sign_in(): void
@@ -81,6 +126,7 @@ class AdminInvitationTest extends TestCase
         AdminInvitation::query()->create([
             'email' => 'staff@coin.test',
             'name' => 'Staff',
+            'role' => 'viewer',
             'token_hash' => hash('sha256', $plainToken),
             'invited_by_admin_id' => $inviter->id,
             'expires_at' => now()->addDay(),
@@ -101,6 +147,7 @@ class AdminInvitationTest extends TestCase
         $this->assertDatabaseHas('admins', [
             'email' => 'staff@coin.test',
             'name' => 'Staff Admin',
+            'role' => 'viewer',
         ]);
 
         $code = null;
@@ -161,6 +208,7 @@ class AdminInvitationTest extends TestCase
         $this->actingAs($admin, 'admin')
             ->post('http://admin.coin.test/admins/invite', [
                 'email' => 'existing@coin.test',
+                'role' => 'operator',
             ])
             ->assertRedirect('http://admin.coin.test/admins')
             ->assertSessionHas('status_type', 'success');

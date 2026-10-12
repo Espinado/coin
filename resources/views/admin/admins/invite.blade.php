@@ -35,6 +35,20 @@
             </div>
 
             <div>
+                <label for="role" style="display:block;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.12em;color:rgba(232,237,245,0.65);">{{ strtoupper(__('coin.admin.admins.role')) }}</label>
+                <select id="role" name="role" required
+                    style="width:100%;box-sizing:border-box;margin-top:8px;padding:12px 14px;border-radius:10px;border:1px solid rgba(255,255,255,0.12);background:#070a10;color:#e8edf5;font-size:14px;">
+                    @foreach($inviteRoles as $value => $label)
+                        <option value="{{ $value }}" @selected(old('role', 'operator') === $value)>{{ $label }}</option>
+                    @endforeach
+                </select>
+                <p style="margin:8px 0 0;font-size:12.5px;color:rgba(232,237,245,0.58);">{{ __('coin.admin.admins.invite_role_hint') }}</p>
+                @error('role')
+                    <div style="margin-top:8px;font-size:12.5px;color:#ff8f8f;">{{ $message }}</div>
+                @enderror
+            </div>
+
+            <div>
                 <button type="submit" class="admin-btn admin-btn-primary">{{ __('coin.admin.admins.send_invite') }}</button>
             </div>
         </form>

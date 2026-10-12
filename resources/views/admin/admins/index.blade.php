@@ -31,6 +31,7 @@
                     <tr style="text-align:left;border-bottom:1px solid rgba(255,255,255,0.08);">
                         <th style="padding:14px 18px;">{{ strtoupper(__('coin.admin.email')) }}</th>
                         <th style="padding:14px 18px;">{{ strtoupper(__('coin.auth.name')) }}</th>
+                        <th style="padding:14px 18px;">{{ strtoupper(__('coin.admin.admins.role')) }}</th>
                         <th style="padding:14px 18px;">{{ strtoupper(__('coin.admin.admins.invited_by')) }}</th>
                         <th style="padding:14px 18px;">{{ strtoupper(__('coin.admin.admins.expires_at')) }}</th>
                         <th style="padding:14px 18px;"></th>
@@ -46,6 +47,7 @@
                                 @endif
                             </td>
                             <td style="padding:14px 18px;">{{ $invitation->name ?? '—' }}</td>
+                            <td style="padding:14px 18px;">{{ \App\Support\AdminRole::tryFrom((string) $invitation->role)?->label() ?? __('coin.admin.roles.operator') }}</td>
                             <td style="padding:14px 18px;">{{ $invitation->invitedBy?->name ?? '—' }}</td>
                             <td style="padding:14px 18px;">{{ $invitation->expires_at->timezone(config('coin.profit_accrual.schedule_timezone', 'Europe/Riga'))->format('d.m.Y H:i') }}</td>
                             <td style="padding:14px 18px;text-align:right;white-space:nowrap;">

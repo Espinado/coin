@@ -8,8 +8,10 @@ use App\Http\Controllers\Controller;
 use App\Models\Admin;
 use App\Models\AdminInvitation;
 use App\Services\AdminInvitationService;
+use App\Support\AdminRole;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 use RuntimeException;
 
@@ -49,7 +51,12 @@ class AdminStaffController extends Controller
 
     public function create(): View
     {
-        return view('admin.admins.invite');
+        return view('admin.admins.invite', [
+            'inviteRoles' => [
+                AdminRole::Operator->value => AdminRole::Operator->label(),
+                AdminRole::Viewer->value => AdminRole::Viewer->label(),
+            ],
+        ]);
     }
 
     public function store(Request $request, AdminInvitationService $invitations): RedirectResponse
@@ -57,6 +64,7 @@ class AdminStaffController extends Controller
         $validated = $request->validate([
             'email' => ['required', 'string', 'email', 'max:255'],
             'name' => ['nullable', 'string', 'max:255'],
+            'role' => ['required', 'string', Rule::in([AdminRole::Operator->value, AdminRole::Viewer->value])],
         ]);
 
         $existingAdmin = Admin::query()->where('email', $validated['email'])->first();
@@ -66,6 +74,7 @@ class AdminStaffController extends Controller
                 $request->user('admin'),
                 $validated['email'],
                 $validated['name'] ?? null,
+                AdminRole::from($validated['role']),
             );
         } catch (RuntimeException $exception) {
             return redirect()

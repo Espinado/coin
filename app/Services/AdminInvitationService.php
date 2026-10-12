@@ -13,12 +13,20 @@ use RuntimeException;
 
 class AdminInvitationService
 {
-    public function invite(Admin $inviter, string $email, ?string $name = null): AdminInvitation
-    {
+    public function invite(
+        Admin $inviter,
+        string $email,
+        ?string $name = null,
+        AdminRole $role = AdminRole::Operator,
+    ): AdminInvitation {
         $email = Str::lower(trim($email));
 
         if ($email === '') {
             throw new RuntimeException(__('coin.admin.admins.email_required'));
+        }
+
+        if (! in_array($role, [AdminRole::Operator, AdminRole::Viewer], true)) {
+            throw new RuntimeException(__('coin.admin.admins.role_invalid'));
         }
 
         $existingAdmin = Admin::query()->where('email', $email)->first();
@@ -31,6 +39,7 @@ class AdminInvitationService
             inviter: $inviter,
             email: $email,
             name: $name,
+            role: $role,
         );
     }
 
@@ -40,6 +49,7 @@ class AdminInvitationService
             inviter: $inviter,
             email: $target->email,
             name: $target->name,
+            role: $target->adminRole(),
             targetAdmin: $target,
         );
     }
@@ -71,7 +81,9 @@ class AdminInvitationService
             return $this->invitePasswordReset($inviter, $invitation->admin);
         }
 
-        return $this->invite($inviter, $invitation->email, $invitation->name);
+        $role = AdminRole::tryFrom((string) $invitation->role) ?? AdminRole::Operator;
+
+        return $this->invite($inviter, $invitation->email, $invitation->name, $role);
     }
 
     public function revoke(AdminInvitation $invitation): void
@@ -111,11 +123,16 @@ class AdminInvitationService
         }
 
         return DB::transaction(function () use ($invitation, $name, $password) {
+            $role = AdminRole::tryFrom((string) $invitation->role) ?? AdminRole::Operator;
+            if (! in_array($role, [AdminRole::Operator, AdminRole::Viewer], true)) {
+                $role = AdminRole::Operator;
+            }
+
             $admin = Admin::query()->create([
                 'name' => trim($name),
                 'email' => $invitation->email,
                 'password' => $password,
-                'role' => AdminRole::Operator,
+                'role' => $role,
             ]);
 
             $invitation->update(['accepted_at' => now()]);
@@ -133,6 +150,7 @@ class AdminInvitationService
         Admin $inviter,
         string $email,
         ?string $name = null,
+        AdminRole $role = AdminRole::Operator,
         ?Admin $targetAdmin = null,
     ): AdminInvitation {
         AdminInvitation::query()
@@ -145,6 +163,7 @@ class AdminInvitationService
         $invitation = AdminInvitation::query()->create([
             'email' => $email,
             'name' => $name !== null && trim($name) !== '' ? trim($name) : ($targetAdmin?->name),
+            'role' => $role->value,
             'admin_id' => $targetAdmin?->id,
             'token_hash' => $this->hashToken($plainToken),
             'invited_by_admin_id' => $inviter->id,
