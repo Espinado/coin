@@ -6,19 +6,14 @@
             'src' => asset('cloudflops/partners/powered-by-bytedance.png'),
         ],
         [
-            'slug' => 'moonshot',
-            'name' => 'Moonshot AI',
-            'src' => asset('cloudflops/partners/powered-by-moonshot.png'),
+            'slug' => 'nvidia-cuda',
+            'name' => 'NVIDIA CUDA',
+            'src' => asset('cloudflops/partners/powered-by-nvidia-cuda.png'),
         ],
         [
             'slug' => 'deepseek',
             'name' => 'DeepSeek',
             'src' => asset('cloudflops/partners/powered-by-deepseek.png'),
-        ],
-        [
-            'slug' => 'nvidia-cuda',
-            'name' => 'NVIDIA CUDA',
-            'src' => asset('cloudflops/partners/powered-by-nvidia-cuda.png'),
         ],
     ];
 @endphp
