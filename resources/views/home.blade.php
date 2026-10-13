@@ -117,9 +117,15 @@
           <div class="coin-landing-footer__heading">SUPPORT</div>
           <div class="coin-landing-footer__nav">
             @include('partials.landing-footer-contact', ['companyLegal' => $companyLegal])
-            <a href="#">Telegram</a>
-            <a href="#">X</a>
-            <a href="#">LinkedIn</a>
+            @if(filled(config('coin.social.telegram')))
+              <a href="{{ config('coin.social.telegram') }}" target="_blank" rel="noopener noreferrer">Telegram</a>
+            @endif
+            @if(filled(config('coin.social.x')))
+              <a href="{{ config('coin.social.x') }}" target="_blank" rel="noopener noreferrer">X</a>
+            @endif
+            @if(filled(config('coin.social.linkedin')))
+              <a href="{{ config('coin.social.linkedin') }}" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+            @endif
           </div>
         </div>
       </div>

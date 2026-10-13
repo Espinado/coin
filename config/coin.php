@@ -39,6 +39,12 @@ return [
         'indexnow_endpoint' => env('COIN_SEO_INDEXNOW_ENDPOINT', 'https://api.indexnow.org/indexnow'),
     ],
 
+    'social' => [
+        'telegram' => env('COIN_SOCIAL_TELEGRAM', 'https://t.me/CUDAFlops'),
+        'x' => env('COIN_SOCIAL_X', ''),
+        'linkedin' => env('COIN_SOCIAL_LINKEDIN', ''),
+    ],
+
     // Comma-separated proxy IPs (or *). Empty = do not trust X-Forwarded-For.
     'trusted_proxies' => array_values(array_filter(array_map(
         trim(...),
