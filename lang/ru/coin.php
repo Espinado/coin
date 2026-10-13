@@ -1877,6 +1877,7 @@ return [
         'powered_kicker' => 'СТЕК',
         'powered_title' => 'Powered by — партнёры платформы',
         'powered_lead' => 'Вычисления и модельный стек, на котором строится CudaFlops.',
+        'powered_by' => 'Powered by',
         'powered_by_alt' => 'Powered by :partner',
 
         'referrals_title' => 'Приглашайте и получайте больше',

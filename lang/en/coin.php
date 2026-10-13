@@ -1877,6 +1877,7 @@ return [
         'powered_kicker' => 'STACK',
         'powered_title' => 'Powered by proven partners',
         'powered_lead' => 'Compute and model stack behind CudaFlops workloads.',
+        'powered_by' => 'Powered by',
         'powered_by_alt' => 'Powered by :partner',
 
         'referrals_title' => 'Invite others and earn more',

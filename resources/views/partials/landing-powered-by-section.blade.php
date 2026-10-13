@@ -3,17 +3,17 @@
         [
             'slug' => 'bytedance',
             'name' => 'ByteDance',
-            'src' => asset('cloudflops/partners/powered-by-bytedance.png'),
+            'src' => asset('cloudflops/partners/bytedance.png'),
         ],
         [
             'slug' => 'nvidia-cuda',
             'name' => 'NVIDIA CUDA',
-            'src' => asset('cloudflops/partners/powered-by-nvidia-cuda.png'),
+            'src' => asset('cloudflops/partners/nvidia-cuda.png'),
         ],
         [
             'slug' => 'deepseek',
             'name' => 'DeepSeek',
-            'src' => asset('cloudflops/partners/powered-by-deepseek.png'),
+            'src' => asset('cloudflops/partners/deepseek.png'),
         ],
     ];
 @endphp
@@ -29,10 +29,11 @@
     <div class="coin-landing-powered__grid" role="list">
       @foreach($partners as $partner)
         <figure class="coin-landing-powered__item" role="listitem">
+          <figcaption class="coin-landing-powered__label">{{ __('coin.landing.powered_by') }}</figcaption>
           <img
             src="{{ $partner['src'] }}"
-            alt="{{ __('coin.landing.powered_by_alt', ['partner' => $partner['name']]) }}"
-            class="coin-landing-powered__badge"
+            alt="{{ $partner['name'] }}"
+            class="coin-landing-powered__logo coin-landing-powered__logo--{{ $partner['slug'] }}"
             loading="lazy"
             decoding="async"
           />
