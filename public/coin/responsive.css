@@ -1072,6 +1072,52 @@ html.coin-nav-open .coin-nav-mobile {
   flex: none;
 }
 
+.coin-landing-powered {
+  padding: var(--landing-section-y) clamp(16px, 4vw, 72px);
+  border-top: 1px solid rgba(150, 235, 250, 0.08);
+}
+
+.coin-landing-powered__intro {
+  max-width: 620px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.coin-landing-powered__lead {
+  margin: 18px 0 0;
+  font-size: 16px;
+  line-height: 1.6;
+  color: rgba(230, 244, 250, 0.72);
+}
+
+.coin-landing-powered__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr));
+  gap: clamp(14px, 2.5vw, 22px);
+  margin-top: clamp(28px, 4vw, 42px);
+  align-items: stretch;
+}
+
+.coin-landing-powered__item {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 148px;
+  padding: 10px;
+  border-radius: 18px;
+  background: rgba(150, 235, 250, 0.03);
+  border: 1px solid rgba(150, 235, 250, 0.1);
+}
+
+.coin-landing-powered__badge {
+  display: block;
+  width: 100%;
+  max-width: 280px;
+  height: auto;
+  object-fit: contain;
+}
+
 .coin-landing-plans {
   padding: var(--landing-section-y) clamp(16px, 4vw, 72px);
   border-top: 1px solid rgba(150, 235, 250, 0.08);

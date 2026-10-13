@@ -67,6 +67,8 @@
 
   @include('partials.landing-infra-section')
 
+  @include('partials.landing-powered-by-section')
+
   @include('partials.landing-referrals-section')
 
   <section id="faq" data-screen-label="FAQ" style="position: relative; z-index: 5; padding: 32px 72px; border-top: 1px solid rgba(150,235,250,0.08);">

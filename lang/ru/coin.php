@@ -1874,6 +1874,11 @@ return [
         'mock_datacenter' => 'Дата-центр :n',
         'mock_datacenter_range' => 'Дата-центр 04 — 07',
 
+        'powered_kicker' => 'СТЕК',
+        'powered_title' => 'Powered by — партнёры платформы',
+        'powered_lead' => 'Вычисления и модельный стек, на котором строится CudaFlops.',
+        'powered_by_alt' => 'Powered by :partner',
+
         'referrals_title' => 'Приглашайте и получайте больше',
         'referrals_lead' => 'Поделитесь ссылкой — реферальное вознаграждение начисляется, когда приглашённые покупают план или повышают его с доплатой. Условия программы настраиваются.',
         'referrals_code_placeholder' => 'ваш-код',

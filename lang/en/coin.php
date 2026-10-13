@@ -1874,6 +1874,11 @@ return [
         'mock_datacenter' => 'Data center :n',
         'mock_datacenter_range' => 'Data centers 04–07',
 
+        'powered_kicker' => 'STACK',
+        'powered_title' => 'Powered by proven partners',
+        'powered_lead' => 'Compute and model stack behind CudaFlops workloads.',
+        'powered_by_alt' => 'Powered by :partner',
+
         'referrals_title' => 'Invite others and earn more',
         'referrals_lead' => 'Share your link — referral rewards accrue when invitees buy a plan or upgrade with a top-up. Program terms are configurable.',
         'referrals_code_placeholder' => 'your-code',
